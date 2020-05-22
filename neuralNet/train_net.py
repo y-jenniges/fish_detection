@@ -7,6 +7,7 @@ import json
 import os
 import random
 
+
 NUM_GROUPS = 6
 
 # load annotation files
@@ -24,14 +25,20 @@ path = "../data/labels/training_labels_no_animals.json"
 with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
   
+
+# for entry in train_labels_no_animals:
+#     entry['filename'] = "../data/" + entry['filename'].split('Data/')[1]
+
+# with open('train_labels_no_animals_new.json', 'w') as outfile:
+#     json.dump(train_labels_no_animals, outfile)
     
 # image path
-data_root = "../data/maritime_dataset/"
+#data_root = "../data/maritime_dataset/"
 
 def loadImage(fname):
     "Loads an image as a h*w*3 numpy array"
-    img =  img_to_array(load_img(os.path.join(data_root,fname)), dtype="uint8")
-    
+    #img =  img_to_array(load_img(os.path.join(data_root,fname)), dtype="uint8")
+    img =  img_to_array(load_img(fname), dtype="uint8")
     #print(f"image before {img.shape}")
     rest_x, rest_y = img.shape[0]%32, img.shape[1]%32
     if rest_x != 0:
@@ -48,15 +55,15 @@ def shapeOfFilename(fname):
     return imageShape.shape
 
 
-imageShape = shapeOfFilename("/training_data_animals/0.jpg")
+imageShape = shapeOfFilename("../data/maritime_dataset/training_data_animals/0.jpg")
 print(f"Image format {imageShape}.")
 
 
 
 def addToHeatmap (hm, block, x, y):
     """Adds block to hm[y:y+block.shape[0],x:x+block.shape[1]] and 
-     works even if part of block extends outside hm. hm and block
-     have both 3 dimensions (w*h*c)."""
+      works even if part of block extends outside hm. hm and block
+      have both 3 dimensions (w*h*c)."""
   # We have a rectangle hm[hylo:hyhi,hxlo:hxhi] 
   # and a rectangle block[bylo:byhi,bxlo:bxhi] which should be added to the
   # hm-rectangle. Some of the h-indices may be out of bounds in which case
@@ -85,20 +92,20 @@ def addToHeatmap (hm, block, x, y):
         
 def interpolate (x):
     """Returns an interpolation (xInt, alpha) that distributes a 1 between
-     xInt and xInt+1, where xInt<=x<xInt+1 such that alpha goes into
-     xInt and (1-alpha) into xInt+1. It does this in a way that is linear
-     in x and where for an integer x, xInt=x."""
+      xInt and xInt+1, where xInt<=x<xInt+1 such that alpha goes into
+      xInt and (1-alpha) into xInt+1. It does this in a way that is linear
+      in x and where for an integer x, xInt=x."""
     xInt = math.floor(x)
     return (xInt, 1-(x-xInt))
   
 def annotationToLowResHeatmap (annotation, group = 1, bodyPart = 'front'):
     """Converts a list of points (each a dict with 'x' and 'y' component) into 
-     a heatmap with 1/32 of image resolution. A 1 is bilinearly distributed
-     among the 4 heatmap pixels close to the annotated strawberry. This means,
-     if the annotated strawberry is in the center of a heatmap pixel, this
-     pixel gets increased by 1, if it is on the border between two pixel
-     both get increased by 0.5 ,if it is on the corner between four pixel
-     each gets increased by 0.25."""
+      a heatmap with 1/32 of image resolution. A 1 is bilinearly distributed
+      among the 4 heatmap pixels close to the annotated strawberry. This means,
+      if the annotated strawberry is in the center of a heatmap pixel, this
+      pixel gets increased by 1, if it is on the border between two pixel
+      both get increased by 0.5 ,if it is on the corner between four pixel
+      each gets increased by 0.25."""
     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
     bodyPart: 'front' or 'back'"""
     
@@ -142,8 +149,8 @@ def annotationToLowResHeatmap (annotation, group = 1, bodyPart = 'front'):
 
 def gaussian (sigma, dim):
     """Returns a dim*dim*1 array with a not normalized 
-     Gaussian centered at dim//2, dim//2
-     with peak value 1 and the given sigma."""
+      Gaussian centered at dim//2, dim//2
+      with peak value 1 and the given sigma."""
     x,y,z = np.mgrid[0:dim,0:dim,0:1]
     cx=dim//2
     cy=dim//2
@@ -155,9 +162,9 @@ print (31060*400/(1590*1280*320)*0.2)
 
 def annotationToHighResHeatmap (annotation, group = 1, bodyPart = "front"):
     """Converts a list of points (each a dict with 'x' and 'y' component) into 
-     a heatmap with original image resolution using myGaussian. For every 
-     strawberry, the Gaussian myGaussian (peak 1) centered at the 
-     annotated strawberry point is added."""
+      a heatmap with original image resolution using myGaussian. For every 
+      strawberry, the Gaussian myGaussian (peak 1) centered at the 
+      annotated strawberry point is added."""
     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
     bodyPart: 'front' or 'back'"""
     
@@ -182,8 +189,8 @@ def annotationToHighResHeatmap (annotation, group = 1, bodyPart = "front"):
 # doesn't need to be kept in memory.
 def dummyPrepareEntry (entry):
     """Dummy function to prepare an entry of the dataset. It takes one entry
-     and converts it to a input, ground-truth output pair that is given
-     to keras. At the moment the image is loaded and the output is just empty."""
+      and converts it to a input, ground-truth output pair that is given
+      to keras. At the moment the image is loaded and the output is just empty."""
     return (loadImage(entry['filename']), [])
 
 class DataGenerator(keras.utils.Sequence):
