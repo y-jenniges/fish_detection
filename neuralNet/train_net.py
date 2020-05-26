@@ -218,7 +218,7 @@ class DataGenerator(keras.utils.Sequence):
     def __len__(self):
         'Denotes the number of batches per epoch'
         #return int(np.floor(len(self.dataset) / self.batch_size))
-        print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}")
+        #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}")
         return int((np.floor(len(self.dataset)) + np.floor(len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
@@ -259,6 +259,8 @@ def prepareEntryLowResHeatmap (entry):
     filename = entry['filename']
     annotation = entry['animals']
     
+    #print(f"prepare entry low res heatmap: filename {filename} ")
+
     return (loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32), annotationToLowResHeatmap(annotation))
 
 def prepareEntryHighResHeatmap (entry):
@@ -278,9 +280,12 @@ def prepareEntryHighResHeatmap (entry):
 def showEntryOfGenerator (dataGen,i):
     """Fetches the first batch, prints dataformat statistics and 
     shows the first entry both as image X and annotation y."""    
+    
     X, y = dataGen[i]
-    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
-    print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
+
+
+    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
+    print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
     #showImageWithHeatmap (X[i], y[i]) 
 
 trainGenL = DataGenerator (train_labels_animals, prepareEntry=prepareEntryLowResHeatmap)
