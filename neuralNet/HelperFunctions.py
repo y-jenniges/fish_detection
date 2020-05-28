@@ -37,6 +37,36 @@ def showImageWithAnnotation(entry):
     plt.scatter (x_back, y_back, marker="x", c="b")
     plt.show()
 
+def showImageWithHeatmap (image, hm=None, gt=None, filename=None):
+    """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
+     The hm.shape must be an integer fraction of the image shape. gt must 
+     have be a list of dicts with 'x' and 'y' entries as in the dataset. 
+     Both hm and gt can be None in which case they are skipped. 
+     If filename is given, the plot is saved."""
+    if hm is not None:
+        factor = image.shape[0]//hm.shape[0]
+        assert hm.shape[0]*factor==image.shape[0] and hm.shape[1]*factor==image.shape[1]
+        assert len(hm.shape)==3
+        hmResized = np.repeat (hm, factor, axis=0) # y
+        hmResized = np.repeat (hmResized, factor, axis=1) #x
+        hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
+        hmResized = np.clip (hmResized*2, 0, 1)
+        
+        #print(f"hm resized {hmResized.shape}\nimage {image.shape}\nfactor {factor}")
+        if image.dtype =="uint8":
+            image = image//2 + (128*hmResized).astype(np.uint8)
+        else:
+            image = ((image+1)*64 + 128*hmResized).astype(np.uint8)
+    plt.imshow(image)
+    if gt is not None:
+        print("gt is not none")
+        x = [label["x"] for label in gt]
+        y = [label["y"] for label in gt]
+        plt.scatter (x, y, marker="x", c="b")
+    if filename is not None:
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+    plt.show()
+
 def showOverlappingHeatmaps(**heatmaps):
     for h in heatmaps:
         print("hbsd")
