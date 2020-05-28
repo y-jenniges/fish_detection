@@ -3,11 +3,11 @@ NUM_GROUPS = 6
 
 
 # parameters for training
-no_animal_ratio = 0
+no_animal_ratio = 0.2
 batch_size = 4
 
 loss = 'mse'
 optimizer = 'adam'
-metrics = ['mae']
+metrics = ['mae', 'acc']
 
-epochs = 10
+epochs = 3
