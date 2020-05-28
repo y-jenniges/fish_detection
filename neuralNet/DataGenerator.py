@@ -4,6 +4,7 @@
 import numpy as np
 import keras
 import HelperFunctions as helpers
+import Globals
 import random
 import HeatmapClass
 
@@ -22,24 +23,27 @@ def prepareEntryLowResHeatmap (entry):
     annotation = entry['animals']
     
     # todo das hier sind alle heatmaps für ein Bild, wie gebe ich das dem netz?
-    heatmap1f = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front')
-    heatmap1b = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='back')
-    heatmap2f = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='front')
-    heatmap2b = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='back')
-    heatmap3f = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='front')
-    heatmap3b = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='back')
-    heatmap4f = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='front')
-    heatmap4b = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='back')
-    heatmap5f = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='front')
-    heatmap5b = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='back')
-    heatmap6f = HeatmapClass.Heatmap(entry, resolution='low', group=6, bodyPart='front')
-    heatmap6b = HeatmapClass.Heatmap(entry, resolution='low', group=6, bodyPart='back')
+    heatmap0f = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='front').hm
+    heatmap0b = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='back').hm
+    heatmap1f = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front').hm
+    heatmap1b = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='back').hm
+    heatmap2f = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='front').hm
+    heatmap2b = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='back').hm
+    heatmap3f = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='front').hm
+    heatmap3b = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='back').hm
+    heatmap4f = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='front').hm
+    heatmap4b = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='back').hm
+    heatmap5f = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='front').hm
+    heatmap5b = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='back').hm
     
+        
     image = helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+
     
     # return [(image, heatmap1f), (image, heatmap1b), (image, heatmap2f), (image, heatmap2b), (image, heatmap3f), (image, heatmap3b), 
     #         (image, heatmap4f), (image, heatmap4b), (image, heatmap5f), (image, heatmap5b), (image, heatmap6f), (image, heatmap6b)]
-    return (image, [heatmap1f, heatmap1b, heatmap2f, heatmap2b, heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b, heatmap6f, heatmap6b])
+    return (image, [heatmap0f, heatmap0b, heatmap1f, heatmap1b, heatmap2f, heatmap2b, 
+                    heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
     #return (image, heatmap1f.hm)
 
 def prepareEntryHighResHeatmap (entry):
@@ -55,15 +59,28 @@ def prepareEntryHighResHeatmap (entry):
     return (helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32), heatmap.hm)
 
 
-def showEntryOfGenerator(dataGen,i):
+def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
     print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
     print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
     
-    # if heatmap != None:
-    #     heatmap.showImageWithHeatmap (X[i], y[i]) 
+    
+    # todo how to i know the resolution
+    if showHeatmaps:
+        entry = {'filename':"", 'animals':[]}
+        
+        # heatmap = HeatmapClass.Heatmap(entry, resolution='low', group='0', bodyPart='front')
+               
+        # for i in range(Globals.NUM_GROUPS):
+        #     heatmap.showImageWithHeatmap (group=i, bodyPart="front")
+        #     heatmap.showImageWithHeatmap (group=i, bodyPart="back")
+        for j in range(2):#Globals.NUM_GROUPS*2):
+            print(j)
+            print(X[i])
+            helpers.showImageWithHeatmap (X[i], y[i][j])
+        
 
 
 
@@ -92,7 +109,7 @@ class DataGenerator(keras.utils.Sequence):
     def __len__(self):
         'Denotes the number of batches per epoch'
         #return int(np.floor(len(self.dataset) / self.batch_size))
-        print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}")
+        #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")
         return int((np.floor(len(self.dataset)) + np.floor(len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
