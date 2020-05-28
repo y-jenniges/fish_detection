@@ -1,6 +1,8 @@
 import json
+import pickle
 import os
 from datetime import datetime
+import keras
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -20,8 +22,15 @@ with open(os.path.join(label_root, path), 'r') as f:
 # load testGenL
 testGenL = None
 
+# load testGenL
+with open("serialized_testGen.pickle",'rb') as file:
+    raw_data = file.read()
+test = pickle.loads(raw_data)
+
+
 # load model
-modelL = None
+# todo look for file name (depends on timestamp)
+modelL = load_model()
 
 # Use this to visualize results
 # It shows the input image (background), the predicted heatmap (white "fog" in foreground)
