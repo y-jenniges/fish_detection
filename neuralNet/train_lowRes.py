@@ -3,9 +3,24 @@ import HelperFunctions as helpers
 import Globals
 import keras
 from keras import layers
-
+import time
 import json
 import os
+import pickle
+
+"""group: 
+    0 - nothing, 
+    1 - fish, 
+    2 - crustacea, 
+    3- chaetognatha, 
+    4 - unidentified_object, 
+    5 - jellyfish
+bodyPart: 
+    'front'
+    'back'
+    'both'
+"""
+
 
 # load annotation files
 label_root = "../data/labels/"
@@ -29,14 +44,38 @@ data_root = "../data/maritime_dataset/"
 imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"))
 print(f"Image format {imageShape}.")
 
-# initialize heatmap
-#hm_L = HeatmapClass.Heatmap(imageShape, resolution='low')
+trainGenL = dg.DataGenerator (dataset=train_labels_animals, 
+                              no_animal_dataset=train_labels_no_animals,
+                              no_animal_ratio=Globals.no_animal_ratio,
+                              prepareEntry=dg.prepareEntryLowResHeatmap,
+                              batch_size=Globals.batch_size)
 
+testGenL = dg.DataGenerator (dataset=test_labels, 
+                              prepareEntry=dg.prepareEntryLowResHeatmap,
+                              batch_size=Globals.batch_size)
 
-trainGenL = dg.DataGenerator (train_labels_animals, prepareEntry=dg.prepareEntryLowResHeatmap)
-testGenL = dg.DataGenerator (test_labels, prepareEntry=dg.prepareEntryLowResHeatmap)
-dg.showEntryOfGenerator (trainGenL,0)
 print("DataGenerators initialized")
+
+#dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
+#dg.showEntryOfGenerator (testGenL, 0, True)
+
+
+# serialize data generators
+serialized_trainGen = pickle.dumps(trainGenL)
+serialized_testGen = pickle.dumps(testGenL)
+
+filename_train = 'serialized_trainGen.pickle'
+filename_test = 'serialized_testGen.pickle'
+
+# save data generators
+with open(filename_train,'wb') as file:
+    file.write(serialized_trainGen)
+with open(filename_test,'wb') as file:
+    file.write(serialized_testGen)
+
+print("DataGenerators serialized")
+
+
 
 
 # Now construct the low-res net and store it into the variable model
@@ -90,18 +129,20 @@ modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.m
 modelL.summary()
 
 
-# Train the low-res-net
+# train low-res-net
 #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 #for ctr in range(10):
 history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs, validation_data=testGenL)
+
+timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+modelL.save(f"model-L-{timestamp}")
 modelL.save_weights(f"fish-L.h5") # saves weights (e.g. a checkpoint) locally
+# save the history(todo: is it already contained in modelL.save? and also weights?)
+# history.history is a dict
+with open(f"trainHistory-{timestamp}", 'wb') as file:
+    pickle.dump(history.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
   
     #files.download('fish-L.h5') # download weights from e.g. google-colab to local machine
     
-    
-# save necessary outputs
-trainGenL
-testGenL
-modelL
-history
