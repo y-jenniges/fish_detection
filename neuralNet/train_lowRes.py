@@ -43,7 +43,7 @@ data_root = "../data/maritime_dataset/"
 imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"))
 print(f"Image format {imageShape}.")
 
-trainGenL = dg.DataGenerator (dataset=train_labels_animals, 
+trainGenL = dg.DataGenerator (dataset=train_labels_animals,
                               no_animal_dataset=train_labels_no_animals,
                               no_animal_ratio=Globals.no_animal_ratio,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
@@ -56,7 +56,7 @@ testGenL = dg.DataGenerator (dataset=test_labels,
 print("DataGenerators initialized")
 
 #dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
-#dg.showEntryOfGenerator (testGenL, 0, True)
+dg.showEntryOfGenerator (testGenL, 0, False)
 
 
 # # serialize data generators

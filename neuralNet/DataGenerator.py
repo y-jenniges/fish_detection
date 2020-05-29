@@ -7,6 +7,7 @@ import HelperFunctions as helpers
 import Globals
 import random
 import HeatmapClass
+import json
 
 def dummyPrepareEntry (entry):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -19,7 +20,7 @@ def prepareEntryLowResHeatmap (entry):
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
     
-    hm_folder_path = "../data/heatmaps_lowRes/"
+    hm_folder_path = "../data/heatmaps_lowRes/test/"
     
     hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
     with open(hm_file_path, 'r') as f:
@@ -46,7 +47,7 @@ def prepareEntryHighResHeatmap (entry):
     
     # heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
     
-    hm_folder_path = "../data/heatmaps_highRes/"
+    hm_folder_path = "../data/heatmaps_highRes/test"
     
     hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
     with open(hm_file_path, 'r') as f:
@@ -66,8 +67,8 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
     print("received x and y")
-    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
-    print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
+    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
+    print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
        
     # todo how to i know the resolution
     if showHeatmaps:
@@ -94,7 +95,7 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, hm_json_path = [], no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+    def __init__(self, dataset, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
         'Initialization'
         self.dataset = dataset
         self.no_animal_dataset = no_animal_dataset 
@@ -106,10 +107,6 @@ class DataGenerator(keras.utils.Sequence):
         self.no_animal_size = (int)(batch_size*no_animal_ratio)     
         self.animal_size = batch_size - self.no_animal_size
           
-        
-        with open(hm_json_path, 'r') as f:
-            self.hms = json.load(f)
-        
         self.on_epoch_end()
         
     def __len__(self):
@@ -119,14 +116,13 @@ class DataGenerator(keras.utils.Sequence):
         return int((np.floor(len(self.dataset)) + np.floor(len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
-        print("getitem")
         'Generate one batch of data'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
         
         batch_animals_prep = []
         for e in batch_animals:
-            batch_animals_prep += self.prepareEntry(self.e)
+            batch_animals_prep += self.prepareEntry(e)
         
         batch_no_animals_prep = []
         for e in batch_no_animals:
