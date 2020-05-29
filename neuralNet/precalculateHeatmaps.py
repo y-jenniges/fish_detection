@@ -3,7 +3,6 @@ import os
 import numpy as np
 import HeatmapClass
 import HelperFunctions as helpers
-from PIL import Image
 
 
 # load annotation files
@@ -49,10 +48,11 @@ def calculateAllHeatmapsForImage(entry):
 
 # label files to work on 
 labels_list = [train_labels_animals, test_labels, train_labels_no_animals]
-data = labels_list[1]
+data = labels_list[0]
     
 # path to store heatmaps
-hm_path = "../data/heatmaps_lowRes/"
+hm_path = "../data/heatmaps_lowRes/training_animals/"
+#hm_path = "../data/heatmaps_highRes/training_animals/"
 
 # iterate over all images
 for entry in data:   

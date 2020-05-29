@@ -19,30 +19,19 @@ def prepareEntryLowResHeatmap (entry):
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
     
-    filename = entry['filename']
-    annotation = entry['animals']
+    hm_folder_path = "../data/heatmaps_lowRes/"
     
-    # todo das hier sind alle heatmaps für ein Bild, wie gebe ich das dem netz?
-    heatmap0f = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='front').hm
-    heatmap0b = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='back').hm
-    heatmap1f = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front').hm
-    heatmap1b = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='back').hm
-    heatmap2f = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='front').hm
-    heatmap2b = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='back').hm
-    heatmap3f = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='front').hm
-    heatmap3b = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='back').hm
-    heatmap4f = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='front').hm
-    heatmap4b = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='back').hm
-    heatmap5f = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='front').hm
-    heatmap5b = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='back').hm
+    hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+    with open(hm_file_path, 'r') as f:
+        hms = json.load(f)
+   
+    image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     
+    return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
+            (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
+            (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
+               
         
-    image = helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-
-    
-    return [(image, heatmap0f), (image, heatmap0b), (image, heatmap1f), (image, heatmap1b), \
-            (image, heatmap2f), (image, heatmap2b), (image, heatmap3f), (image, heatmap3b),\
-            (image, heatmap4f), (image, heatmap4b), (image, heatmap5f), (image, heatmap5b)]
     # return (image, [heatmap0f, heatmap0b, heatmap1f, heatmap1b, heatmap2f, heatmap2b, 
     #                 heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
     #return (image, heatmap1f.hm)
@@ -52,12 +41,24 @@ def prepareEntryHighResHeatmap (entry):
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
     
-    filename = entry['filename']
-    annotation = entry['animals']
+    # filename = entry['filename']
+    # annotation = entry['animals']
     
-    heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
+    # heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
     
-    return (helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32), heatmap.hm)
+    hm_folder_path = "../data/heatmaps_highRes/"
+    
+    hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+    with open(hm_file_path, 'r') as f:
+        hms = json.load(f)
+   
+    image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+    
+    return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
+            (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
+            (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
+               
+    #return (helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32), heatmap.hm)
 
 
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
@@ -67,21 +68,20 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     print("received x and y")
     print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
     print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
-    
-    
-    # # todo how to i know the resolution
-    # if showHeatmaps:
-    #     entry = {'filename':"", 'animals':[]}
-        
-    #     # heatmap = HeatmapClass.Heatmap(entry, resolution='low', group='0', bodyPart='front')
-               
-    #     # for i in range(Globals.NUM_GROUPS):
-    #     #     heatmap.showImageWithHeatmap (group=i, bodyPart="front")
-    #     #     heatmap.showImageWithHeatmap (group=i, bodyPart="back")
-    #     for j in range(2):#Globals.NUM_GROUPS*2):
-    #         print(j)
-    #         print(X[i])
-    #         helpers.showImageWithHeatmap (X[i], y[i][j])
+       
+    # todo how to i know the resolution
+    if showHeatmaps:
+        # hm_folder_path = "../data/heatmaps_lowRes/"
+        # hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+        # with open(hm_file_path, 'r') as f:
+        #     hms = json.load(f)
+            
+        # show heatmap for 2 batches
+        for j in range(2):
+            print(j)
+            print(X[i])
+            helpers.showImageWithHeatmap (X[i], y[i][j])
+
         
 
 
@@ -94,7 +94,7 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+    def __init__(self, dataset, hm_json_path = [], no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
         'Initialization'
         self.dataset = dataset
         self.no_animal_dataset = no_animal_dataset 
@@ -106,6 +106,10 @@ class DataGenerator(keras.utils.Sequence):
         self.no_animal_size = (int)(batch_size*no_animal_ratio)     
         self.animal_size = batch_size - self.no_animal_size
           
+        
+        with open(hm_json_path, 'r') as f:
+            self.hms = json.load(f)
+        
         self.on_epoch_end()
         
     def __len__(self):
@@ -122,17 +126,14 @@ class DataGenerator(keras.utils.Sequence):
         
         batch_animals_prep = []
         for e in batch_animals:
-            batch_animals_prep += self.prepareEntry(e)
+            batch_animals_prep += self.prepareEntry(self.e)
         
         batch_no_animals_prep = []
         for e in batch_no_animals:
             batch_no_animals_prep += self.prepareEntry(e)
-        
-        
+              
         batch = batch_animals_prep + batch_no_animals_prep
             
-        print("calc x and y ")
-
         X = np.array([e[0] for e in batch])
         y = np.array([e[1] for e in batch])
              
