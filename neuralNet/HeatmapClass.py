@@ -49,13 +49,19 @@ class Heatmap():
         hm_y, hm_x = self.image.shape[0]//32, self.image.shape[1]//32
         self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
          
-        group_array = np.zeros(Globals.NUM_GROUPS)
-        group_array[self.group] = 1
-            
-
+        group_array = np.zeros(Globals.NUM_GROUPS*2)
+        if self.bodyPart=='front':
+            group_array[self.group*2] = 1 
+        elif self.bodyPart=='back':
+            group_array[self.group*2+1] = 1 
+        else:
+            print("annotationToLowResHeatmap: invalid bodyPart")
+   
+        
         for animal in self.gt:
+            # only receive animals from group that is currently active in class
             if np.array_equal(animal['group'], group_array):
-                x, y = animal[self.bodyPart][0], animal[self.bodyPart][1]
+                x, y = [animal['position'][0], animal['position'][1]]
                 #print(x)
                 hmx, alphaX = helpers.interpolate ((x-16)/32) # increase hmx by alpha, and hmx+1 by 1-alpha
                 hmy, alphaY = helpers.interpolate ((y-16)/32) # increase hmy by alpha, and hmy+1 by 1-alpha
@@ -92,13 +98,19 @@ class Heatmap():
         self.hm = np.zeros ((self.image.shape[0], self.image.shape[1], 1), dtype=np.float32)
         self.gaussian = helpers.gaussian(8,50)
 
-        group_array = np.zeros(Globals.NUM_GROUPS)
-        group_array[self.group] = 1
+        group_array = np.zeros(Globals.NUM_GROUPS*2)
+        if self.bodyPart=='front':
+            group_array[self.group*2] = 1 
+        elif self.bodyPart=='back':
+            group_array[self.group*2+1] = 1 
+        elif self.bodyPart=='both':
+            print("annotation to high res heatmap: not implemented yet")
+            
     
         for animal in self.gt:
             if np.array_equal(animal['group'], group_array):
-                x = animal[self.bodyPart][0]
-                y = animal[self.bodyPart][1]
+                x = animal['position'][0]
+                y = animal['position'][1]
     
                 if 0<=x <self.hm.shape[1] and 0<=y<self.hm.shape[0]: 
                     self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
@@ -137,19 +149,22 @@ class Heatmap():
     
     
     # todo gt is actually already part of this class
-    def showImageWithHeatmap (self, filename=None, group=1, bodyPart="front"):
+    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None):
         """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
          The hm.shape must be an integer fraction of the image shape. gt must 
          have be a list of dicts with 'x' and 'y' entries as in the dataset. 
          Both hm and gt can be None in which case they are skipped. 
          If filename is given, the plot is saved."""
+         
+        if group==None: group=self.group
+        if bodyPart==None: bodyPart=self.bodyPart
+        
         assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
         assert group in range(Globals.NUM_GROUPS)
         
         # copy image (so the heatmap is not drawn on original)
         img = self.image.copy()
-        
-    
+           
         # if a heatmap for another group or bodyPart is wished, calculate it
         if self.group != group or self.bodyPart != bodyPart:
             if bodyPart == 'both':
@@ -159,10 +174,7 @@ class Heatmap():
                 self.bodyPart = bodyPart
                 self.annotationToHeatmap()
         
-        if self.hm is not None:
-            
-            group_array = np.zeros(Globals.NUM_GROUPS)
-            group_array[group] = 1    
+        if self.hm is not None:       
             factor = img.shape[0]//self.hm.shape[0]
     
             assert self.hm.shape[0]*factor==img.shape[0] and self.hm.shape[1]*factor==img.shape[1]
@@ -179,60 +191,65 @@ class Heatmap():
                 img = ((img+1)*64 + 128*hmResized).astype(np.uint8)
         plt.imshow(img)
         
-        if self.gt is not None:
-            if bodyPart == "both":
-                x_front = [animal['front'][0] for animal in self.gt if np.array_equal(animal['group'], group_array)] 
-                x_back = [animal['back'][0] for animal in self.gt if np.array_equal(animal['group'], group_array)]
-                y_front = [animal['front'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
-                y_back = [animal['back'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
+        
+        print(f"body part is {self.bodyPart}")
+        if self.gt is not None:               
+            if self.bodyPart=='both':
+                x_front = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2==0]  #np.array_equal(animal['group'], group_array_front)] 
+                y_front = [animal['position'][1] for animal in self.gt if animal['group'].index(1)%2==0]#np.array_equal(animal['group'], group_array_front)]
+                
+                x_back = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
+                y_back = [animal['position'][1] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
              
 
-                plt.scatter(x_front, y_front, marker='o', c='b',)
-                plt.scatter(x_back, y_back, marker='x', c='b',)
+                plt.scatter(x_front, y_front, marker='o', c='r')
+                plt.scatter(x_back, y_back, marker='x', c='b')
                 #plt.legend(loc='upper left')
                 #plt.show()
              
             else:
-                x = [animal[bodyPart][0] for animal in self.gt if np.array_equal(animal['group'], group_array) ]
-                y = [animal[bodyPart][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
+                group_array = np.zeros(Globals.NUM_GROUPS*2)
+                if self.bodyPart=='front':
+                    group_array[self.group*2] = 1 
+                elif self.bodyPart=='back':
+                    group_array[self.group*2+1] = 1 
+                    
+                x = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array) ]
+                y = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
                 
-                marker = "o" if bodyPart == "front" else "x"
-                plt.scatter (x, y, marker=marker, c="b")
+                if bodyPart=='front':
+                    marker='o'
+                    color='r'
+                else:
+                    marker='x'
+                    color='b'
+                plt.scatter (x, y, marker=marker, c=color)
             
         if filename is not None:
             plt.savefig(filename, dpi=150, bbox_inches='tight')
         plt.show()
    
     
-    def calculateHeadTailHeatmap(self, group):
+    def calculateHeadTailHeatmap(self, group=None):
+        if group==None: group=self.group
+        
         # init one heatmap for animal head and one for animal tail
         hm_front = []
         hm_back = []
         
-        # if the relevant group has not changed, calculate the missing heatmap only, otherwise, calculate both heatmaps
-        if self.group == group:
-            if self.bodyPart == 'front':
-                hm_front = self.hm
-                self.bodyPart = 'back'
-                self.annotationToHeatmap()
-                hm_back = self.hm   
-            elif self.bodyPart == 'back':
-                hm_back = self.hm
-                self.bodyPart = 'front'
-                self.annotationToHeatmap()
-                hm_front = self.hm   
-        else:
-            self.group = group
-            
-            self.bodyPart = 'front'
-            self.annotationToHeatmap()
-            hm_front = self.hm 
-            
-            self.bodyPart = 'back'
-            self.annotationToHeatmap()
-            hm_back = self.hm   
-            
+        # calculate front heatmap
+        self.group = group     
+        self.bodyPart = 'front'
+        self.annotationToHeatmap()
+        hm_front = self.hm 
+
+        # calculate back heatmap
+        self.bodyPart = 'back'
+        self.annotationToHeatmap()
+        hm_back = self.hm 
+
         # combine both heatmaps by taking the average
+        self.bodyPart = 'both'
         self.hm = (hm_front + hm_back)/2
         
         

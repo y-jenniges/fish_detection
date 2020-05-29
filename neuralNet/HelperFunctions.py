@@ -29,43 +29,112 @@ def showImageWithAnnotation(entry):
     "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
     image = loadImage(entry['filename'])
     plt.imshow(image)
-    x_front = [animal["front"][0] for animal in entry['animals']]
-    y_front = [animal["front"][1] for animal in entry['animals']]
-    x_back = [animal["back"][0] for animal in entry['animals']]
-    y_back = [animal["back"][1] for animal in entry['animals']]
+    x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
+    y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
+    
+    x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
+    y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
     plt.scatter (x_front, y_front, marker="o", c="w")
     plt.scatter (x_back, y_back, marker="x", c="b")
     plt.show()
 
-def showImageWithHeatmap (image, hm=None, gt=None, filename=None):
+# def showImageWithHeatmap (image, hm=None, gt=None, filename=None):
+#     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
+#      The hm.shape must be an integer fraction of the image shape. gt must 
+#      have be a list of dicts with 'x' and 'y' entries as in the dataset. 
+#      Both hm and gt can be None in which case they are skipped. 
+#      If filename is given, the plot is saved."""
+#     if hm is not None:
+#         factor = image.shape[0]//hm.shape[0]
+#         assert hm.shape[0]*factor==image.shape[0] and hm.shape[1]*factor==image.shape[1]
+#         assert len(hm.shape)==3
+#         hmResized = np.repeat (hm, factor, axis=0) # y
+#         hmResized = np.repeat (hmResized, factor, axis=1) #x
+#         hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
+#         hmResized = np.clip (hmResized*2, 0, 1)
+        
+#         #print(f"hm resized {hmResized.shape}\nimage {image.shape}\nfactor {factor}")
+#         if image.dtype =="uint8":
+#             image = image//2 + (128*hmResized).astype(np.uint8)
+#         else:
+#             image = ((image+1)*64 + 128*hmResized).astype(np.uint8)
+#     plt.imshow(image)
+#     if gt is not None:
+#         print("gt is not none")
+#         x = [label["x"] for label in gt]
+#         y = [label["y"] for label in gt]
+#         plt.scatter (x, y, marker="x", c="b")
+#     if filename is not None:
+#         plt.savefig(filename, dpi=150, bbox_inches='tight')
+#     plt.show()
+
+def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
      The hm.shape must be an integer fraction of the image shape. gt must 
      have be a list of dicts with 'x' and 'y' entries as in the dataset. 
      Both hm and gt can be None in which case they are skipped. 
      If filename is given, the plot is saved."""
+    assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
+    assert group in range(Globals.NUM_GROUPS)
+    
+    # copy image (so the heatmap is not drawn on original)
+    img = image.copy()
+       
     if hm is not None:
-        factor = image.shape[0]//hm.shape[0]
-        assert hm.shape[0]*factor==image.shape[0] and hm.shape[1]*factor==image.shape[1]
+ 
+        factor = img.shape[0]//hm.shape[0]
+
+        assert hm.shape[0]*factor==img.shape[0] and hm.shape[1]*factor==img.shape[1]
         assert len(hm.shape)==3
+        
         hmResized = np.repeat (hm, factor, axis=0) # y
         hmResized = np.repeat (hmResized, factor, axis=1) #x
         hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
         hmResized = np.clip (hmResized*2, 0, 1)
         
-        #print(f"hm resized {hmResized.shape}\nimage {image.shape}\nfactor {factor}")
-        if image.dtype =="uint8":
-            image = image//2 + (128*hmResized).astype(np.uint8)
+        if img.dtype =="uint8":
+            img = img//2 + (128*hmResized).astype(np.uint8)
         else:
-            image = ((image+1)*64 + 128*hmResized).astype(np.uint8)
-    plt.imshow(image)
-    if gt is not None:
-        print("gt is not none")
-        x = [label["x"] for label in gt]
-        y = [label["y"] for label in gt]
-        plt.scatter (x, y, marker="x", c="b")
+            img = ((img+1)*64 + 128*hmResized).astype(np.uint8)
+    plt.imshow(img)
+    
+    if gt is not None:               
+        if bodyPart=='both':
+            print("showImageWIthHeatmap: hm sth s not right here")
+            group_array_front = np.zeros(Globals.NUM_GROUPS*2)
+            group_array_front[group*2] = 1
+            group_array_back = np.zeros(Globals.NUM_GROUPS*2)
+            group_array_back[group*2+1] = 1
+            
+            x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)] 
+            y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]
+            
+            x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_back)]
+            y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]
+         
+
+            plt.scatter(x_front, y_front, marker='o', c='b',)
+            plt.scatter(x_back, y_back, marker='x', c='b',)
+            #plt.legend(loc='upper left')
+            #plt.show()
+         
+        else:
+            group_array = np.zeros(Globals.NUM_GROUPS*2)
+            if bodyPart=='front':
+                group_array[group*2] = 1 
+            elif bodyPart=='back':
+                group_array[group*2+1] = 1 
+                
+            x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array) ]
+            y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
+            
+            marker = "o" if bodyPart == "front" else "x"
+            plt.scatter (x, y, marker=marker, c="b")
+        
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')
     plt.show()
+
 
 def showOverlappingHeatmaps(**heatmaps):
     for h in heatmaps:

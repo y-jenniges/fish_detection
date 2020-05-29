@@ -40,10 +40,11 @@ def prepareEntryLowResHeatmap (entry):
     image = helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
 
     
-    # return [(image, heatmap1f), (image, heatmap1b), (image, heatmap2f), (image, heatmap2b), (image, heatmap3f), (image, heatmap3b), 
-    #         (image, heatmap4f), (image, heatmap4b), (image, heatmap5f), (image, heatmap5b), (image, heatmap6f), (image, heatmap6b)]
-    return (image, [heatmap0f, heatmap0b, heatmap1f, heatmap1b, heatmap2f, heatmap2b, 
-                    heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
+    return [(image, heatmap0f), (image, heatmap0b), (image, heatmap1f), (image, heatmap1b), \
+            (image, heatmap2f), (image, heatmap2b), (image, heatmap3f), (image, heatmap3b),\
+            (image, heatmap4f), (image, heatmap4b), (image, heatmap5f), (image, heatmap5b)]
+    # return (image, [heatmap0f, heatmap0b, heatmap1f, heatmap1b, heatmap2f, heatmap2b, 
+    #                 heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
     #return (image, heatmap1f.hm)
 
 def prepareEntryHighResHeatmap (entry):
@@ -63,23 +64,24 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
+    print("received x and y")
     print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
     print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
     
     
-    # todo how to i know the resolution
-    if showHeatmaps:
-        entry = {'filename':"", 'animals':[]}
+    # # todo how to i know the resolution
+    # if showHeatmaps:
+    #     entry = {'filename':"", 'animals':[]}
         
-        # heatmap = HeatmapClass.Heatmap(entry, resolution='low', group='0', bodyPart='front')
+    #     # heatmap = HeatmapClass.Heatmap(entry, resolution='low', group='0', bodyPart='front')
                
-        # for i in range(Globals.NUM_GROUPS):
-        #     heatmap.showImageWithHeatmap (group=i, bodyPart="front")
-        #     heatmap.showImageWithHeatmap (group=i, bodyPart="back")
-        for j in range(2):#Globals.NUM_GROUPS*2):
-            print(j)
-            print(X[i])
-            helpers.showImageWithHeatmap (X[i], y[i][j])
+    #     # for i in range(Globals.NUM_GROUPS):
+    #     #     heatmap.showImageWithHeatmap (group=i, bodyPart="front")
+    #     #     heatmap.showImageWithHeatmap (group=i, bodyPart="back")
+    #     for j in range(2):#Globals.NUM_GROUPS*2):
+    #         print(j)
+    #         print(X[i])
+    #         helpers.showImageWithHeatmap (X[i], y[i][j])
         
 
 
@@ -113,14 +115,23 @@ class DataGenerator(keras.utils.Sequence):
         return int((np.floor(len(self.dataset)) + np.floor(len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
+        print("getitem")
         'Generate one batch of data'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
         
-        batch_animals = [self.prepareEntry(e) for e in batch_animals]
-        batch_no_animals = [self.prepareEntry(e) for e in batch_no_animals]
+        batch_animals_prep = []
+        for e in batch_animals:
+            batch_animals_prep += self.prepareEntry(e)
         
-        batch = batch_animals + batch_no_animals
+        batch_no_animals_prep = []
+        for e in batch_no_animals:
+            batch_no_animals_prep += self.prepareEntry(e)
+        
+        
+        batch = batch_animals_prep + batch_no_animals_prep
+            
+        print("calc x and y ")
 
         X = np.array([e[0] for e in batch])
         y = np.array([e[1] for e in batch])
