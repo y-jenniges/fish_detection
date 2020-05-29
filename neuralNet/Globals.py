@@ -6,8 +6,11 @@ NUM_GROUPS = 6
 no_animal_ratio = 0.2
 batch_size = 4
 
-loss = 'mse'
+
+loss={'heatmap': 'mse', 
+      'classification': 'categorical_crossentropy'}
 optimizer = 'adam'
-metrics = ['mae', 'acc']
+metrics = {'heatmap':['mae'],
+           'classification':['acc']}
 
 epochs = 3

@@ -9,35 +9,48 @@ import random
 import HeatmapClass
 import json
 
-def dummyPrepareEntry (entry):
+def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
      and converts it to a input, ground-truth output pair that is given
      to keras. At the moment the image is loaded and the output is just empty."""
     return (helpers.loadImage(entry['filename']), [])
 
-def prepareEntryLowResHeatmap (entry):
+def prepareEntryLowResHeatmap (entry, hm_folder):
     """Get's an entry of the dataset (filename, annotation), load filename and
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
-    
-    hm_folder_path = "../data/heatmaps_lowRes/test/"
-    
-    hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+
+    hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
     with open(hm_file_path, 'r') as f:
-        hms = json.load(f)
+        hm_json = json.load(f)
    
     image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     
-    return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
-            (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
-            (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
+    # image, groundtrouth(heatmap), classification is returned
+    # maybe only heatmaps that are not empty!!
+    
+    heatmaps=[]
+    classification=[]
+    for animal in entry['animals']:
+        group = str(math.floor(animal['group'].index(1)/2))
+        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+        
+        heatmaps.append(hm_json["hm_" + group + bodyPart])
+        classification.append(animal['group'])
+        
+
+    return [image, heatmaps, classification]
+    
+    # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
+    #         (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
+    #         (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
                
         
     # return (image, [heatmap0f, heatmap0b, heatmap1f, heatmap1b, heatmap2f, heatmap2b, 
     #                 heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
     #return (image, heatmap1f.hm)
 
-def prepareEntryHighResHeatmap (entry):
+def prepareEntryHighResHeatmap (entry, hm_folder):
     """Get's an entry of the dataset (filename, annotation), load filename and
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
@@ -47,17 +60,28 @@ def prepareEntryHighResHeatmap (entry):
     
     # heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
     
-    hm_folder_path = "../data/heatmaps_highRes/test"
-    
-    hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+ 
+    hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
     with open(hm_file_path, 'r') as f:
         hms = json.load(f)
    
     image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     
-    return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
-            (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
-            (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
+    heatmaps=[]
+    classification=[]
+    for animal in entry['animals']:
+        group = str(math.floor(animal['group'].index(1)/2))
+        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+        
+        heatmaps.append(hm_json["hm_" + group + bodyPart])
+        classification.append(animal['group'])
+        
+
+    return [image, heatmaps, classification]
+    
+    # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
+    #         (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
+    #         (image, hms['hm_4f']), (image, hms['hm_4b']), (image, hms['hm_5f']), (image, hms['hm_5b'])]
                
     #return (helpers.loadImage(filename)/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32), heatmap.hm)
 
@@ -85,8 +109,6 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
 
         
 
-
-
 class DataGenerator(keras.utils.Sequence):
     """Provides a dataset of the erdbeer to keras in a load on demand fashion
     The dataset must have the format dict filename-->list[dict{"x", "y"}].
@@ -95,8 +117,11 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+    def __init__(self, dataset, hm_folder_path, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
         'Initialization'
+        
+        self.hm_folder_path = hm_folder_path
+       
         self.dataset = dataset
         self.no_animal_dataset = no_animal_dataset 
         self.no_animal_ratio = no_animal_ratio
@@ -106,7 +131,7 @@ class DataGenerator(keras.utils.Sequence):
                        
         self.no_animal_size = (int)(batch_size*no_animal_ratio)     
         self.animal_size = batch_size - self.no_animal_size
-          
+               
         self.on_epoch_end()
         
     def __len__(self):
@@ -119,20 +144,15 @@ class DataGenerator(keras.utils.Sequence):
         'Generate one batch of data'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
-        
-        batch_animals_prep = []
-        for e in batch_animals:
-            batch_animals_prep += self.prepareEntry(e)
-        
-        batch_no_animals_prep = []
-        for e in batch_no_animals:
-            batch_no_animals_prep += self.prepareEntry(e)
-              
-        batch = batch_animals_prep + batch_no_animals_prep
+             
+        batch_animals = [self.prepareEntry(e, self.hm_folder_path) for e in batch_animals]
+        batch_no_animals = [self.prepareEntry(e, self.hm_folder_path + "../training_no_animals/") for e in batch_no_animals]
+            
+        batch = batch_animals + batch_no_animals
             
         X = np.array([e[0] for e in batch])
-        y = np.array([e[1] for e in batch])
-             
+        y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
+           
         return X, y
         
     def get_ground_truth (self, index):

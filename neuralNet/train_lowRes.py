@@ -44,14 +44,16 @@ imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_anima
 print(f"Image format {imageShape}.")
 
 trainGenL = dg.DataGenerator (dataset=train_labels_animals,
+                              hm_folder_path="../data/heatmaps_lowRes/training_animals/",
                               no_animal_dataset=train_labels_no_animals,
                               no_animal_ratio=Globals.no_animal_ratio,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
                               batch_size=Globals.batch_size)
 
 testGenL = dg.DataGenerator (dataset=test_labels, 
-                              prepareEntry=dg.prepareEntryLowResHeatmap,
-                              batch_size=Globals.batch_size)
+                             hm_folder_path="../data/heatmaps_lowRes/test/" ,
+                             prepareEntry=dg.prepareEntryLowResHeatmap,
+                             batch_size=Globals.batch_size)
 
 print("DataGenerators initialized")
 
