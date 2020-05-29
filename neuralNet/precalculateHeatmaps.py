@@ -3,6 +3,8 @@ import os
 import numpy as np
 import HeatmapClass
 import HelperFunctions as helpers
+from PIL import Image
+
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -19,41 +21,40 @@ path = "../data/labels/training_labels_no_animals.json"
 with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
    
+
+def calculateAllHeatmapsForImage(entry):
+    """Calculate all 12 heatmaps for the given image and save them in a json file"""
+    heatmap0f = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='front').hm.tolist()
+    heatmap0b = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='back').hm.tolist()
+    heatmap1f = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front').hm.tolist()
+    heatmap1b = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='back').hm.tolist()
+    heatmap2f = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='front').hm.tolist()
+    heatmap2b = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='back').hm.tolist()
+    heatmap3f = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='front').hm.tolist()
+    heatmap3b = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='back').hm.tolist()
+    heatmap4f = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='front').hm.tolist()
+    heatmap4b = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='back').hm.tolist()
+    heatmap5f = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='front').hm.tolist()
+    heatmap5b = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='back').hm.tolist()
+    
+    data = {'hm_0f':heatmap0f, 'hm_0b':heatmap0b, 'hm_1f':heatmap1f, 'hm_1b':heatmap1b, \
+            'hm_2f':heatmap2f, 'hm_2b':heatmap2b, 'hm_3f':heatmap3f, 'hm_3b':heatmap3b, \
+            'hm_4f':heatmap4f, 'hm_4b':heatmap4b, 'hm_5f':heatmap5f, 'hm_5b':heatmap5b}
+    
+    with open(hm_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json','w') as file:
+        json.dump(data, file)
+    
+    print(f"image done: {entry['filename']}")
+
+
+# label files to work on 
 labels_list = [train_labels_animals, test_labels, train_labels_no_animals]
 data = labels_list[1]
     
-# for every image, calculate heatmap
-hm_path = "../data/heatmaps/test_hms.json"
+# path to store heatmaps
+hm_path = "../data/heatmaps_lowRes/"
 
-def calculateAllHeatmapsForImage(entry):
-    heatmap0f = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='front').hm
-    heatmap0b = HeatmapClass.Heatmap(entry, resolution='low', group=0, bodyPart='back').hm
-    heatmap1f = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front').hm
-    heatmap1b = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='back').hm
-    heatmap2f = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='front').hm
-    heatmap2b = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart='back').hm
-    heatmap3f = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='front').hm
-    heatmap3b = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart='back').hm
-    heatmap4f = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='front').hm
-    heatmap4b = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart='back').hm
-    heatmap5f = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='front').hm
-    heatmap5b = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart='back').hm
-    
-        
-    image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-
-    hms = [(image, heatmap0f), (image, heatmap0b), (image, heatmap1f), (image, heatmap1b), \
-        (image, heatmap2f), (image, heatmap2b), (image, heatmap3f), (image, heatmap3b),\
-        (image, heatmap4f), (image, heatmap4b), (image, heatmap5f), (image, heatmap5b)]
-       
-    print(f"image done: {entry['filename']}")
-    return {'filename':entry['filename'], 'image':image, 'heatmaps':hms}
-
-hms_json = []
 # iterate over all images
 for entry in data:   
     prepared_entry = calculateAllHeatmapsForImage(entry)
-    hms_json.append(prepared_entry)
     
-with open(hm_path, 'w') as outfile:
-    json.dump(hms_json, outfile)
