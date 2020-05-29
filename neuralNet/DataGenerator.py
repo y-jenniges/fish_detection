@@ -8,6 +8,7 @@ import Globals
 import random
 import HeatmapClass
 import json
+import math
 
 def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -90,9 +91,9 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
-    print("received x and y")
-    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]")
-    print(f"y has shape{y.shape}, type {y.dtype} and range [{np.min(y)}..{np.max(y)}]")
+    
+    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
+    print(f"y['heatmap'] has length {len(y['heatmap'])}, y ['classification'] has length {len(y['classification'])}")
        
     # todo how to i know the resolution
     if showHeatmaps:

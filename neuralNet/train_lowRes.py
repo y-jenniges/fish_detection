@@ -57,7 +57,7 @@ testGenL = dg.DataGenerator (dataset=test_labels,
 
 print("DataGenerators initialized")
 
-#dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
+dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
 dg.showEntryOfGenerator (testGenL, 0, False)
 
 
