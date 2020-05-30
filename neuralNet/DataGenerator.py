@@ -122,7 +122,6 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     
     print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
     print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
-    print(f"one heatmap has shape {y['heatmap'][0].shape} and one classification {y['classification'][0].shape}") 
     print(f"classification is {y['classification']}")
 
 
@@ -150,6 +149,7 @@ class DataGenerator(keras.utils.Sequence):
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
     def __init__(self, dataset, hm_folder_path, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+        print("DataGenerator: init")
         'Initialization'
         
         self.hm_folder_path = hm_folder_path
@@ -167,12 +167,19 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
         
     def __len__(self):
+        print("DataGenerator: len")
         'Denotes the number of batches per epoch'
         #return int(np.floor(len(self.dataset) / self.batch_size))
-        #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")
-        return int((np.floor(len(self.dataset)) + np.floor(len(self.no_animal_dataset)))/ self.batch_size)
+        #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")_
+
+        number_of_images = np.floor(len(self.dataset) + (len(self.dataset)/self.batch_size)*self.no_animal_size)
+        print(f"number_of_images {number_of_images}")
+
+        return np.floor(number_of_images/self.batch_size)
+        #return int((np.floor(len(self.dataset)) + np.floor(self.no_animal_ratio*len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
+        print("DataGenerator: getitem")
         'Generate one batch of data'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
@@ -188,6 +195,7 @@ class DataGenerator(keras.utils.Sequence):
         return X, y
         
     def get_ground_truth (self, index):
+        print("DataGenerator: get_ground_truth")
         'Generate ground_truth for the batch in the original format (not heatmap).'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size]
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
@@ -196,6 +204,7 @@ class DataGenerator(keras.utils.Sequence):
         return [e['animals'] for e in batch]          
 
     def on_epoch_end(self):
+        print("DataGenerator: on_epoch_end")
         'Updates indexes after each epoch'
         random.shuffle(self.dataset)
         random.shuffle(self.no_animal_dataset)
