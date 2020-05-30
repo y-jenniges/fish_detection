@@ -57,8 +57,8 @@ testGenL = dg.DataGenerator (dataset=test_labels,
 
 print("DataGenerators initialized")
 
-dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
-dg.showEntryOfGenerator (testGenL, 0, False)
+#dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
+#dg.showEntryOfGenerator (testGenL, 0, False)
 
 
 # serialize data generators
@@ -112,10 +112,12 @@ def ourBlock (x, basename, channels=Globals.NUM_GROUPS*2):
     return x
 
 alpha = 1.0
-input = keras.layers.Input(shape=imageShape)
-backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
+input_tensor = keras.layers.Input(shape=imageShape)
+
+backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input_tensor, include_top=False, weights='imagenet', pooling=None)
 for l in backbone.layers:
     l.trainable = False
+    
 # We attach to the layer with 320 channels because with a 1280 channel input this conv would have too many weights
 x = backbone.get_layer("block_16_project_BN").output
 
@@ -123,9 +125,26 @@ x = backbone.get_layer("block_16_project_BN").output
 x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
-x = layers.Conv2D (1, 1, padding='same', activation='sigmoid', name = "block_18_conv_output")(x)
+#x = layers.Conv2D (1, 1, padding='same', activation='sigmoid', name = "block_18_conv_output")(x)
 
-modelL = keras.Model(inputs=input, outputs=x)
+# output layers
+output_h = layers.Conv2D (filters=1,
+                          kernel_size=1,
+                          padding='same', 
+                          activation='sigmoid', 
+                          name = "heatmap")(x)
+
+output_c = layers.Conv2D(filters=Globals.NUM_GROUPS*2, 
+                          kernel_size=[1,1],
+                          strides=1,
+                          padding='same',
+                          dilation_rate=1,
+                          activation='softmax',
+                          name='classification')(x)
+
+#modelL = keras.Model(inputs=input_tensor, outputs=x)
+#modelL.compile(loss='mse', optimizer='adam', metrics=['mae'])
+modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
 modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelL.summary()
 
