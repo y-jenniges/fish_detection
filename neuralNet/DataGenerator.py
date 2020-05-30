@@ -29,18 +29,22 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     
     # image, groundtrouth(heatmap), classification is returned
     # maybe only heatmaps that are not empty!!
-    
+   
+
+    hm_strings = ["hm_0f", "hm_0b", "hm_1f", "hm_1b", "hm_2f", "hm_2b", "hm_3f", "hm_3f", "hm_4f", "hm_4b", "hm_5f", "hm5b"]
+
+
     # append all heatmaps
-    heatmaps=np.zeros(Globals.NUM_GROUPS*2)
+    heatmaps = []#np.zeros(Globals.NUM_GROUPS*2)
     for i in range(len(heatmaps)):
-        heatmaps.append(hm_json[i])
+        heatmaps[i]= np.array(hm_json[hm_strings[i]], dtype=float)
     
     # initialize the classification (to start with, all images are classified as nothing (group 0))
-    classification=np.zeros(Globals.NUM_GROUPS*2)
+    classification=np.zeros(shape=[Globals.NUM_GROUPS*2, Globals.NUM_GROUPS*2])
     for i in range(len(classification)):
         new_entry = np.zeros(Globals.NUM_GROUPS*2)
         new_entry[0]=1
-        classification.append(new_entry)
+        classification[i] = new_entry
 
 
     for animal in entry['animals']:
