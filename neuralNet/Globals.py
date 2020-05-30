@@ -3,7 +3,7 @@ NUM_GROUPS = 6
 
 
 # parameters for training
-no_animal_ratio = 0.2
+no_animal_ratio = 0.3
 batch_size = 4
 
 
