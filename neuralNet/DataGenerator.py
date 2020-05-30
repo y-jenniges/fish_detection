@@ -30,17 +30,30 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     # image, groundtrouth(heatmap), classification is returned
     # maybe only heatmaps that are not empty!!
     
-    heatmaps=[]
-    classification=[]
+    # append all heatmaps
+    heatmaps=np.zeros(Globals.NUM_GROUPS*2)
+    for i in range(len(heatmaps)):
+        heatmaps.append(hm_json[i])
+    
+    # initialize the classification (to start with, all images are classified as nothing (group 0))
+    classification=np.zeros(Globals.NUM_GROUPS*2)
+    for i in range(len(classification)):
+        new_entry = np.zeros(Globals.NUM_GROUPS*2)
+        new_entry[0]=1
+        classification.append(new_entry)
+
+
     for animal in entry['animals']:
         group = str(math.floor(animal['group'].index(1)/2))
         bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
-        
-        heatmaps.append(hm_json["hm_" + group + bodyPart])
-        classification.append(animal['group'])
+         
+        idx = animal['group'].index(1)
+        classification[idx] = np.asarray(animal['group'])
+        #heatmaps.append(np.asarray(hm_json["hm_" + group + bodyPart]))
+        #classification.append(np.asarray(animal['group']))
         
 
-    return [image, heatmaps, classification]
+    return np.asarray([image, heatmaps, classification])
     
     # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
     #         (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
@@ -64,12 +77,13 @@ def prepareEntryHighResHeatmap (entry, hm_folder):
  
     hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
     with open(hm_file_path, 'r') as f:
-        hms = json.load(f)
+        hm_json = json.load(f)
    
     image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     
     heatmaps=[]
     classification=[]
+    
     for animal in entry['animals']:
         group = str(math.floor(animal['group'].index(1)/2))
         bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
