@@ -31,11 +31,11 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     # maybe only heatmaps that are not empty!!
    
 
-    hm_strings = ["hm_0f", "hm_0b", "hm_1f", "hm_1b", "hm_2f", "hm_2b", "hm_3f", "hm_3f", "hm_4f", "hm_4b", "hm_5f", "hm5b"]
+    hm_strings = ["hm_0f", "hm_0b", "hm_1f", "hm_1b", "hm_2f", "hm_2b", "hm_3f", "hm_3f", "hm_4f", "hm_4b", "hm_5f", "hm_5b"]
 
 
     # append all heatmaps
-    heatmaps = []#np.zeros(Globals.NUM_GROUPS*2)
+    heatmaps = np.zeros(shape=[Globals.NUM_GROUPS*2, np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
     for i in range(len(heatmaps)):
         heatmaps[i]= np.array(hm_json[hm_strings[i]], dtype=float)
     
@@ -111,8 +111,11 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     X, y = dataGen[i]
     
     print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
-    print(f"y['heatmap'] has length {len(y['heatmap'])}, y ['classification'] has length {len(y['classification'])}")
-       
+    print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
+    print(f"one heatmap has shape {y['heatmap'][0].shape} and one classification {y['classification'][0].shape}") 
+    print(f"classification is {y['classification']}")
+
+
     # todo how to i know the resolution
     if showHeatmaps:
         # hm_folder_path = "../data/heatmaps_lowRes/"
