@@ -30,48 +30,49 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     heatmaps=[]
     classification=[]
     
-    for animal in entry['animals']:
-        group = str(math.floor(animal['group'].index(1)/2))
-        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+    # idea here: return only necessary heatmaps and classes
+    # for animal in entry['animals']:
+    #     group = str(math.floor(animal['group'].index(1)/2))
+    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
         
-        heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
-        classification.append(np.array(animal['group']))
+    #     heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
+    #     classification.append(np.array(animal['group']))
     
     
-    # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
-    if len(entry['animals']) == 0:
-        hm = np.zeros(shape=[np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
-        heatmaps.append(hm)
-        c = np.zeros(Globals.NUM_GROUPS*12)
-        c[0] = 1
-        classification.append(c)
+    # # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
+    # if len(entry['animals']) == 0:
+    #     hm = np.zeros(shape=[np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
+    #     heatmaps.append(hm)
+    #     c = np.zeros(Globals.NUM_GROUPS*12)
+    #     c[0] = 1
+    #     classification.append(c)
 
     # image, groundtrouth(heatmap), classification is returned
     # maybe only heatmaps that are not empty!!
    
+    # idea: for all 12 classes, create one heatmap and a classification array
+    hm_strings = ["hm_0f", "hm_0b", "hm_1f", "hm_1b", "hm_2f", "hm_2b", "hm_3f", "hm_3f", "hm_4f", "hm_4b", "hm_5f", "hm_5b"]
 
-    # hm_strings = ["hm_0f", "hm_0b", "hm_1f", "hm_1b", "hm_2f", "hm_2b", "hm_3f", "hm_3f", "hm_4f", "hm_4b", "hm_5f", "hm_5b"]
 
-
-    # # append all heatmaps
-    # heatmaps = np.zeros(shape=[Globals.NUM_GROUPS*2, np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
-    # for i in range(len(heatmaps)):
-    #     heatmaps[i]= np.array(hm_json[hm_strings[i]], dtype=float)
+    # append all heatmaps
+    heatmaps = np.zeros(shape=[Globals.NUM_GROUPS*2, np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
+    for i in range(len(heatmaps)):
+        heatmaps[i]= np.array(hm_json[hm_strings[i]], dtype=float)
     
-    # # initialize the classification (to start with, all images are classified as nothing (group 0))
-    # classification=np.zeros(shape=[Globals.NUM_GROUPS*2, Globals.NUM_GROUPS*2])
-    # for i in range(len(classification)):
-    #     new_entry = np.zeros(Globals.NUM_GROUPS*2)
-    #     new_entry[0]=1
-    #     classification[i] = new_entry
+    # initialize the classification (to start with, all images are classified as nothing (group 0))
+    classification=np.zeros(shape=[Globals.NUM_GROUPS*2, Globals.NUM_GROUPS*2])
+    for i in range(len(classification)):
+        new_entry = np.zeros(Globals.NUM_GROUPS*2)
+        new_entry[0]=1
+        classification[i] = new_entry
 
 
-    # for animal in entry['animals']:
-    #     group = str(math.floor(animal['group'].index(1)/2))
-    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+    for animal in entry['animals']:
+        group = str(math.floor(animal['group'].index(1)/2))
+        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
          
-    #     idx = animal['group'].index(1)
-    #     classification[idx] = np.asarray(animal['group'])
+        idx = animal['group'].index(1)
+        classification[idx] = np.asarray(animal['group'])
 
 
     return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
