@@ -38,7 +38,14 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
         classification.append(np.array(animal['group']))
     
     
-    
+    # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
+    if len(entry['animals']) == 0:
+        hm = np.zeros(shape=[np.array(hm_json['hm_0f']).shape[0], np.array(hm_json['hm_0f']).shape[1], 1])
+        heatmaps.append(hm)
+        c = np.zeros(Globals.NUM_GROUPS*12)
+        c[0] = 1
+        classification.append(c)
+
     # image, groundtrouth(heatmap), classification is returned
     # maybe only heatmaps that are not empty!!
    
@@ -104,7 +111,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder):
         
         heatmaps.append(hm_json["hm_" + group + bodyPart])
         classification.append(animal['group'])
-        
+       
 
     return [image, heatmaps, classification]
     
@@ -175,7 +182,7 @@ class DataGenerator(keras.utils.Sequence):
         number_of_images = np.floor(len(self.dataset) + (len(self.dataset)/self.batch_size)*self.no_animal_size)
         print(f"number_of_images {number_of_images}")
 
-        return np.floor(number_of_images/self.batch_size)
+        return int(np.floor(number_of_images/self.batch_size))
         #return int((np.floor(len(self.dataset)) + np.floor(self.no_animal_ratio*len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
@@ -191,7 +198,9 @@ class DataGenerator(keras.utils.Sequence):
             
         X = np.array([e[0] for e in batch])
         y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
-           
+        
+        print(f"y[heatmap] shape {np.array(y['heatmap']).shape}")
+
         return X, y
         
     def get_ground_truth (self, index):
