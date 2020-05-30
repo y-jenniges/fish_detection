@@ -201,9 +201,10 @@ class DataGenerator(keras.utils.Sequence):
         batch = batch_animals + batch_no_animals
             
         X = np.array([e[0] for e in batch])
-        y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
+        y = np.array([e[1] for e in batch])
+        #y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
         
-        print(f"y[heatmap] shape {np.array(y['heatmap']).shape}")
+        #print(f"y[heatmap] shape {np.array(y['heatmap']).shape}")
 
         return X, y
         
