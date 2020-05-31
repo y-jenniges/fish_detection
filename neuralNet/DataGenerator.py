@@ -131,9 +131,10 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
     
-    print(f"X has shape{X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
-    print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
-    print(f"classification is {y['classification']}")
+    print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
+    print(f"y has shape {y.shape}, type {y.dtype}")
+    #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
+    #print(f"classification is {y['classification']}")
 
 
     # todo how to i know the resolution
