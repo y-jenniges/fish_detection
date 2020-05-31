@@ -90,7 +90,8 @@ print("DataGenerators serialized")
 # For reference you can access the MobileNet.V2 source code at
 # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
-def ourBlock (x, basename, channels=Globals.NUM_GROUPS*2):
+#def ourBlock (x, basename, channels=Globals.NUM_GROUPS*2):
+def ourBlock(x, basename, channels=1):
     """Our own block of computation layers used several times in the network. It is similar to
     the block used in MobileNet.V2 but simplified. x is the layer to attach the block to,
     basename the name of this block, which will be extended by layer names. channel is the
