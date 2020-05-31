@@ -161,10 +161,10 @@ history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs, valid
 timestamp = time.strftime("%Y%m%d-%H%M%S")
 
 modelL.save(f"model-L-{timestamp}")
-modelL.save_weights(f"fish-L.h5") # saves weights (e.g. a checkpoint) locally
+modelL.save_weights(f"fish-L-{timestamp}.h5") # saves weights (e.g. a checkpoint) locally
 # save the history(todo: is it already contained in modelL.save? and also weights?)
 # history.history is a dict
-with open(f"trainHistory-{timestamp}", 'wb') as file:
+with open(f"trainHistory-{timestamp}.pickle", 'wb') as file:
     pickle.dump(history.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
   
