@@ -5,9 +5,11 @@ from datetime import datetime
 import keras
 import HelperFunctions as helpers
 import numpy as np
+import matplotlib.pyplot as plt
+import time
 
-#test_path = "../data/tests/1/"
-test_path=""
+test_path = "../data/tests/1/"
+#test_path=""
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -72,10 +74,41 @@ for i in range(3):
 
     print(f"prediction shape {np.array(temp['prediction']).shape}")
 
-   # helpers.showImageWithHeatmap(image, hm=None, gt=None, group=1, bodyPart="front", filename=None)
+    # helpers.showImageWithHeatmap(image, hm=None, gt=None, group=1, bodyPart="front", filename=None)
     
     output_json.append(temp)
-    
+
+ 
 # save output
-with open(f"predictions-{str(datetime.now())}.json", 'w') as outfile:
+timestamp = time.strftime("%Y%m%d-%H%M%S")  
+with open(f"predictions-{timestamp}.json", 'w') as outfile:
     json.dump(output_json, outfile)
+
+
+# # evaluation --------------------------------------------------------#
+# print("load predictions")
+# with open("predictions-2020-05-31_09-10-15.json", 'rb') as f:
+#     out = json.load(f)
+
+# #helpers.showImageWithHeatmap(output[''])
+
+# print(f"MAE: {history['mae']}")
+# print(f"Loss: {history['loss']}")
+
+# # # plot mae history
+# # plt.plot(history['mae'])
+# # plt.plot(history['val_mae'])
+# # plt.title('model mean absolute error')
+# # plt.ylabel('mae')
+# # plt.xlabel('epoch')
+# # plt.legend(['train', 'test'], loc='upper left')
+# # plt.show()
+
+# # # plot loss history
+# # plt.plot(history['loss'])
+# # plt.plot(history['val_loss'])
+# # plt.title('model loss')
+# # plt.ylabel('loss')
+# # plt.xlabel('epoch')
+# # plt.legend(['train', 'test'], loc='upper left')
+# # plt.show()
