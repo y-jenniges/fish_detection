@@ -127,15 +127,15 @@ x = backbone.get_layer("block_16_project_BN").output
 x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
-#x = layers.Conv2D (1, 1, padding='same', activation='sigmoid', name = "block_18_conv_output")(x)
+x = layers.Conv2D (1, 1, padding='same', activation='sigmoid', name = "block_18_conv_output")(x)
 
 # output layers
 
-output_h = layers.Conv2D (filters=1,
-                          kernel_size=1,
-                          padding='same', 
-                          activation='sigmoid', 
-                          name = "heatmap")(x)
+# output_h = layers.Conv2D (filters=1,
+#                           kernel_size=1,
+#                           padding='same', 
+#                           activation='sigmoid', 
+#                           name = "heatmap")(x)
 
 # output_c = layers.Conv2D(filters=Globals.NUM_GROUPS*2, 
 #                           kernel_size=[1,1],
