@@ -74,7 +74,7 @@ for i in range(3):
 
     print(f"prediction shape {np.array(temp['prediction']).shape}")
 
-    # helpers.showImageWithHeatmap(image, hm=None, gt=None, group=1, bodyPart="front", filename=None)
+    helpers.showImageWithHeatmap(image, hm=t['prediction'], gt=t['gt'], group=1, bodyPart="front", filename=f"../data/output/batch{i}-image{j}")
     
     output_json.append(temp)
 
@@ -85,30 +85,38 @@ with open(f"predictions-{timestamp}.json", 'w') as outfile:
     json.dump(output_json, outfile)
 
 
-# # evaluation --------------------------------------------------------#
-# print("load predictions")
-# with open("predictions-2020-05-31_09-10-15.json", 'rb') as f:
+# evaluation --------------------------------------------------------#
+#print("load predictions")
+#p = "../data/tests/1/predictions-batch0-image0-20200531-111730.json"
+#p = "../data/tests/1/predictions-batch0-image1-20200531-111822.json"
+#p = "../data/tests/1/predictions-batch0-image2-20200531-111914.json"
+#p = "../data/tests/1/predictions-batch0-image3-20200531-112006.json"
+# with open(p, 'r') as f:
 #     out = json.load(f)
 
-# #helpers.showImageWithHeatmap(output[''])
+# pred =  np.asarray(out['prediction'])
+
+# print(f"Is there any non-zero entry in gt, i.e. any animal on image? {np.any(np.array(out['gt']))}")
+# print(f"Prediction: {np.min(pred), np.max(pred)}")
+# helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 
 # print(f"MAE: {history['mae']}")
 # print(f"Loss: {history['loss']}")
 
-# # # plot mae history
-# # plt.plot(history['mae'])
-# # plt.plot(history['val_mae'])
-# # plt.title('model mean absolute error')
-# # plt.ylabel('mae')
-# # plt.xlabel('epoch')
-# # plt.legend(['train', 'test'], loc='upper left')
-# # plt.show()
+# # plot mae history
+# plt.plot(history['mae'])
+# plt.plot(history['val_mae'])
+# plt.title('model mean absolute err or')
+# plt.ylabel('mae')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
 
-# # # plot loss history
-# # plt.plot(history['loss'])
-# # plt.plot(history['val_loss'])
-# # plt.title('model loss')
-# # plt.ylabel('loss')
-# # plt.xlabel('epoch')
-# # plt.legend(['train', 'test'], loc='upper left')
-# # plt.show()
+# # plot loss history
+# plt.plot(history['loss'])
+# plt.plot(history['val_loss'])
+# plt.title('model loss')
+# plt.ylabel('loss')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
