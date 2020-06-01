@@ -13,8 +13,8 @@ import HeatmapClass
 
 out_path = "../data/output/"
 
-#test_path = "../data/tests/2/"
-test_path=""
+test_path = "../data/tests/2/"
+#test_path=""
 out_path = test_path + "output/"
 model_path = "model-L-20200601-035023"
 hist_path = "trainHistory-20200601-035023.pickle"
@@ -52,8 +52,10 @@ with open(os.path.join(test_path, hist_path),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
+print("Loading done")
 
 # predicting one specific image
+
 entry = test_labels[60]
 #helpers.showImageWithAnnotation(entry)
 image = np.asarray(helpers.loadImage(entry['filename']))
@@ -69,15 +71,11 @@ with open("60.json", "w") as f:
     json.dump(yHat.tolist(), f)
 
 
-# Use this to visualize results
-# It shows the input image (background), the predicted heatmap (white "fog" in foreground)
-# and the ground-truth (blue crosses)
-# testIdx = random.randint(0,len(testGenL))
-# testBatch = testGenL[testIdx]
-# gtBatch = testGenL.get_ground_truth(testIdx)
-# yHats = modelL.predict (testBatch[0])
-# for i in range(0,len(yHats)):
-#     helpers.showImageWithHeatmap (testBatch[0][i], yHats[i], gtBatch[i], filename=f"result-L-{i}.png") 
+# show heatmap only
+# with open("../data/tests/2/39.json","r") as f:
+#     data=json.load(f)
+# plt.savefig("39_hm.jpg")
+# plt.imshow(np.array(data)[0,:,:,:], cmap="gray")
 
 
 print(f"history keys {history.keys()}")
@@ -130,8 +128,8 @@ print(f"history keys {history.keys()}")
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-# print(f"MAE: {history['mae']}")
-# print(f"Loss: {history['loss']}")
+print(f"MAE: {history['mae']}")
+print(f"Loss: {history['loss']}")
 
 # plot mae history
 # plt.plot(history['mae'])
