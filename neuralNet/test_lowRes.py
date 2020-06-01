@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 import time
 
 timestamp = time.strftime("%Y%m%d-%H%M%S")  
-out_path = "../data/output-{timestamp}/"
+out_path = "../data/output/"
 
 #test_path = "../data/tests/1/"
 test_path=""
+model_path = "model-L-20200601-035023"
+hist_path = "trainHistory-20200601-035023.pickle"
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -38,10 +40,10 @@ testGen = pickle.loads(raw_data)
 
 # load model
 # todo look for file name (depends on timestamp)
-modelL = keras.models.load_model(os.path.join(test_path,"model-L-20200531-015257"))
+modelL = keras.models.load_model(os.path.join(test_path,model_path))
 
 # load training history
-with open(os.path.join(test_path,"trainHistory-20200531-015257"),'rb') as file:
+with open(os.path.join(test_path, hist_path),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
@@ -63,13 +65,18 @@ output_json = []
 gt = []
 yHats = []
 #for i in range(len(testGen)):
-for i in range(1):
+for i in range(10):
     temp = {}
     testBatch = testGen[i]
     
     print(testBatch[0].shape)
     print(testBatch[1].shape)
         
+    temp['batch'] = i
+    temp['images'] = testBatch[0].tolist()
+    temp['gt'] = testBatch[1].tolist()
+    temp['prediction'] = modelL.predict(testBatch[0]).tolist()
+
     #todo adapt gt in DataGenerator!
     for j in range(4):
         t = {}
@@ -77,7 +84,7 @@ for i in range(1):
         t['gt'] = temp['gt'][j]
         t['prediction'] = temp['prediction'][j]
         # save output
-        helpers.showImageWithHeatmap(t['image'], hm=t['prediction'], gt=None, group=1, bodyPart="front", filename=f"{out_path}batch{i}-image{j}.jpg")
+        helpers.showImageWithHeatmap(np.array(t['image']), hm=np.array(t['prediction']), gt=None, group=1, bodyPart="front", filename=f"{out_path}batch{i}-image{j}.jpg")
         with open(f"{out_path}predictions-batch{i}-image{j}.json", 'w') as outfile:
             json.dump(t, outfile)
 
