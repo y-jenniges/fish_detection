@@ -9,11 +9,12 @@ import matplotlib.pyplot as plt
 import time
 import HeatmapClass
 
-timestamp = time.strftime("%Y%m%d-%H%M%S")  
+#timestamp = time.strftime("%Y%m%d-%H%M%S")  
 
-test_path = "../data/tests/2/"
-#test_path=""
+out_path = "../data/output/"
 
+#test_path = "../data/tests/2/"
+test_path=""
 out_path = test_path + "output/"
 model_path = "model-L-20200601-035023"
 hist_path = "trainHistory-20200601-035023.pickle"
@@ -47,12 +48,12 @@ testGen = pickle.loads(raw_data)
 modelL = keras.models.load_model(os.path.join(test_path,model_path))
 
 # load training history
-with open(os.path.join(test_path,hist_path),'rb') as file:
+with open(os.path.join(test_path, hist_path),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
 
-
+# predicting one specific image
 entry = test_labels[973]
 #helpers.showImageWithAnnotation(entry)
 image = np.asarray(helpers.loadImage(entry['filename']))
@@ -61,6 +62,7 @@ hm = HeatmapClass.Heatmap(entry)
 X = np.expand_dims(image, axis=0)
 y = np.asarray(hm.hm)
 yHat = modelL.predict(X)
+helpers.showImageWithHeatmap(image, yHat, filename="a.jpg")
 
 # Use this to visualize results
 # It shows the input image (background), the predicted heatmap (white "fog" in foreground)
@@ -75,17 +77,23 @@ yHat = modelL.predict(X)
 
 print(f"history keys {history.keys()}")
 
+
 # output_json = []
 # gt = []
 # yHats = []
 # #for i in range(len(testGen)):
-# for i in range(1):
+# for i in range(10):
 #     temp = {}
 #     testBatch = testGen[i]
     
-#     print(testBatch[0].shape)
-#     print(testBatch[1].shape)
+# #     print(testBatch[0].shape)
+# #     print(testBatch[1].shape)
         
+#     temp['batch'] = i
+#     temp['images'] = testBatch[0].tolist()
+#     temp['gt'] = testBatch[1].tolist()
+#     temp['prediction'] = modelL.predict(testBatch[0]).tolist()
+
 #     #todo adapt gt in DataGenerator!
 #     for j in range(4):
 #         t = {}
@@ -93,7 +101,7 @@ print(f"history keys {history.keys()}")
 #         t['gt'] = temp['gt'][j]
 #         t['prediction'] = temp['prediction'][j]
 #         # save output
-#         helpers.showImageWithHeatmap(t['image'], hm=t['prediction'], gt=None, group=1, bodyPart="front", filename=f"{out_path}batch{i}-image{j}.jpg")
+#         helpers.showImageWithHeatmap(np.array(t['image']), hm=np.array(t['prediction']), gt=None, group=1, bodyPart="front", filename=f"{out_path}batch{i}-image{j}.jpg")
 #         with open(f"{out_path}predictions-batch{i}-image{j}.json", 'w') as outfile:
 #             json.dump(t, outfile)
 
@@ -136,6 +144,11 @@ print(f"history keys {history.keys()}")
 # plt.title('model loss')
 # plt.ylabel('loss')
 # plt.xlabel('epoch')
+<<<<<<< HEAD
 # plt.legend(['train', 'test'], loc='upper right')
 # #plt.savefig(out_path+"loss")
 # plt.show()
+=======
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
+>>>>>>> 5b833a1ce4a1d701b1da83aa6e4ea000295d47df
