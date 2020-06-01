@@ -54,7 +54,7 @@ history = pickle.loads(raw_data)
 
 
 # predicting one specific image
-entry = test_labels[973]
+entry = test_labels[60]
 #helpers.showImageWithAnnotation(entry)
 image = np.asarray(helpers.loadImage(entry['filename']))
 hm = HeatmapClass.Heatmap(entry)
@@ -62,7 +62,12 @@ hm = HeatmapClass.Heatmap(entry)
 X = np.expand_dims(image, axis=0)
 y = np.asarray(hm.hm)
 yHat = modelL.predict(X)
-helpers.showImageWithHeatmap(image, yHat, filename="a.jpg")
+print(f"yhat shape {yHat.shape})")
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], filename="a.jpg")
+
+with open("60.json", "w") as f:
+    json.dump(yHat.tolist(), f)
+
 
 # Use this to visualize results
 # It shows the input image (background), the predicted heatmap (white "fog" in foreground)
@@ -144,11 +149,6 @@ print(f"history keys {history.keys()}")
 # plt.title('model loss')
 # plt.ylabel('loss')
 # plt.xlabel('epoch')
-<<<<<<< HEAD
 # plt.legend(['train', 'test'], loc='upper right')
 # #plt.savefig(out_path+"loss")
 # plt.show()
-=======
-# plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
->>>>>>> 5b833a1ce4a1d701b1da83aa6e4ea000295d47df
