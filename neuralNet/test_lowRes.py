@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-test_path = "../data/tests/1/"
-#test_path=""
+#test_path = "../data/tests/1/"
+test_path=""
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -60,14 +60,14 @@ output_json = []
 gt = []
 yHats = []
 #for i in range(len(testGen)):
-for i in range(3):
+for i in range(1):
     temp = {}
     testBatch = testGen[i]
     
     print(testBatch[0].shape)
     print(testBatch[1].shape)
     
-    temp['batch'] = i
+    #temp['batch'] = i
     temp['images'] = testBatch[0].tolist()
     temp['gt'] = testBatch[1].tolist()
     temp['prediction'] = modelL.predict(testBatch[0]).tolist()
@@ -78,11 +78,15 @@ for i in range(3):
     
     output_json.append(temp)
 
- 
-# save output
-timestamp = time.strftime("%Y%m%d-%H%M%S")  
-with open(f"predictions-{timestamp}.json", 'w') as outfile:
-    json.dump(output_json, outfile)
+    for j in range(4):
+        t = {}
+        t['image'] = temp['images'][j]
+        t['gt'] = temp['gt'][j]
+        t['prediction'] = temp['prediction'][j]
+        # save output
+        timestamp = time.strftime("%Y%m%d-%H%M%S")  
+        with open(f"predictions-batch{i}-image{j}-{timestamp}.json", 'w') as outfile:
+            json.dump(t, outfile)
 
 
 # # evaluation --------------------------------------------------------#
