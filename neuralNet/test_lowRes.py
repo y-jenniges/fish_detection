@@ -8,6 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
+timestamp = time.strftime("%Y%m%d-%H%M%S")  
+out_path = "../data/output-{timestamp}/"
+
 test_path = "../data/tests/1/"
 #test_path=""
 
@@ -80,8 +83,7 @@ for i in range(3):
 
  
 # save output
-timestamp = time.strftime("%Y%m%d-%H%M%S")  
-with open(f"predictions-{timestamp}.json", 'w') as outfile:
+with open(f"{out_path}predictions.json", 'w') as outfile:
     json.dump(output_json, outfile)
 
 
