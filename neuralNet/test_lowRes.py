@@ -11,8 +11,8 @@ import time
 timestamp = time.strftime("%Y%m%d-%H%M%S")  
 out_path = "../data/output-{timestamp}/"
 
-test_path = "../data/tests/1/"
-#test_path=""
+#test_path = "../data/tests/1/"
+test_path=""
 
 # load annotation files
 path = "../data/labels/training_labels_animals.json"
@@ -63,28 +63,24 @@ output_json = []
 gt = []
 yHats = []
 #for i in range(len(testGen)):
-for i in range(3):
+for i in range(1):
     temp = {}
     testBatch = testGen[i]
     
     print(testBatch[0].shape)
     print(testBatch[1].shape)
-    
-    temp['batch'] = i
-    temp['images'] = testBatch[0].tolist()
-    temp['gt'] = testBatch[1].tolist()
-    temp['prediction'] = modelL.predict(testBatch[0]).tolist()
+        
+    #todo adapt gt in DataGenerator!
+    for j in range(4):
+        t = {}
+        t['image'] = temp['images'][j]
+        t['gt'] = temp['gt'][j]
+        t['prediction'] = temp['prediction'][j]
+        # save output
+        helpers.showImageWithHeatmap(t['image'], hm=t['prediction'], gt=None, group=1, bodyPart="front", filename=f"{out_path}batch{i}-image{j}.jpg")
+        with open(f"{out_path}predictions-batch{i}-image{j}.json", 'w') as outfile:
+            json.dump(t, outfile)
 
-    print(f"prediction shape {np.array(temp['prediction']).shape}")
-
-    helpers.showImageWithHeatmap(image, hm=t['prediction'], gt=t['gt'], group=1, bodyPart="front", filename=f"../data/output/batch{i}-image{j}")
-    
-    output_json.append(temp)
-
- 
-# save output
-with open(f"{out_path}predictions.json", 'w') as outfile:
-    json.dump(output_json, outfile)
 
 
 # evaluation --------------------------------------------------------#
