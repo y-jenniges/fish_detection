@@ -20,7 +20,9 @@ bodyPart:
     'back'
     'both'
 """
-
+# output directory
+timestamp = time.strftime("%Y%m%d-%H%M%S")
+out_path = f"../data/output-{timestamp}/"
 
 # load annotation files
 label_root = "../data/labels/"
@@ -66,8 +68,8 @@ dg.showEntryOfGenerator (testGenL, 0, False)
 serialized_trainGen = pickle.dumps(trainGenL)
 serialized_testGen = pickle.dumps(testGenL)
 
-filename_train = 'serialized_trainGen.pickle'
-filename_test = 'serialized_testGen.pickle'
+filename_train = f'{out_path}serialized_trainGen.pickle'
+filename_test = f'{out_path}serialized_testGen.pickle'
 
 # save data generators
 with open(filename_train,'wb') as file:
@@ -159,13 +161,13 @@ modelL.summary()
 #for ctr in range(10):
 history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs, validation_data=testGenL)
 
-timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-modelL.save(f"model-L-{timestamp}")
-modelL.save_weights(f"fish-L-{timestamp}.h5") # saves weights (e.g. a checkpoint) locally
+
+modelL.save(f"{out_path}model-L")
+modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # save the history(todo: is it already contained in modelL.save? and also weights?)
 # history.history is a dict
-with open(f"trainHistory-{timestamp}.pickle", 'wb') as file:
+with open(f"{out_path}trainHistory.pickle", 'wb') as file:
     pickle.dump(history.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
   
