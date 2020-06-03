@@ -50,6 +50,9 @@ def entropy(x):
     xlogx = -tmp*np.log(np.maximum(tmp, np.finfo(tmp.dtype).eps))
     return np.average(np.sum(xlogx,axis=-1))
 
+
+
+
 # def showImageWithHeatmap (image, hm=None, gt=None, filename=None):
 #     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
 #      The hm.shape must be an integer fraction of the image shape. gt must 
@@ -114,6 +117,16 @@ def gaussian (sigma, dim):
     cy=dim//2
     return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
 
+def downsample (T, factor=32):
+  """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
+     Downsamples the height and width dimension of T by the given factor. 
+     The length in these dimensions must be a multiple of factor."""
+  sh = T.shape
+  assert sh[-3]%factor==0
+  assert sh[-2]%factor==0
+  newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
+  return T.reshape(newSh).mean(axis=(-4, -2))
+
 def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
      The hm.shape must be an integer fraction of the image shape. gt must 
@@ -166,9 +179,9 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         else:
             group_array = np.zeros(Globals.channels)
             if bodyPart=='front':
-                group_array[group*2] = 1 
+                group_array[group*2-1] = 1 
             elif bodyPart=='back':
-                group_array[group*2+1] = 1 
+                group_array[group*2] = 1 
                 
             x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array) ]
             y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
