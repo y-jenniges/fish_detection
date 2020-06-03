@@ -33,12 +33,12 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     hm_json['hm_1f']
     
     # idea here: return only necessary heatmaps and classes
-    # for animal in entry['animals']:
-    #     group = str(math.floor(animal['group'].index(1)/2))
-    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+    for animal in entry['animals']:
+        group = str(math.floor(animal['group'].index(1)/2))
+        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
         
-    #     heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
-    #     classification.append(np.array(animal['group']))
+        heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
+        classification.append(np.array(animal['group']))
     
     
     # # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
@@ -76,7 +76,8 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     #     idx = animal['group'].index(1)
     #     classification[idx] = np.asarray(animal['group'])
 
-    return (image, np.asarray(hm_json['hm_1f']))
+    # this return is for one heatmap calculations only
+    #return (image, np.asarray(hm_json['hm_1f']))
 
     return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
   
@@ -131,8 +132,14 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
     
-    print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X)}..{np.max(X)}]") 
-    print(f"y has shape {y.shape}, type {y.dtype}")
+    eLo = helpers.entropy(y)
+    eHi = helpers.entropy(np.mean(y, axis=(0,1,2)))
+    
+    print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
+    print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}] and entropy [{eLo:.3f}..{eHi:.3f}]")
+    
+
+    
     #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
     #print(f"classification is {y['classification']}")
 
@@ -146,8 +153,8 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
             
         # show heatmap for 2 batches
         for j in range(2):
-            print(j)
-            print(X[i])
+            #print(j)
+            #print(X[i])
             helpers.showImageWithHeatmap (X[i], y[i][j])
 
         
@@ -161,7 +168,7 @@ class DataGenerator(keras.utils.Sequence):
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
     def __init__(self, dataset, hm_folder_path, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
-        print("DataGenerator: init")
+        #print("DataGenerator: init")
         'Initialization'
         
         self.hm_folder_path = hm_folder_path
@@ -179,7 +186,7 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
         
     def __len__(self):
-        print("DataGenerator: len")
+        #print("DataGenerator: len")
         'Denotes the number of batches per epoch'
         #return int(np.floor(len(self.dataset) / self.batch_size))
         #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")_
@@ -191,7 +198,7 @@ class DataGenerator(keras.utils.Sequence):
         #return int((np.floor(len(self.dataset)) + np.floor(self.no_animal_ratio*len(self.no_animal_dataset)))/ self.batch_size)
       
     def __getitem__(self, index):
-        print("DataGenerator: getitem")
+        #print("DataGenerator: getitem")
         'Generate one batch of data'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
@@ -210,7 +217,7 @@ class DataGenerator(keras.utils.Sequence):
         return X, y
         
     def get_ground_truth (self, index):
-        print("DataGenerator: get_ground_truth")
+        #print("DataGenerator: get_ground_truth")
         'Generate ground_truth for the batch in the original format (not heatmap).'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size]
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
@@ -219,7 +226,7 @@ class DataGenerator(keras.utils.Sequence):
         return [e['animals'] for e in batch]          
 
     def on_epoch_end(self):
-        print("DataGenerator: on_epoch_end")
+        #print("DataGenerator: on_epoch_end")
         'Updates indexes after each epoch'
         random.shuffle(self.dataset)
         random.shuffle(self.no_animal_dataset)

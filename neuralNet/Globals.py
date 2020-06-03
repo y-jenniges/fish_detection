@@ -3,14 +3,17 @@ NUM_GROUPS = 6
 
 
 # parameters for training
-no_animal_ratio = 0.3
+no_animal_ratio = 0
 batch_size = 4
+channels = NUM_GROUPS*2 - 1
 
 
-loss={'heatmap': 'mse', 
-      'classification': 'categorical_crossentropy'}
+# loss={'heatmap': 'mse', 
+#       'classification': 'categorical_crossentropy'}
+loss = "categorical_crossentropy"
 optimizer = 'adam'
-metrics = {'heatmap':['mae'],
-           'classification':['acc']}
+metrics = ['mae']
+# metrics = {'heatmap':['mae'],
+#            'classification':['acc']}
 
-epochs = 3
+epochs = 15

@@ -9,15 +9,12 @@ import matplotlib.pyplot as plt
 import time
 import HeatmapClass
 
-#timestamp = time.strftime("%Y%m%d-%H%M%S")  
 
-out_path = "../data/output/"
+test_path = "../data/output/4/"
+out_path = test_path #+ "output/"
 
-test_path = "../data/tests/2/"
-#test_path=""
-out_path = test_path + "output/"
-model_path = "model-L-20200601-035023"
-hist_path = "trainHistory-20200601-035023.pickle"
+model_path = "model-L"
+hist_path = "trainHistory.pickle"
 testGen_path = "serialized_testGen.pickle"
 
 
@@ -55,22 +52,32 @@ history = pickle.loads(raw_data)
 print("Loading done")
 
 # predicting one specific image
-entry = test_labels[47]
-#helpers.showImageWithAnnotation(entry)
-image = np.asarray(helpers.loadImage(entry['filename']))
-hm = HeatmapClass.Heatmap(entry)
+i = 60
 
-X = np.expand_dims(image, axis=0)
-y = np.asarray(hm.hm)
-yHat = modelL.predict(X)
-helpers.showImageWithHeatmap(image, yHat, filename="a.jpg")
+entry = test_labels[i]
+# #helpers.showImageWithAnnotation(entry)
+image = np.asarray(helpers.loadImage(entry['filename']))
+# hm = HeatmapClass.Heatmap(entry)
+
+# X = np.expand_dims(image, axis=0)
+# y = np.asarray(hm.hm)
+# yHat = modelL.predict(X)
+# helpers.showImageWithHeatmap(image, yHat, filename="a.jpg")
+# with open(out_path + str(i) + ".json", "w") as f:
+#    json.dump(yHat.tolist(), f)
+
 
 # show heatmap only
-# with open("../data/tests/2/39.json","r") as f:
-#     data=json.load(f)
-# plt.savefig("39_hm.jpg")
-# plt.imshow(np.array(data)[0,:,:,:], cmap="gray")
+with open(out_path+str(i)+".json","r") as f:
+    data=json.load(f)
+data = np.array(data)[0,:,:,:]
+plt.imsave(out_path + str(i) +'_hm.png', data[:,:,0], cmap='gray')
+plt.imshow(data[:,:,0], cmap="gray")
+#image = np.ones(shape=image.shape)*255 # black image
+helpers.showImageWithHeatmap(image, data, filename=out_path+str(i)+"_image_hm.jpg")
 
+
+print(f"({np.min(data), np.max(data)})")
 
 print(f"history keys {history.keys()}")
 
@@ -125,14 +132,14 @@ print(f"history keys {history.keys()}")
 print(f"MAE: {history['mae']}")
 print(f"Loss: {history['loss']}")
 
-# plot mae history
+# # plot mae history
 # plt.plot(history['mae'])
 # plt.plot(history['val_mae'])
 # plt.title('model mean absolute error')
 # plt.ylabel('mae')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# #plt.savefig(out_path+"mae")
+# plt.savefig(out_path+"mae")
 # plt.show()
 
 # # plot loss history
@@ -142,5 +149,5 @@ print(f"Loss: {history['loss']}")
 # plt.ylabel('loss')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# #plt.savefig(out_path+"loss")
+# plt.savefig(out_path+"loss")
 # plt.show()

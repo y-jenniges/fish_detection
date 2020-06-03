@@ -38,6 +38,18 @@ def showImageWithAnnotation(entry):
     plt.scatter (x_back, y_back, marker="x", c="b")
     plt.show()
 
+def entropy(x):
+    '''Returns the average entropy of the probability distributions in x. The last axis of x
+    is assumed to represent the different events with their probabilities. Over this axis the
+    entropy is computed, all other axes create just a multitude of such distributions and over
+    these axes the average is taken. If the last axis has dimension 1 this is assumed to be
+    a binary crossentropy.'''
+    tmp = x
+    if tmp.shape[-1]==1: # If only one channel we view it as distribution on a binary values
+        tmp = np.concatenate((tmp, 1-tmp),axis=-1)
+    xlogx = -tmp*np.log(np.maximum(tmp, np.finfo(tmp.dtype).eps))
+    return np.average(np.sum(xlogx,axis=-1))
+
 # def showImageWithHeatmap (image, hm=None, gt=None, filename=None):
 #     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
 #      The hm.shape must be an integer fraction of the image shape. gt must 
@@ -67,6 +79,40 @@ def showImageWithAnnotation(entry):
 #     if filename is not None:
 #         plt.savefig(filename, dpi=150, bbox_inches='tight')
 #     plt.show()
+
+
+
+# Heatmap helpers ------------------------------------------------------------------#
+# Use this to test whether interpolate works
+def showInterpolate():
+    "Helper function to check that interpolate works"
+    x = np.arange(0,4,0.02)
+    xInt = [interpolate(myX)[0] for myX in x]
+    if not type(xInt[0]) is int:
+        raise TypeError(f"First result of interpolate must be int but is {xInt[0]}")
+    alpha = [interpolate(myX)[1] for myX in x]
+    plt.figure(figsize=(6,2))
+    plt.plot (x, xInt, 'r', label='xInt')
+    plt.plot (x, alpha, 'b', label='alpha')
+    plt.legend()
+    plt.show ()
+
+def interpolate (x):
+    """Returns an interpolation (xInt, alpha) that distributes a 1 between
+    xInt and xInt+1, where xInt<=x<xInt+1 such that alpha goes into
+    xInt and (1-alpha) into xInt+1. It does this in a way that is linear
+    in x and where for an integer x, xInt=x."""
+    xInt = math.floor(x)
+    return (xInt, 1-(x-xInt))
+
+def gaussian (sigma, dim):
+    """Returns a dim*dim*1 array with a not normalized 
+    Gaussian centered at dim//2, dim//2
+    with peak value 1 and the given sigma."""
+    x,y,z = np.mgrid[0:dim,0:dim,0:1]
+    cx=dim//2
+    cy=dim//2
+    return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
 
 def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
@@ -100,10 +146,9 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
     
     if gt is not None:               
         if bodyPart=='both':
-            print("showImageWIthHeatmap: hm sth s not right here")
-            group_array_front = np.zeros(Globals.NUM_GROUPS*2)
+            group_array_front = np.zeros(Globals.channels())
             group_array_front[group*2] = 1
-            group_array_back = np.zeros(Globals.NUM_GROUPS*2)
+            group_array_back = np.zeros(Globals.channels)
             group_array_back[group*2+1] = 1
             
             x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)] 
@@ -119,7 +164,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             #plt.show()
          
         else:
-            group_array = np.zeros(Globals.NUM_GROUPS*2)
+            group_array = np.zeros(Globals.channels)
             if bodyPart=='front':
                 group_array[group*2] = 1 
             elif bodyPart=='back':
@@ -137,37 +182,9 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
 
 
 def showOverlappingHeatmaps(**heatmaps):
-    for h in heatmaps:
-        print("hbsd")
-
-# Heatmap helpers ------------------------------------------------------------------#
-# Use this to test whether interpolate works
-def showInterpolate():
-    "Helper function to check that interpolate works"
-    x = np.arange(0,4,0.02)
-    xInt = [interpolate(myX)[0] for myX in x]
-    if not type(xInt[0]) is int:
-        raise TypeError(f"First result of interpolate must be int but is {xInt[0]}")
-    alpha = [interpolate(myX)[1] for myX in x]
-    plt.figure(figsize=(6,2))
-    plt.plot (x, xInt, 'r', label='xInt')
-    plt.plot (x, alpha, 'b', label='alpha')
-    plt.legend()
-    plt.show ()
-
-def interpolate (x):
-    """Returns an interpolation (xInt, alpha) that distributes a 1 between
-    xInt and xInt+1, where xInt<=x<xInt+1 such that alpha goes into
-    xInt and (1-alpha) into xInt+1. It does this in a way that is linear
-    in x and where for an integer x, xInt=x."""
-    xInt = math.floor(x)
-    return (xInt, 1-(x-xInt))
-
-def gaussian (sigma, dim):
-    """Returns a dim*dim*1 array with a not normalized 
-    Gaussian centered at dim//2, dim//2
-    with peak value 1 and the given sigma."""
-    x,y,z = np.mgrid[0:dim,0:dim,0:1]
-    cx=dim//2
-    cy=dim//2
-    return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
+    if heatmaps != None:
+        
+        final_hm = np.zeros(shape=heatmaps[0].shape)    
+        final_hm = sum(heatmaps)/len(heatmaps)
+          
+        return final_hm
