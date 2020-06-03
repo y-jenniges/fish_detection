@@ -19,17 +19,17 @@ testGen_path = "serialized_testGen.pickle"
 
 
 # load annotation files
-path = "../data/labels/training_labels_animals.json"
-label_root = ""
+label_root = "../data/maritime_dataset_25/labels/"
 
+path = "training_labels_animals.json"
 with open(os.path.join(label_root, path) , 'r') as f:
     train_labels_animals = json.load(f)
     
-path = "../data/labels/test_labels.json"
+path = "test_labels.json"
 with open(os.path.join(label_root, path), 'r') as f:
     test_labels = json.load(f)
     
-path = "../data/labels/training_labels_no_animals.json"
+path = "training_labels_no_animals.json"
 with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
 
