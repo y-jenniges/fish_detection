@@ -46,14 +46,16 @@ class Heatmap():
         """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
         bodyPart: 'front' or 'back'"""
 
+        #print("annotation to low res hm")
+
         hm_y, hm_x = self.image.shape[0]//32, self.image.shape[1]//32
         self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
          
-        group_array = np.zeros(Globals.NUM_GROUPS*2)
+        group_array = np.zeros(Globals.channels)
         if self.bodyPart=='front':
-            group_array[self.group*2] = 1 
+            group_array[self.group*2-1] = 1 
         elif self.bodyPart=='back':
-            group_array[self.group*2+1] = 1 
+            group_array[self.group*2] = 1 
         else:
             print("annotationToLowResHeatmap: invalid bodyPart")
    
@@ -61,31 +63,42 @@ class Heatmap():
         for animal in self.gt:
             # only receive animals from group that is currently active in class
             if np.array_equal(animal['group'], group_array):
+                #print(animal['group'])
                 x, y = [animal['position'][0], animal['position'][1]]
                 #print(x)
                 hmx, alphaX = helpers.interpolate ((x-16)/32) # increase hmx by alpha, and hmx+1 by 1-alpha
                 hmy, alphaY = helpers.interpolate ((y-16)/32) # increase hmy by alpha, and hmy+1 by 1-alpha
     
-                step_x = 1
-                step_y = 1
-    
-                #if hmx + 1 > hm.shape[1] and rest_x != 0: step_x = rest_x
-                #if hmy + 1 > hm.shape[0] and rest_y != 0: step_y = rest_y
-    
+
                 if 0 <= hmx < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
                     self.hm[hmy, hmx, 0] += alphaX*alphaY
     
-                if 0 <= hmx+ step_x < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
-                    self.hm[hmy, hmx+step_x, 0] += (1-alphaX)*alphaY
+                if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
+                    self.hm[hmy, hmx + 1, 0] += (1-alphaX)*alphaY
     
-                if 0 <= hmx < self.hm.shape[1] and 0 <= hmy+step_y < self.hm.shape[0]: 
-                    self.hm[hmy+step_y, hmx, 0] += alphaX*(1-alphaY)
+                if 0 <= hmx < self.hm.shape[1] and 0 <= hmy + 1 < self.hm.shape[0]: 
+                    self.hm[hmy + 1, hmx, 0] += alphaX*(1-alphaY)
     
-                if 0 <= hmx+step_x < self.hm.shape[1] and 0 <= hmy+step_y < self.hm.shape[0]: 
-                    self.hm[hmy+step_y, hmx+step_x, 0] += (1-alphaX)*(1-alphaY)
+                if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy+ + 1 < self.hm.shape[0]: 
+                    self.hm[hmy + 1, hmx + 1, 0] += (1-alphaX)*(1-alphaY)
        
+        np.clip (self.hm, 0, 1, out=self.hm)
         #return self.hm
     
+   
+   # def annotationToHeatmap (self):
+   #    """Converts a list of points (each a dict with 'x' and 'y' component) into 
+   #       a heatmap with original image resolution using myGaussian. For every 
+   #       strawberry, the Gaussian myGaussian (peak 1) centered at the 
+   #       annotated strawberry point is added."""
+   #    self.hm = np.zeros ((imageShape[0], imageShape[1], 1), dtype=np.float32)
+   #    for p in self.gt:
+   #      x = p["x"]
+   #      y = p["y"]
+   #      if 0<=x<hm.shape[1] and 0<=y<hm.shape[0]: 
+   #        addToHeatmap (self.hm, myGaussian, x-myGaussian.shape[1]//2, y-myGaussian.shape[0]//2)
+   #    np.clip (self.hm, 0, 1, out=self.hm)
+      #return hm 
    
     def annotationToHighResHeatmap (self):
         """Converts a list of points (each a dict with 'x' and 'y' component) into 
@@ -98,11 +111,11 @@ class Heatmap():
         self.hm = np.zeros ((self.image.shape[0], self.image.shape[1], 1), dtype=np.float32)
         self.gaussian = helpers.gaussian(8,50)
 
-        group_array = np.zeros(Globals.NUM_GROUPS*2)
+        group_array = np.zeros(Globals.channels)
         if self.bodyPart=='front':
-            group_array[self.group*2] = 1 
+            group_array[self.group*2-1] = 1 
         elif self.bodyPart=='back':
-            group_array[self.group*2+1] = 1 
+            group_array[self.group*2] = 1 
         elif self.bodyPart=='both':
             print("annotation to high res heatmap: not implemented yet")
             
@@ -115,6 +128,7 @@ class Heatmap():
                 if 0<=x <self.hm.shape[1] and 0<=y<self.hm.shape[0]: 
                     self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
     
+        np.clip (self.hm, 0, 1, out=self.hm)    
         #return self.hm   
 
     def addToHeatmap (self, block, x, y):
@@ -192,7 +206,7 @@ class Heatmap():
         plt.imshow(img)
         
         
-        print(f"body part is {self.bodyPart}")
+        #print(f"body part is {self.bodyPart}")
         if self.gt is not None:               
             if self.bodyPart=='both':
                 x_front = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2==0]  #np.array_equal(animal['group'], group_array_front)] 
@@ -200,7 +214,6 @@ class Heatmap():
                 
                 x_back = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
                 y_back = [animal['position'][1] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
-             
 
                 plt.scatter(x_front, y_front, marker='o', c='r')
                 plt.scatter(x_back, y_back, marker='x', c='b')
@@ -208,11 +221,12 @@ class Heatmap():
                 #plt.show()
              
             else:
-                group_array = np.zeros(Globals.NUM_GROUPS*2)
+                #print("gt is not None")
+                group_array = np.zeros(Globals.channels)
                 if self.bodyPart=='front':
-                    group_array[self.group*2] = 1 
+                    group_array[self.group*2-1] = 1 
                 elif self.bodyPart=='back':
-                    group_array[self.group*2+1] = 1 
+                    group_array[self.group*2] = 1 
                     
                 x = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array) ]
                 y = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
@@ -223,7 +237,7 @@ class Heatmap():
                 else:
                     marker='x'
                     color='b'
-                plt.scatter (x, y, marker=marker, c=color)
+                plt.scatter (x, y, s=2, marker=marker, c=color)
             
         if filename is not None:
             plt.savefig(filename, dpi=150, bbox_inches='tight')
