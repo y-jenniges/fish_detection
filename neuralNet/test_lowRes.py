@@ -53,18 +53,23 @@ print("Loading done")
 
 # predicting one specific image
 i = 60
-
 entry = test_labels[i]
-# #helpers.showImageWithAnnotation(entry)
 image = np.asarray(helpers.loadImage(entry['filename']))
+
 # hm = HeatmapClass.Heatmap(entry)
 
 # X = np.expand_dims(image, axis=0)
 # y = np.asarray(hm.hm)
 # yHat = modelL.predict(X)
-# helpers.showImageWithHeatmap(image, yHat, filename="a.jpg")
+# print(f"yhat shape {yHat.shape})")
+
 # with open(out_path + str(i) + ".json", "w") as f:
 #    json.dump(yHat.tolist(), f)
+
+
+#helpers.showImageWithAnnotation(entry)
+# helpers.showImageWithHeatmap(image, yHat[0, :, :, :], filename="a.jpg")
+
 
 
 # show heatmap only
