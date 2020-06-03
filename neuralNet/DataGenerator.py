@@ -9,6 +9,7 @@ import random
 import HeatmapClass
 import json
 import math
+import matplotlib.pyplot as plt
 
 def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -16,29 +17,42 @@ def dummyPrepareEntry (entry, hm_folder):
      to keras. At the moment the image is loaded and the output is just empty."""
     return (helpers.loadImage(entry['filename']), [])
 
-def prepareEntryLowResHeatmap (entry, hm_folder):
+def prepareEntryLowResHeatmap (entry, hm_folder=None):
     """Get's an entry of the dataset (filename, annotation), load filename and
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
 
-    hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
-    with open(hm_file_path, 'r') as f:
-        hm_json = json.load(f)
-   
-    image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
- 
+    # use precalculated heatmaps, if their folder is specified
+    if hm_folder != None:
+        hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+        with open(hm_file_path, 'r') as f:
+            hm_json = json.load(f)
+            hm = hm_json['hm_1f']
+            # todo adapt the precalculated heatmaps! (i.e. clip them to 0-1)
+            np.clip (hm, 0, 1, out=hm)
+    else:
+        print("Calculating heatmap...")
+        hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front')
+        #hm.showImageWithHeatmap()
+        hm = hm.hm
+    
+    # load image and make its range [-1,1] (suitable for mobilenet)
+    image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+    #image = 2.*(image - np.min(image))/np.ptp(image)-1
+    image = 2.*image/np.max(image) - 1
+
     heatmaps=[]
     classification=[]
     
-    hm_json['hm_1f']
+
     
     # idea here: return only necessary heatmaps and classes
-    for animal in entry['animals']:
-        group = str(math.floor(animal['group'].index(1)/2))
-        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+    # for animal in entry['animals']:
+    #     group = str(math.floor(animal['group'].index(1)/2))
+    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
         
-        heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
-        classification.append(np.array(animal['group']))
+    #     heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
+    #     classification.append(np.array(animal['group']))
     
     
     # # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
@@ -77,9 +91,9 @@ def prepareEntryLowResHeatmap (entry, hm_folder):
     #     classification[idx] = np.asarray(animal['group'])
 
     # this return is for one heatmap calculations only
-    #return (image, np.asarray(hm_json['hm_1f']))
+    return (image, np.asarray(hm))
 
-    return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
+    #return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
   
 
   
@@ -136,7 +150,7 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     eHi = helpers.entropy(np.mean(y, axis=(0,1,2)))
     
     print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
-    print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}] and entropy [{eLo:.3f}..{eHi:.3f}]")
+    print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(y):.3f}..{np.max(y):.3f}] and entropy [{eLo:.7f}..{eHi:.7f}]")
     
 
     
@@ -167,12 +181,11 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, hm_folder_path, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
         #print("DataGenerator: init")
         'Initialization'
         
         self.hm_folder_path = hm_folder_path
-       
         self.dataset = dataset
         self.no_animal_dataset = no_animal_dataset 
         self.no_animal_ratio = no_animal_ratio
@@ -192,7 +205,7 @@ class DataGenerator(keras.utils.Sequence):
         #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")_
 
         number_of_images = np.floor(len(self.dataset) + (len(self.dataset)/self.batch_size)*self.no_animal_size)
-        print(f"number_of_images {number_of_images}")
+        #print(f"number_of_images {number_of_images}")
 
         return int(np.floor(number_of_images/self.batch_size))
         #return int((np.floor(len(self.dataset)) + np.floor(self.no_animal_ratio*len(self.no_animal_dataset)))/ self.batch_size)
