@@ -10,6 +10,7 @@ import HeatmapClass
 import json
 import math
 import matplotlib.pyplot as plt
+import os
 
 def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -27,7 +28,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
         hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
         with open(hm_file_path, 'r') as f:
             hm_json = json.load(f)
-            hm = hm_json['hm_1f']
+            hm = np.array(hm_json['hm_1f'])
             # todo adapt the precalculated heatmaps! (i.e. clip them to 0-1)
             np.clip (hm, 0, 1, out=hm)
     else:
@@ -213,11 +214,15 @@ class DataGenerator(keras.utils.Sequence):
     def __getitem__(self, index):
         #print("DataGenerator: getitem")
         'Generate one batch of data'
+        
+        no_animal_hm_path = os.path.join(self.hm_folder_path, "../training_no_animals/") if self.hm_folder_path != None else None
+
+        
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
              
         batch_animals = [self.prepareEntry(e, self.hm_folder_path) for e in batch_animals]
-        batch_no_animals = [self.prepareEntry(e, self.hm_folder_path + "../training_no_animals/") for e in batch_no_animals]
+        batch_no_animals = [self.prepareEntry(e, no_animal_hm_path) for e in batch_no_animals]
             
         batch = batch_animals + batch_no_animals
             
