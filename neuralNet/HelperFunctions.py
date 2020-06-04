@@ -127,7 +127,7 @@ def downsample (T, factor=32):
   newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
   return T.reshape(newSh).mean(axis=(-4, -2))
 
-def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None):
+def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None, exaggerate=1):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
      The hm.shape must be an integer fraction of the image shape. gt must 
      have be a list of dicts with 'x' and 'y' entries as in the dataset. 
@@ -152,9 +152,9 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         hmResized = np.clip (hmResized*2, 0, 1)
         
         if img.dtype =="uint8":
-            img = img//2 + (128*hmResized).astype(np.uint8)
+            img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
         else:
-            img = ((img+1)*64 + 128*hmResized).astype(np.uint8)
+            img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)
     
     if gt is not None:               

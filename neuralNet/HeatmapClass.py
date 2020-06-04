@@ -162,8 +162,7 @@ class Heatmap():
             self.hm[hylo:hyhi,hxlo:hxhi] += block[bylo:byhi,bxlo:bxhi]
     
     
-    # todo gt is actually already part of this class
-    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None):
+    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None, exxagerate=1):
         """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
          The hm.shape must be an integer fraction of the image shape. gt must 
          have be a list of dicts with 'x' and 'y' entries as in the dataset. 
@@ -200,9 +199,9 @@ class Heatmap():
             hmResized = np.clip (hmResized*2, 0, 1)
             
             if img.dtype =="uint8":
-                img = img//2 + (128*hmResized).astype(np.uint8)
+                img = img//2 + (128*exxagerate*hmResized).astype(np.uint8)
             else:
-                img = ((img+1)*64 + 128*hmResized).astype(np.uint8)
+                img = ((img+1)*64 + 128*exxagerate*hmResized).astype(np.uint8)
         plt.imshow(img)
         
         
