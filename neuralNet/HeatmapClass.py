@@ -188,7 +188,7 @@ class Heatmap():
                 self.bodyPart = bodyPart
                 self.annotationToHeatmap()
         
-        if self.hm is not None:       
+        if self.hm is not None:      
             factor = img.shape[0]//self.hm.shape[0]
     
             assert self.hm.shape[0]*factor==img.shape[0] and self.hm.shape[1]*factor==img.shape[1]
@@ -207,27 +207,39 @@ class Heatmap():
         
         
         #print(f"body part is {self.bodyPart}")
-        if self.gt is not None:               
+        if self.gt is not None:    
+            
+            group_array = np.zeros(Globals.channels)
+            if self.bodyPart=='front':
+                group_array[self.group*2-1] = 1 
+            elif self.bodyPart=='back' or self.bodyPart=='both':
+                group_array[self.group*2] = 1 
+            
+            print(group_array)
+            
             if self.bodyPart=='both':
-                x_front = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2==0]  #np.array_equal(animal['group'], group_array_front)] 
-                y_front = [animal['position'][1] for animal in self.gt if animal['group'].index(1)%2==0]#np.array_equal(animal['group'], group_array_front)]
                 
-                x_back = [animal['position'][0] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
-                y_back = [animal['position'][1] for animal in self.gt if animal['group'].index(1)%2!=0]   #np.array_equal(animal['group'], group_array_back)]
+                group_array_front = np.copy(group_array)
+                group_array_front[np.argwhere(group_array==1)-1] = 1
+                group_array_front[np.argwhere(group_array==1)] = 0
+                
+                print(f"group_array {group_array}\ngroup array front {group_array_front}")
+                
+                x_front = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array_front)] 
+                y_front = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array_front)]
+                
+                x_back = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array)]
+                y_back = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
 
-                plt.scatter(x_front, y_front, marker='o', c='r')
-                plt.scatter(x_back, y_back, marker='x', c='b')
+                print(f"x front {x_front}\ny front {y_front}\nx back {x_back}\ny back {y_back}")
+
+                plt.scatter(x_front, y_front, s=20, marker='o', c='r')
+                plt.scatter(x_back, y_back, s=20, marker='x', c='b')
                 #plt.legend(loc='upper left')
                 #plt.show()
              
             else:
                 #print("gt is not None")
-                group_array = np.zeros(Globals.channels)
-                if self.bodyPart=='front':
-                    group_array[self.group*2-1] = 1 
-                elif self.bodyPart=='back':
-                    group_array[self.group*2] = 1 
-                    
                 x = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array) ]
                 y = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
                 
@@ -237,7 +249,7 @@ class Heatmap():
                 else:
                     marker='x'
                     color='b'
-                plt.scatter (x, y, s=2, marker=marker, c=color)
+                plt.scatter (x, y, s=20, marker=marker, c=color)
             
         if filename is not None:
             plt.savefig(filename, dpi=150, bbox_inches='tight')
