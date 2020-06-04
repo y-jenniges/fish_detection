@@ -13,10 +13,10 @@ def loadImage(fname):
     #print(f"image before {img.shape}")
     rest_x, rest_y = img.shape[0]%32, img.shape[1]%32
     if rest_x != 0:
-        img = np.pad(img, ((0,rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
+        img = np.pad(img, ((0,32-rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
     if rest_y != 0:        
-        img = np.pad(img, ((0,0),(0, rest_y),(0,0)), 'constant', constant_values=0)
-        
+        img = np.pad(img, ((0,0),(0, 32-rest_y),(0,0)), 'constant', constant_values=0)
+       
     return img
 
 # Load the first image an d get the shape of that: All images have the same size
