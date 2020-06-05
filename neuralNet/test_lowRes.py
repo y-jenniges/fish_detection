@@ -10,7 +10,7 @@ import time
 import HeatmapClass
 
 
-test_path = "../data/output/4/"
+test_path = "../data/output/8/"
 out_path = test_path #+ "output/"
 
 model_path = "model-L"
@@ -49,42 +49,49 @@ with open(os.path.join(test_path, hist_path),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
+
+
 print("Loading done")
 
-# predicting one specific image
+############ predicting one specific image
 i = 60
 entry = test_labels[i]
 image = np.asarray(helpers.loadImage(entry['filename']))
 
-# hm = HeatmapClass.Heatmap(entry)
+# groundtruth heatmap
+hm = HeatmapClass.Heatmap(entry)
+y = np.asarray(hm.hm)
 
-# X = np.expand_dims(image, axis=0)
-# y = np.asarray(hm.hm)
-# yHat = modelL.predict(X)
-# print(f"yhat shape {yHat.shape})")
+# predicted heatmap
+X = np.expand_dims(image, axis=0)
+yHat = modelL.predict(X)
+
+print(f"yhat shape {yHat.shape})")
+print(f"yhat has range {np.min(yHat), np.max(yHat)}")
 
 # with open(out_path + str(i) + ".json", "w") as f:
 #    json.dump(yHat.tolist(), f)
 
 
 #helpers.showImageWithAnnotation(entry)
-# helpers.showImageWithHeatmap(image, yHat[0, :, :, :], filename="a.jpg")
-
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1, filename=f"{out_path}test{i}_exag1.jpg")
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=10, filename=f"{out_path}test{i}_exag10.jpg")
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f"{out_path}test{i}_exag100.jpg")
 
 
 # show heatmap only
-with open(out_path+str(i)+".json","r") as f:
-    data=json.load(f)
-data = np.array(data)[0,:,:,:]
-plt.imsave(out_path + str(i) +'_hm.png', data[:,:,0], cmap='gray')
-plt.imshow(data[:,:,0], cmap="gray")
-#image = np.ones(shape=image.shape)*255 # black image
-helpers.showImageWithHeatmap(image, data, filename=out_path+str(i)+"_image_hm.jpg")
+# with open(out_path+str(i)+".json","r") as f:
+#     data=json.load(f)
+# data = np.array(data)[0,:,:,:]
+# plt.imsave(out_path + str(i) +'_hm.png', data[:,:,0], cmap='gray')
+# plt.imshow(data[:,:,0], cmap="gray")
+# #image = np.ones(shape=image.shape)*255 # black image
+# helpers.showImageWithHeatmap(image, data, filename=out_path+str(i)+"_image_hm.jpg")
 
 
-print(f"({np.min(data), np.max(data)})")
+# print(f"({np.min(data), np.max(data)})")
 
-print(f"history keys {history.keys()}")
+# print(f"history keys {history.keys()}")
 
 
 # output_json = []
@@ -134,8 +141,8 @@ print(f"history keys {history.keys()}")
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-print(f"MAE: {history['mae']}")
-print(f"Loss: {history['loss']}")
+# print(f"MAE: {history['mae']}")
+# print(f"Loss: {history['loss']}")
 
 # # plot mae history
 # plt.plot(history['mae'])
@@ -144,7 +151,7 @@ print(f"Loss: {history['loss']}")
 # plt.ylabel('mae')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+"mae")
+# plt.savefig(out_path+"mae.png")
 # plt.show()
 
 # # plot loss history
@@ -154,5 +161,5 @@ print(f"Loss: {history['loss']}")
 # plt.ylabel('loss')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+"loss")
+# plt.savefig(out_path+"loss.png")
 # plt.show()
