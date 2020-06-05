@@ -123,7 +123,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
             # todo adapt the precalculated heatmaps! (i.e. clip them to 0-1)
             np.clip (hm, 0, 1, out=hm)
     else:
-        print("Calculating heatmap...")
+        #print("Calculating heatmap...")
         hm = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
         #hm.showImageWithHeatmap()
         hm = hm.hm

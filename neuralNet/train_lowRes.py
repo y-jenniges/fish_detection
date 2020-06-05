@@ -22,7 +22,7 @@ bodyPart:
 """
 # output directory
 #timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/4/"
+out_path = f"../data/output/9/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
