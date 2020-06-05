@@ -117,9 +117,8 @@ class Heatmap():
         elif self.bodyPart=='back':
             group_array[self.group*2] = 1 
         elif self.bodyPart=='both':
-            print("annotation to high res heatmap: not implemented yet")
+            print("annotation to high res heatmap: invalid bodyPart")
             
-    
         for animal in self.gt:
             if np.array_equal(animal['group'], group_array):
                 x = animal['position'][0]
@@ -139,6 +138,10 @@ class Heatmap():
       # and a rectangle block[bylo:byhi,bxlo:bxhi] which should be added to the
       # hm-rectangle. Some of the h-indices may be out of bounds in which case
       # both the h-index and the corresponding b-index must be adapted.
+        # round x and y such that they are integers (rounded to the pixel grid)
+        x = round(x)
+        y = round(y)
+      
         bsy, bsx,_ = block.shape
         hsy, hsx,_ = self.hm.shape
         # Initially start with considering the full b-block
@@ -213,8 +216,7 @@ class Heatmap():
                 group_array[self.group*2-1] = 1 
             elif self.bodyPart=='back' or self.bodyPart=='both':
                 group_array[self.group*2] = 1 
-            
-            print(group_array)
+                
             
             if self.bodyPart=='both':
                 
@@ -222,7 +224,7 @@ class Heatmap():
                 group_array_front[np.argwhere(group_array==1)-1] = 1
                 group_array_front[np.argwhere(group_array==1)] = 0
                 
-                print(f"group_array {group_array}\ngroup array front {group_array_front}")
+                #print(f"group_array {group_array}\ngroup array front {group_array_front}")
                 
                 x_front = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array_front)] 
                 y_front = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array_front)]
@@ -230,7 +232,7 @@ class Heatmap():
                 x_back = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array)]
                 y_back = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
 
-                print(f"x front {x_front}\ny front {y_front}\nx back {x_back}\ny back {y_back}")
+                #print(f"x front {x_front}\ny front {y_front}\nx back {x_back}\ny back {y_back}")
 
                 plt.scatter(x_front, y_front, s=20, marker='o', c='r')
                 plt.scatter(x_back, y_back, s=20, marker='x', c='b')

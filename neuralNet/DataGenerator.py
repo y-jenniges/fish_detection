@@ -105,7 +105,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     #                 heatmap3f, heatmap3b, heatmap4f, heatmap4b, heatmap5f, heatmap5b])
     #return (image, heatmap1f.hm)
 
-def prepareEntryHighResHeatmap (entry, hm_folder):
+def prepareEntryHighResHeatmap (entry, hm_folder=None):
     """Get's an entry of the dataset (filename, annotation), load filename and
     converts annotation into a low-res heatmap. Returning both as x, y pair.
     to be passed to keras."""
@@ -114,26 +114,39 @@ def prepareEntryHighResHeatmap (entry, hm_folder):
     # annotation = entry['animals']
     
     # heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
+        # use precalculated heatmaps, if their folder is specified
+    if hm_folder != None:
+        hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
+        with open(hm_file_path, 'r') as f:
+            hm_json = json.load(f)
+            hm = np.array(hm_json['hm_1f'])
+            # todo adapt the precalculated heatmaps! (i.e. clip them to 0-1)
+            np.clip (hm, 0, 1, out=hm)
+    else:
+        print("Calculating heatmap...")
+        hm = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
+        #hm.showImageWithHeatmap()
+        hm = hm.hm
     
- 
-    hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
-    with open(hm_file_path, 'r') as f:
-        hm_json = json.load(f)
-   
-    image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-    
+    # load image and make its range [-1,1] (suitable for mobilenet)
+    image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+    #image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+    #image = 2.*(image - np.min(image))/np.ptp(image)-1
+    image = 2.*image/np.max(image) - 1
+
     heatmaps=[]
     classification=[]
-    
-    for animal in entry['animals']:
-        group = str(math.floor(animal['group'].index(1)/2))
-        bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
         
-        heatmaps.append(hm_json["hm_" + group + bodyPart])
-        classification.append(animal['group'])
+    # for animal in entry['animals']:
+    #     group = str(math.floor(animal['group'].index(1)/2))
+    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+        
+    #     heatmaps.append(hm_json["hm_" + group + bodyPart])
+    #     classification.append(animal['group'])
        
 
-    return [image, heatmaps, classification]
+    return (image, np.asarray(hm))
+    #return [image, heatmaps, classification]
     
     # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
     #         (image, hms['hm_2f']), (image, hms['hm_2b']), (image, hms['hm_3f']), (image, hms['hm_3b']),\
