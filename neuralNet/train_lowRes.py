@@ -22,7 +22,7 @@ bodyPart:
 """
 # output directory
 #timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/9/"
+out_path = f"../data/output/11/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -132,7 +132,7 @@ x = backbone.get_layer("block_16_project_BN").output
 x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
-x = layers.Conv2D (1, 1, padding='same', activation='sigmoid', name = "block_18_conv_output")(x)
+x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
 
 
 
