@@ -10,10 +10,12 @@ batch_size = 4
 
 # loss={'heatmap': 'mse', 
 #       'classification': 'categorical_crossentropy'}
+activation_outLayer = "sigmoid"
 loss = "mse"
+
 optimizer = 'adam'
 metrics = ['mae']
 # metrics = {'heatmap':['mae'],
 #            'classification':['acc']}
 
-epochs = 15
+epochs = 100
