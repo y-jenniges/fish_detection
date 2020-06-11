@@ -158,8 +158,9 @@ modelL = keras.Model(inputs=input, outputs=x)
 modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelL.summary()
 
+start_L  = time.time()
 historyL = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
-
+end_L = time.time() - start_L
 
 x = modelL.get_layer("block_17_project_BN").output # low-res model before last conv-sigmoid layer
 x = layers.UpSampling2D(interpolation='bilinear', name='block_19_upto16')(x)
@@ -202,11 +203,13 @@ modelH.summary()
 # # train low-res-net
 # #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 # #for ctr in range(10):
+start_H = time.time()
 historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH)
-
+end_H = time.time() - start_H
 # # print the time used for training
 # print(f"Training took {time.time() - start}")
 
+print(f"model-L training took {end_L}\nmodel-H training took {end_H}")
 
 # save model, weights and history
 modelH.save(f"{out_path}model-H")
