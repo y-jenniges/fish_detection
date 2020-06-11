@@ -8,14 +8,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import HeatmapClass
+import DataGenerator as dg
+import Globals
 
 
-test_path = "../data/output/8/"
+test_path = "../data/output/12/"
 out_path = test_path #+ "output/"
 
-model_path = "model-L"
-hist_path = "trainHistory.pickle"
-testGen_path = "serialized_testGen.pickle"
+res = "-H"
+
+model_path = "model" + res
+hist_path = "trainHistory" + res+ ".pickle"
+testGen_path = "serialized_testGen" + res+ ".pickle"
 
 
 # load annotation files
@@ -34,10 +38,15 @@ with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
 
 
-# load testGenL
+# load testGen
 with open(os.path.join(test_path, testGen_path),'rb') as file:
     raw_data = file.read()
 testGen = pickle.loads(raw_data)
+
+# testGenL = dg.DataGenerator (dataset=test_labels, 
+#                               #hm_folder_path="../data/heatmaps_lowRes/test/" ,
+#                               prepareEntry=dg.prepareEntryLowResHeatmap,
+#                               batch_size=Globals.batch_size)
 
 
 # load model
@@ -54,7 +63,7 @@ history = pickle.loads(raw_data)
 print("Loading done")
 
 ############ predicting one specific image
-i = 60
+i = 0
 entry = test_labels[i]
 image = np.asarray(helpers.loadImage(entry['filename']))
 
@@ -147,19 +156,19 @@ helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f
 # # plot mae history
 # plt.plot(history['mae'])
 # plt.plot(history['val_mae'])
-# plt.title('model mean absolute error')
+# plt.title(f'model{res} mean absolute error')
 # plt.ylabel('mae')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+"mae.png")
+# plt.savefig(out_path+f"mae{res}.png")
 # plt.show()
 
 # # plot loss history
 # plt.plot(history['loss'])
 # plt.plot(history['val_loss'])
-# plt.title('model loss')
+# plt.title(f'model{res} loss')
 # plt.ylabel('loss')
 # plt.xlabel('epoch')
 # plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+"loss.png")
+# plt.savefig(out_path+f"loss{res}.png")
 # plt.show()
