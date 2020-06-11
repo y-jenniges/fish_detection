@@ -22,7 +22,7 @@ bodyPart:
 """
 # output directory
 #timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/11/"
+out_path = f"../data/output/14/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -70,8 +70,8 @@ dg.showEntryOfGenerator (testGenL, 0, False)
 serialized_trainGen = pickle.dumps(trainGenL)
 serialized_testGen = pickle.dumps(testGenL)
 
-filename_train = f'{out_path}serialized_trainGen.pickle'
-filename_test = f'{out_path}serialized_testGen.pickle'
+filename_train = f'{out_path}serialized_trainGen-L.pickle'
+filename_test = f'{out_path}serialized_testGen-L.pickle'
 
 # save data generators
 with open(filename_train,'wb') as file:
@@ -119,9 +119,9 @@ def ourBlock (x, basename, channels=8):
     return x
 
 alpha = 1.0
-input_tensor = keras.layers.Input(shape=imageShape)
+input= keras.layers.Input(shape=imageShape)
 
-backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input_tensor, include_top=False, weights='imagenet', pooling=None)
+backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
 for l in backbone.layers:
     l.trainable = False
     
@@ -156,7 +156,7 @@ x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer,
 #opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.001, amsgrad=False)
 opt = keras.optimizers.Adam()
 
-modelL = keras.Model(inputs=input_tensor, outputs=x)
+modelL = keras.Model(inputs=input, outputs=x)
 modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -181,7 +181,7 @@ modelL.save(f"{out_path}model-L")
 modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # save the history(todo: is it already contained in modelL.save? and also weights?)
 # history.history is a dict
-with open(f"{out_path}trainHistory.pickle", 'wb') as file:
+with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
     pickle.dump(history.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
   

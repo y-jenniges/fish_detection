@@ -11,7 +11,7 @@ batch_size = 4
 # loss={'heatmap': 'mse', 
 #       'classification': 'categorical_crossentropy'}
 activation_outLayer = "sigmoid"
-loss = "mse"
+loss = "binary_crossentropy"
 
 optimizer = 'adam'
 metrics = ['mae']
