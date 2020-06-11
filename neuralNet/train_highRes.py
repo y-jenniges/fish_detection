@@ -22,7 +22,7 @@ bodyPart:
 """
 # output directory
 #timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/11/"
+out_path = f"../data/output/13/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -82,17 +82,21 @@ dg.showEntryOfGenerator (testGenH, 0, False)
 
 
 # serialize data generators
-serialized_trainGen = pickle.dumps(trainGenH)
-serialized_testGen = pickle.dumps(testGenH)
+serialized_trainGenH = pickle.dumps(trainGenH)
+serialized_testGenH = pickle.dumps(testGenH)
+serialized_testGenL = pickle.dumps(testGenL)
 
 filename_train = f'{out_path}serialized_trainGen-H.pickle'
-filename_test = f'{out_path}serialized_testGen-H.pickle'
+filename_testH = f'{out_path}serialized_testGen-H.pickle'
+filename_testL = f'{out_path}serialized_testGen-L.pickle'
 
 # save data generators
 with open(filename_train,'wb') as file:
-    file.write(serialized_trainGen)
-with open(filename_test,'wb') as file:
-    file.write(serialized_testGen)
+    file.write(serialized_trainGenH)
+with open(filename_testH,'wb') as file:
+    file.write(serialized_testGenH)
+with open(filename_testL,'wb') as file:
+    file.write(serialized_testGenL)
 
 print("DataGenerators serialized")
 
@@ -154,7 +158,7 @@ modelL = keras.Model(inputs=input, outputs=x)
 modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelL.summary()
 
-historyL = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs, validation_data=testGenL)
+historyL = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 
 x = modelL.get_layer("block_17_project_BN").output # low-res model before last conv-sigmoid layer
@@ -186,9 +190,7 @@ x = ourBlock (x, 'block_23', channels=4)
 x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
 
 
-input_tensor = keras.layers.Input(shape=imageShape)
-
-modelH = keras.Model(inputs=input_tensor, outputs=x)
+modelH = keras.Model(inputs=input, outputs=x)
 modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelH.summary()
 
@@ -200,7 +202,7 @@ modelH.summary()
 # # train low-res-net
 # #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 # #for ctr in range(10):
-historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs, validation_data=testGenH)
+historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH)
 
 # # print the time used for training
 # print(f"Training took {time.time() - start}")

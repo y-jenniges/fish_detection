@@ -18,4 +18,5 @@ metrics = ['mae']
 # metrics = {'heatmap':['mae'],
 #            'classification':['acc']}
 
-epochs = 100
+epochs-L = 50
+epochs-H = 20

@@ -170,7 +170,7 @@ start  = time.time()
 # train low-res-net
 #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 #for ctr in range(10):
-history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs, validation_data=testGenL)
+history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 # print the time used for training
 print(f"Training took {time.time() - start}")
