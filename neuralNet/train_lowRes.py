@@ -170,7 +170,17 @@ start  = time.time()
 # train low-res-net
 #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 #for ctr in range(10):
-history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
+
+# activate all layers for training
+for l in modelL.layers:
+    l.trainable = True
+    
+# compile and fit model again
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+
+
 
 # print the time used for training
 print(f"Training took {time.time() - start}")
@@ -181,9 +191,9 @@ modelL.save(f"{out_path}model-L")
 modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # save the history(todo: is it already contained in modelL.save? and also weights?)
 # history.history is a dict
-with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
-    pickle.dump(history.history, file)
+with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
+    pickle.dump(history_phase1.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
-  
-    #files.download('fish-L.h5') # download weights from e.g. google-colab to local machine
-    
+
+with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
+    pickle.dump(history_phase2.history, file)  
