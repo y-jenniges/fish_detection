@@ -5,6 +5,19 @@ import matplotlib.pyplot as plt
 import Globals
 
 
+
+# Label file helpers ---------------------------------------------------------------#
+def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
+    filtered_list = []
+
+    for entry in label_list:
+        for animal in entry['animals']:
+            if animal_id == animal['group']:
+                filtered_list.append(entry)
+                break
+    return filtered_list
+
+
 # Image helpers --------------------------------------------------------------------#
 def loadImage(fname):
     "Loads an image as a h*w*3 numpy array"
@@ -25,18 +38,19 @@ def shapeOfFilename(fname):
     imageShape = loadImage(fname)
     return imageShape.shape
 
-def showImageWithAnnotation(entry):
-    "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
-    image = loadImage(entry['filename'])
-    plt.imshow(image)
-    x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
-    y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
+# todo head and tail are switched!!
+# def showImageWithAnnotation(entry):
+#     "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
+#     image = loadImage(entry['filename'])
+#     plt.imshow(image)
+#     x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
+#     y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
     
-    x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
-    y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
-    plt.scatter (x_front, y_front, marker="o", c="w")
-    plt.scatter (x_back, y_back, marker="x", c="b")
-    plt.show()
+#     x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
+#     y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
+#     plt.scatter (x_front, y_front, marker="o", c="w")
+#     plt.scatter (x_back, y_back, marker="x", c="b")
+#     plt.show()
 
 def entropy(x):
     '''Returns the average entropy of the probability distributions in x. The last axis of x
@@ -127,12 +141,13 @@ def downsample (T, factor=32):
   newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
   return T.reshape(newSh).mean(axis=(-4, -2))
 
+# nned to calcualte heatmap anyway, so this funtcion is not very useful
 def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None, exaggerate=1):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
-     The hm.shape must be an integer fraction of the image shape. gt must 
-     have be a list of dicts with 'x' and 'y' entries as in the dataset. 
-     Both hm and gt can be None in which case they are skipped. 
-     If filename is given, the plot is saved."""
+      The hm.shape must be an integer fraction of the image shape. gt must 
+      have be a list of dicts with 'x' and 'y' entries as in the dataset. 
+      Both hm and gt can be None in which case they are skipped. 
+      If filename is given, the plot is saved."""
     assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
     assert group in range(Globals.NUM_GROUPS)
     
@@ -152,7 +167,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         hmResized = np.clip (hmResized*2, 0, 1)
         
         if img.dtype =="uint8":
-            img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
+            img = img + (128*exaggerate*hmResized).astype(np.uint8)
         else:
             img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)

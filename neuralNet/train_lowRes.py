@@ -20,9 +20,9 @@ bodyPart:
     'back'
     'both'
 """
+
 # output directory
-#timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/14/"
+out_path = f"../data/output/19/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -39,6 +39,11 @@ with open(os.path.join(label_root, label_path), 'r') as f:
 label_path = "training_labels_no_animals.json"
 with open(os.path.join(label_root, label_path), 'r') as f:
     train_labels_no_animals = json.load(f)
+
+# only use images that contain fish
+fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
+test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
 
 # image path
@@ -170,15 +175,18 @@ start  = time.time()
 # train low-res-net
 #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 #for ctr in range(10):
-history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
-
-# activate all layers for training
-for l in modelL.layers:
-    l.trainable = True
+history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
     
-# compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+# for traininv mobilenet too 
+# history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
+
+# # activate all layers for training
+# for l in modelL.layers:
+#     l.trainable = True
+    
+# # compile and fit model again
+# modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+# history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 
 
@@ -191,9 +199,13 @@ modelL.save(f"{out_path}model-L")
 modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # save the history(todo: is it already contained in modelL.save? and also weights?)
 # history.history is a dict
-with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
-    pickle.dump(history_phase1.history, file)
-    #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
+with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
+    pickle.dump(history.history, file) 
 
-with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
-    pickle.dump(history_phase2.history, file)  
+# for training mobilenet too
+# with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
+#     pickle.dump(history_phase1.history, file)
+#     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
+
+# with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
+#     pickle.dump(history_phase2.history, file)  
