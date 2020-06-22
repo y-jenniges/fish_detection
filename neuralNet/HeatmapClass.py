@@ -201,8 +201,9 @@ class Heatmap():
             hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
             hmResized = np.clip (hmResized*2, 0, 1)
             
+            # todo adapt abdunkel factor
             if img.dtype =="uint8":
-                img = img//2 + (128*exxagerate*hmResized).astype(np.uint8)
+                img = img + (128*exxagerate*hmResized).astype(np.uint8)
             else:
                 img = ((img+1)*64 + 128*exxagerate*hmResized).astype(np.uint8)
         plt.imshow(img)
