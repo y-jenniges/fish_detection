@@ -12,13 +12,13 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/12/"
+test_path = "../data/output/18/"
 out_path = test_path #+ "output/"
 
-res = "-H"
+res = "-L"
 
 model_path = "model" + res
-hist_path = "trainHistory" + res+ ".pickle"
+hist_path = "trainHistory" + res + ".pickle"
 testGen_path = "serialized_testGen" + res+ ".pickle"
 
 
@@ -39,14 +39,14 @@ with open(os.path.join(label_root, path), 'r') as f:
 
 
 # load testGen
-with open(os.path.join(test_path, testGen_path),'rb') as file:
-    raw_data = file.read()
-testGen = pickle.loads(raw_data)
+# with open(os.path.join(test_path, testGen_path),'rb') as file:
+#     raw_data = file.read()
+# testGen = pickle.loads(raw_data)
 
-# testGenL = dg.DataGenerator (dataset=test_labels, 
-#                               #hm_folder_path="../data/heatmaps_lowRes/test/" ,
-#                               prepareEntry=dg.prepareEntryLowResHeatmap,
-#                               batch_size=Globals.batch_size)
+testGen = dg.DataGenerator (dataset=test_labels, 
+                              #hm_folder_path="../data/heatmaps_lowRes/test/" ,
+                              prepareEntry=dg.prepareEntryLowResHeatmap,
+                              batch_size=Globals.batch_size)
 
 
 # load model
@@ -54,17 +54,24 @@ testGen = pickle.loads(raw_data)
 modelL = keras.models.load_model(os.path.join(test_path,model_path))
 
 # load training history
-with open(os.path.join(test_path, hist_path),'rb') as file:
-    raw_data = file.read()
-history = pickle.loads(raw_data)
+# with open(os.path.join(test_path, hist_path),'rb') as file:
+#     raw_data = file.read()
+# history = pickle.loads(raw_data)
 
 
 
 print("Loading done")
 
 ############ predicting one specific image
-i = 0
-entry = test_labels[i]
+f0 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/0.jpg"
+f22 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/22.jpg"
+f39 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
+f51 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
+f60 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
+
+i = 60
+entry = [entry for entry in test_labels if entry['filename'] == f60][0]
+#entry = test_labels[i]
 image = np.asarray(helpers.loadImage(entry['filename']))
 
 # groundtruth heatmap
@@ -83,10 +90,11 @@ print(f"yhat has range {np.min(yHat), np.max(yHat)}")
 
 
 #helpers.showImageWithAnnotation(entry)
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1, filename=f"{out_path}test{i}_exag1.jpg")
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=10, filename=f"{out_path}test{i}_exag10.jpg")
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f"{out_path}test{i}_exag100.jpg")
-
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1, filename=f"{out_path}test{i}{res}_exag1.jpg")
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=10, filename=f"{out_path}test{i}{res}_exag10.jpg")
+helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f"{out_path}test{i}{res}_exag100.jpg")
+#.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1)
+print(helpers.entropy(yHat))
 
 # show heatmap only
 # with open(out_path+str(i)+".json","r") as f:
@@ -152,6 +160,7 @@ helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f
 
 # print(f"MAE: {history['mae']}")
 # print(f"Loss: {history['loss']}")
+
 
 # # plot mae history
 # plt.plot(history['mae'])
