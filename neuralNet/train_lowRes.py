@@ -22,12 +22,12 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/19/"
+out_path = f"../data/output/21/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
 label_root = "../data/maritime_dataset_25/labels/"
-
+ 
 label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     train_labels_animals = json.load(f)
@@ -127,7 +127,7 @@ alpha = 1.0
 input= keras.layers.Input(shape=imageShape)
 
 backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
-for l in backbone.layers:
+for l in backbone.layers[-25]:
     l.trainable = False
     
 # We attach to the layer with 320 channels because with a 1280 channel input this conv would have too many weights
