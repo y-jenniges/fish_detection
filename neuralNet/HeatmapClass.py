@@ -27,89 +27,22 @@ class Heatmap():
         else:
             raise Exception(f"Resolution undefined: Resolution must be either 'low' or 'high'")
          
+        self.gaussian = helpers.gaussian(8,50)
+         
+         
         # calculate heatmap
         if bodyPart == "both":
             self.calculateHeadTailHeatmap(self.group)
         else:
             self.annotationToHeatmap()
 
-  
-        
-    def annotationToLowResHeatmap (self):
+    def annotationToHm(self):
         """Converts a list of points (each a dict with 'x' and 'y' component) into 
-         a heatmap with 1/32 of image resolution. A 1 is bilinearly distributed
-         among the 4 heatmap pixels close to the annotated strawberry. This means,
-         if the annotated strawberry is in the center of a heatmap pixel, this
-         pixel gets increased by 1, if it is on the border between two pixel
-         both get increased by 0.5 ,if it is on the corner between four pixel
-         each gets increased by 0.25."""
-        """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
-        bodyPart: 'front' or 'back'"""
-
-        #print("annotation to low res hm")
-
-        hm_y, hm_x = self.image.shape[0]//32, self.image.shape[1]//32
+        a heatmap with original image resolution using myGaussian. For every 
+        strawberry, the Gaussian myGaussian (peak 1) centered at the 
+        annotated strawberry point is added."""
+        hm_y, hm_x = self.image.shape[0], self.image.shape[1]
         self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
-         
-        group_array = np.zeros(Globals.channels)
-        if self.bodyPart=='front':
-            group_array[self.group*2-1] = 1 
-        elif self.bodyPart=='back':
-            group_array[self.group*2] = 1 
-        else:
-            print("annotationToLowResHeatmap: invalid bodyPart")
-   
-        
-        for animal in self.gt:
-            # only receive animals from group that is currently active in class
-            if np.array_equal(animal['group'], group_array):
-                #print(animal['group'])
-                x, y = [animal['position'][0], animal['position'][1]]
-                #print(x)
-                hmx, alphaX = helpers.interpolate ((x-16)/32) # increase hmx by alpha, and hmx+1 by 1-alpha
-                hmy, alphaY = helpers.interpolate ((y-16)/32) # increase hmy by alpha, and hmy+1 by 1-alpha
-    
-
-                if 0 <= hmx < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
-                    self.hm[hmy, hmx, 0] += alphaX*alphaY
-    
-                if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
-                    self.hm[hmy, hmx + 1, 0] += (1-alphaX)*alphaY
-    
-                if 0 <= hmx < self.hm.shape[1] and 0 <= hmy + 1 < self.hm.shape[0]: 
-                    self.hm[hmy + 1, hmx, 0] += alphaX*(1-alphaY)
-    
-                if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy+ + 1 < self.hm.shape[0]: 
-                    self.hm[hmy + 1, hmx + 1, 0] += (1-alphaX)*(1-alphaY)
-       
-        np.clip (self.hm, 0, 1, out=self.hm)
-        #return self.hm
-    
-   
-   # def annotationToHeatmap (self):
-   #    """Converts a list of points (each a dict with 'x' and 'y' component) into 
-   #       a heatmap with original image resolution using myGaussian. For every 
-   #       strawberry, the Gaussian myGaussian (peak 1) centered at the 
-   #       annotated strawberry point is added."""
-   #    self.hm = np.zeros ((imageShape[0], imageShape[1], 1), dtype=np.float32)
-   #    for p in self.gt:
-   #      x = p["x"]
-   #      y = p["y"]
-   #      if 0<=x<hm.shape[1] and 0<=y<hm.shape[0]: 
-   #        addToHeatmap (self.hm, myGaussian, x-myGaussian.shape[1]//2, y-myGaussian.shape[0]//2)
-   #    np.clip (self.hm, 0, 1, out=self.hm)
-      #return hm 
-   
-    def annotationToHighResHeatmap (self):
-        """Converts a list of points (each a dict with 'x' and 'y' component) into 
-         a heatmap with original image resolution using myGaussian. For every 
-         strawberry, the Gaussian myGaussian (peak 1) centered at the 
-         annotated strawberry point is added."""
-        """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
-        bodyPart: 'front' or 'back'"""
-
-        self.hm = np.zeros ((self.image.shape[0], self.image.shape[1], 1), dtype=np.float32)
-        self.gaussian = helpers.gaussian(8,50)
 
         group_array = np.zeros(Globals.channels)
         if self.bodyPart=='front':
@@ -123,12 +56,98 @@ class Heatmap():
             if np.array_equal(animal['group'], group_array):
                 x = animal['position'][0]
                 y = animal['position'][1]
-    
-                if 0<=x <self.hm.shape[1] and 0<=y<self.hm.shape[0]: 
+            
+                if 0 <= x < self.hm.shape[1] and 0 <= y < self.hm.shape[0]: 
                     self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
+                
+        np.clip (self.hm, 0, 1, out=self.hm)
+     
+    def annotationToLowResHeatmap (self):   
+        self.annotationToHm()
+        
+    def annotationToHighResHeatmap (self):   
+        self.annotationToHm()
+        
+    # def annotationToLowResHeatmap (self):
+    #     """Converts a list of points (each a dict with 'x' and 'y' component) into 
+    #      a heatmap with 1/32 of image resolution. A 1 is bilinearly distributed
+    #      among the 4 heatmap pixels close to the annotated strawberry. This means,
+    #      if the annotated strawberry is in the center of a heatmap pixel, this
+    #      pixel gets increased by 1, if it is on the border between two pixel
+    #      both get increased by 0.5 ,if it is on the corner between four pixel
+    #      each gets increased by 0.25."""
+    #     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
+    #     bodyPart: 'front' or 'back'"""
+
+    #     #print("annotation to low res hm")
+
+    #     hm_y, hm_x = self.image.shape[0]//32, self.image.shape[1]//32
+    #     self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
+         
+    #     group_array = np.zeros(Globals.channels)
+    #     if self.bodyPart=='front':
+    #         group_array[self.group*2-1] = 1 
+    #     elif self.bodyPart=='back':
+    #         group_array[self.group*2] = 1 
+    #     else:
+    #         print("annotationToLowResHeatmap: invalid bodyPart")
+   
+        
+    #     for animal in self.gt:
+    #         # only receive animals from group that is currently active in class
+    #         if np.array_equal(animal['group'], group_array):
+    #             #print(animal['group'])
+    #             x, y = [animal['position'][0], animal['position'][1]]
+    #             #print(x)
+    #             hmx, alphaX = helpers.interpolate ((x-16)/32) # increase hmx by alpha, and hmx+1 by 1-alpha
+    #             hmy, alphaY = helpers.interpolate ((y-16)/32) # increase hmy by alpha, and hmy+1 by 1-alpha
     
-        np.clip (self.hm, 0, 1, out=self.hm)    
-        #return self.hm   
+
+    #             if 0 <= hmx < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
+    #                 self.hm[hmy, hmx, 0] += alphaX*alphaY
+    
+    #             if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
+    #                 self.hm[hmy, hmx + 1, 0] += (1-alphaX)*alphaY
+    
+    #             if 0 <= hmx < self.hm.shape[1] and 0 <= hmy + 1 < self.hm.shape[0]: 
+    #                 self.hm[hmy + 1, hmx, 0] += alphaX*(1-alphaY)
+    
+    #             if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy+ + 1 < self.hm.shape[0]: 
+    #                 self.hm[hmy + 1, hmx + 1, 0] += (1-alphaX)*(1-alphaY)
+       
+    #     np.clip (self.hm, 0, 1, out=self.hm)
+        #return self.hm
+    
+   
+    # def annotationToHighResHeatmap (self):
+    #     """Converts a list of points (each a dict with 'x' and 'y' component) into 
+    #      a heatmap with original image resolution using myGaussian. For every 
+    #      strawberry, the Gaussian myGaussian (peak 1) centered at the 
+    #      annotated strawberry point is added."""
+    #     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
+    #     bodyPart: 'front' or 'back'"""
+
+    #     self.hm = np.zeros ((self.image.shape[0], self.image.shape[1], 1), dtype=np.float32)
+    #     self.gaussian = helpers.gaussian(8,50)
+
+    #     group_array = np.zeros(Globals.channels)
+    #     if self.bodyPart=='front':
+    #         group_array[self.group*2-1] = 1 
+    #     elif self.bodyPart=='back':
+    #         group_array[self.group*2] = 1 
+    #     elif self.bodyPart=='both':
+    #         print("annotation to high res heatmap: invalid bodyPart")
+            
+    #     for animal in self.gt:
+    #         if np.array_equal(animal['group'], group_array):
+    #             x = animal['position'][0]
+    #             y = animal['position'][1]
+    
+    #             if 0<=x <self.hm.shape[1] and 0<=y<self.hm.shape[0]: 
+    #                 self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
+    
+    #     np.clip (self.hm, 0, 1, out=self.hm)    
+  
 
     def addToHeatmap (self, block, x, y):
         """Adds block to hm[y:y+block.shape[0],x:x+block.shape[1]] and 
@@ -165,7 +184,7 @@ class Heatmap():
             self.hm[hylo:hyhi,hxlo:hxhi] += block[bylo:byhi,bxlo:bxhi]
     
     
-    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None, exxagerate=1):
+    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None, exagerate=1):
         """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
          The hm.shape must be an integer fraction of the image shape. gt must 
          have be a list of dicts with 'x' and 'y' entries as in the dataset. 
@@ -203,9 +222,9 @@ class Heatmap():
             
             # todo adapt abdunkel factor
             if img.dtype =="uint8":
-                img = img + (128*exxagerate*hmResized).astype(np.uint8)
+                img = img + (128*exagerate*hmResized).astype(np.uint8)
             else:
-                img = ((img+1)*64 + 128*exxagerate*hmResized).astype(np.uint8)
+                img = ((img+1)*64 + 128*exagerate*hmResized).astype(np.uint8)
         plt.imshow(img)
         
         

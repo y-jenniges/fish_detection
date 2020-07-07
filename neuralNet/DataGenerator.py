@@ -38,8 +38,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
         hm = hm.hm
     
     # load image and make its range [-1,1] (suitable for mobilenet)
-    image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-    #image = 2.*(image - np.min(image))/np.ptp(image)-1
+    image = helpers.loadImage(entry['filename'])
     image = 2.*image/np.max(image) - 1
 
     heatmaps=[]
@@ -92,7 +91,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     #     classification[idx] = np.asarray(animal['group'])
 
     # this return is for one heatmap calculations only
-    return (image, np.asarray(hm))
+    return (image, helpers.downsample(np.asarray(hm)))
 
     #return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
   
