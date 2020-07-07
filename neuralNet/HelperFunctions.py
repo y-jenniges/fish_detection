@@ -167,7 +167,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         hmResized = np.clip (hmResized*2, 0, 1)
         
         if img.dtype =="uint8":
-            img = img + (128*exaggerate*hmResized).astype(np.uint8)
+            img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
         else:
             img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)
