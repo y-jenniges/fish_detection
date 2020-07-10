@@ -4,7 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import Globals
 import cv2
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
 
 # Label file helpers ---------------------------------------------------------------#
 def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
@@ -108,6 +108,7 @@ def equalizeImage(img_path):
     # Histogram equalisation on the V-channel
     #img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
     
+    # contrast limited adaptive histogram equalization (clahe)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(20,20))
     img_hsv[:, :, 2] = clahe.apply(img_hsv[:, :, 2])
         
@@ -118,6 +119,43 @@ def equalizeImage(img_path):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
     return image
+
+def adaptBrigthness(image, factor=1):
+    # convert to PIL format
+    img = Image.fromarray(image)
+    
+    # adapt brigthness
+    enhancer = ImageEnhance.Brightness(img)
+    im_output = enhancer.enhance(factor)
+    
+    # convert back to np.array
+    return np.asarray(im_output)
+
+# factor < 1 -> decrease contrast
+# facotr > 1 -> increase contrast
+def adaptContrast(image, factor=1, auto=False):
+    # convert to PIL format
+    img = Image.fromarray(image)
+    
+    # adapt contrast
+    if auto:
+        im_output = ImageOps.autocontrast(img)
+    else:
+        enhancer = ImageEnhance.Contrast(img)
+        im_output = enhancer.enhance(factor)
+    
+    # convert back to np.array
+    return np.asarray(im_output)
+
+def equalizePil(image):
+    # convert to PIL format
+    img = Image.fromarray(image)
+    
+    # equalize
+    im_output = ImageOps.equalize(img)
+    
+    # convert back to np.array
+    return np.asarray(im_output)
 
 
 # heatmap helpers ------------------------------------------------------------------#
