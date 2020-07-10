@@ -3,8 +3,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import Globals
-
-
+import cv2
+from PIL import Image
 
 # Label file helpers ---------------------------------------------------------------#
 def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
@@ -18,10 +18,12 @@ def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0,
     return filtered_list
 
 
-# Image helpers --------------------------------------------------------------------#
-def loadImage(fname):
+# image helpers --------------------------------------------------------------------#
+def loadImage(fname, equalize=True):
     "Loads an image as a h*w*3 numpy array"
-    img =  img_to_array(load_img(fname), dtype="uint8")
+    
+    # load image in PIL format (either first equalized or not)
+    img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
     
     #print(f"image before {img.shape}")
     rest_x, rest_y = img.shape[0]%32, img.shape[1]%32
@@ -97,10 +99,29 @@ def entropy(x):
 #         plt.savefig(filename, dpi=150, bbox_inches='tight')
 #     plt.show()
 
+def equalizeImage(img_path):
+    image = cv2.imread(img_path)
+
+    # convert image from RGB to HSV
+    img_hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    
+    # Histogram equalisation on the V-channel
+    #img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+    
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(20,20))
+    img_hsv[:, :, 2] = clahe.apply(img_hsv[:, :, 2])
+        
+    # convert image back from HSV to RGB
+    image = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB)
+        
+    # flip BGR to RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    return image
 
 
-# Heatmap helpers ------------------------------------------------------------------#
-# Use this to test whether interpolate works
+# heatmap helpers ------------------------------------------------------------------#
+# use this to test whether interpolate works
 def showInterpolate():
     "Helper function to check that interpolate works"
     x = np.arange(0,4,0.02)
