@@ -27,7 +27,7 @@ labels = labels[:5]
  
 
 
-num_classes = 5   
+num_classes = 2   
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 #jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
@@ -78,40 +78,46 @@ def generateY(entry):
     classifications=[]
     
     
-    # idea here: generate all heatmaps (iterate over groups)
-    for i in list(range((num_classes+1)//2)):
+    
+    # idea here: fish head only
+    hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="front")
+    hm.downsample()
+    
+    
+    # # idea here: generate all heatmaps (iterate over groups)
+    # for i in list(range((num_classes+1)//2)):
         
-        if i == 0:
-            hm = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
-            hm.downsample()
+    #     if i == 0:
+    #         hm = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
+    #         hm.downsample()
             
-            c = np.zeros(num_classes)
-            c[0] = 1
+    #         c = np.zeros(num_classes)
+    #         c[0] = 1
             
-            heatmaps.append(hm.hm)
-            classifications.append(c)
-        else:
-            # generate head heatmap
-            hm_f = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
-            hm_f.downsample()
+    #         heatmaps.append(hm.hm)
+    #         classifications.append(c)
+    #     else:
+    #         # generate head heatmap
+    #         hm_f = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
+    #         hm_f.downsample()
             
-            # generate tail heatmap
-            hm_b = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="back")
-            hm_b.downsample()
+    #         # generate tail heatmap
+    #         hm_b = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="back")
+    #         hm_b.downsample()
             
-            # append heatmaps
-            heatmaps.append(hm_f.hm)
-            heatmaps.append(hm_b.hm)
+    #         # append heatmaps
+    #         heatmaps.append(hm_f.hm)
+    #         heatmaps.append(hm_b.hm)
             
-            # create classifications
-            c_f = np.zeros(num_classes)
-            c_b = np.zeros(num_classes)
-            c_f[i*2-1] = 1
-            c_b[i*2] = 1
+    #         # create classifications
+    #         c_f = np.zeros(num_classes)
+    #         c_b = np.zeros(num_classes)
+    #         c_f[i*2-1] = 1
+    #         c_b[i*2] = 1
             
-            # append classifications
-            classifications.append(c_f)
-            classifications.append(c_b)
+    #         # append classifications
+    #         classifications.append(c_f)
+    #         classifications.append(c_b)
         
     # # idea here: return only necessary heatmaps and classes
     # coveredGroups = []    
@@ -200,7 +206,7 @@ input= keras.layers.Input(shape=img.shape)
 #               loss="binary_crossentropy",
 #               metrics=["accuracy"])
 
-channels = 8
+channels = 10
 
 model = Sequential()
 model.add(layers.Conv2D (channels, 1, padding='same', name = "a_bottleneck_conv", input_shape=img.shape))
@@ -222,11 +228,7 @@ model.add(layers.Conv2D (num_classes, 1,
                          padding='same', 
                          activation="softmax", 
                          name = "heatmap"))
-#model.add(layers.Conv2D (filters=num_classes,
-#                           kernel_size=1,
-#                           padding='same', 
-#                           activation='softmax', 
-#                           name = "heatmap"))
+
 
 model.compile(loss='categorical_crossentropy', 
               optimizer=keras.optimizers.adam(lr=0.001), 
