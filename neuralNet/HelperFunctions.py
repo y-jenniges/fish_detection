@@ -19,12 +19,19 @@ def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0,
 
 
 # image helpers --------------------------------------------------------------------#
-def loadImage(fname, equalize=True):
+def loadImage(fname, equalize=False):
     "Loads an image as a h*w*3 numpy array"
     
     # load image in PIL format (either first equalized or not)
-    img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
-    
+    #img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
+    if equalize:
+        #img = np.asarray(Image.fromarray(fname))
+        img = img_to_array(load_img(fname), dtype="uint8")
+        img = equalizePil(img)
+        img = adaptContrast(img, auto=True)
+    else:
+        img = img_to_array(load_img(fname), dtype="uint8")
+
     #print(f"image before {img.shape}")
     rest_x, rest_y = img.shape[0]%32, img.shape[1]%32
     if rest_x != 0:
