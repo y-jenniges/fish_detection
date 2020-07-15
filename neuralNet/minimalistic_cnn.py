@@ -79,7 +79,7 @@ def generateY(entry):
     
     
     # idea here: generate all heatmaps (iterate over groups)
-    for i in list((num_classes+1)/2):
+    for i in list(range((num_classes+1)//2)):
         
         if i == 0:
             hm = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
@@ -88,7 +88,7 @@ def generateY(entry):
             c = np.zeros(num_classes)
             c[0] = 1
             
-            heatmaps.append(hm)
+            heatmaps.append(hm.hm)
             classifications.append(c)
         else:
             # generate head heatmap
@@ -100,8 +100,8 @@ def generateY(entry):
             hm_b.downsample()
             
             # append heatmaps
-            heatmaps.append(hm_f)
-            heatmaps.append(hm_b)
+            heatmaps.append(hm_f.hm)
+            heatmaps.append(hm_b.hm)
             
             # create classifications
             c_f = np.zeros(num_classes)
@@ -152,7 +152,7 @@ for entry in train_labels:
     classifications.append(cs)
 
 
-y_train = heatmaps
+y_train = np.asarray(heatmaps)
 #y_train = {"heatmap": heatmaps, "classification":classifications}
 
 heatmaps=[]
@@ -163,10 +163,11 @@ for entry in test_labels:
     heatmaps.append(hms)
     classifications.append(cs)
 
-y_test = heatmaps
+y_test = np.asarray(heatmaps)
 #y_test = {"heatmap": heatmaps, "classification":classifications}
 
-
+x_train = np.asarray(x_train)
+x_test = np.asarray(x_test)
 
 
 
@@ -174,30 +175,62 @@ y_test = heatmaps
 input= keras.layers.Input(shape=img.shape)
 
 # https://medium.com/@vijayabhaskar96/multi-label-image-classification-tutorial-with-keras-imagedatagenerator-cd541f8eaf24
+# model = Sequential()
+# model.add(layers.Conv2D(32, (3, 3), padding='same', input_shape=img.shape))
+# model.add(layers.Activation('relu'))
+# model.add(layers.Conv2D(32, (3, 3)))
+# model.add(layers.Activation('relu'))
+# model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+# model.add(layers.Dropout(0.25))
+
+# model.add(layers.Conv2D(64, (3, 3), padding='same'))
+# model.add(layers.Activation('relu'))
+# model.add(layers.Conv2D(64, (3, 3)))
+# model.add(layers.Activation('relu'))
+# model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+# model.add(layers.Dropout(0.25))
+
+# model.add(layers.Flatten())
+# model.add(layers.Dense(512))
+# model.add(layers.Activation('relu'))
+# model.add(layers.Dropout(0.5))
+# model.add(layers.Dense(num_classes, activation='sigmoid'))
+
+# model.compile(keras.optimizers.rmsprop(lr=0.0001, decay=1e-6),
+#               loss="binary_crossentropy",
+#               metrics=["accuracy"])
+
+channels = 8
+
 model = Sequential()
-model.add(layers.Conv2D(32, (3, 3), padding='same', input_shape=img.shape))
-model.add(layers.Activation('relu'))
-model.add(layers.Conv2D(32, (3, 3)))
-model.add(layers.Activation('relu'))
-model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-model.add(layers.Dropout(0.25))
+model.add(layers.Conv2D (channels, 1, padding='same', name = "a_bottleneck_conv", input_shape=img.shape))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_bottleneck_BN'))
+model.add(layers.ReLU(6., name='a_bottleneck_relu'))
 
-model.add(layers.Conv2D(64, (3, 3), padding='same'))
-model.add(layers.Activation('relu'))
-model.add(layers.Conv2D(64, (3, 3)))
-model.add(layers.Activation('relu'))
-model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-model.add(layers.Dropout(0.25))
+model.add(layers.Conv2D (4*channels, 1, padding='same', name = "a_conv"))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_BN'))
+model.add(layers.ReLU(6., name='a_relu'))
 
-model.add(layers.Flatten())
-model.add(layers.Dense(512))
-model.add(layers.Activation('relu'))
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(num_classes, activation='sigmoid'))
-model.compile(keras.optimizers.rmsprop(lr=0.0001, decay=1e-6),
-              loss="binary_crossentropy",
-              metrics=["accuracy"])
+model.add(layers.DepthwiseConv2D(kernel_size=3, activation=None, use_bias=False, padding='same', name='a-DW'))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_DW_BN'))
+model.add(layers.ReLU(6., name='a_DW_relu'))
 
+model.add(layers.Conv2D (channels, 1, padding='same', name = "a_project"))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_project_BN'))
+    
+model.add(layers.Conv2D (num_classes, 1, 
+                         padding='same', 
+                         activation="softmax", 
+                         name = "heatmap"))
+#model.add(layers.Conv2D (filters=num_classes,
+#                           kernel_size=1,
+#                           padding='same', 
+#                           activation='softmax', 
+#                           name = "heatmap"))
+
+model.compile(loss='categorical_crossentropy', 
+              optimizer=keras.optimizers.adam(lr=0.001), 
+              metric= ['mae'])
 
 #inputA = layers.Input(shape=img.shape)
 #inputB = layers.Input(shape=(num_classes,))
