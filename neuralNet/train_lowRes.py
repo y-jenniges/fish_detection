@@ -22,7 +22,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/21/"
+out_path = f"../data/output/29/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -127,7 +127,8 @@ alpha = 1.0
 input= keras.layers.Input(shape=imageShape)
 
 backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
-for l in backbone.layers[-25]:
+#for l in backbone.layers[:-25]:
+for l in backbone.layers:
     l.trainable = False
     
 # We attach to the layer with 320 channels because with a 1280 channel input this conv would have too many weights
