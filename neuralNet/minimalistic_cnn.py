@@ -24,12 +24,17 @@ with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
 labels = labels[:5]
-    
+ 
+
+
+num_classes = 5   
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+#jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     
 
 test_ratio = 0.05
+
 
 # splitting data into test and train for every organism
 # FISH
@@ -38,11 +43,17 @@ fish_test_length = math.ceil(test_ratio*len(fish))
 test_fish = fish[:fish_test_length]
 train_fish = fish[fish_test_length:]
 
+# CRUSTACEA
+crust = helpers.filter_labels_for_animal_group(labels, crust_id)
+crust_test_length = math.ceil(test_ratio*len(crust))
+test_crust = crust[:crust_test_length]
+train_crust = crust[crust_test_length:]
+
 # JELLYFISH
-jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
-jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
-test_jellyfish = jellyfish[:jellyfish_test_length]
-train_jellyfish = jellyfish[jellyfish_test_length:]
+# jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
+# jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
+# test_jellyfish = jellyfish[:jellyfish_test_length]
+# train_jellyfish = jellyfish[jellyfish_test_length:]
 
 # sample image
 img = helpers.loadImage(fish[0]['filename'])
@@ -50,8 +61,8 @@ plt.imshow(img)
 plt.show()
 
 # create final test and train data
-test_labels = test_fish + test_jellyfish
-train_labels = train_fish + train_jellyfish
+test_labels = test_fish + test_crust
+train_labels = train_fish + train_crust
 
 def generateY(entry):
 
@@ -67,14 +78,14 @@ def generateY(entry):
     classifications=[]
     
     
-    # idea here: generate all heatmaps
-    for i in list(range(Globals.NUM_GROUPS)):
+    # idea here: generate all heatmaps (iterate over groups)
+    for i in list((num_classes+1)/2):
         
         if i == 0:
             hm = HeatmapClass.Heatmap(entry, resolution='low', group=i, bodyPart="front")
             hm.downsample()
             
-            c = np.zeros(Globals.NUM_GROUPS*2-1)
+            c = np.zeros(num_classes)
             c[0] = 1
             
             heatmaps.append(hm)
@@ -93,8 +104,8 @@ def generateY(entry):
             heatmaps.append(hm_b)
             
             # create classifications
-            c_f = np.zeros(Globals.NUM_GROUPS*2-1)
-            c_b = np.zeros(Globals.NUM_GROUPS*2-1)
+            c_f = np.zeros(num_classes)
+            c_b = np.zeros(num_classes)
             c_f[i*2-1] = 1
             c_b[i*2] = 1
             
@@ -159,7 +170,7 @@ y_test = heatmaps
 
 
 
-num_classes = 11
+
 input= keras.layers.Input(shape=img.shape)
 
 # https://medium.com/@vijayabhaskar96/multi-label-image-classification-tutorial-with-keras-imagedatagenerator-cd541f8eaf24
