@@ -61,14 +61,14 @@ plt.imshow(img)
 plt.show()
 
 # create final test and train data
-test_labels = test_fish + test_crust
-train_labels = train_fish + train_crust
+test_labels = test_fish #+ test_crust
+train_labels = train_fish #+ train_crust
 
 def generateY(entry):
 
-    hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front')
-    #hm.showImageWithHeatmap()
-    hm = hm.hm
+    # hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front')
+    # #hm.showImageWithHeatmap()
+    # hm = hm.hm
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])
@@ -82,6 +82,8 @@ def generateY(entry):
     # idea here: fish head only
     hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="front")
     hm.downsample()
+    
+    heatmaps = hm.hm
     
     
     # # idea here: generate all heatmaps (iterate over groups)
@@ -224,13 +226,13 @@ model.add(layers.ReLU(6., name='a_DW_relu'))
 model.add(layers.Conv2D (channels, 1, padding='same', name = "a_project"))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_project_BN'))
     
-model.add(layers.Conv2D (num_classes, 1, 
+model.add(layers.Conv2D (1, 1, 
                          padding='same', 
-                         activation="softmax", 
+                         activation="sigmoid", 
                          name = "heatmap"))
 
 
-model.compile(loss='categorical_crossentropy', 
+model.compile(loss='mse', 
               optimizer=keras.optimizers.adam(lr=0.001), 
               metric= ['mae'])
 
