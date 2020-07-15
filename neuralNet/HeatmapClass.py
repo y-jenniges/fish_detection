@@ -303,4 +303,12 @@ class Heatmap():
     #def calculateAverageHeatmap(self, group):       
  
 
-        
+    def downsample (self, factor=32):
+      """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
+         Downsamples the height and width dimension of T by the given factor. 
+         The length in these dimensions must be a multiple of factor."""
+      sh = self.hm.shape
+      assert sh[-3]%factor==0
+      assert sh[-2]%factor==0
+      newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
+      self.hm = self.hm.reshape(newSh).mean(axis=(-4, -2))
