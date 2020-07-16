@@ -15,7 +15,7 @@ from keras import layers
 
 
 # output directory
-out_path = "../data/output/30/"
+out_path = "../data/output/31/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
@@ -23,7 +23,7 @@ label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
-labels = labels[:5]
+#labels = labels[:5]
  
 
 
@@ -56,8 +56,8 @@ train_crust = crust[crust_test_length:]
 # train_jellyfish = jellyfish[jellyfish_test_length:]
 
 # sample image
-img = helpers.loadImage(fish[0]['filename'])
-plt.imshow(img)
+image_example = helpers.loadImage(fish[0]['filename'])
+plt.imshow(image_example)
 plt.show()
 
 # create final test and train data
@@ -77,8 +77,7 @@ def generateY(entry):
     heatmaps=[]
     classifications=[]
     
-    
-    
+      
     # idea here: fish head only
     hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="front")
     hm.downsample()
@@ -180,7 +179,7 @@ x_test = np.asarray(x_test)
 
 
 
-input= keras.layers.Input(shape=img.shape)
+#input= keras.layers.Input(shape=image_example.shape)
 
 # https://medium.com/@vijayabhaskar96/multi-label-image-classification-tutorial-with-keras-imagedatagenerator-cd541f8eaf24
 # model = Sequential()
@@ -208,33 +207,80 @@ input= keras.layers.Input(shape=img.shape)
 #               loss="binary_crossentropy",
 #               metrics=["accuracy"])
 
-channels = 10
+
+#------------ Taking last layers of Udos example, input images have same resolution as heatmaps -------------------------------------------------------------------------
+# channels = 10
+# image_example = helpers.downsample(image_example)
+# model = Sequential()
+# model.add(layers.Conv2D (channels, 1, padding='same', name = "a_bottleneck_conv", input_shape=image_example.shape))
+# model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_bottleneck_BN'))
+# model.add(layers.ReLU(6., name='a_bottleneck_relu'))
+
+# model.add(layers.Conv2D (4*channels, 1, padding='same', name = "a_conv"))
+# model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_BN'))
+# model.add(layers.ReLU(6., name='a_relu'))
+
+# model.add(layers.DepthwiseConv2D(kernel_size=3, activation=None, use_bias=False, padding='same', name='a-DW'))
+# model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_DW_BN'))
+# model.add(layers.ReLU(6., name='a_DW_relu'))
+
+# model.add(layers.Conv2D (channels, 1, padding='same', name = "a_project"))
+# model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_project_BN'))
+    
+# model.add(layers.Conv2D (1, 1, 
+#                           padding='same', 
+#                           activation="sigmoid", 
+#                           name = "heatmap"))
+
+
+# model.compile(loss='mse', 
+#               optimizer=keras.optimizers.adam(lr=0.001), 
+#               metrics = ['mae'])
+
+# history = model.fit(x_train, y_train, 
+#                     epochs=50, 
+#                     batch_size=4, 
+#                     verbose=1, 
+#                     validation_data=(x_test, y_test))
+
+#-------------------------------------------------------------------------------------
+
+# https://victorzhou.com/blog/keras-cnn-tutorial/
+
+# reproducible results??
+np.random.seed = 0
+PYTHONHASHSEED = 0
+
+helpers.showImageWithHeatmap(x_train[0], y_train[0])
 
 model = Sequential()
-model.add(layers.Conv2D (channels, 1, padding='same', name = "a_bottleneck_conv", input_shape=img.shape))
-model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_bottleneck_BN'))
-model.add(layers.ReLU(6., name='a_bottleneck_relu'))
+model.add(layers.DepthwiseConv2D(kernel_size=3, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
+model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (4*channels, 1, padding='same', name = "a_conv"))
-model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_BN'))
-model.add(layers.ReLU(6., name='a_relu'))
+model.add(layers.Conv2D (filters=8, kernel_size=1, strides=16, padding='same'))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
+model.add(layers.ReLU(6.))
 
-model.add(layers.DepthwiseConv2D(kernel_size=3, activation=None, use_bias=False, padding='same', name='a-DW'))
-model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_DW_BN'))
-model.add(layers.ReLU(6., name='a_DW_relu'))
-
-model.add(layers.Conv2D (channels, 1, padding='same', name = "a_project"))
-model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='a_project_BN'))
+model.add(layers.Conv2D (filters=8, kernel_size=1, strides=2, padding='same'))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
     
-model.add(layers.Conv2D (1, 1, 
-                         padding='same', 
-                         activation="sigmoid", 
-                         name = "heatmap"))
+model.add(layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "heatmap"))
 
 
 model.compile(loss='mse', 
               optimizer=keras.optimizers.adam(lr=0.001), 
-              metric= ['mae'])
+              metrics = ['mae'])
+
+model.summary()
+
+history = model.fit(x_train, y_train, 
+                    epochs=50, 
+                    batch_size=4, 
+                    verbose=1, 
+                    validation_data=(x_test, y_test))
+
+
 
 #inputA = layers.Input(shape=img.shape)
 #inputB = layers.Input(shape=(num_classes,))
@@ -287,11 +333,11 @@ model.compile(loss='mse',
 # model.compile(loss={'heatmap': 'mse', 'classification': 'categorical_crossentropy'}, 
 #               optimizer=keras.optimizers.adam(lr=0.001), 
 #               metrics = {'heatmap':['mae'], 'classification':['acc']})
-history = model.fit(x_train, y_train, 
-                    epochs=1, 
-                    batch_size=1, 
-                    verbose=1, 
-                    validation_data=(x_test, y_test))
+# history = model.fit(x_train, y_train, 
+#                     epochs=50, 
+#                     batch_size=4, 
+#                     verbose=1, 
+#                     validation_data=(x_test, y_test))
 #                    validation_split=0.2)
 
 # # Test the model after training
