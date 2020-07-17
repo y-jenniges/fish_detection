@@ -49,7 +49,7 @@
 #---------------------------------------------------------------------------
 import keras
 
-path="../data/output/29/"
+path="../data/output/31/"
 
 model = keras.models.load_model(f"{path}model-L")
 
@@ -130,4 +130,7 @@ x = x.reshape(1,736, 1088, 3)
 #x = helpers.downsample(x)
 
 activations = get_activations(model, x, auto_compile=True)
-keract.display_activations(activations, save=True, directory=f"{path}activations")
+#keract.display_activations(activations, save=True, directory=f"{path}activations")
+
+
+keract.display_heatmaps(activations, x, save=True, directory=f"{path}activationHeatmapsWithImage")
