@@ -23,7 +23,7 @@ label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
-labels = labels[:5]
+#labels = labels[:2]
  
 
 
@@ -256,33 +256,40 @@ PYTHONHASHSEED = 0
 helpers.showImageWithHeatmap(x_train[0], y_train[0])
 
 model = Sequential()
-model.add(layers.DepthwiseConv2D(kernel_size=3, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
+model.add(layers.Conv2D(kernel_size=7, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (filters=128, kernel_size=1, strides=2, padding='same'))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=2, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (filters=64, kernel_size=1, strides=2, padding='same'))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=2, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (filters=32, kernel_size=1, strides=2, padding='same'))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=2, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (filters=16, kernel_size=1, strides=2, padding='same'))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=2, padding='same'))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
+model.add(layers.ReLU(6.))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 
-model.add(layers.Conv2D (filters=8, kernel_size=1, strides=2, padding='same'))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=2, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-    
+model.add(layers.ReLU(6.))
+model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
+model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
+model.add(layers.ReLU(6.))
+
 model.add(layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "heatmap"))
 
 
-model.compile(loss='mse', 
+model.compile(loss='binary_crossentropy', 
               optimizer=keras.optimizers.adam(lr=0.001), 
               metrics = ['mae'])
 
