@@ -12,7 +12,7 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/18/"
+test_path = "../data/output/24/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -38,22 +38,24 @@ with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
 
 
+
+
 # load testGen
 # with open(os.path.join(test_path, testGen_path),'rb') as file:
 #     raw_data = file.read()
 # testGen = pickle.loads(raw_data)
 
-testGen = dg.DataGenerator (dataset=test_labels, 
-                              #hm_folder_path="../data/heatmaps_lowRes/test/" ,
-                              prepareEntry=dg.prepareEntryLowResHeatmap,
-                              batch_size=Globals.batch_size)
+# testGen = dg.DataGenerator (dataset=test_labels, 
+#                               #hm_folder_path="../data/heatmaps_lowRes/test/" ,
+#                               prepareEntry=dg.prepareEntryLowResHeatmap,
+#                               batch_size=Globals.batch_size)
 
 
 # load model
 # todo look for file name (depends on timestamp)
 modelL = keras.models.load_model(os.path.join(test_path,model_path))
 
-# load training history
+# # load training history
 # with open(os.path.join(test_path, hist_path),'rb') as file:
 #     raw_data = file.read()
 # history = pickle.loads(raw_data)
@@ -69,32 +71,38 @@ f39 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39
 f51 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
 f60 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
 
-i = 60
-entry = [entry for entry in test_labels if entry['filename'] == f60][0]
-#entry = test_labels[i]
-image = np.asarray(helpers.loadImage(entry['filename']))
+#tests = {"f0":0, "f22":22, "f39":39, "f51":51, "f60":60}
+tests = {"0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
 
-# groundtruth heatmap
-hm = HeatmapClass.Heatmap(entry)
-y = np.asarray(hm.hm)
-
-# predicted heatmap
-X = np.expand_dims(image, axis=0)
-yHat = modelL.predict(X)
-
-print(f"yhat shape {yHat.shape})")
-print(f"yhat has range {np.min(yHat), np.max(yHat)}")
-
-# with open(out_path + str(i) + ".json", "w") as f:
-#    json.dump(yHat.tolist(), f)
-
-
-#helpers.showImageWithAnnotation(entry)
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1, filename=f"{out_path}test{i}{res}_exag1.jpg")
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=10, filename=f"{out_path}test{i}{res}_exag10.jpg")
-helpers.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=100, filename=f"{out_path}test{i}{res}_exag100.jpg")
-#.showImageWithHeatmap(image, yHat[0, :, :, :], exaggerate=1)
-print(helpers.entropy(yHat))
+for k, v in tests.items():
+    entry = [entry for entry in test_labels if entry['filename'] == v][0]
+    #entry = test_labels[i]
+    image = np.asarray(helpers.loadImage(entry['filename']))
+    image = 2.*image/np.max(image) - 1
+        
+    # groundtruth heatmap
+    hm = HeatmapClass.Heatmap(entry)
+    y = np.asarray(hm.hm)
+    
+    # predicted heatmap
+    X = np.expand_dims(image, axis=0)
+    yHat = modelL.predict(X)
+    
+    print(v)
+    print(f"yhat shape {yHat.shape})")
+    print(f"yhat has range {np.min(yHat), np.max(yHat)}")
+    print()
+    
+    # with open(out_path + str(i) + ".json", "w") as f:
+    #    json.dump(yHat.tolist(), f)
+    
+    
+    helpers.showImageWithAnnotation(entry)
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1, filename=f"{out_path}test{k}{res}_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=10, filename=f"{out_path}test{k}{res}_exag10.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=100, filename=f"{out_path}test{k}{res}_exag100.jpg")
+   # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1)
+    print(helpers.entropy(yHat))
 
 # show heatmap only
 # with open(out_path+str(i)+".json","r") as f:
