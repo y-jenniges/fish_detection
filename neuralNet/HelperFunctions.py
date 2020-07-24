@@ -48,18 +48,18 @@ def shapeOfFilename(fname):
     return imageShape.shape
 
 # todo head and tail are switched!!
-# def showImageWithAnnotation(entry):
-#     "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
-#     image = loadImage(entry['filename'])
-#     plt.imshow(image)
-#     x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
-#     y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
+def showImageWithAnnotation(entry):
+    "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
+    image = loadImage(entry['filename'])
+    plt.imshow(image)
+    x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
+    y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
     
-#     x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
-#     y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
-#     plt.scatter (x_front, y_front, marker="o", c="w")
-#     plt.scatter (x_back, y_back, marker="x", c="b")
-#     plt.show()
+    x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
+    y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
+    plt.scatter (x_front, y_front, marker="o", c="w")
+    plt.scatter (x_back, y_back, marker="x", c="b")
+    plt.show()
 
 def entropy(x):
     '''Returns the average entropy of the probability distributions in x. The last axis of x

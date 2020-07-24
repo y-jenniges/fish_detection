@@ -15,7 +15,7 @@ from keras import layers
 
 
 # output directory
-out_path = "../data/output/32/"
+out_path = "../data/output/34/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
@@ -23,7 +23,7 @@ label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
-#labels = labels[:2]
+labels = labels[:2]
  
 
 
@@ -256,7 +256,7 @@ PYTHONHASHSEED = 0
 helpers.showImageWithHeatmap(x_train[0], y_train[0])
 
 model = Sequential()
-model.add(layers.Conv2D(kernel_size=7, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
+model.add(layers.Conv2D(filters=3, kernel_size=7, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
 model.add(layers.ReLU(6.))
 

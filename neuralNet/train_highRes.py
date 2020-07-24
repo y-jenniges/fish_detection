@@ -21,8 +21,7 @@ bodyPart:
     'both'
 """
 # output directory
-#timestamp = time.strftime("%Y%m%d-%H%M%S")
-out_path = f"../data/output/13/"
+out_path = f"../data/output/34/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -39,6 +38,15 @@ with open(os.path.join(label_root, label_path), 'r') as f:
 label_path = "training_labels_no_animals.json"
 with open(os.path.join(label_root, label_path), 'r') as f:
     train_labels_no_animals = json.load(f)
+
+# only use images that contain fish
+fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
+test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
+
+# train_labels_animals = train_labels_animals[:4]
+# test_labels = test_labels[:4]
+
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -140,6 +148,7 @@ def ourBlock (x, basename, channels=8):
 
 alpha = 1.0
 input = keras.layers.Input(shape=imageShape)
+
 backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
 
 for l in backbone.layers:
@@ -159,8 +168,23 @@ modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.m
 modelL.summary()
 
 start_L  = time.time()
-historyL = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+
+# for training mobilenet too 
+history_L1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
+
+# activate all layers for training
+for l in modelL.layers:
+    l.trainable = True
+    
+# compile and fit model again
+modelL.compile(loss=Globals.loss, optimizer="adam", metrics=Globals.metrics)
+history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+
+
 end_L = time.time() - start_L
+
+
+# upsampling -----------------------------------------------------------------------------------------
 
 x = modelL.get_layer("block_17_project_BN").output # low-res model before last conv-sigmoid layer
 x = layers.UpSampling2D(interpolation='bilinear', name='block_19_upto16')(x)
@@ -213,10 +237,10 @@ print(f"model-L training took {end_L}\nmodel-H training took {end_H}")
 
 # save model, weights and history
 modelH.save(f"{out_path}model-H")
-modelH.save_weights(f"{out_path}weights-H.h5") # saves weights (e.g. a checkpoint) locally
+#modelH.save_weights(f"{out_path}weights-H.h5") # saves weights (e.g. a checkpoint) locally
 
 modelL.save(f"{out_path}model-L")
-modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
+#modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 
 
 # save the history(todo: is it already contained in modelL.save? and also weights?)
@@ -225,5 +249,7 @@ with open(f"{out_path}trainHistory-H.pickle", 'wb') as file:
     pickle.dump(historyH.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
     
-with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
-    pickle.dump(historyL.history, file)
+with open(f"{out_path}trainHistory-L1.pickle", 'wb') as file:
+    pickle.dump(history_L1.history, file)
+with open(f"{out_path}trainHistory-L2.pickle", 'wb') as file:
+    pickle.dump(history_L2.history, file)

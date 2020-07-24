@@ -35,7 +35,8 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
         #print("Calculating heatmap...")
         hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart='front')
         #hm.showImageWithHeatmap()
-        hm = hm.hm
+        hm = helpers.downsample(hm.hm)
+        
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])
@@ -43,16 +44,48 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
 
     heatmaps=[]
     classification=[]
+ 
     
+    heatmaps = hm
+    classification = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    # heatmaps.append(hm)
+    # classification.append(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+    #helpers.showImageWithHeatmap(image, hm)
+
+
 
     
-    # idea here: return only necessary heatmaps and classes
+    # # idea here: return only necessary heatmaps and classes
     # for animal in entry['animals']:
-    #     group = str(math.floor(animal['group'].index(1)/2))
-    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
+    #     group = math.ceil(animal['group'].index(1)/2)
+    #     #group = str(math.floor(animal['group'].index(1)/2))
+    #     bodyPart = 'front' if animal['group'].index(1)%2==0 else 'back'
         
-    #     heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
-    #     classification.append(np.array(animal['group']))
+    #     hm = HeatmapClass.Heatmap(entry, resolution='low', group=group, bodyPart=bodyPart)
+    #     #hm.showImageWithHeatmap()
+    #     hm = helpers.downsample(hm.hm)
+        
+        
+    #     # heatmaps.append(hm)
+    #     # classification.append(np.array(animal['group']))
+    #     # helpers.showImageWithHeatmap(image, hm)
+        
+    #     # avoid dulicate heatmaps
+    #     if len(heatmaps) == 0:
+    #         heatmaps.append(hm)
+    #         classification.append(np.array(animal['group']))
+    #     else:
+    #         isContained = False
+    #         for h in heatmaps:
+    #             if np.array_equal(h, hm):
+    #                 isContained = True
+                
+    #         if not isContained:   
+    #             heatmaps.append(hm)
+    #             # heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
+    #             classification.append(np.array(animal['group']))
+    #             helpers.showImageWithHeatmap(image, hm)
+                    
     
     
     # # if there is no animal on the image, give an all black heatmap (all zeros) and class 0 (nothing)
@@ -91,10 +124,20 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     #     classification[idx] = np.asarray(animal['group'])
 
     # this return is for one heatmap calculations only
-    return (image, helpers.downsample(np.asarray(hm)))
+    #return (image, helpers.downsample(np.asarray(hm)))
 
-    #return np.asarray([np.asarray(image), np.asarray(heatmaps), np.asarray(classification)])
-  
+
+    # print("datagenerator gives back: ")
+    # print(heatmaps)
+    # print(classification)
+    # print(len(heatmaps))
+    # print(len(classification))
+
+    #return np.asarray(image), {"heatmap": heatmaps, "classification": classification}
+    
+
+    
+    return np.asarray(image), np.asarray(heatmaps), np.asarray(classification)
 
   
     # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
@@ -135,6 +178,22 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
 
     heatmaps=[]
     classification=[]
+    
+    heatmaps = hm
+    classification = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    
+    # # idea here: return only necessary heatmaps and classes
+    # for animal in entry['animals']:
+    #     group = math.ceil(animal['group'].index(1)/2)
+    #     #group = str(math.floor(animal['group'].index(1)/2))
+    #     bodyPart = 'front' if animal['group'].index(1)%2==0 else 'back'
+        
+    #     hm = HeatmapClass.Heatmap(entry, resolution='low', group=group, bodyPart=bodyPart)
+    #     hm.showImageWithHeatmap()
+        
+    #     heatmaps.append(hm)
+    #     # heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
+    #     classification.append(np.array(animal['group']))
         
     # for animal in entry['animals']:
     #     group = str(math.floor(animal['group'].index(1)/2))
@@ -144,7 +203,8 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     #     classification.append(animal['group'])
        
 
-    return (image, np.asarray(hm))
+    return np.asarray(image), np.asarray(heatmaps), np.asarray(classification)
+    #return (image, np.asarray(hm))
     #return [image, heatmaps, classification]
     
     # return [(image, hms['hm_0f']), (image, hms['hm_0b']), (image, hms['hm_1f']), (image, hms['hm_1b']), \
@@ -159,16 +219,25 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     shows the first entry both as image X and annotation y."""    
     X, y = dataGen[i]
     
-    eLo = helpers.entropy(y)
-    eHi = helpers.entropy(np.mean(y, axis=(0,1,2)))
+    # eLo = helpers.entropy(y)
+    # eHi = helpers.entropy(np.mean(y, axis=(0,1,2)))
     
-    print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
-    print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(y):.3f}..{np.max(y):.3f}] and entropy [{eLo:.7f}..{eHi:.7f}]")
+    # print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
+    #print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(y):.3f}..{np.max(y):.3f}] and entropy [{eLo:.7f}..{eHi:.7f}]")
     
-
+    # print(type(y))
+    # print("laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
     
+    # print(y[0]['classification'].shape)
+    # print(y[1]['classification'].shape)
+    # print(y[2]['classification'].shape)
+    # print(y[3]['classification'].shape)
+    #print(y['heatmap'].shape)
+    #print(y['classification'].shape)
+   #print(f"len of y: {len(y)} and shape of y[0]: {y[0].shape}")
     #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
     #print(f"classification is {y['classification']}")
+    print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
 
 
     # todo how to i know the resolution
@@ -237,14 +306,20 @@ class DataGenerator(keras.utils.Sequence):
         batch_no_animals = [self.prepareEntry(e, no_animal_hm_path) for e in batch_no_animals]
             
         batch = batch_animals + batch_no_animals
-            
+        
         X = np.array([e[0] for e in batch])
-        y = np.array([e[1] for e in batch])
+        heatmaps = np.array([e[1] for e in batch])
+        classification = np.array([e[2] for e in batch])
         #y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
         
         #print(f"y[heatmap] shape {np.array(y['heatmap']).shape}")
 
-        return X, y
+        #print(f"heatmaps shape {np.asarray(heatmaps).shape}")
+        #print(f"heatmaps[0] shape {np.asarray(heatmaps[0]).shape}")
+
+        #return X, {"heatmap": heatmaps, "classification": classification}
+        #return X, [heatmaps, classification]
+        return X, heatmaps
         
     def get_ground_truth (self, index):
         #print("DataGenerator: get_ground_truth")

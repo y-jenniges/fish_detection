@@ -22,7 +22,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/29/"
+out_path = f"../data/output/34/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -45,12 +45,16 @@ fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
 test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
+# only take first 5 labels
+# train_labels_animals = train_labels_animals[:4]
+# test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
 data_root = "../data/maritime_dataset_25/"
 imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"))
 print(f"Image format {imageShape}.")
+
 
 trainGenL = dg.DataGenerator (dataset=train_labels_animals,
                               #hm_folder_path="../data/heatmaps_lowRes/training_animals/",
@@ -89,15 +93,15 @@ print("DataGenerators serialized")
 
 
 
-# Now construct the low-res net and store it into the variable model
-# Loading of MobileNet.V2 will give a warning "`input_shape` is undefined or non-square, or `rows` is not in [96, 128, 160, 192, 224]. Weights for input shape (224, 224) will be loaded as the default."
-# That's correct.
-# Proceed as described in abv-uebung-6.pdf and discuss the architecture.
-# Inspect the architecture with model.summary() to make sure, that the number of trainable weights
-# is compatible to the amount of data we have.
-#
-# For reference you can access the MobileNet.V2 source code at
-# https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
+# # Now construct the low-res net and store it into the variable model
+# # Loading of MobileNet.V2 will give a warning "`input_shape` is undefined or non-square, or `rows` is not in [96, 128, 160, 192, 224]. Weights for input shape (224, 224) will be loaded as the default."
+# # That's correct.
+# # Proceed as described in abv-uebung-6.pdf and discuss the architecture.
+# # Inspect the architecture with model.summary() to make sure, that the number of trainable weights
+# # is compatible to the amount of data we have.
+# #
+# # For reference you can access the MobileNet.V2 source code at
+# # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
 def ourBlock (x, basename, channels=8):
 #def ourBlock(x, basename, channels=Globals.channels):
@@ -124,7 +128,7 @@ def ourBlock (x, basename, channels=8):
     return x
 
 alpha = 1.0
-input= keras.layers.Input(shape=imageShape)
+input = keras.layers.Input(shape=imageShape)
 
 backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
 #for l in backbone.layers[:-25]:
@@ -176,18 +180,18 @@ start  = time.time()
 # train low-res-net
 #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 #for ctr in range(10):
-history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+#history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
     
-# for traininv mobilenet too 
-# history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
+# for training mobilenet too 
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
 
-# # activate all layers for training
-# for l in modelL.layers:
-#     l.trainable = True
+# activate all layers for training
+for l in modelL.layers:
+    l.trainable = True
     
-# # compile and fit model again
-# modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-# history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+# compile and fit model again
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 
 
@@ -195,18 +199,18 @@ history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, val
 print(f"Training took {time.time() - start}")
 
 
-# save model, weights and history
-modelL.save(f"{out_path}model-L")
-modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
-# save the history(todo: is it already contained in modelL.save? and also weights?)
-# history.history is a dict
-with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
-    pickle.dump(history.history, file) 
+# # save model, weights and history
+# modelL.save(f"{out_path}model-L")
+# modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
+# # save the history(todo: is it already contained in modelL.save? and also weights?)
+# # history.history is a dict
+# # with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
+# #     pickle.dump(history.history, file) 
 
 # for training mobilenet too
-# with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
-#     pickle.dump(history_phase1.history, file)
-#     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
+with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
+    pickle.dump(history_phase1.history, file)
+    #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
 
-# with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
-#     pickle.dump(history_phase2.history, file)  
+with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
+    pickle.dump(history_phase2.history, file)  

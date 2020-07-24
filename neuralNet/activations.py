@@ -49,7 +49,7 @@
 #---------------------------------------------------------------------------
 import keras
 
-path="../data/output/31/"
+path="../data/output/32/"
 
 model = keras.models.load_model(f"{path}model-L")
 
@@ -122,7 +122,7 @@ import keract
 
 import HelperFunctions as helpers
 #filename = "../data/maritime_dataset_25/training_data_animals/60.jpg"
-filename = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/training_data_animals/60.jpg"
+filename = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
 image = helpers.loadImage(filename)
 x = 2.*image/np.max(image) - 1
 x = x.reshape(1,736, 1088, 3)
@@ -130,7 +130,7 @@ x = x.reshape(1,736, 1088, 3)
 #x = helpers.downsample(x)
 
 activations = get_activations(model, x, auto_compile=True)
-#keract.display_activations(activations, save=True, directory=f"{path}activations")
+keract.display_activations(activations, save=True, directory=f"{path}activations")
 
 
 keract.display_heatmaps(activations, x, save=True, directory=f"{path}activationHeatmapsWithImage")
