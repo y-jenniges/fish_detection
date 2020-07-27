@@ -317,9 +317,9 @@ class DataGenerator(keras.utils.Sequence):
         #print(f"heatmaps shape {np.asarray(heatmaps).shape}")
         #print(f"heatmaps[0] shape {np.asarray(heatmaps[0]).shape}")
 
-        #return X, {"heatmap": heatmaps, "classification": classification}
+        return X, {"heatmap": heatmaps, "classification": classification}
         #return X, [heatmaps, classification]
-        return X, heatmaps
+        #return X, heatmaps
         
     def get_ground_truth (self, index):
         #print("DataGenerator: get_ground_truth")

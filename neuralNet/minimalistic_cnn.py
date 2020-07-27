@@ -296,7 +296,7 @@ model.compile(loss='binary_crossentropy',
 model.summary()
 
 history = model.fit(x_train, y_train, 
-                    epochs=50, 
+                    epochs=200, 
                     batch_size=4, 
                     verbose=1, 
                     validation_data=(x_test, y_test))

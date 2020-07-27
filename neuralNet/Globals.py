@@ -5,7 +5,7 @@ channels = NUM_GROUPS*2 - 1
 
 # parameters for training
 no_animal_ratio = 0
-batch_size = 4
+batch_size = 2
 
 
 # loss={'heatmap': 'mse', 
@@ -18,5 +18,5 @@ metrics = ['mae']
 # metrics = {'heatmap':['mae'],
 #            'classification':['acc']}
 
-epochs_L = 50
+epochs_L = 200
 epochs_H = 20

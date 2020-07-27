@@ -22,7 +22,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/34/"
+out_path = f"../data/output/38/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -46,8 +46,8 @@ train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_anima
 test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
 # only take first 5 labels
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -142,8 +142,8 @@ x = backbone.get_layer("block_16_project_BN").output
 x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
-x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
-
+#x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
+x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 # output layers
@@ -199,18 +199,19 @@ history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs
 print(f"Training took {time.time() - start}")
 
 
-# # save model, weights and history
-# modelL.save(f"{out_path}model-L")
+# save model, weights and history
+modelL.save(f"{out_path}model-L")
+
 # modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # # save the history(todo: is it already contained in modelL.save? and also weights?)
 # # history.history is a dict
-# # with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
-# #     pickle.dump(history.history, file) 
+# with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
+#     pickle.dump(history.history, file) 
 
 # for training mobilenet too
-with open(f"{out_path}trainHistory-1.pickle", 'wb') as file:
+with open(f"{out_path}trainHistory-L1.pickle", 'wb') as file:
     pickle.dump(history_phase1.history, file)
     #modelL.save_weights(f"fish-L-{ctr}.h5") # saves weights (e.g. a checkpoint) locally
 
-with open(f"{out_path}trainHistory-2.pickle", 'wb') as file:
+with open(f"{out_path}trainHistory-L2.pickle", 'wb') as file:
     pickle.dump(history_phase2.history, file)  
