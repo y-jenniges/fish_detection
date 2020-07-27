@@ -21,7 +21,7 @@ bodyPart:
     'both'
 """
 # output directory
-out_path = f"../data/output/34/"
+out_path = f"../data/output/39/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -44,8 +44,8 @@ fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
 test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
 
 
 # image path
@@ -90,17 +90,17 @@ dg.showEntryOfGenerator (testGenH, 0, False)
 
 
 # serialize data generators
-serialized_trainGenH = pickle.dumps(trainGenH)
+#serialized_trainGenH = pickle.dumps(trainGenH)
 serialized_testGenH = pickle.dumps(testGenH)
 serialized_testGenL = pickle.dumps(testGenL)
 
-filename_train = f'{out_path}serialized_trainGen-H.pickle'
+#filename_train = f'{out_path}serialized_trainGen-H.pickle'
 filename_testH = f'{out_path}serialized_testGen-H.pickle'
 filename_testL = f'{out_path}serialized_testGen-L.pickle'
 
 # save data generators
-with open(filename_train,'wb') as file:
-    file.write(serialized_trainGenH)
+# with open(filename_train,'wb') as file:
+#     file.write(serialized_trainGenH)
 with open(filename_testH,'wb') as file:
     file.write(serialized_testGenH)
 with open(filename_testL,'wb') as file:
@@ -161,12 +161,16 @@ x = backbone.get_layer("block_16_project_BN").output
 x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
-x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
+#x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
+x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+
 
 modelL = keras.Model(inputs=input, outputs=x)
 modelL.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelL.summary()
 
+
+# start timer for training
 start_L  = time.time()
 
 # for training mobilenet too 
@@ -179,7 +183,6 @@ for l in modelL.layers:
 # compile and fit model again
 modelL.compile(loss=Globals.loss, optimizer="adam", metrics=Globals.metrics)
 history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
-
 
 end_L = time.time() - start_L
 
@@ -212,7 +215,8 @@ x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
 #x = layers.ReLU(6., name='block_23_relu')(x)
 x = ourBlock (x, 'block_23', channels=4)
 
-x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
+#x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
+x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 modelH = keras.Model(inputs=input, outputs=x)
