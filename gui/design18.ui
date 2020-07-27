@@ -475,7 +475,7 @@ QLabel{
             <number>5</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_filter_10">
+            <widget class="QPushButton" name="btn_menu2">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -667,7 +667,7 @@ QLabel{
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_9">
+            <widget class="QPushButton" name="btn_zoom">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -702,7 +702,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_2">
+            <widget class="QPushButton" name="btn_add">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -737,7 +737,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_5">
+            <widget class="QPushButton" name="btn_previous">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -772,7 +772,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_7">
+            <widget class="QPushButton" name="btn_placeholder">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -806,7 +806,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_8">
+            <widget class="QPushButton" name="btn_next">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -841,7 +841,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_4">
+            <widget class="QPushButton" name="btn_delete">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -876,7 +876,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_3">
+            <widget class="QPushButton" name="btn_undo">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -959,7 +959,7 @@ QLabel{
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_filter_6">
+            <widget class="QPushButton" name="btn_menu">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
