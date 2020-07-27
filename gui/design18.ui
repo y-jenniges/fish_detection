@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1285</width>
-    <height>817</height>
+    <width>1281</width>
+    <height>808</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -558,9 +558,7 @@ QLabel{
               </font>
              </property>
              <property name="styleSheet">
-              <string notr="true">
-
-</string>
+              <string notr="true"/>
              </property>
              <property name="text">
               <string>L</string>
@@ -1467,6 +1465,18 @@ QLabel{
            </item>
            <item>
             <widget class="QLabel" name="label_user_id_6">
+             <property name="font">
+              <font>
+               <family>Century Gothic</family>
+               <pointsize>10</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">font:10pt;</string>
+             </property>
              <property name="text">
               <string>yj</string>
              </property>
@@ -1712,20 +1722,19 @@ QLabel{
       </widget>
       <widget class="QWidget" name="page_settings">
        <property name="styleSheet">
-        <string notr="true">QTextEdit{
+        <string notr="true">/*-------------------------- line edit ------------------------*/
+QLineEdit{
+	background-color:white;
+	border-radius: 3px;
 	font: 12pt &quot;Century Gothic&quot;;
-outline:none;
-border: none; 
-border-width: 0px;
-border-radius: 3px;
-
+	selection-background-color:rgb(0, 203, 221);
+	selection-color:white;
+	color:black;
 }
 
 
 
-
-
-
+/*-------------------------- tab widget ------------------------*/
 QTabWidget{
 	font: 12pt &quot;Century Gothic&quot;;
 }
@@ -1769,10 +1778,14 @@ QTabBar::tab:!selected {
 
 
 
+/*-------------------------- labels ------------------------*/
 QLabel{
 	color:black;
 }
 
+
+
+/*-------------------------- buttons ------------------------*/
 QPushButton{
 	font: 10pt &quot;Century Gothic&quot;;
 }
@@ -1786,40 +1799,26 @@ QPushButton{
 }
 
 
+#btn_apply_camera:hover , 
+#btn_load:hover, #btn_save:hover{
+  background-color: rgb(0, 203, 221);
+}
+
+#btn_apply_camera:pressed , 
+#btn_load:pressed, #btn_save:pressed{
+background-color: rgb(0, 160, 174);
+}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*-------------------------- double spin boxes ------------------------*/
 
 QDoubleSpinBox {
     padding-right: 15px; /* make room for the arrows */
-    border-image: url(:/images/frame.png) 4;
-    border-width: 3;
+    /*border-image: url(:/images/frame.png) 4;*/
+    border-radius: 3px;
+	selection-background-color:rgb(0, 203, 221);
+	font:12pt &quot;Century Gothic&quot;;
 }
 
 QDoubleSpinBox::up-button {
@@ -1827,56 +1826,60 @@ QDoubleSpinBox::up-button {
     subcontrol-position: top right; /* position at the top right corner */
 
     width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
-    border-image: url(:/images/spinup.png) 1;
+    border-image: url(:/icons/icons/arrow_up.png) 1;
     border-width: 1px;
+	margin:2px;
 }
 
 QDoubleSpinBox::up-button:hover {
-    border-image: url(:/images/spinup_hover.png) 1;
+    border-image: url(:/icons/icons/arrow_up_blue.png) 1;
 }
 
 QDoubleSpinBox::up-button:pressed {
-    border-image: url(:/images/spinup_pressed.png) 1;
+    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;
 }
 
+
+
+/*
 QDoubleSpinBox::up-arrow {
-    image: url(:/images/up_arrow.png);
+    image:url(:/icons/icons/arrow_up.png);
     width: 7px;
     height: 7px;
 }
-
 QDoubleSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
-   image: url(:/images/up_arrow_disabled.png);
+ /*  image: url(:/images/up_arrow_disabled.png);
 }
+QDoubleSpinBox::down-arrow {
+    image: url(:/icons/icons/arrow_down.png);
+    width: 7px;
+    height: 7px;
+}
+QDoubleSpinBox::down-arrow:disabled,
+QDoubleSpinBox::down-arrow:off { /* off state when value in min */
+ /*  image: url(:/icons/icons/arrow_down.png) 1;
+}
+*/
 
 QDoubleSpinBox::down-button {
     subcontrol-origin: border;
     subcontrol-position: bottom right; /* position at bottom right corner */
 
     width: 16px;
-    border-image: url(:/images/spindown.png) 1;
+    border-image: url(:/icons/icons/arrow_down.png) 1;
     border-width: 1px;
     border-top-width: 0;
+	margin:2px;
 }
 
 QDoubleSpinBox::down-button:hover {
-    border-image: url(:/images/spindown_hover.png) 1;
+    border-image: url(:/icons/icons/arrow_down_blue.png) 1;
 }
 
-QSpinBox::down-button:pressed {
-    border-image: url(:/images/spindown_pressed.png) 1;
+QDoubleSpinBox::down-button:pressed {
+    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;
 }
-
-QDoubleSpinBox::down-arrow {
-    image: url(:/images/down_arrow.png);
-    width: 7px;
-    height: 7px;
-}
-
-QDoubleSpinBox::down-arrow:disabled,
-QDoubleSpinBox::down-arrow:off { /* off state when value in min */
-   image: url(:/images/down_arrow_disabled.png);
-}</string>
+</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <property name="spacing">
@@ -2036,6 +2039,9 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
            </item>
            <item>
             <widget class="QLabel" name="label_user_id_settings">
+             <property name="styleSheet">
+              <string notr="true">color:white; font:10pt;</string>
+             </property>
              <property name="text">
               <string>yj</string>
              </property>
@@ -2381,7 +2387,13 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QTextEdit" name="textEdit_config">
+                      <widget class="QLineEdit" name="lineEdit">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -2395,29 +2407,19 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
                         </size>
                        </property>
                        <property name="toolTip">
-                        <string>Select a camera configruation file usinf the &quot;Load&quot; button on the right</string>
+                        <string>Select a camera configuration file using the &quot;Load&quot; button on the right</string>
                        </property>
-                       <property name="frameShape">
-                        <enum>QFrame::NoFrame</enum>
+                       <property name="inputMask">
+                        <string/>
                        </property>
-                       <property name="verticalScrollBarPolicy">
-                        <enum>Qt::ScrollBarAlwaysOff</enum>
+                       <property name="text">
+                        <string/>
                        </property>
                        <property name="readOnly">
                         <bool>true</bool>
                        </property>
-                       <property name="html">
-                        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Century Gothic'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="acceptRichText">
-                        <bool>true</bool>
-                       </property>
                        <property name="placeholderText">
-                        <string>Select camera configuration file...</string>
+                        <string>Path to camera configuration file...</string>
                        </property>
                       </widget>
                      </item>
@@ -2538,6 +2540,12 @@ p, li { white-space: pre-wrap; }
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
+                       <property name="prefix">
+                        <string/>
+                       </property>
+                       <property name="maximum">
+                        <double>999.990000000000009</double>
+                       </property>
                       </widget>
                      </item>
                      <item>
@@ -2644,6 +2652,12 @@ p, li { white-space: pre-wrap; }
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
+                       <property name="prefix">
+                        <string/>
+                       </property>
+                       <property name="maximum">
+                        <double>999.990000000000009</double>
+                       </property>
                       </widget>
                      </item>
                      <item>
@@ -2743,6 +2757,12 @@ p, li { white-space: pre-wrap; }
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                       <property name="prefix">
+                        <string/>
+                       </property>
+                       <property name="maximum">
+                        <double>999.990000000000009</double>
                        </property>
                       </widget>
                      </item>
