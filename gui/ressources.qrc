@@ -1,0 +1,32 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>icons/fish.png</file>
+    <file>icons/arrow_up_blue.png</file>
+    <file>icons/open_image.png</file>
+    <file>icons/arrow_up_darkblue.png</file>
+    <file>icons/arrow_down_darkblue.png</file>
+    <file>icons/arrow_down_blue.png</file>
+    <file>icons/arrow_up.png</file>
+    <file>icons/camera.png</file>
+    <file>icons/settings.png</file>
+    <file>icons/arrow_left_big.png</file>
+    <file>icons/arrow_right_big.png</file>
+    <file>icons/glass_b.png</file>
+    <file>icons/data_w.png</file>
+    <file>icons/user_w.png</file>
+    <file>icons/bin_open.png</file>
+    <file>icons/plus_b.png</file>
+    <file>icons/home_w.png</file>
+    <file>icons/glass.png</file>
+    <file>icons/undo.png</file>
+    <file>icons/bin_closed.png</file>
+    <file>icons/arrow_right_small.png</file>
+    <file>icons/arrow_left_small.png</file>
+    <file>icons/plus.png</file>
+    <file>icons/menu_padded.png</file>
+    <file>icons/menu.png</file>
+    <file>icons/filter.png</file>
+    <file>icons/user_b.png</file>
+    <file>icons/arrow_down.png</file>
+  </qresource>
+</RCC>
