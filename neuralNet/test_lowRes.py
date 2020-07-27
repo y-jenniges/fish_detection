@@ -12,13 +12,12 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/24/"
+test_path = "../data/output/37/"
 out_path = test_path #+ "output/"
 
 res = "-L"
 
 model_path = "model" + res
-hist_path = "trainHistory" + res + ".pickle"
 testGen_path = "serialized_testGen" + res+ ".pickle"
 
 
@@ -37,8 +36,10 @@ path = "training_labels_no_animals.json"
 with open(os.path.join(label_root, path), 'r') as f:
     train_labels_no_animals = json.load(f)
 
-
-
+hist_path = "trainHistory" + res + ".pickle"
+a = "trainHistory-L1.pickle"
+b = "trainHistory-L2.pickle"
+c = "trainHistory-H.pickle"
 
 # load testGen
 # with open(os.path.join(test_path, testGen_path),'rb') as file:
@@ -55,10 +56,10 @@ with open(os.path.join(label_root, path), 'r') as f:
 # todo look for file name (depends on timestamp)
 modelL = keras.models.load_model(os.path.join(test_path,model_path))
 
-# # load training history
-# with open(os.path.join(test_path, hist_path),'rb') as file:
-#     raw_data = file.read()
-# history = pickle.loads(raw_data)
+# load training history
+with open(os.path.join(test_path, a),'rb') as file:
+    raw_data = file.read()
+history = pickle.loads(raw_data)
 
 
 
@@ -79,7 +80,7 @@ for k, v in tests.items():
     #entry = test_labels[i]
     image = np.asarray(helpers.loadImage(entry['filename']))
     image = 2.*image/np.max(image) - 1
-        
+    
     # groundtruth heatmap
     hm = HeatmapClass.Heatmap(entry)
     y = np.asarray(hm.hm)
@@ -97,10 +98,10 @@ for k, v in tests.items():
     #    json.dump(yHat.tolist(), f)
     
     
-    helpers.showImageWithAnnotation(entry)
+    #helpers.showImageWithAnnotation(entry)
     helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1, filename=f"{out_path}test{k}{res}_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=10, filename=f"{out_path}test{k}{res}_exag10.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=100, filename=f"{out_path}test{k}{res}_exag100.jpg")
+    #helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=10)#, filename=f"{out_path}test{k}{res}_exag10.jpg")
+    # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=100, filename=f"{out_path}test{k}{res}_exag100.jpg")
    # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1)
     print(helpers.entropy(yHat))
 
@@ -166,26 +167,26 @@ for k, v in tests.items():
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-# print(f"MAE: {history['mae']}")
-# print(f"Loss: {history['loss']}")
+print(f"MAE: {history['mae']}")
+print(f"Loss: {history['loss']}")
 
 
-# # plot mae history
-# plt.plot(history['mae'])
-# plt.plot(history['val_mae'])
-# plt.title(f'model{res} mean absolute error')
-# plt.ylabel('mae')
-# plt.xlabel('epoch')
-# plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+f"mae{res}.png")
-# plt.show()
+# plot mae history
+plt.plot(history['mae'])
+plt.plot(history['val_mae'])
+plt.title(f'model{res} mean absolute error')
+plt.ylabel('mae')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper right')
+plt.savefig(out_path+f"mae{res}.png")
+plt.show()
 
-# # plot loss history
-# plt.plot(history['loss'])
-# plt.plot(history['val_loss'])
-# plt.title(f'model{res} loss')
-# plt.ylabel('loss')
-# plt.xlabel('epoch')
-# plt.legend(['train', 'test'], loc='upper right')
-# plt.savefig(out_path+f"loss{res}.png")
-# plt.show()
+# plot loss history
+plt.plot(history['loss'])
+plt.plot(history['val_loss'])
+plt.title(f'model{res} loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper right')
+plt.savefig(out_path+f"loss{res}.png")
+plt.show()
