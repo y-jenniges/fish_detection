@@ -46,8 +46,8 @@ train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_anima
 test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
 # only take first 5 labels
-train_labels_animals = train_labels_animals[:4]
-test_labels = test_labels[:4]
+# train_labels_animals = train_labels_animals[:4]
+# test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
