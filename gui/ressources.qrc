@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/book.png</file>
+    <file>icons/thunfish.png</file>
+    <file>icons/nn.png</file>
     <file>icons/arrow_left_big_blue.png</file>
     <file>icons/arrow_right_big_blue.png</file>
     <file>icons/fish.png</file>
@@ -30,5 +33,10 @@
     <file>icons/filter.png</file>
     <file>icons/user_b.png</file>
     <file>icons/arrow_down.png</file>
+  </qresource>
+  <qresource prefix="logos">
+    <file>logos/logo_awi.png</file>
+    <file>logos/logo_uniBremen.png</file>
+    <file>logos/logo_ifam.png</file>
   </qresource>
 </RCC>
