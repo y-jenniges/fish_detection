@@ -92,11 +92,19 @@ background-color:  rgb(0, 160, 174);
 }
 
 
-#btn_user:hover{
+#btn_user:hover, 
+#btn_user_data:hover, 
+#btn_user_settings:hover,
+#btn_user_handbook:hover,
+#btn_user_about:hover{
 background-color:  rgb(0, 160, 174);
 }
 
-#btn_user:pressed{
+#btn_user:pressed,
+#btn_user_data:pressed, 
+#btn_user_settings:pressed,
+#btn_user_handbook:pressed,
+#btn_user_about:pressed{
 background-color: rgb(0,100,108);
 
 }
@@ -228,7 +236,7 @@ QLabel{
        <number>0</number>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="page_home">
        <property name="focusPolicy">
@@ -927,7 +935,7 @@ QLabel{
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>324</width>
+               <width>354</width>
                <height>20</height>
               </size>
              </property>
@@ -1362,7 +1370,7 @@ QLabel{
             <number>2</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_user_5">
+            <widget class="QPushButton" name="btn_user_data_2">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -1399,7 +1407,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_5">
+            <widget class="QLabel" name="label_user_id_data_2">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -1469,7 +1477,7 @@ QLabel{
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_6">
+            <widget class="QLabel" name="label_user_id_data">
              <property name="font">
               <font>
                <family>Century Gothic</family>
@@ -1491,7 +1499,7 @@ QLabel{
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_user_6">
+            <widget class="QPushButton" name="btn_user_data">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1976,6 +1984,18 @@ QCalendarWidget QSpinBox::down-button:pressed {
                  </item>
                  <item>
                   <widget class="QFrame" name="frame_date">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777214</width>
+                     <height>40</height>
+                    </size>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::NoFrame</enum>
                    </property>
@@ -2690,14 +2710,12 @@ QTabBar::tab {
     border: None;
     min-width: 8ex;
     padding: 2px;
-	padding-bottom:5px;
+	padding-bottom: 5px;
 
 }
 
 QTabBar::tab:selected, QTabBar::tab:hover {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 #fafafa, stop: 0.4 #f4f4f4,
-                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
+    background: rgb(240, 240, 240);
 }
 
 QTabBar::tab:selected {
@@ -3255,6 +3273,9 @@ QDoubleSpinBox::down-button:pressed {
            </property>
            <item>
             <widget class="QTabWidget" name="tabWidget">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="styleSheet">
               <string notr="true"/>
              </property>
@@ -3302,6 +3323,9 @@ QDoubleSpinBox::down-button:pressed {
                   </property>
                   <item>
                    <widget class="QFrame" name="frame_config">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -3334,7 +3358,7 @@ QDoubleSpinBox::down-button:pressed {
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit">
+                      <widget class="QLineEdit" name="lineEdit_config_path">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                          <horstretch>0</horstretch>
@@ -3343,7 +3367,7 @@ QDoubleSpinBox::down-button:pressed {
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>0</width>
+                         <width>400</width>
                          <height>40</height>
                         </size>
                        </property>
@@ -3367,6 +3391,9 @@ QDoubleSpinBox::down-button:pressed {
                        </property>
                        <property name="placeholderText">
                         <string>Path to camera configuration file...</string>
+                       </property>
+                       <property name="cursorMoveStyle">
+                        <enum>Qt::VisualMoveStyle</enum>
                        </property>
                       </widget>
                      </item>
@@ -3491,7 +3518,7 @@ QDoubleSpinBox::down-button:pressed {
                         <string/>
                        </property>
                        <property name="maximum">
-                        <double>999.990000000000009</double>
+                        <double>9999.989999999999782</double>
                        </property>
                       </widget>
                      </item>
@@ -3603,7 +3630,7 @@ QDoubleSpinBox::down-button:pressed {
                         <string/>
                        </property>
                        <property name="maximum">
-                        <double>999.990000000000009</double>
+                        <double>9999.989999999999782</double>
                        </property>
                       </widget>
                      </item>
@@ -3709,7 +3736,7 @@ QDoubleSpinBox::down-button:pressed {
                         <string/>
                        </property>
                        <property name="maximum">
-                        <double>999.990000000000009</double>
+                        <double>99999.990000000005239</double>
                        </property>
                       </widget>
                      </item>
@@ -3802,6 +3829,9 @@ QDoubleSpinBox::down-button:pressed {
                      </item>
                      <item>
                       <widget class="QPushButton" name="btn_apply_camera">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="minimumSize">
                         <size>
                          <width>70</width>
@@ -3949,7 +3979,7 @@ QDoubleSpinBox::down-button:pressed {
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>300</width>
+                         <width>400</width>
                          <height>40</height>
                         </size>
                        </property>
@@ -3972,7 +4002,7 @@ QDoubleSpinBox::down-button:pressed {
                         <string/>
                        </property>
                        <property name="maxLength">
-                        <number>3</number>
+                        <number>32767</number>
                        </property>
                        <property name="echoMode">
                         <enum>QLineEdit::Normal</enum>
@@ -3981,7 +4011,7 @@ QDoubleSpinBox::down-button:pressed {
                         <number>0</number>
                        </property>
                        <property name="readOnly">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                        <property name="placeholderText">
                         <string>Path to neural network model...</string>
@@ -3990,6 +4020,9 @@ QDoubleSpinBox::down-button:pressed {
                      </item>
                      <item>
                       <widget class="QPushButton" name="btn_browse_nn">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="minimumSize">
                         <size>
                          <width>70</width>
@@ -4071,6 +4104,9 @@ QDoubleSpinBox::down-button:pressed {
                      </item>
                      <item>
                       <widget class="QPushButton" name="btn_apply_nn">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="minimumSize">
                         <size>
                          <width>70</width>
@@ -4362,7 +4398,7 @@ border-radius:3px;</string>
                       </spacer>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit_4">
+                      <widget class="QLineEdit" name="lineEdit_user_id">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                          <horstretch>0</horstretch>
@@ -4580,7 +4616,7 @@ border-radius:3px;</string>
             <number>2</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_user_settings_3">
+            <widget class="QPushButton" name="btn_user_settings_handbook_2">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -4617,7 +4653,7 @@ border-radius:3px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_settings_3">
+            <widget class="QLabel" name="label_user_id_handbook_2">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -4687,7 +4723,7 @@ border-radius:3px;</string>
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_settings_4">
+            <widget class="QLabel" name="label_user_id_handbook">
              <property name="styleSheet">
               <string notr="true">color:white; font:10pt;</string>
              </property>
@@ -4700,7 +4736,7 @@ border-radius:3px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_user_settings_4">
+            <widget class="QPushButton" name="btn_user_settings_handbook">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -4991,7 +5027,7 @@ border-radius:3px;</string>
             <number>2</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_user_settings_5">
+            <widget class="QPushButton" name="btn_user_about_2">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -5028,7 +5064,7 @@ border-radius:3px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_settings_5">
+            <widget class="QLabel" name="label_user_id_about_2">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -5098,7 +5134,7 @@ border-radius:3px;</string>
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_user_id_settings_6">
+            <widget class="QLabel" name="label_user_id_about">
              <property name="styleSheet">
               <string notr="true">color:white; font:10pt;</string>
              </property>
@@ -5111,7 +5147,7 @@ border-radius:3px;</string>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_user_settings_6">
+            <widget class="QPushButton" name="btn_user_about">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
