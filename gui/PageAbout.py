@@ -1,181 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from TabWidget import TabWidget
-import Helpers
 
+from Helpers import TopFrame, MenuFrame
+import time
 """
-Frame that contains the menu button. It is similar on most pages, except the home page. 
-The latter includes controls instead of a text in this bar.
+Class to create the about page of the software. It contains information about the development of the software.
 """
-class MenuFrame(QtWidgets.QFrame):
-
-    def __init__(self, central_text, frame_name, parent=None):
-        super(QtWidgets.QFrame, self).__init__(parent)
-
-        # create an icon loader
-        self.icon_loader = Helpers.IconLoader()
-        
-        self.setMinimumSize(QtCore.QSize(0, 50))
-        self.setMaximumSize(QtCore.QSize(16777215, 50))
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.setLineWidth(0)
-        self.setObjectName(frame_name)
-        horizontalLayout_31 = QtWidgets.QHBoxLayout(self)
-        
-        horizontalLayout_31.setContentsMargins(11, 5, 11, 5)
-        horizontalLayout_31.setSpacing(4)
-        horizontalLayout_31.setObjectName("horizontalLayout_31")
-        
-        btn_menu_2 = QtWidgets.QPushButton(self)
-        btn_menu_2.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(btn_menu_2.sizePolicy().hasHeightForWidth())
-        btn_menu_2.setSizePolicy(sizePolicy)
-        btn_menu_2.setMinimumSize(QtCore.QSize(40, 40))
-        btn_menu_2.setMaximumSize(QtCore.QSize(40, 40))
-        btn_menu_2.setText("")
-        btn_menu_2.setIconSize(QtCore.QSize(30, 30))
-        btn_menu_2.setObjectName("btn_menu_2")
-        horizontalLayout_31.addWidget(btn_menu_2)
-        
-        spacerItem58 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_31.addItem(spacerItem58)
-        
-        spacerItem59 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_31.addItem(spacerItem59)
-        
-        self.label_settings_3 = QtWidgets.QLabel(self)
-        font = QtGui.QFont()
-        font.setFamily("Century Gothic")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setItalic(False)
-        font.setWeight(75)
-        self.label_settings_3.setFont(font)
-        self.label_settings_3.setStyleSheet("color:black; font: bold 14pt;")
-        self.label_settings_3.setObjectName("label_settings_3")
-        horizontalLayout_31.addWidget(self.label_settings_3)
-        
-        spacerItem60 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_31.addItem(spacerItem60)
-        
-        spacerItem61 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_31.addItem(spacerItem61)
-        
-        self.btn_menu = QtWidgets.QPushButton(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_menu.sizePolicy().hasHeightForWidth())
-        self.btn_menu.setSizePolicy(sizePolicy)
-        self.btn_menu.setMinimumSize(QtCore.QSize(40, 40))
-        self.btn_menu.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_menu.setText("")
-        self.btn_menu.setIcon(self.icon_loader.get_icon('icon9'))
-        self.btn_menu.setIconSize(QtCore.QSize(30, 30))
-        self.btn_menu.setObjectName("btn_menu")
-        horizontalLayout_31.addWidget(self.btn_menu)
-        
-"""
-This class creates the blue frame which is at the top on every page. 
-"""       
-class TopFrame(QtWidgets.QFrame):
-    """
-    @pixmap_path: path to the pixmap for the icon in the center of the frame (indicating the functionality of the page)
-    @frame_name: name of the created frame
-    """
-    def __init__(self, pixmap_path, frame_name, parent=None):
-        super(QtWidgets.QFrame, self).__init__(parent)
-
-        # create an icon loader
-        self.icon_loader = Helpers.IconLoader()
-    
-        self.setMinimumSize(QtCore.QSize(0, 30))
-        self.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.setStyleSheet("")
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.setLineWidth(0)
-        self.setObjectName(frame_name)
-        
-        horizontalLayout_34 = QtWidgets.QHBoxLayout(self)
-        horizontalLayout_34.setContentsMargins(-1, 2, -1, 2)
-        horizontalLayout_34.setObjectName("horizontalLayout_34")
-    
-        # create a dummy button to keep the frame symmetric
-        btn_user_about_2 = QtWidgets.QPushButton(self)
-        btn_user_about_2.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(btn_user_about_2.sizePolicy().hasHeightForWidth())
-        btn_user_about_2.setSizePolicy(sizePolicy)
-        btn_user_about_2.setMinimumSize(QtCore.QSize(25, 25))
-        btn_user_about_2.setMaximumSize(QtCore.QSize(25, 25))
-        btn_user_about_2.setStyleSheet("")
-        btn_user_about_2.setText("")
-        btn_user_about_2.setIconSize(QtCore.QSize(20, 20))
-        btn_user_about_2.setObjectName("btn_user_about_2")
-        horizontalLayout_34.addWidget(btn_user_about_2)
-        
-        # create a dummy label to keep the frame symmetric (it has to be a member variable such that the invisible text can be adapted. This will change the width of the label)
-        self.label_user_id_2 = QtWidgets.QLabel(self)
-        self.label_user_id_2.setEnabled(True)
-        self.label_user_id_2.setStyleSheet("color:transparent")
-        self.label_user_id_2.setTextFormat(QtCore.Qt.AutoText)
-        self.label_user_id_2.setObjectName("label_user_id_2")
-        horizontalLayout_34.addWidget(self.label_user_id_2)
-        
-        spacerItem56 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_34.addItem(spacerItem56)
-        
-        # central icon on the frame (indicating the functionality of the page)
-        # the icon is passed as a variable to this class
-        icon = QtWidgets.QLabel(self)
-        icon.setMinimumSize(QtCore.QSize(20, 20))
-        icon.setMaximumSize(QtCore.QSize(20, 20))
-        icon.setText("")
-        icon.setPixmap(QtGui.QPixmap(pixmap_path))
-        icon.setScaledContents(True)
-        icon.setAlignment(QtCore.Qt.AlignCenter)
-        icon.setObjectName("icon")
-        horizontalLayout_34.addWidget(icon)
-        
-        spacerItem57 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        horizontalLayout_34.addItem(spacerItem57)
-        
-        # label to display the Id of the current user
-        self.label_user_id = QtWidgets.QLabel(self)
-        self.label_user_id.setStyleSheet("color:white; font:10pt;")
-        self.label_user_id.setTextFormat(QtCore.Qt.AutoText)
-        self.label_user_id.setObjectName("label_user_id")
-        horizontalLayout_34.addWidget(self.label_user_id)
-        
-        # button to switch directly to the user settings
-        self.btn_user = QtWidgets.QPushButton(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_user.sizePolicy().hasHeightForWidth())
-        self.btn_user.setSizePolicy(sizePolicy)
-        self.btn_user.setMinimumSize(QtCore.QSize(25, 25))
-        self.btn_user.setMaximumSize(QtCore.QSize(25, 25))
-        self.btn_user.setText("")
-        self.btn_user.setIcon(self.icon_loader.get_icon('icon1'))
-        self.btn_user.setIconSize(QtCore.QSize(20, 20))
-        self.btn_user.setObjectName("btn_user")
-        horizontalLayout_34.addWidget(self.btn_user)
-
 class PageAbout(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
+        start_time = time.time()
+        
         super(QtWidgets.QWidget, self).__init__(parent)
-        
-        # create an icon loader
-        self.icon_loader = Helpers.IconLoader()
-        
+            
         #self.page_about = QtWidgets.QWidget()
         self.setObjectName("page_about")
         
@@ -261,5 +97,5 @@ class PageAbout(QtWidgets.QWidget):
         self.verticalLayout_19.addWidget(self.frame_logos)
         self.verticalLayout_11.addWidget(self.frame_about)
 
-        
+        #print(f"page about init: {time.time() - start_time}")
 

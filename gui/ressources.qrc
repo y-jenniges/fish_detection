@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/fish_white.png</file>
     <file>icons/book.png</file>
     <file>icons/thunfish.png</file>
     <file>icons/nn.png</file>
