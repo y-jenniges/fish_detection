@@ -10,15 +10,21 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from TabWidget import TabWidget
 import page_settings
+import PageAbout
+import Helpers 
 
 import pandas as pd
 import numpy as np
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
-    def setupUi(self, MainWindow):       
+    def setupUi(self, MainWindow):  
+        # create icon loader
+        self.icon_loader = Helpers.IconLoader()
+        
         # set up main window
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1244, 822)
+        MainWindow.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))
         
         # create a size policy for the main window
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -40,7 +46,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "#frame_controlBar_2{background-color:rgb(200, 200, 200); }\n"
 "#frame_controlBar_3{background-color:rgb(200, 200, 200); }\n"
 "#frame_controlBar_4{background-color:rgb(200, 200, 200); }\n"
-"#frame_controlBar_5{background-color:rgb(200, 200, 200); }\n"
+"#frame_controlBar_about{background-color:rgb(200, 200, 200); }\n"
 "\n"
 "QPushButton{\n"
 "background-color:transparent;\n"
@@ -289,9 +295,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.btn_user.setMinimumSize(QtCore.QSize(25, 25))
         self.btn_user.setMaximumSize(QtCore.QSize(25, 25))
         self.btn_user.setText("")
-        self.icon1 = QtGui.QIcon()
-        self.icon1.addPixmap(QtGui.QPixmap(":/icons/icons/user_w.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_user.setIcon(self.icon1)
+        self.btn_user.setIcon(self.icon_loader.get_icon("icon1"))
         self.btn_user.setIconSize(QtCore.QSize(20, 20))
         self.btn_user.setObjectName("btn_user")
         self.horizontalLayout_3.addWidget(self.btn_user)
@@ -351,9 +355,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.btn_filter.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_filter.setMaximumSize(QtCore.QSize(40, 40))
         self.btn_filter.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/filter.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_filter.setIcon(icon2)
+        self.btn_filter.setIcon(self.icon_loader.get_icon("icon2"))
         self.btn_filter.setIconSize(QtCore.QSize(30, 30))
         self.btn_filter.setObjectName("btn_filter")
         self.horizontalLayout_4.addWidget(self.btn_filter)
@@ -679,7 +681,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.btn_user_data.setMinimumSize(QtCore.QSize(25, 25))
         self.btn_user_data.setMaximumSize(QtCore.QSize(25, 25))
         self.btn_user_data.setText("")
-        self.btn_user_data.setIcon(self.icon1)
+        self.btn_user_data.setIcon(self.icon_loader.get_icon("icon1"))
         self.btn_user_data.setIconSize(QtCore.QSize(20, 20))
         self.btn_user_data.setObjectName("btn_user_data")
         self.horizontalLayout_9.addWidget(self.btn_user_data)
@@ -1259,7 +1261,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.btn_user_handbook.setMinimumSize(QtCore.QSize(25, 25))
         self.btn_user_handbook.setMaximumSize(QtCore.QSize(25, 25))
         self.btn_user_handbook.setText("")
-        self.btn_user_handbook.setIcon(self.icon1)
+        self.btn_user_handbook.setIcon(self.icon_loader.get_icon("icon1"))
         self.btn_user_handbook.setIconSize(QtCore.QSize(20, 20))
         self.btn_user_handbook.setObjectName("btn_user_handbook")
         self.horizontalLayout_30.addWidget(self.btn_user_handbook)
@@ -1332,195 +1334,200 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.addWidget(self.page_handbook)
         
         # about page
-        self.page_about = QtWidgets.QWidget()
-        self.page_about.setObjectName("page_about")
-        self.verticalLayout_11 = QtWidgets.QVBoxLayout(self.page_about)
-        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_11.setSpacing(0)
-        self.verticalLayout_11.setObjectName("verticalLayout_11")
-        self.frame_aboutBar = QtWidgets.QFrame(self.page_about)
-        self.frame_aboutBar.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_aboutBar.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.frame_aboutBar.setStyleSheet("")
-        self.frame_aboutBar.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_aboutBar.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_aboutBar.setLineWidth(0)
-        self.frame_aboutBar.setObjectName("frame_aboutBar")
-        self.horizontalLayout_34 = QtWidgets.QHBoxLayout(self.frame_aboutBar)
-        self.horizontalLayout_34.setContentsMargins(-1, 2, -1, 2)
-        self.horizontalLayout_34.setObjectName("horizontalLayout_34")
-        self.btn_user_about_2 = QtWidgets.QPushButton(self.frame_aboutBar)
-        self.btn_user_about_2.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_user_about_2.sizePolicy().hasHeightForWidth())
-        self.btn_user_about_2.setSizePolicy(sizePolicy)
-        self.btn_user_about_2.setMinimumSize(QtCore.QSize(25, 25))
-        self.btn_user_about_2.setMaximumSize(QtCore.QSize(25, 25))
-        self.btn_user_about_2.setStyleSheet("")
-        self.btn_user_about_2.setText("")
-        self.btn_user_about_2.setIconSize(QtCore.QSize(20, 20))
-        self.btn_user_about_2.setObjectName("btn_user_about_2")
-        self.horizontalLayout_34.addWidget(self.btn_user_about_2)
-        
-        self.label_user_id_about_2 = QtWidgets.QLabel(self.frame_aboutBar)
-        self.label_user_id_about_2.setEnabled(True)
-        self.label_user_id_about_2.setStyleSheet("color:transparent")
-        self.label_user_id_about_2.setTextFormat(QtCore.Qt.AutoText)
-        self.label_user_id_about_2.setObjectName("label_user_id_about_2")
-        self.horizontalLayout_34.addWidget(self.label_user_id_about_2)
-        
-        spacerItem56 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_34.addItem(spacerItem56)
-        self.icon_settings_3 = QtWidgets.QLabel(self.frame_aboutBar)
-        self.icon_settings_3.setMinimumSize(QtCore.QSize(20, 20))
-        self.icon_settings_3.setMaximumSize(QtCore.QSize(20, 20))
-        self.icon_settings_3.setText("")
-        self.icon_settings_3.setPixmap(QtGui.QPixmap(":/icons/icons/thunfish.png"))
-        self.icon_settings_3.setScaledContents(True)
-        self.icon_settings_3.setAlignment(QtCore.Qt.AlignCenter)
-        self.icon_settings_3.setObjectName("icon_settings_3")
-        self.horizontalLayout_34.addWidget(self.icon_settings_3)
-        spacerItem57 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_34.addItem(spacerItem57)
-        
-        self.label_user_id_about = QtWidgets.QLabel(self.frame_aboutBar)
-        self.label_user_id_about.setStyleSheet("color:white; font:10pt;")
-        self.label_user_id_about.setTextFormat(QtCore.Qt.AutoText)
-        self.label_user_id_about.setObjectName("label_user_id_about")
-        self.horizontalLayout_34.addWidget(self.label_user_id_about)
-        
-        self.btn_user_about = QtWidgets.QPushButton(self.frame_aboutBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_user_about.sizePolicy().hasHeightForWidth())
-        self.btn_user_about.setSizePolicy(sizePolicy)
-        self.btn_user_about.setMinimumSize(QtCore.QSize(25, 25))
-        self.btn_user_about.setMaximumSize(QtCore.QSize(25, 25))
-        self.btn_user_about.setText("")
-        self.btn_user_about.setIcon(self.icon1)
-        self.btn_user_about.setIconSize(QtCore.QSize(20, 20))
-        self.btn_user_about.setObjectName("btn_user_about")
-        self.horizontalLayout_34.addWidget(self.btn_user_about)
-        self.verticalLayout_11.addWidget(self.frame_aboutBar)
-        self.frame_controlBar_5 = QtWidgets.QFrame(self.page_about)
-        self.frame_controlBar_5.setMinimumSize(QtCore.QSize(0, 50))
-        self.frame_controlBar_5.setMaximumSize(QtCore.QSize(16777215, 50))
-        self.frame_controlBar_5.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_controlBar_5.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_controlBar_5.setLineWidth(0)
-        self.frame_controlBar_5.setObjectName("frame_controlBar_5")
-        self.horizontalLayout_31 = QtWidgets.QHBoxLayout(self.frame_controlBar_5)
-        self.horizontalLayout_31.setContentsMargins(11, 5, 11, 5)
-        self.horizontalLayout_31.setSpacing(4)
-        self.horizontalLayout_31.setObjectName("horizontalLayout_31")
-        self.btn_menu_settings_5 = QtWidgets.QPushButton(self.frame_controlBar_5)
-        self.btn_menu_settings_5.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_menu_settings_5.sizePolicy().hasHeightForWidth())
-        self.btn_menu_settings_5.setSizePolicy(sizePolicy)
-        self.btn_menu_settings_5.setMinimumSize(QtCore.QSize(40, 40))
-        self.btn_menu_settings_5.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_menu_settings_5.setText("")
-        self.btn_menu_settings_5.setIconSize(QtCore.QSize(30, 30))
-        self.btn_menu_settings_5.setObjectName("btn_menu_settings_5")
-        self.horizontalLayout_31.addWidget(self.btn_menu_settings_5)
-        spacerItem58 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_31.addItem(spacerItem58)
-        spacerItem59 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_31.addItem(spacerItem59)
-        self.label_settings_3 = QtWidgets.QLabel(self.frame_controlBar_5)
-        font = QtGui.QFont()
-        font.setFamily("Century Gothic")
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setItalic(False)
-        font.setWeight(75)
-        self.label_settings_3.setFont(font)
-        self.label_settings_3.setStyleSheet("color:black; font: bold 14pt;")
-        self.label_settings_3.setObjectName("label_settings_3")
-        self.horizontalLayout_31.addWidget(self.label_settings_3)
-        spacerItem60 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_31.addItem(spacerItem60)
-        spacerItem61 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_31.addItem(spacerItem61)
-        
-        self.btn_menu_settings_6 = QtWidgets.QPushButton(self.frame_controlBar_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_menu_settings_6.sizePolicy().hasHeightForWidth())
-        self.btn_menu_settings_6.setSizePolicy(sizePolicy)
-        self.btn_menu_settings_6.setMinimumSize(QtCore.QSize(40, 40))
-        self.btn_menu_settings_6.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_menu_settings_6.setText("")
-        self.btn_menu_settings_6.setIcon(self.icon9)
-        self.btn_menu_settings_6.setIconSize(QtCore.QSize(30, 30))
-        self.btn_menu_settings_6.setObjectName("btn_menu_settings_6")
-        self.append_main_menu_to_button(self.btn_menu_settings_6)
-        self.horizontalLayout_31.addWidget(self.btn_menu_settings_6)
-        
-        self.verticalLayout_11.addWidget(self.frame_controlBar_5)
-        self.frame_about = QtWidgets.QFrame(self.page_about)
-        self.frame_about.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_about.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_about.setObjectName("frame_about")
-        self.verticalLayout_19 = QtWidgets.QVBoxLayout(self.frame_about)
-        self.verticalLayout_19.setObjectName("verticalLayout_19")
-        self.label_about_text = QtWidgets.QLabel(self.frame_about)
-        self.label_about_text.setStyleSheet("color:black; \n"
-"padding:10px;\n"
-"background-color:rgb(230, 230, 230);\n"
-"border-radius:3px;")
-        self.label_about_text.setScaledContents(False)
-        self.label_about_text.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_about_text.setWordWrap(True)
-        self.label_about_text.setObjectName("label_about_text")
-        self.verticalLayout_19.addWidget(self.label_about_text)
-        spacerItem62 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_19.addItem(spacerItem62)
-        self.frame_logos = QtWidgets.QFrame(self.frame_about)
-        self.frame_logos.setMaximumSize(QtCore.QSize(16777215, 70))
-        self.frame_logos.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_logos.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_logos.setObjectName("frame_logos")
-        self.horizontalLayout_24 = QtWidgets.QHBoxLayout(self.frame_logos)
-        self.horizontalLayout_24.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_24.setSpacing(0)
-        self.horizontalLayout_24.setObjectName("horizontalLayout_24")
-        self.label_logo_uni = QtWidgets.QLabel(self.frame_logos)
-        self.label_logo_uni.setMaximumSize(QtCore.QSize(400, 16777215))
-        self.label_logo_uni.setText("")
-        self.label_logo_uni.setPixmap(QtGui.QPixmap(":/logos/logos/logo_uniBremen.png"))
-        self.label_logo_uni.setScaledContents(True)
-        self.label_logo_uni.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_logo_uni.setWordWrap(False)
-        self.label_logo_uni.setObjectName("label_logo_uni")
-        self.horizontalLayout_24.addWidget(self.label_logo_uni)
-        self.label_logo_awi = QtWidgets.QLabel(self.frame_logos)
-        self.label_logo_awi.setMaximumSize(QtCore.QSize(200, 16777215))
-        self.label_logo_awi.setText("")
-        self.label_logo_awi.setPixmap(QtGui.QPixmap(":/logos/logos/logo_awi.png"))
-        self.label_logo_awi.setScaledContents(True)
-        self.label_logo_awi.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_logo_awi.setObjectName("label_logo_awi")
-        self.horizontalLayout_24.addWidget(self.label_logo_awi)
-        self.label_logo_ifam = QtWidgets.QLabel(self.frame_logos)
-        self.label_logo_ifam.setMaximumSize(QtCore.QSize(280, 16777215))
-        self.label_logo_ifam.setText("")
-        self.label_logo_ifam.setPixmap(QtGui.QPixmap(":/logos/logos/logo_ifam.png"))
-        self.label_logo_ifam.setScaledContents(True)
-        self.label_logo_ifam.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_logo_ifam.setObjectName("label_logo_ifam")
-        self.horizontalLayout_24.addWidget(self.label_logo_ifam)
-        self.verticalLayout_19.addWidget(self.frame_logos)
-        self.verticalLayout_11.addWidget(self.frame_about)
+        self.page_about = PageAbout.PageAbout()
         self.stackedWidget.addWidget(self.page_about)
         self.horizontalLayout_15.addWidget(self.stackedWidget)
+        
+#         self.page_about = QtWidgets.QWidget()
+#         self.page_about.setObjectName("page_about")
+#         self.verticalLayout_11 = QtWidgets.QVBoxLayout(self.page_about)
+#         self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
+#         self.verticalLayout_11.setSpacing(0)
+#         self.verticalLayout_11.setObjectName("verticalLayout_11")
+#         self.frame_aboutBar = QtWidgets.QFrame(self.page_about)
+#         self.frame_aboutBar.setMinimumSize(QtCore.QSize(0, 30))
+#         self.frame_aboutBar.setMaximumSize(QtCore.QSize(16777215, 30))
+#         self.frame_aboutBar.setStyleSheet("")
+#         self.frame_aboutBar.setFrameShape(QtWidgets.QFrame.NoFrame)
+#         self.frame_aboutBar.setFrameShadow(QtWidgets.QFrame.Raised)
+#         self.frame_aboutBar.setLineWidth(0)
+#         self.frame_aboutBar.setObjectName("frame_aboutBar")
+#         self.horizontalLayout_34 = QtWidgets.QHBoxLayout(self.frame_aboutBar)
+#         self.horizontalLayout_34.setContentsMargins(-1, 2, -1, 2)
+#         self.horizontalLayout_34.setObjectName("horizontalLayout_34")
+#         self.btn_user_about_2 = QtWidgets.QPushButton(self.frame_aboutBar)
+#         self.btn_user_about_2.setEnabled(False)
+#         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+#         sizePolicy.setHorizontalStretch(0)
+#         sizePolicy.setVerticalStretch(0)
+#         sizePolicy.setHeightForWidth(self.btn_user_about_2.sizePolicy().hasHeightForWidth())
+#         self.btn_user_about_2.setSizePolicy(sizePolicy)
+#         self.btn_user_about_2.setMinimumSize(QtCore.QSize(25, 25))
+#         self.btn_user_about_2.setMaximumSize(QtCore.QSize(25, 25))
+#         self.btn_user_about_2.setStyleSheet("")
+#         self.btn_user_about_2.setText("")
+#         self.btn_user_about_2.setIconSize(QtCore.QSize(20, 20))
+#         self.btn_user_about_2.setObjectName("btn_user_about_2")
+#         self.horizontalLayout_34.addWidget(self.btn_user_about_2)
+        
+#         self.label_user_id_about_2 = QtWidgets.QLabel(self.frame_aboutBar)
+#         self.label_user_id_about_2.setEnabled(True)
+#         self.label_user_id_about_2.setStyleSheet("color:transparent")
+#         self.label_user_id_about_2.setTextFormat(QtCore.Qt.AutoText)
+#         self.label_user_id_about_2.setObjectName("label_user_id_about_2")
+#         self.horizontalLayout_34.addWidget(self.label_user_id_about_2)
+        
+#         spacerItem56 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_34.addItem(spacerItem56)
+#         self.icon_settings_3 = QtWidgets.QLabel(self.frame_aboutBar)
+#         self.icon_settings_3.setMinimumSize(QtCore.QSize(20, 20))
+#         self.icon_settings_3.setMaximumSize(QtCore.QSize(20, 20))
+#         self.icon_settings_3.setText("")
+#         self.icon_settings_3.setPixmap(QtGui.QPixmap(":/icons/icons/fish_white.png"))
+#         self.icon_settings_3.setScaledContents(True)
+#         self.icon_settings_3.setAlignment(QtCore.Qt.AlignCenter)
+#         self.icon_settings_3.setObjectName("icon_settings_3")
+#         self.horizontalLayout_34.addWidget(self.icon_settings_3)
+#         spacerItem57 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_34.addItem(spacerItem57)
+        
+#         self.label_user_id_about = QtWidgets.QLabel(self.frame_aboutBar)
+#         self.label_user_id_about.setStyleSheet("color:white; font:10pt;")
+#         self.label_user_id_about.setTextFormat(QtCore.Qt.AutoText)
+#         self.label_user_id_about.setObjectName("label_user_id_about")
+#         self.horizontalLayout_34.addWidget(self.label_user_id_about)
+        
+#         self.btn_user_about = QtWidgets.QPushButton(self.frame_aboutBar)
+#         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+#         sizePolicy.setHorizontalStretch(0)
+#         sizePolicy.setVerticalStretch(0)
+#         sizePolicy.setHeightForWidth(self.btn_user_about.sizePolicy().hasHeightForWidth())
+#         self.btn_user_about.setSizePolicy(sizePolicy)
+#         self.btn_user_about.setMinimumSize(QtCore.QSize(25, 25))
+#         self.btn_user_about.setMaximumSize(QtCore.QSize(25, 25))
+#         self.btn_user_about.setText("")
+#         self.btn_user_about.setIcon(self.icon1)
+#         self.btn_user_about.setIconSize(QtCore.QSize(20, 20))
+#         self.btn_user_about.setObjectName("btn_user_about")
+#         self.horizontalLayout_34.addWidget(self.btn_user_about)
+#         self.verticalLayout_11.addWidget(self.frame_aboutBar)
+#         self.frame_controlBar_5 = QtWidgets.QFrame(self.page_about)
+#         self.frame_controlBar_5.setMinimumSize(QtCore.QSize(0, 50))
+#         self.frame_controlBar_5.setMaximumSize(QtCore.QSize(16777215, 50))
+#         self.frame_controlBar_5.setFrameShape(QtWidgets.QFrame.NoFrame)
+#         self.frame_controlBar_5.setFrameShadow(QtWidgets.QFrame.Raised)
+#         self.frame_controlBar_5.setLineWidth(0)
+#         self.frame_controlBar_5.setObjectName("frame_controlBar_5")
+#         self.horizontalLayout_31 = QtWidgets.QHBoxLayout(self.frame_controlBar_5)
+#         self.horizontalLayout_31.setContentsMargins(11, 5, 11, 5)
+#         self.horizontalLayout_31.setSpacing(4)
+#         self.horizontalLayout_31.setObjectName("horizontalLayout_31")
+#         self.btn_menu_settings_5 = QtWidgets.QPushButton(self.frame_controlBar_5)
+#         self.btn_menu_settings_5.setEnabled(False)
+#         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+#         sizePolicy.setHorizontalStretch(0)
+#         sizePolicy.setVerticalStretch(0)
+#         sizePolicy.setHeightForWidth(self.btn_menu_settings_5.sizePolicy().hasHeightForWidth())
+#         self.btn_menu_settings_5.setSizePolicy(sizePolicy)
+#         self.btn_menu_settings_5.setMinimumSize(QtCore.QSize(40, 40))
+#         self.btn_menu_settings_5.setMaximumSize(QtCore.QSize(40, 40))
+#         self.btn_menu_settings_5.setText("")
+#         self.btn_menu_settings_5.setIconSize(QtCore.QSize(30, 30))
+#         self.btn_menu_settings_5.setObjectName("btn_menu_settings_5")
+#         self.horizontalLayout_31.addWidget(self.btn_menu_settings_5)
+#         spacerItem58 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_31.addItem(spacerItem58)
+#         spacerItem59 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_31.addItem(spacerItem59)
+#         self.label_settings_3 = QtWidgets.QLabel(self.frame_controlBar_5)
+#         font = QtGui.QFont()
+#         font.setFamily("Century Gothic")
+#         font.setPointSize(14)
+#         font.setBold(True)
+#         font.setItalic(False)
+#         font.setWeight(75)
+#         self.label_settings_3.setFont(font)
+#         self.label_settings_3.setStyleSheet("color:black; font: bold 14pt;")
+#         self.label_settings_3.setObjectName("label_settings_3")
+#         self.horizontalLayout_31.addWidget(self.label_settings_3)
+#         spacerItem60 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_31.addItem(spacerItem60)
+#         spacerItem61 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+#         self.horizontalLayout_31.addItem(spacerItem61)
+        
+#         self.btn_menu_settings_6 = QtWidgets.QPushButton(self.frame_controlBar_5)
+#         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+#         sizePolicy.setHorizontalStretch(0)
+#         sizePolicy.setVerticalStretch(0)
+#         sizePolicy.setHeightForWidth(self.btn_menu_settings_6.sizePolicy().hasHeightForWidth())
+#         self.btn_menu_settings_6.setSizePolicy(sizePolicy)
+#         self.btn_menu_settings_6.setMinimumSize(QtCore.QSize(40, 40))
+#         self.btn_menu_settings_6.setMaximumSize(QtCore.QSize(40, 40))
+#         self.btn_menu_settings_6.setText("")
+#         self.btn_menu_settings_6.setIcon(self.icon9)
+#         self.btn_menu_settings_6.setIconSize(QtCore.QSize(30, 30))
+#         self.btn_menu_settings_6.setObjectName("btn_menu_settings_6")
+#         self.append_main_menu_to_button(self.btn_menu_settings_6)
+#         self.horizontalLayout_31.addWidget(self.btn_menu_settings_6)
+        
+#         self.verticalLayout_11.addWidget(self.frame_controlBar_5)
+#         self.frame_about = QtWidgets.QFrame(self.page_about)
+#         self.frame_about.setFrameShape(QtWidgets.QFrame.StyledPanel)
+#         self.frame_about.setFrameShadow(QtWidgets.QFrame.Raised)
+#         self.frame_about.setObjectName("frame_about")
+#         self.verticalLayout_19 = QtWidgets.QVBoxLayout(self.frame_about)
+#         self.verticalLayout_19.setObjectName("verticalLayout_19")
+#         self.label_about_text = QtWidgets.QLabel(self.frame_about)
+#         self.label_about_text.setStyleSheet("color:black; \n"
+# "padding:10px;\n"
+# "background-color:rgb(230, 230, 230);\n"
+# "border-radius:3px;")
+#         self.label_about_text.setScaledContents(False)
+#         self.label_about_text.setAlignment(QtCore.Qt.AlignCenter)
+#         self.label_about_text.setWordWrap(True)
+#         self.label_about_text.setObjectName("label_about_text")
+#         self.verticalLayout_19.addWidget(self.label_about_text)
+#         spacerItem62 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+#         self.verticalLayout_19.addItem(spacerItem62)
+#         self.frame_logos = QtWidgets.QFrame(self.frame_about)
+#         self.frame_logos.setMaximumSize(QtCore.QSize(16777215, 70))
+#         self.frame_logos.setFrameShape(QtWidgets.QFrame.NoFrame)
+#         self.frame_logos.setFrameShadow(QtWidgets.QFrame.Raised)
+#         self.frame_logos.setObjectName("frame_logos")
+#         self.horizontalLayout_24 = QtWidgets.QHBoxLayout(self.frame_logos)
+#         self.horizontalLayout_24.setContentsMargins(0, 0, 0, 0)
+#         self.horizontalLayout_24.setSpacing(0)
+#         self.horizontalLayout_24.setObjectName("horizontalLayout_24")
+#         self.label_logo_uni = QtWidgets.QLabel(self.frame_logos)
+#         self.label_logo_uni.setMaximumSize(QtCore.QSize(400, 16777215))
+#         self.label_logo_uni.setText("")
+#         self.label_logo_uni.setPixmap(QtGui.QPixmap(":/logos/logos/logo_uniBremen.png"))
+#         self.label_logo_uni.setScaledContents(True)
+#         self.label_logo_uni.setAlignment(QtCore.Qt.AlignCenter)
+#         self.label_logo_uni.setWordWrap(False)
+#         self.label_logo_uni.setObjectName("label_logo_uni")
+#         self.horizontalLayout_24.addWidget(self.label_logo_uni)
+#         self.label_logo_awi = QtWidgets.QLabel(self.frame_logos)
+#         self.label_logo_awi.setMaximumSize(QtCore.QSize(200, 16777215))
+#         self.label_logo_awi.setText("")
+#         self.label_logo_awi.setPixmap(QtGui.QPixmap(":/logos/logos/logo_awi.png"))
+#         self.label_logo_awi.setScaledContents(True)
+#         self.label_logo_awi.setAlignment(QtCore.Qt.AlignCenter)
+#         self.label_logo_awi.setObjectName("label_logo_awi")
+#         self.horizontalLayout_24.addWidget(self.label_logo_awi)
+#         self.label_logo_ifam = QtWidgets.QLabel(self.frame_logos)
+#         self.label_logo_ifam.setMaximumSize(QtCore.QSize(280, 16777215))
+#         self.label_logo_ifam.setText("")
+#         self.label_logo_ifam.setPixmap(QtGui.QPixmap(":/logos/logos/logo_ifam.png"))
+#         self.label_logo_ifam.setScaledContents(True)
+#         self.label_logo_ifam.setAlignment(QtCore.Qt.AlignCenter)
+#         self.label_logo_ifam.setObjectName("label_logo_ifam")
+#         self.horizontalLayout_24.addWidget(self.label_logo_ifam)
+#         self.verticalLayout_19.addWidget(self.frame_logos)
+#         self.verticalLayout_11.addWidget(self.frame_about)
+#         self.stackedWidget.addWidget(self.page_about)
+#         self.horizontalLayout_15.addWidget(self.stackedWidget)
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setEnabled(True)
@@ -1532,7 +1539,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
         self.tabWidget_2.setCurrentIndex(0)
         self.tabWidget.setCurrentIndex(0)
-        #self.page_settings.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(0)
         
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -1641,10 +1648,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_user_id_handbook_2.setText(_translate("MainWindow", "yj"))
         self.label_user_id_handbook.setText(_translate("MainWindow", "yj"))
         self.label_settings_2.setText(_translate("MainWindow", "Handbook"))
-        self.label_user_id_about_2.setText(_translate("MainWindow", "yj"))
-        self.label_user_id_about.setText(_translate("MainWindow", "yj"))
-        self.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
-        self.label_about_text.setText(_translate("MainWindow", "This software (MarOMarker) was developed in the scope of the Master\'s thesis <em>Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN</em> by Yvonne Jenniges. The thesis was a cooperation between the University of Bremen, the Alfred Wegener Institute and the Fraunhofer IFAM.\n"
+
+        # self.label_user_id_about_2.setText(_translate("MainWindow", "yj"))
+        # self.label_user_id_about.setText(_translate("MainWindow", "yj"))
+#         self.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
+#         self.label_about_text.setText(_translate("MainWindow", "This software (MarOMarker) was developed in the scope of the Master\'s thesis <em>Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN</em> by Yvonne Jenniges. The thesis was a cooperation between the University of Bremen, the Alfred Wegener Institute and the Fraunhofer IFAM.\n"
+# "<br>\n"
+# "<br>\n"
+# "<br>\n"
+# "Yvonne Jenniges <br>\n"
+# "yvonne.jenniges@gmx.de <br>\n"
+# "<br>\n"
+# "Supervisors <br>\n"
+# "Prof. Dr.-Ing. Udo Frese <br>\n"
+# "Prof. Dr. Philipp Fischer<br>\n"
+# "<br>\n"
+# "September 2020"))
+        # @todo!! in PageAbout: add these somewhere       
+        self.page_about.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
+        self.page_about.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
+        
+        self.page_about.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
+        self.page_about.label_about_text.setText(_translate("MainWindow", "This software (MarOMarker) was developed in the scope of the Master\'s thesis <em>Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN</em> by Yvonne Jenniges. The thesis was a cooperation between the University of Bremen, the Alfred Wegener Institute and the Fraunhofer IFAM.\n"
 "<br>\n"
 "<br>\n"
 "<br>\n"
@@ -1656,11 +1681,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "Prof. Dr. Philipp Fischer<br>\n"
 "<br>\n"
 "September 2020"))
-        
+    
+        # connect user button in topBar
         self.btn_user.clicked.connect(self.direct_to_user_settings)
         self.btn_user_data.clicked.connect(self.direct_to_user_settings)
         self.btn_user_handbook.clicked.connect(self.direct_to_user_settings)
-        self.btn_user_about.clicked.connect(self.direct_to_user_settings)
+        #self.btn_user_about.clicked.connect(self.direct_to_user_settings)
+        
+        self.page_about.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
+    
+        # connect menu buttons
+        self.append_main_menu_to_button(self.page_about.frame_controlBar.btn_menu)
     
 
     def apply_settings_decision(self, answer):
@@ -1719,6 +1750,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_user_id_data.setText(self.lineEdit_user_id_oldValue)
         self.label_user_id_settings.setText(self.lineEdit_user_id_oldValue)
         self.label_user_id_handbook.setText(self.lineEdit_user_id_oldValue)
+        
+        # @todo
         self.label_user_id_about.setText(self.lineEdit_user_id_oldValue)
         
         # also update the dummy userIds to preserve the symmetry of the bar
@@ -1726,6 +1759,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_user_id_data_2.setText(self.lineEdit_user_id_oldValue)
         self.label_user_id_settings_2.setText(self.lineEdit_user_id_oldValue)
         self.label_user_id_handbook_2.setText(self.lineEdit_user_id_oldValue)
+        
+        # @todo
         self.label_user_id_about_2.setText(self.lineEdit_user_id_oldValue)
         
     
@@ -1795,12 +1830,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         df = pd.read_csv(filename[0])
         
         # check format of file
-        if(self.check_config_format(df)):
-            # save old values of spinBoxes
-            self.spinBox_offset_oldValue = self.spinBox_offset.value()
-            self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-            self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-            
+        if(self.check_config_format(df)):           
             # set the respective spinBox values
             self.spinBox_offset.setValue(df["y-offset"][0])
             self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
@@ -1809,8 +1839,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             # display the path to the file in the respective lineEdit
             self.lineEdit_config_path.setText(filename[0])
             
-            # set old value for config path
-            self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+
         else:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Critical)
@@ -2126,7 +2155,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.btn_user_settings.setMinimumSize(QtCore.QSize(25, 25))
         self.btn_user_settings.setMaximumSize(QtCore.QSize(25, 25))
         self.btn_user_settings.setText("")
-        self.btn_user_settings.setIcon(self.icon1)
+        self.btn_user_settings.setIcon(self.icon_loader.get_icon("icon1"))
         self.btn_user_settings.setIconSize(QtCore.QSize(20, 20))
         self.btn_user_settings.setObjectName("btn_user_settings")
         self.horizontalLayout_7.addWidget(self.btn_user_settings)
