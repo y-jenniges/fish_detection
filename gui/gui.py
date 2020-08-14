@@ -223,6 +223,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout(self.centralwidget)
         self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+        
+        # create stacked widget
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
         self.stackedWidget.setLineWidth(0)
         self.stackedWidget.setObjectName("stackedWidget")
@@ -254,7 +256,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # add the stacked widget to the layout
         self.horizontalLayout_15.addWidget(self.stackedWidget)
 
-        # set statusBar
+        # set central widget and statusBar
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setEnabled(True)

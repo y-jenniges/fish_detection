@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1244</width>
-    <height>822</height>
+    <width>1240</width>
+    <height>813</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -240,7 +240,7 @@ QLabel{
        <number>0</number>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="page_home_lr">
        <layout class="QVBoxLayout" name="verticalLayout_20">
