@@ -46,7 +46,7 @@ class Animal():
     def __init__(self, position_head=QtCore.QPoint(-1,-1), position_tail=QtCore.QPoint(-1,-1), group=AnimalGroup.UNIDENTIFIED, species=AnimalSpecies.UNIDENTIFIED, remark=""):
                 
         # size of the head/tail visuals
-        self.pixmap_width = 10
+        self.pixmap_width = 50
         
         self.position_head = position_head
         self.position_tail = position_tail
@@ -71,9 +71,9 @@ class Animal():
         self.calculateBoundingBox()
 
         # set pixmaps for head/tail visuals
-        self.get_pixmaps_according_to_group()
+        self.get_colors_according_to_group()
      
-    def get_pixmaps_according_to_group(self):
+    def get_colors_according_to_group(self):
         self.color = ""
         
         if self.group == AnimalGroup.UNIDENTIFIED:
@@ -116,8 +116,7 @@ class Animal():
         
     def setGroup(self, group):
         self.group = group
-        self.get_pixmaps_according_to_group()
-        # adapt color of bounding box, head, tail, line? should be done be drawing!
+        self.get_colors_according_to_group()
     
     def calculateBoundingBox(self):
         pos_x = min(self.position_tail.x(), self.position_head.x()) - self.boundingBoxOffset[0]/2 #abs((self.position_head.x() - self.position_tail.x())/2) + min(self.position_head.x(), self.position_tail.x())
@@ -138,21 +137,6 @@ class MeasurementArea(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(MeasurementArea, self).__init__(parent)
-
-        # display an image in the background
-        #self.setAutoFillBackground(True)
-        # self.horizontalLayout = QtWidgets.QVBoxLayout(self)
-        # self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        # self.horizontalLayout.setObjectName("horizontalLayout")
-        
-        # self.label = QtWidgets.QLabel ("", self)
-        # self.label.setScaledContents(True)
-        # pix = QtGui.QPixmap("../data/maritime_dataset_25/training_data_animals/0.jpg")
-        # self.label.setPixmap(pix)
-
-        # self.horizontalLayout.addWidget(self.label)   
-        #self.resize(pix.width(), pix.height())
-        self.setStyleSheet("background-color:black;")
 
         #self.setLayout(self.horizontalLayout)
         self.setMinimumSize(200,200)
@@ -188,7 +172,7 @@ class MeasurementArea(QtWidgets.QWidget):
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine))
     
         # draw background
-        pix = self.current_image.scaled(QtCore.QSize(self.width(), self.height()))
+        pix = self.current_image_pixmap.scaled(QtCore.QSize(self.width(), self.height()))
         painter.fillRect(self.rect(), QtGui.QBrush(pix))
     
         # draw all animals in the list
@@ -196,8 +180,15 @@ class MeasurementArea(QtWidgets.QWidget):
             painter.drawPixmap(animal.rect_head, animal.pixmap_head)
             painter.drawPixmap(animal.rect_tail, animal.pixmap_tail)
             
-            painter.setPen(QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))          
+            # draw a line that is not displayed within the circle representing the head
+            painter.setPen(QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))  
+            # @todo 
             painter.drawLine(animal.line)
+            
+            #temp_line = QtCore.QLine(animal.line)
+            #temp_line.setP1(QtCore.QPoint(animal.line.x1() + 25, animal.line.y1() - 25))
+            #painter.drawLine(temp_line)
+            
             
             painter.setPen(QtGui.QPen(QtGui.QColor(0,0,0,0), 2, QtCore.Qt.SolidLine)) 
             painter.drawRoundedRect(animal.boundingBox, 10, 10)
@@ -286,19 +277,16 @@ class MeasurementArea(QtWidgets.QWidget):
                 self.is_tail_drawn = False
 
         self.update()
-            
-            # else:
-            #     self.is_head_drawn = False
-            #     self.is_tail_drawn = False
-
-              
+                      
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if not self.drag_position_head.isNull():         
+        # if there is a head to draw and if the drag_position is within the widget, move the head
+        if not self.drag_position_head.isNull() and self.rect().contains(event.pos()):         
             self.cur_animal.setPositionHead(event.pos() - self.drag_position_head)
-        
-        if not self.drag_position_tail.isNull():
+            
+        # if there is a tail to draw and if the drag_position is within the widget, move the tail
+        if not self.drag_position_tail.isNull() and self.rect().contains(event.pos()):
             self.cur_animal.setPositionTail(event.pos() - self.drag_position_tail)
             
         self.update()
@@ -310,20 +298,24 @@ class MeasurementArea(QtWidgets.QWidget):
         super().mouseReleaseEvent(event)
 
     def on_next_animal(self):
-        index = self.animals.index(self.cur_animal)
-
-        # only go to next animal if there is another one
-        if index < len(self.animals)-1:
-            self.cur_animal = self.animals[index+1]
-            self.update()
+        # only switch animals if the current one is in the list (and not None)
+        if self.cur_animal in self.animals:
+            index = self.animals.index(self.cur_animal)
+    
+            # only go to next animal if there is another one
+            if index < len(self.animals)-1:
+                self.cur_animal = self.animals[index+1]
+                self.update()
         
     def on_previous_animal(self):
-        index = self.animals.index(self.cur_animal)
-        
-        # only go to previous animal, if there is one
-        if index > 0:
-            self.cur_animal = self.animals[index-1]
-            self.update()
+        # only switch animals if the current one is in the list (and not None)
+        if self.cur_animal in self.animals:
+            index = self.animals.index(self.cur_animal)
+            
+            # only go to previous animal, if there is one
+            if index > 0:
+                self.cur_animal = self.animals[index-1]
+                self.update()
 
     def on_remove_animal(self):
         if(self.is_remove_mode_active):
