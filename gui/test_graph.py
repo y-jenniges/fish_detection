@@ -2,12 +2,13 @@
 import random
 import sys
 import enum
+import sympy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # dict contains all animals on that image
 animal_list = []
-
+IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 # map to assign a color to an animal group
 animal_color_map = 1
 
@@ -38,6 +39,22 @@ class AnimalVisualRepresentation():
 
 
 
+
+# class RoundedRect(QtCore.QRectF):
+#     def __init__(self, pen=None, parent=None):
+#         super(RoundedRect, self).__init__(parent)
+
+              
+#     def paintEvent(self, event):
+#         # define painter
+#         painter = QtGui.QPainter(self)
+#         painter.setRenderHint(QtGui.QPainter.Antialiasing)
+#         painter.setPen(QtGui.QPen(QtGui.QColor(0,0,0,0), 2, QtCore.Qt.SolidLine)) 
+        
+#         painter.drawRoundedRect(self, 50, 50)   
+     
+       
+
 """
 Class to represent an animal on an image.
 """
@@ -46,7 +63,7 @@ class Animal():
     def __init__(self, position_head=QtCore.QPoint(-1,-1), position_tail=QtCore.QPoint(-1,-1), group=AnimalGroup.UNIDENTIFIED, species=AnimalSpecies.UNIDENTIFIED, remark=""):
                 
         # size of the head/tail visuals
-        self.pixmap_width = 50
+        self.pixmap_width = 20
         
         self.position_head = position_head
         self.position_tail = position_tail
@@ -57,21 +74,31 @@ class Animal():
         self.width = None
       
         # set the visual for the head, tail and line between them
-        pos_visual_head = position_head - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
-        pos_visual_tail = position_tail - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        self.pos_visual_head = position_head - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        self.pos_visual_tail = position_tail - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
 
-        self.rect_head = QtCore.QRect(pos_visual_head, QtCore.QSize(self.pixmap_width, self.pixmap_width))
-        self.rect_tail = QtCore.QRect(pos_visual_tail, QtCore.QSize(self.pixmap_width, self.pixmap_width))
-        self.line = QtCore.QLine(self.position_head, self.position_tail)  
+        self.rect_head = QtCore.QRect(self.pos_visual_head, QtCore.QSize(self.pixmap_width, self.pixmap_width))
+        self.rect_tail = QtCore.QRect(self.pos_visual_tail, QtCore.QSize(self.pixmap_width, self.pixmap_width))       
+        self.line = QtCore.QLineF(self.position_head, self.position_tail)  
 
         
-        # set the bounding box visual
-        self.boundingBox = QtCore.QRect()
-        self.boundingBoxOffset = [50, 50]
-        self.calculateBoundingBox()
+
+        
+        
+       
 
         # set pixmaps for head/tail visuals
         self.get_colors_according_to_group()
+        
+        # set the bounding box visual
+        self.boundingBox = QtCore.QRectF()#QtGui.QPen(self.color, 2, QtCore.Qt.SolidLine), QtCore.QRectF())#QtCore.QRectF()
+        self.boundingBoxOffset = [50, 50]
+        self.calculateBoundingBox()
+        
+        self.boundingBox_visual = None
+        self.head_item_visual = None
+        self.tail_item_visual = None
+        self.line_item_visual = None
      
     def get_colors_according_to_group(self):
         self.color = ""
@@ -101,16 +128,23 @@ class Animal():
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
             self.color = QtGui.QColor(0, 0, 0)
      
+        # scale pixmaps
+        self.pixmap_head = self.pixmap_head.scaled(QtCore.QSize(self.pixmap_width/2, self.pixmap_width/2))     
+        self.pixmap_tail = self.pixmap_tail.scaled(QtCore.QSize(self.pixmap_width/2, self.pixmap_width/2))
+        
     
     def setPositionHead(self, pos):
         self.position_head = pos
         self.rect_head.moveTopLeft(pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2))
+        self.pos_visual_head = pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        
         self.line.setP1(pos)
         self.calculateBoundingBox() 
     
     def setPositionTail(self, pos):
         self.position_tail = pos
         self.rect_tail.moveTopLeft(pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2))
+        self.pos_visual_tail = pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
         self.line.setP2(pos)
         self.calculateBoundingBox()
         
@@ -130,16 +164,18 @@ class Animal():
         self.boundingBox.setHeight(size_y)
         
 
-class MeasurementArea(QtWidgets.QWidget):
+class MeasurementWidget(QtWidgets.QWidget):
     """
     Custom Qt Widget to be used for adding/removing/displaying the heads and tails of animals.
     """
 
     def __init__(self, parent=None):
-        super(MeasurementArea, self).__init__(parent)
-
+        super(MeasurementWidget, self).__init__(parent)
+        #self.parent = parent
+        
         #self.setLayout(self.horizontalLayout)
         self.setMinimumSize(200,200)
+        
 
         # dragging offset when moving the markings for head and/or tail
         self.drag_position_head = QtCore.QPoint()
@@ -158,22 +194,65 @@ class MeasurementArea(QtWidgets.QWidget):
         # variables to control what interactions are possible
         self.is_add_mode_active = False
         self.is_remove_mode_active = False
-        
+
         # current image
-        self.current_image_pixmap = QtGui.QPixmap("../data/maritime_dataset_25/training_data_animals/0.jpg")
+        #self.current_image_pixmap = QtGui.QPixmap("../data/maritime_dataset_25/training_data_animals/0.jpg")
+        self.pixmap = QtGui.QPixmap("../data/maritime_dataset_25/training_data_animals/0.jpg")        
+        #self.pixmap.scaled(QtCore.QSize(self.width(), self.height()))
+
+        self.setStyleSheet("background: no-repeat")
+        # zoom
+        self.zoom = 1
+        self.scale_offset = [0.0, 0.0]
+        self.cur_width = self.width()
+        self.cur_height = self.height()
         
+        
+        self.min_width = self.width()
+        self.min_height = self.height()
+        self.max_width = self.width()*10
+        self.max_height = self.height()*10
+        
+        
+
+    # @todo it is very slow
+    # def get_line_to_draw(self, animal):
+    #     # calucalte intersection points of the circle (of animal head) and the line connecting the circle and the cross (for animal tail)
+    #     p1 = sympy.geometry.Point2D(animal.line.p1().x(), animal.line.p1().y())
+    #     p2 = sympy.geometry.Point2D(animal.line.p2().x(), animal.line.p2().y())
+    #     sym_circle = sympy.geometry.Circle(p1, animal.pixmap_width/2)
+    #     sym_line = sympy.geometry.Line(p1, p2)
+    #     intersection = sympy.geometry.intersection(sym_circle, sym_line)
+        
+    #     # use the intersection point to draw the line such that it stops at the edge of the circle (and does not intersecti with it)
+    #     if intersection[0].x <= p1.x and p2.x <= p1.x:
+    #         return QtCore.QLine(animal.line.p2(), QtCore.QPoint(intersection[0].x, intersection[0].y))
+    #     else:
+    #         return QtCore.QLine(QtCore.QPoint(intersection[1].x, intersection[1].y), animal.line.p2()) 
+        
+        # alternatively, simply return the original line
+        #return animal.line)
+
+    
 
     def paintEvent(self, event):
         super().paintEvent(event)    
-                
+        print("paint")
         # define painter
         painter = QtGui.QPainter(self)
+        #painter = QtGui.QPainter(self.parent)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine))
     
-        # draw background
-        pix = self.current_image_pixmap.scaled(QtCore.QSize(self.width(), self.height()))
+        # draw background      
+        #
+        pix = self.pixmap.scaled(QtCore.QSize(self.width(), self.height()))#, transformMode=QtCore.Qt.SmoothTransformation)
         painter.fillRect(self.rect(), QtGui.QBrush(pix))
+
+        #painter.fillRect(self.rect(), QtGui.QBrush(self.pixmap))
+
+        #painter.setBackground(QtGui.QBrush(pix))
+        #painter.scale(self.scale_offset[0], self.scale_offset[1])
     
         # draw all animals in the list
         for animal in self.animals:
@@ -182,17 +261,12 @@ class MeasurementArea(QtWidgets.QWidget):
             
             # draw a line that is not displayed within the circle representing the head
             painter.setPen(QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))  
-            # @todo 
-            painter.drawLine(animal.line)
-            
-            #temp_line = QtCore.QLine(animal.line)
-            #temp_line.setP1(QtCore.QPoint(animal.line.x1() + 25, animal.line.y1() - 25))
-            #painter.drawLine(temp_line)
-            
-            
+            painter.drawLine(animal.line)#self.get_line_to_draw(animal))
+                   
             painter.setPen(QtGui.QPen(QtGui.QColor(0,0,0,0), 2, QtCore.Qt.SolidLine)) 
             painter.drawRoundedRect(animal.boundingBox, 10, 10)
             
+          
          
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine))
         
@@ -201,13 +275,14 @@ class MeasurementArea(QtWidgets.QWidget):
             if self.cur_animal.position_head != QtCore.QPoint(-1,-1):
                 # draw the head visual
                 painter.drawPixmap(self.cur_animal.rect_head, self.cur_animal.pixmap_head)
-                
+                #self.parent._scene.addPixmap(self.cur_animal.rect_head, self.cur_animal.pixmap_head)
+                 
             if self.cur_animal.position_tail != QtCore.QPoint(-1,-1):
                 # draw the tail visual
                 painter.drawPixmap(self.cur_animal.rect_tail, self.cur_animal.pixmap_tail)
                 
                 painter.setPen(QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
-                painter.drawLine(self.cur_animal.line)
+                painter.drawLine(self.cur_animal.line)#self.get_line_to_draw(self.cur_animal))
                 painter.drawRoundedRect(self.cur_animal.boundingBox, 10, 10)
          
 
@@ -280,13 +355,36 @@ class MeasurementArea(QtWidgets.QWidget):
                       
         super().mousePressEvent(event)
 
+
+    # def wheelEvent(self, event):
+    #    # if self.hasPhoto():
+    #     if event.angleDelta().y() > 0:
+    #         print("event angle delta")
+    #         factor = 1.25
+    #         self.zoom += 1
+    #     else:
+    #         print("event angle delta else")
+    #         factor = 0.8
+    #         self.zoom -= 1
+            
+    #     if self.zoom > 0:
+    #         print(f"scale factor {factor}")
+    #         self.scale_offset = [factor, factor]
+    #     elif self.zoom == 0:
+    #         print("fit view")
+    #         self.fitInView()
+    #     else:
+    #         print("no zoom")
+    #         self.zoom = 0
+
+
     def mouseMoveEvent(self, event):
         # if there is a head to draw and if the drag_position is within the widget, move the head
-        if not self.drag_position_head.isNull() and self.rect().contains(event.pos()):         
+        if self.cur_animal != None and not self.drag_position_head.isNull() and self.rect().contains(event.pos()):         
             self.cur_animal.setPositionHead(event.pos() - self.drag_position_head)
             
         # if there is a tail to draw and if the drag_position is within the widget, move the tail
-        if not self.drag_position_tail.isNull() and self.rect().contains(event.pos()):
+        if self.cur_animal != None and not self.drag_position_tail.isNull() and self.rect().contains(event.pos()):
             self.cur_animal.setPositionTail(event.pos() - self.drag_position_tail)
             
         self.update()
@@ -335,6 +433,15 @@ class MeasurementArea(QtWidgets.QWidget):
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
 
+    def setZoom(self, zoom, width, height):
+        self.zoom = zoom
+        new_size = QtCore.QSize(width+(self.max_width - width)/100.0*zoom, height+(self.max_height - height)/100.0*zoom)
+        
+        #self.pixmap.scaled(new_size, QtCore.Qt.KeepAspectRatio)
+        #self.resize(self.width()+zoom, self.height()+zoom)
+        self.resize(new_size)
+        self.update()
+        #self.resize(self.size()*self.zoom*1.01)
 
 
 class MyWindow(QtWidgets.QMainWindow):
@@ -351,35 +458,50 @@ class MyWindow(QtWidgets.QMainWindow):
         self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
 
+
+
         # create widgets and gui objects
-        self.measurementWidget = MeasurementArea(self)    
+        self.measurementWidget = MeasurementWidget()    
         button_add = QtWidgets.QPushButton('Add')
         button_remove = QtWidgets.QPushButton('Remove')
         button_next = QtWidgets.QPushButton('Next')
         button_previous = QtWidgets.QPushButton('Previous')
         
+        self.scrollArea = QtWidgets.QScrollArea()
+        self.scrollArea.setWidget(self.measurementWidget)
+        self.scrollArea.setVisible(True)
+        self.scrollArea.setWidgetResizable(True)
         
-
+        self.slider_zoom = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.slider_zoom.setMaximum(100)
                  
         # add objects to layout
         self.horizontalLayout_15.addWidget(button_add)
         self.horizontalLayout_15.addWidget(button_remove)
         self.horizontalLayout_15.addWidget(button_next)
         self.horizontalLayout_15.addWidget(button_previous)
-        self.horizontalLayout_15.addWidget(self.measurementWidget)
-        
-       
+        self.horizontalLayout_15.addWidget(self.slider_zoom)
+        self.horizontalLayout_15.addWidget(self.scrollArea)
+               
         MainWindow.setCentralWidget(self.centralwidget)       
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
         
         # connect signals and slots      
         button_add.clicked.connect(self.measurementWidget.on_add_animal)
         button_remove.clicked.connect(self.measurementWidget.on_remove_animal)
         button_next.clicked.connect(self.measurementWidget.on_next_animal)
         button_previous.clicked.connect(self.measurementWidget.on_previous_animal)
+        self.slider_zoom.valueChanged.connect(self.on_slider_zoom)
 
-
+    def on_slider_zoom(self):
+        print(f"slider {self.slider_zoom.value()}")
+        self.scrollArea.setWidgetResizable(False)
+        self.measurementWidget.setZoom(self.slider_zoom.value(), self.scrollArea.width(), self.scrollArea.height())
+        self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:20px;}");
+        self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:20px;}");
+        if self.slider_zoom.value() == 0:
+            self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:0px;}");
+            self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:0px;}");
         
 if __name__ == "__main__":
     import sys
