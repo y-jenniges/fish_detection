@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/glass_darkBlue.png</file>
+    <file>icons/bin_open_darkBlue.png</file>
+    <file>icons/plus_darkBlue.png</file>
     <file>icons/fish_white.png</file>
     <file>icons/book.png</file>
     <file>icons/thunfish.png</file>

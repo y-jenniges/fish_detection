@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1685</width>
-    <height>1548</height>
+    <width>1681</width>
+    <height>1539</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -4421,7 +4421,7 @@ QDoubleSpinBox::down-button:pressed {
               <enum>QTabWidget::West</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>2</number>
              </property>
              <widget class="QWidget" name="tab_camera">
               <attribute name="icon">

@@ -27,7 +27,7 @@ class PageHome(QtWidgets.QWidget):
             self.btn_zoom.setIcon(get_icon(":/icons/icons/glass.png")) 
             self.widget_zoom.hide()
         else:
-            self.btn_zoom.setIcon(get_icon(":/icons/icons/glass_b.png")) 
+            self.btn_zoom.setIcon(get_icon(":/icons/icons/glass_darkBlue.png")) 
             self.widget_zoom.show()
     
     def onZoomValueChanged(self, value):
@@ -52,13 +52,13 @@ class PageHome(QtWidgets.QWidget):
     def updateAddRemoveIcons(self):
         # adapt icon of the add button
         if self.photo_viewer.imageArea.animal_painter.is_add_mode_active:
-            self.btn_add.setIcon(get_icon(":/icons/icons/plus_b.png"))
+            self.btn_add.setIcon(get_icon(":/icons/icons/plus_darkBlue.png"))
         else:
             self.btn_add.setIcon(get_icon(":/icons/icons/plus.png"))
             
         # adapt icon of the add button
         if self.photo_viewer.imageArea.animal_painter.is_remove_mode_active:
-            self.btn_delete.setIcon(get_icon(":/icons/icons/bin_open.png"))
+            self.btn_delete.setIcon(get_icon(":/icons/icons/bin_open_darkBlue.png"))
         else:
             self.btn_delete.setIcon(get_icon(":/icons/icons/bin_closed.png"))        
         
@@ -176,7 +176,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_add.setIcon(get_icon(":/icons/icons/plus.png"))
         self.btn_add.setIconSize(QtCore.QSize(30, 30))
         self.btn_add.setObjectName("btn_add")
-        
+
         # button for switching to previous animal
         self.btn_previous = QtWidgets.QPushButton(self.frame_controlBar)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -347,7 +347,7 @@ class PageHome(QtWidgets.QWidget):
         self.updateGeometry()
         # hide the zoom widget if it is open and a click somewhere else is registered
         if self.widget_zoom.isVisible() and not self.widget_zoom.rect().contains(event.pos()):
-            self.widget_zoom.hide()
+            self.openZoomWidget()
             
         super().mousePressEvent(event)   
         
