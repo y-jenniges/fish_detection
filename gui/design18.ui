@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1240</width>
-    <height>813</height>
+    <width>1685</width>
+    <height>1548</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -2322,7 +2322,7 @@ QLabel{
               <property name="spacing">
                <number>0</number>
               </property>
-              <item row="0" column="0">
+              <item row="1" column="0">
                <widget class="QLabel" name="image">
                 <property name="text">
                  <string/>
@@ -4900,6 +4900,59 @@ QDoubleSpinBox::down-button:pressed {
                        </property>
                        <property name="text">
                         <string>pixel</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="frame">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_25">
+                     <item>
+                      <widget class="QSlider" name="horizontalSlider">
+                       <property name="styleSheet">
+                        <string notr="true">QSlider::groove:horizontal {
+    height: 4px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: white; /* qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #B1B1B1, stop:1 #c4c4c4); rgb(150, 150, 150);*/
+    margin: 1px 0;
+}
+
+QSlider::handle:horizontal {
+    width: 5px;
+    margin: -10px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */ 
+    background: rgb(0, 203, 221);
+	border-radius: 3px;
+	border:none;
+}
+
+QSlider::handle:horizontal:hover{
+	background: rgb(0, 160, 174);
+}
+
+QSlider::handle:horizontal:pressed{
+	background:rgb(0,100,108);
+}
+
+QSlider::add-page:horizontal {
+    background: white;
+}
+
+QSlider::sub-page:horizontal {
+    background: rgb(0, 203, 221);
+}</string>
+                       </property>
+                       <property name="maximum">
+                        <number>100</number>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
                        </property>
                       </widget>
                      </item>

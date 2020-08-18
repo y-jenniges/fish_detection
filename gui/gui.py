@@ -292,7 +292,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.page_home.comboBox_imgRemark.setItemText(3, _translate("MainWindow", "high turbidity"))
         self.page_home.comboBox_imgRemark.setItemText(4, _translate("MainWindow", "wrong illumination"))
         self.page_home.comboBox_imgRemark.setItemText(5, _translate("MainWindow", "without flashlight"))
-        self.page_home.label_imgCount.setText(_translate("MainWindow", "01/48"))
+        self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))
         
         # data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))

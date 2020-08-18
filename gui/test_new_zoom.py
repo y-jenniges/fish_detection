@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import glob
 
 from test_graph import Animal, AnimalGroup, AnimalSpecies
-
+from Helpers import get_icon
 
 IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 IMAGE_PREFIX = ""
@@ -124,9 +124,7 @@ class AnimalPainter():
         self.imageArea = imageArea
  
     def removeAll(self):
-        print("remove all")
         for animal in ANIMAL_LIST:
-            print("remove another one")
             self.removeHeadVisual(animal)
             self.removeTailVisual(animal)
             self.removeLineVisual(animal)
@@ -207,17 +205,23 @@ class AnimalPainter():
     def on_remove_animal(self):
         if(self.is_remove_mode_active):
             self.is_remove_mode_active = False
+        elif self.is_add_mode_active:
+            if (self.is_head_drawn and self.is_tail_drawn):
+                self.is_add_mode_active = False
+                self.is_remove_mode_active = True
+            else:
+                print("Error: Please draw head and tail before switching off the Add-mode.")            
         else:
             self.is_add_mode_active = False
             self.is_remove_mode_active = True          
 
-    def on_add_animal(self):   
+    def on_add_animal(self): 
         if(self.is_add_mode_active):
             # the add mode can only be deactivated when head and tail are drawn
             if (self.is_head_drawn and self.is_tail_drawn):
                 self.is_add_mode_active = False
             else:
-                print("Error: Please draw head and tail before switching of the Add-mode.")
+                print("Error: Please draw head and tail before switching off the Add-mode.")
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
@@ -226,7 +230,8 @@ class AnimalPainter():
         # convert event position to scene corrdinates
         pos = self.imageArea.mapToScene(event.pos()).toPoint()
         
-        if(self.is_head_drawn and self.is_tail_drawn and self.cur_animal is not None):
+        # enable dragging for current animal (when add mode is not active and the current animal is completey drawn)
+        if(self.is_head_drawn and self.is_tail_drawn and self.cur_animal is not None and not self.is_add_mode_active):
             if (2 * QtGui.QVector2D(pos - self.cur_animal.rect_head.center()).length()
                 < self.cur_animal.rect_head.width()):
                 self.drag_position_head = pos - self.cur_animal.position_head
@@ -275,11 +280,11 @@ class AnimalPainter():
                 # adapt the tail position of the current animal
                 self.cur_animal.setPositionTail(pos)
                 
-                 # tail is now defined and will be drawn
-                self.is_tail_drawn = True
-                
                 # do the actual drawing
                 self.drawAnimalTailLineBoundingBox(self.cur_animal)
+                
+                # tail is now defined and will be drawn
+                self.is_tail_drawn = True
                 
                 # add animal to list
                 ANIMAL_LIST.append(self.cur_animal)
@@ -288,14 +293,14 @@ class AnimalPainter():
                 # create a new animal
                 self.cur_animal = Animal(position_head = pos)
                 self.cur_animal.setGroup(AnimalGroup.FISH)
+                               
+                # do the actual drawing of the head
+                self.drawAnimalHead(self.cur_animal)
                 
-                # head is now defined and will be drawn 
+                # head is now drawn
                 self.is_head_drawn = True
                 self.is_tail_drawn = False
                 
-                # do the actual drawing of the head
-                self.drawAnimalHead(self.cur_animal)
-       
         self.updateBoundingBoxes()                     
 
     def mouseMoveEvent(self, event):
@@ -335,67 +340,167 @@ class PhotoViewer(QtWidgets.QWidget):
     def __init__(self):
         super(PhotoViewer, self).__init__()
 
+        # list of image pathes and the current image index
         self.cur_image_index = 0
-        self.setStyleSheet("ImageArea{background-color:black}")
+        self.image_list = glob.glob(IMAGE_DIRECTORY + IMAGE_PREFIX + "*.jpg")
 
-        # gui elements
-        self.imageArea = ImageArea()
-        self.btn_next_image = QtWidgets.QPushButton("next image")
-        self.btn_previous_image = QtWidgets.QPushButton("previous image")
-        
-        # create a layout
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setObjectName("layout")
-        self.layout.setSpacing(0)
-        self.setLayout(self.layout)
-        
-        # add gui elements to layout
-        self.layout.addWidget(self.imageArea)
-        self.layout.addWidget(self.btn_next_image)
-        self.layout.addWidget(self.btn_previous_image)
+        # initalize gui
+        self.init_ui()
         
         # initalize actions
-        self.btn_next_image.clicked.connect(self.on_next_image)
-        self.btn_previous_image.clicked.connect(self.on_previous_image)
+        self.init_actions()
         
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        image_list = glob.glob(IMAGE_DIRECTORY + IMAGE_PREFIX + "*.jpg")
-        self.loadImage(image_list[self.cur_image_index])
+        self.loadImage(self.image_list[self.cur_image_index])
                 
     def loadImage(self, path):
         photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
         self.imageArea.setPhoto(photo)
-  
-    def on_next_image(self):
-        image_list = glob.glob(IMAGE_DIRECTORY + IMAGE_PREFIX + "*.jpg")
-        path = image_list[self.cur_image_index+1]
-        self.cur_image_index = self.cur_image_index + 1        
-        self.loadImage(path)
-        self.updateImageCount()   
+        self.updateImageCountVisual()
         
         # clear visuals
         self.imageArea.animal_painter.removeAll()
         
         # clear animal list
         ANIMAL_LIST.clear()
-        print(ANIMAL_LIST)
+  
+    def on_next_image(self):
+        # if there is a next image, load it
+        if self.cur_image_index < len(self.image_list) - 1:
+            # get the new image and load it
+            path = self.image_list[self.cur_image_index+1]
+            self.cur_image_index = self.cur_image_index + 1        
+            self.loadImage(path)
        
     def on_previous_image(self):
-        image_list = glob.glob(IMAGE_DIRECTORY + IMAGE_PREFIX + "*.jpg")
-        path = image_list[self.cur_image_index-1]
-        self.cur_image_index = self.cur_image_index - 1
-        self.loadImage(path)   
-        self.updateImageCount()  
+        # if there is a previous image, load it
+        if self.cur_image_index > 0:
+            path = self.image_list[self.cur_image_index-1]
+            self.cur_image_index = self.cur_image_index - 1
+            self.loadImage(path) 
+
+    def updateImageCountVisual(self):
+        num_images = len(self.image_list)
+        cur_image = self.cur_image_index
+        self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
+
+    def init_actions(self):
+        # connect buttons
+        self.btn_previous_image.clicked.connect(self.on_previous_image)
+        self.btn_next_image.clicked.connect(self.on_next_image)
+
+        # --- define shortcuts ------------------------------------------------------------------------------------------- #  
+        QtWidgets.QShortcut(QtGui.QKeySequence("left"), self.btn_previous_image, self.on_previous_image)
+        QtWidgets.QShortcut(QtGui.QKeySequence("right"), self.btn_next_image, self.on_next_image)
         
-    def updateImageCount(self):
-        #print(f"new image count : {self.cur_image_index}" )
-        pass
 
+        
+    def init_ui(self):
+        # --- left frame ------------------------------------------------------------------------------------------- # 
+        # frame
+        frame_left = QtWidgets.QFrame(self)
+        frame_left.setMinimumSize(QtCore.QSize(60, 0))
+        frame_left.setMaximumSize(QtCore.QSize(60, 16777215))
+        frame_left.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_left.setObjectName("frame_left")
+        
+        # vertical spacers
+        spacerItem7 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem8 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+ 
+        # button for previous image
+        self.btn_previous_image = QtWidgets.QPushButton(frame_left)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_previous_image.sizePolicy().hasHeightForWidth())
+        self.btn_previous_image.setSizePolicy(sizePolicy)
+        self.btn_previous_image.setIcon(get_icon(":/icons/icons/arrow_left_big.png"))
+        self.btn_previous_image.setIconSize(QtCore.QSize(20, 40))
+        self.btn_previous_image.setCheckable(False)
+        self.btn_previous_image.setFlat(False)
+        self.btn_previous_image.setObjectName("btn_previous_image")
 
+        # label to display image count
+        self.label_imgCount = QtWidgets.QLabel(frame_left)
+        self.label_imgCount.setMinimumSize(QtCore.QSize(0, 40))
+        self.label_imgCount.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.label_imgCount.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_imgCount.setObjectName("label_imgCount")
+        self.label_imgCount.setStyleSheet("font:10pt 'Century Gothic'")
+        
+        # layout
+        layout_frame_left = QtWidgets.QVBoxLayout(frame_left)
+        layout_frame_left.setContentsMargins(5, 5, 5, 0)
+        layout_frame_left.setObjectName("layout_frame_left")
+        
+        # add widgets to layout
+        layout_frame_left.addItem(spacerItem7)
+        layout_frame_left.addWidget(self.btn_previous_image)
+        layout_frame_left.addItem(spacerItem8)
+        layout_frame_left.addWidget(self.label_imgCount)
+        
+        
+        # --- image frame ------------------------------------------------------------------------------------------- # 
+        self.imageArea = ImageArea()
+        
+        
+        # --- right frame ------------------------------------------------------------------------------------------- # 
+        # frame
+        frame_right = QtWidgets.QFrame(self)
+        frame_right.setMinimumSize(QtCore.QSize(60, 0))
+        frame_right.setMaximumSize(QtCore.QSize(60, 16777215))
+        frame_right.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_right.setObjectName("frame_right")
+        
+        # vertical spacers
+        spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem10 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        # button for previous image
+        self.btn_next_image = QtWidgets.QPushButton(frame_right)      
+        self.btn_next_image.setIcon(get_icon(":/icons/icons/arrow_right_big.png"))
+        self.btn_next_image.setIconSize(QtCore.QSize(20, 40))
+        self.btn_next_image.setObjectName("btn_next_image")
+        
+        # button for opening image in separate window
+        self.btn_openImg = QtWidgets.QPushButton(frame_right)
+        self.btn_openImg.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_openImg.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_openImg.setIcon(get_icon(":/icons/icons/open_image.png"))
+        self.btn_openImg.setIconSize(QtCore.QSize(30, 30))
+        self.btn_openImg.setObjectName("btn_openImg")
+        
+        # layout
+        layout_frame_right = QtWidgets.QVBoxLayout(frame_right)
+        layout_frame_right.setContentsMargins(5, 5, 5, 0)
+        layout_frame_right.setObjectName("layout_frame_right")
+        
+        # add widgets to layout
+        layout_frame_right.addItem(spacerItem9)
+        layout_frame_right.addWidget(self.btn_next_image)
+        layout_frame_right.addItem(spacerItem10)
+        layout_frame_right.addWidget(self.btn_openImg)
+        
+        # --- main widget ------------------------------------------------------------------------------------------- #      
+        # main layout
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.setObjectName("layout")
+        
+        # adding widgets to main layout 
+        layout.addWidget(frame_left)
+        layout.addWidget(self.imageArea)
+        layout.addWidget(frame_right)
 
+        # set main layout
+        self.layout = layout
+        
+
+        
 
 
 class MyWindow(QtWidgets.QMainWindow):
