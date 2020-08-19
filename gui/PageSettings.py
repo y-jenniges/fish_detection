@@ -2,8 +2,42 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from TabWidget import TabWidget
 from Helpers import TopFrame, MenuFrame, get_icon
-
+import ntpath
 import time
+import pandas as pd
+
+class TextImageItemWidget (QtWidgets.QWidget):
+    def __init__ (self, imagePath, parent = None):
+        super(TextImageItemWidget, self).__init__(parent)
+         
+        # the title is the name of the image
+        self.imagePath = imagePath
+        self.title = ntpath.basename(imagePath).split('.')[0]
+        
+        # create the label to display the text
+        self.label_text = QtWidgets.QLabel(self.title + "\n" + str(imagePath))
+        self.label_text.setMinimumWidth(400)
+        self.label_text.setWordWrap(True)
+        self.label_text.setStyleSheet("font:10pt 'Century Gothic'")
+        
+        # create the label to display the image      
+        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.imagePath))
+        self.label_image = QtWidgets.QLabel()
+        self.label_image.setPixmap(pixmap.scaled(QtCore.QSize(150,100), QtCore.Qt.KeepAspectRatio))      
+    
+        # a spacer between label and image
+        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+
+        # define the layout
+        horizontalLayout = QtWidgets.QHBoxLayout()
+        horizontalLayout.addWidget(self.label_text)
+        horizontalLayout.addItem(spacer)
+        horizontalLayout.addWidget(self.label_image)
+        self.setLayout(horizontalLayout)  
+
+    def set_text(self, text):
+        self.label_text.setText(text)
+
 """
 Class to create the settings page of the software.
 """
@@ -12,7 +46,21 @@ class PageSettings(QtWidgets.QWidget):
     def __init__(self, parent=None):
         start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
-                
+
+        # init ui and actions on it
+        self.init_ui()
+        self.init_actions()
+        self.init_oldValues()
+        
+        # add example to list widget
+        path1 = "C:/Users/yjenn/Pictures/Wallpapers/23.jpg"
+        path2 = "C:/Users/yjenn/Pictures/Wallpapers/tiger_stone_lying_big_cats_predator_52901_3840x2160.jpg"
+        self.addCustomItem(path1)
+        self.addCustomItem(path2)
+        
+        #print(f"page settings init: {time.time() - start_time}")
+
+    def init_ui(self):               
         self.setStyleSheet("/*-------------------------- line edit ------------------------*/\n"
 "QLineEdit{\n"
 "    background-color:white;\n"
@@ -88,7 +136,7 @@ class PageSettings(QtWidgets.QWidget):
 "    background-color:rgb(150, 150, 150);\n"
 "}\n"
 "\n"
-"#btn_load, #btn_save, #btn_browse_nn{\n"
+"#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species{\n"
 "    background-color:rgb(200, 200, 200);\n"
 "}\n"
 "\n"
@@ -98,7 +146,7 @@ class PageSettings(QtWidgets.QWidget):
 "#btn_apply_species:hover, \n"
 "#btn_apply_nn:hover,\n"
 "#btn_load:hover, #btn_save:hover, \n"
-"#btn_browse_nn:hover{\n"
+"#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover{\n"
 "  background-color: rgb(0, 203, 221);\n"
 "}\n"
 "\n"
@@ -107,7 +155,7 @@ class PageSettings(QtWidgets.QWidget):
 "#btn_apply_species:pressed, \n"
 "#btn_apply_nn:pressed,\n"
 "#btn_load:pressed, #btn_save:pressed,\n"
-"#btn_browse_nn:pressed{\n"
+"#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed{\n"
 "background-color: rgb(0, 160, 174);\n"
 "}\n"
 "\n"
@@ -182,31 +230,33 @@ class PageSettings(QtWidgets.QWidget):
 "    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
 "}\n"
 "")
+        # --- main page --------------------------------------------------- #
         self.setObjectName("page_settings")
         
-        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self)
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_4.setSpacing(0)
-        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        # main layout
+        self.layout_page_settings = QtWidgets.QVBoxLayout(self)
+        self.layout_page_settings.setContentsMargins(0, 0, 0, 0)
+        self.layout_page_settings.setSpacing(0)
+        self.layout_page_settings.setObjectName("layout_page_settings")
         
         # top bar (the blue one on every page)
-        self.frame_topBar = TopFrame(":/icons/icons/settings.png", "frame_settingsBar")
-        self.verticalLayout_4.addWidget(self.frame_topBar)
+        self.frame_topBar = TopFrame(":/icons/icons/settings.png", "frame_settingsBar")   
         
         # menu bar on about page
         self.frame_controlBar = MenuFrame("Settings", "frame_controlBar_settings")
-        self.verticalLayout_4.addWidget(self.frame_controlBar)
-    
-        # main frame for the settings
+  
+        # --- main frame for the settings --------------------------------------------------- #
         self.frame_settings = QtWidgets.QFrame(self)
         self.frame_settings.setStyleSheet("")
         self.frame_settings.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_settings.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_settings.setObjectName("frame_settings")
-        self.horizontalLayout_10 = QtWidgets.QHBoxLayout(self.frame_settings)
-        self.horizontalLayout_10.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_10.setSpacing(0)
-        self.horizontalLayout_10.setObjectName("horizontalLayout_10")
+        
+        # layout for the main settings frame
+        self.layout_settings_frame = QtWidgets.QHBoxLayout(self.frame_settings)
+        self.layout_settings_frame.setContentsMargins(0, 0, 0, 0)
+        self.layout_settings_frame.setSpacing(0)
+        self.layout_settings_frame.setObjectName("layout_settings_frame")
                 
         # custom tab widget (with horizontal texts on the left side)
         self.tabWidget = TabWidget(self.frame_settings)
@@ -214,30 +264,71 @@ class PageSettings(QtWidgets.QWidget):
         self.tabWidget.setTabPosition(QtWidgets.QTabWidget.West)
         self.tabWidget.setObjectName("tabWidget")
         
-        # tab for camera settings
-        self.tab_camera = QtWidgets.QWidget()
-        self.tab_camera.setObjectName("tab_camera")
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.tab_camera)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.frame_camera_options = QtWidgets.QFrame(self.tab_camera)
-        self.frame_camera_options.setStyleSheet("")
-        self.frame_camera_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_camera_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_camera_options.setObjectName("frame_camera_options")
-        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.frame_camera_options)
-        self.verticalLayout_6.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout_6.setSpacing(7)
-        self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.frame_config = QtWidgets.QFrame(self.frame_camera_options)
-        self.frame_config.setMinimumSize(QtCore.QSize(0, 50))
-        self.frame_config.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_config.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_config.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_config.setObjectName("frame_config")
-        self.horizontalLayout_11 = QtWidgets.QHBoxLayout(self.frame_config)
-        self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_11.setObjectName("horizontalLayout_11")
-        self.lineEdit_config_path = QtWidgets.QLineEdit(self.frame_config)
+        # define tabs
+        self.tab_camera = self.createTabCamera() # tab for camera settings
+        self.tab_neuralNet = self.createTabNeuralNetwork() # tab for neural net
+        self.tab_species = self.createTabSpecies() # tab for species    
+        self.tab_user = self.createTabUser() # tab for user settings
+        
+        # add tabs to tab widget
+        self.tabWidget.addTab(self.tab_camera, get_icon(":/icons/icons/camera.png"), "")
+        self.tabWidget.addTab(self.tab_neuralNet, get_icon(":/icons/icons/nn.png"), "")
+        self.tabWidget.addTab(self.tab_species, get_icon(":/icons/icons/fish.png"), "")
+        self.tabWidget.addTab(self.tab_user, get_icon(":/icons/icons/user_b.png"), "")
+        
+        # add tab widget to layout of main settings frame
+        self.layout_settings_frame.addWidget(self.tabWidget)
+        
+        # --- add widgets to main layout ------------------------------------------------------------ #
+        self.layout_page_settings.addWidget(self.frame_topBar)
+        self.layout_page_settings.addWidget(self.frame_controlBar)
+        self.layout_page_settings.addWidget(self.frame_settings)
+    
+    def createTabCamera(self):
+        # --- main frame (whole tab) ----------------------------------------------- #
+        tab_camera = QtWidgets.QWidget()
+        tab_camera.setObjectName("tab_camera")
+        
+        # main layout
+        layout = QtWidgets.QGridLayout(tab_camera)
+        layout.setObjectName("layout")
+        
+        # spacers
+        spacerItem34 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem35 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for camera options ----------------------------------------------- #
+        frame_camera_options = QtWidgets.QFrame(tab_camera)
+        frame_camera_options.setStyleSheet("")
+        frame_camera_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_camera_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_camera_options.setObjectName("frame_camera_options")
+        
+        # layout
+        layout_camera_options = QtWidgets.QVBoxLayout(frame_camera_options)
+        layout_camera_options.setContentsMargins(11, 11, 11, 11)
+        layout_camera_options.setSpacing(7)
+        layout_camera_options.setObjectName("layout_camera_options")
+        
+        # vertical spacer
+        spacerItem32 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for camera config file ----------------------------------------------- #
+        frame_config = QtWidgets.QFrame(frame_camera_options)
+        frame_config.setMinimumSize(QtCore.QSize(0, 50))
+        frame_config.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_config.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_config.setObjectName("frame_config")
+        
+        # layout
+        layout_config = QtWidgets.QHBoxLayout(frame_config)
+        layout_config.setContentsMargins(0, 0, 0, 0)
+        layout_config.setObjectName("layout_config")
+        
+        # line edit for config path
+        self.lineEdit_config_path = QtWidgets.QLineEdit(frame_config)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -245,43 +336,48 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_config_path.setSizePolicy(sizePolicy)
         self.lineEdit_config_path.setMinimumSize(QtCore.QSize(400, 40))
         self.lineEdit_config_path.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.lineEdit_config_path.setInputMask("")
-        self.lineEdit_config_path.setText("")
         self.lineEdit_config_path.setReadOnly(True)
         self.lineEdit_config_path.setObjectName("lineEdit_config_path")
-        
-        self.horizontalLayout_11.addWidget(self.lineEdit_config_path)
-        
-        self.btn_load = QtWidgets.QPushButton(self.frame_config)
+           
+        # button for loading a config file
+        self.btn_load = QtWidgets.QPushButton(frame_config)
         self.btn_load.setMinimumSize(QtCore.QSize(125, 40))
         self.btn_load.setMaximumSize(QtCore.QSize(16777215, 40))
         self.btn_load.setObjectName("btn_load")
-        self.horizontalLayout_11.addWidget(self.btn_load)
         
-        self.btn_save = QtWidgets.QPushButton(self.frame_config)
+        # button for saving current camera config
+        self.btn_save = QtWidgets.QPushButton(frame_config)
         self.btn_save.setMinimumSize(QtCore.QSize(125, 40))
         self.btn_save.setMaximumSize(QtCore.QSize(16777215, 40))
         self.btn_save.setObjectName("btn_save")
-        self.horizontalLayout_11.addWidget(self.btn_save)
         
-        self.verticalLayout_6.addWidget(self.frame_config)
+        # add widgets to layout
+        layout_config.addWidget(self.lineEdit_config_path)
+        layout_config.addWidget(self.btn_load)
+        layout_config.addWidget(self.btn_save)
         
-        self.frame_offset = QtWidgets.QFrame(self.frame_camera_options)
-        self.frame_offset.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_offset.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_offset.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_offset.setObjectName("frame_offset")
-        self.horizontalLayout_12 = QtWidgets.QHBoxLayout(self.frame_offset)
-        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
-        self.label_offset = QtWidgets.QLabel(self.frame_offset)
+        
+        # --- frame for offset options ----------------------------------------------- # 
+        frame_offset = QtWidgets.QFrame(frame_camera_options)
+        frame_offset.setMinimumSize(QtCore.QSize(0, 30))
+        frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_offset.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_offset.setObjectName("frame_offset")
+        
+        # layout
+        layout_offset = QtWidgets.QHBoxLayout(frame_offset)
+        layout_offset.setContentsMargins(0, 0, 0, 0)
+        layout_offset.setObjectName("layout_offset")
+        
+        # label to display parameter name "offset"
+        self.label_offset = QtWidgets.QLabel(frame_offset)
         self.label_offset.setObjectName("label_offset")
-        self.horizontalLayout_12.addWidget(self.label_offset)
-        spacerItem29 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_12.addItem(spacerItem29)
         
-        self.spinBox_offset = QtWidgets.QDoubleSpinBox(self.frame_offset)
+        # horizontal spacer
+        spacerItem29 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+             
+        # spin box for the offset
+        self.spinBox_offset = QtWidgets.QDoubleSpinBox(frame_offset)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -290,12 +386,11 @@ class PageSettings(QtWidgets.QWidget):
         self.spinBox_offset.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_offset.setMaximumSize(QtCore.QSize(16777215, 40))
         self.spinBox_offset.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_offset.setPrefix("")
         self.spinBox_offset.setMaximum(9999.99)
         self.spinBox_offset.setObjectName("spinBox_offset")
-        self.horizontalLayout_12.addWidget(self.spinBox_offset)
         
-        self.label_unit_offset = QtWidgets.QLabel(self.frame_offset)
+        # label to display the unit of the offset
+        self.label_unit_offset = QtWidgets.QLabel(frame_offset)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -304,23 +399,35 @@ class PageSettings(QtWidgets.QWidget):
         self.label_unit_offset.setMinimumSize(QtCore.QSize(50, 0))
         self.label_unit_offset.setMaximumSize(QtCore.QSize(50, 16777215))
         self.label_unit_offset.setObjectName("label_unit_offset")
-        self.horizontalLayout_12.addWidget(self.label_unit_offset)
-        self.verticalLayout_6.addWidget(self.frame_offset)
-        self.frame_distance_cameras = QtWidgets.QFrame(self.frame_camera_options)
-        self.frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_distance_cameras.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_distance_cameras.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_distance_cameras.setObjectName("frame_distance_cameras")
-        self.horizontalLayout_13 = QtWidgets.QHBoxLayout(self.frame_distance_cameras)
-        self.horizontalLayout_13.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_13.setObjectName("horizontalLayout_13")
-        self.label_distance_cameras = QtWidgets.QLabel(self.frame_distance_cameras)
+             
+        # add widgets to layout
+        layout_offset.addWidget(self.label_offset)
+        layout_offset.addItem(spacerItem29)
+        layout_offset.addWidget(self.spinBox_offset)
+        layout_offset.addWidget(self.label_unit_offset)
+        
+        
+        # --- frame for camera distance options ----------------------------------------------- #
+        frame_distance_cameras = QtWidgets.QFrame(frame_camera_options)
+        frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
+        frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_distance_cameras.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_distance_cameras.setObjectName("frame_distance_cameras")
+        
+        # layout
+        layout_distance = QtWidgets.QHBoxLayout(frame_distance_cameras)
+        layout_distance.setContentsMargins(0, 0, 0, 0)
+        layout_distance.setObjectName("layout_distance")
+        
+        # label to display parameter name "distance between cameras"
+        self.label_distance_cameras = QtWidgets.QLabel(frame_distance_cameras)
         self.label_distance_cameras.setObjectName("label_distance_cameras")
-        self.horizontalLayout_13.addWidget(self.label_distance_cameras)
+              
+        # horizontal spacer
         spacerItem30 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_13.addItem(spacerItem30)
-        self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(self.frame_distance_cameras)
+        
+        # spin box for the distance between the cameras
+        self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(frame_distance_cameras)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -329,31 +436,44 @@ class PageSettings(QtWidgets.QWidget):
         self.spinBox_distance_cameras.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 40))
         self.spinBox_distance_cameras.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_distance_cameras.setPrefix("")
         self.spinBox_distance_cameras.setMaximum(9999.99)
         self.spinBox_distance_cameras.setObjectName("spinBox_distance_cameras")
-        self.horizontalLayout_13.addWidget(self.spinBox_distance_cameras)
-        self.label_unit_ditance_cameras = QtWidgets.QLabel(self.frame_distance_cameras)
+        
+        # label to display the unit of the distance between the cameras
+        self.label_unit_ditance_cameras = QtWidgets.QLabel(frame_distance_cameras)
         self.label_unit_ditance_cameras.setMinimumSize(QtCore.QSize(50, 0))
         self.label_unit_ditance_cameras.setMaximumSize(QtCore.QSize(50, 16777215))
         self.label_unit_ditance_cameras.setObjectName("label_unit_ditance_cameras")
-        self.horizontalLayout_13.addWidget(self.label_unit_ditance_cameras)
-        self.verticalLayout_6.addWidget(self.frame_distance_cameras)
-        self.frame_distance_chip_lense = QtWidgets.QFrame(self.frame_camera_options)
-        self.frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_distance_chip_lense.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_distance_chip_lense.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_distance_chip_lense.setObjectName("frame_distance_chip_lense")
-        self.horizontalLayout_14 = QtWidgets.QHBoxLayout(self.frame_distance_chip_lense)
-        self.horizontalLayout_14.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_14.setObjectName("horizontalLayout_14")
-        self.label_distance_chip_lense = QtWidgets.QLabel(self.frame_distance_chip_lense)
+        
+        # add widgets to layout
+        layout_distance.addWidget(self.label_distance_cameras)
+        layout_distance.addItem(spacerItem30)
+        layout_distance.addWidget(self.spinBox_distance_cameras)
+        layout_distance.addWidget(self.label_unit_ditance_cameras)
+        
+        
+        # --- frame for distance chip lense options ----------------------------------------------- #
+        frame_distance_chip_lense = QtWidgets.QFrame(frame_camera_options)
+        frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
+        frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_distance_chip_lense.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        frame_distance_chip_lense.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_distance_chip_lense.setObjectName("frame_distance_chip_lense")
+        
+        # layout
+        layout_distance_cl = QtWidgets.QHBoxLayout(frame_distance_chip_lense)
+        layout_distance_cl.setContentsMargins(0, 0, 0, 0)
+        layout_distance_cl.setObjectName("layout_distance_cl")
+        
+        # label to display name of parameter "distance between chip and lense"
+        self.label_distance_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
         self.label_distance_chip_lense.setObjectName("label_distance_chip_lense")
-        self.horizontalLayout_14.addWidget(self.label_distance_chip_lense)
+ 
+        # horizontal spacer
         spacerItem31 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_14.addItem(spacerItem31)
-        self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(self.frame_distance_chip_lense)
+
+        # spin box for the distance between chip and lense
+        self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(frame_distance_chip_lense)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -362,11 +482,11 @@ class PageSettings(QtWidgets.QWidget):
         self.spinBox_distance_chip_lense.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 40))
         self.spinBox_distance_chip_lense.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_distance_chip_lense.setPrefix("")
         self.spinBox_distance_chip_lense.setMaximum(99999.99)
         self.spinBox_distance_chip_lense.setObjectName("spinBox_distance_chip_lense")
-        self.horizontalLayout_14.addWidget(self.spinBox_distance_chip_lense)
-        self.label_unit_chip_lense = QtWidgets.QLabel(self.frame_distance_chip_lense)
+        
+        # label to display the unit of the distance between chip and lense
+        self.label_unit_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -375,67 +495,109 @@ class PageSettings(QtWidgets.QWidget):
         self.label_unit_chip_lense.setMinimumSize(QtCore.QSize(50, 0))
         self.label_unit_chip_lense.setMaximumSize(QtCore.QSize(50, 16777215))
         self.label_unit_chip_lense.setObjectName("label_unit_chip_lense")
-        self.horizontalLayout_14.addWidget(self.label_unit_chip_lense)
-        self.verticalLayout_6.addWidget(self.frame_distance_chip_lense)
-        spacerItem32 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_6.addItem(spacerItem32)
-        self.frame_apply = QtWidgets.QFrame(self.frame_camera_options)
-        self.frame_apply.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_apply.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_apply.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_apply.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_apply.setObjectName("frame_apply")
-        self.horizontalLayout_16 = QtWidgets.QHBoxLayout(self.frame_apply)
-        self.horizontalLayout_16.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_16.setObjectName("horizontalLayout_16")
-        spacerItem33 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_16.addItem(spacerItem33)
         
-        self.btn_apply_camera = QtWidgets.QPushButton(self.frame_apply)
+        # add widgets to layout
+        layout_distance_cl.addWidget(self.label_distance_chip_lense)
+        layout_distance_cl.addItem(spacerItem31)
+        layout_distance_cl.addWidget(self.spinBox_distance_chip_lense)
+        layout_distance_cl.addWidget(self.label_unit_chip_lense)
+        
+        
+        # --- frame for applying camera options ----------------------------------------------- #
+        frame_apply = QtWidgets.QFrame(frame_camera_options)
+        frame_apply.setMinimumSize(QtCore.QSize(0, 30))
+        frame_apply.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_apply.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_apply.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_apply.setObjectName("frame_apply")
+        
+        # layout
+        layout_apply_camera = QtWidgets.QHBoxLayout(frame_apply)
+        layout_apply_camera.setContentsMargins(0, 0, 0, 0)
+        layout_apply_camera.setObjectName("layout_apply_camera")
+        
+        # horizontal spacer
+        spacerItem33 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        
+        # button for applying camera settings
+        self.btn_apply_camera = QtWidgets.QPushButton(frame_apply)
         self.btn_apply_camera.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_apply_camera.setStyleSheet("font:bold;")
         self.btn_apply_camera.setObjectName("btn_apply_camera")
         self.btn_apply_camera.setEnabled(False)
-        self.horizontalLayout_16.addWidget(self.btn_apply_camera)
         
-        self.verticalLayout_6.addWidget(self.frame_apply)
-        self.gridLayout_3.addWidget(self.frame_camera_options, 0, 0, 1, 1)
-        spacerItem34 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_3.addItem(spacerItem34, 0, 1, 1, 1)
-        spacerItem35 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout_3.addItem(spacerItem35, 1, 0, 1, 1)
-        self.tabWidget.addTab(self.tab_camera, get_icon(":/icons/icons/camera.png"), "")
+        # add widgets to layout
+        layout_apply_camera.addItem(spacerItem33)
+        layout_apply_camera.addWidget(self.btn_apply_camera)
         
-        # tab for neural net
-        self.tab_neuralNet = QtWidgets.QWidget()
-        self.tab_neuralNet.setObjectName("tab_neuralNet")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.tab_neuralNet)
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.frame_nn_options = QtWidgets.QFrame(self.tab_neuralNet)
-        self.frame_nn_options.setStyleSheet("")
-        self.frame_nn_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_nn_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_nn_options.setObjectName("frame_nn_options")
-        self.verticalLayout_17 = QtWidgets.QVBoxLayout(self.frame_nn_options)
-        self.verticalLayout_17.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout_17.setSpacing(7)
-        self.verticalLayout_17.setObjectName("verticalLayout_17")
-        self.frame_nn_info = QtWidgets.QFrame(self.frame_nn_options)
-        self.frame_nn_info.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_nn_info.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_nn_info.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_nn_info.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_nn_info.setObjectName("frame_nn_info")
-        self.horizontalLayout_36 = QtWidgets.QHBoxLayout(self.frame_nn_info)
-        self.horizontalLayout_36.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_36.setObjectName("horizontalLayout_36")
-        self.label_nn = QtWidgets.QLabel(self.frame_nn_info)
+        
+        # --- adding widgets to content (camera options) and main frame  ----------------------------------------------- #
+        layout_camera_options.addWidget(frame_config)
+        layout_camera_options.addWidget(frame_offset)
+        layout_camera_options.addWidget(frame_distance_cameras)
+        layout_camera_options.addWidget(frame_distance_chip_lense)
+        layout_camera_options.addItem(spacerItem32)
+        layout_camera_options.addWidget(frame_apply)
+        
+        layout.addWidget(frame_camera_options, 0, 0, 1, 1)
+        layout.addItem(spacerItem34, 0, 1, 1, 1)        
+        layout.addItem(spacerItem35, 1, 0, 1, 1)   
+        
+        return tab_camera
+        
+    def createTabNeuralNetwork(self):
+        # --- main frame (whole tab) ----------------------------------------------- #
+        tab_neuralNet = QtWidgets.QWidget()
+        tab_neuralNet.setObjectName("tab_neuralNet")
+        
+        # main layout
+        layout = QtWidgets.QGridLayout(tab_neuralNet)
+        layout.setObjectName("layout")
+        
+        # spacers
+        spacerItem39 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem40 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for nn options ----------------------------------------------- #
+        frame_nn_options = QtWidgets.QFrame(tab_neuralNet)
+        frame_nn_options.setStyleSheet("")
+        frame_nn_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_nn_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_nn_options.setObjectName("frame_nn_options")
+        
+        # layout
+        layout_nn_options = QtWidgets.QVBoxLayout(frame_nn_options)
+        layout_nn_options.setContentsMargins(11, 11, 11, 11)
+        layout_nn_options.setSpacing(7)
+        layout_nn_options.setObjectName("layout_nn_options")
+        
+        # vertical spacer
+        spacerItem37 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for nn path options ----------------------------------------------- #
+        frame_nn_path_options = QtWidgets.QFrame(frame_nn_options)
+        frame_nn_path_options.setMinimumSize(QtCore.QSize(0, 30))
+        frame_nn_path_options.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_nn_path_options.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        frame_nn_path_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_nn_path_options.setObjectName("frame_nn_path_options")
+        
+        # layout
+        layout_nn_path = QtWidgets.QHBoxLayout(frame_nn_path_options)
+        layout_nn_path.setContentsMargins(0, 0, 0, 0)
+        layout_nn_path.setObjectName("layout_nn_path")
+        
+        # label to display name of parameter "neural network path"
+        self.label_nn = QtWidgets.QLabel(frame_nn_path_options)
         self.label_nn.setObjectName("label_nn")
-        self.horizontalLayout_36.addWidget(self.label_nn)
+
+        # horizontal spacer
         spacerItem36 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_36.addItem(spacerItem36)
         
-        self.lineEdit_nn = QtWidgets.QLineEdit(self.frame_nn_info)
+        # line edit for nn path
+        self.lineEdit_nn = QtWidgets.QLineEdit(frame_nn_path_options)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -443,130 +605,216 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_nn.setSizePolicy(sizePolicy)
         self.lineEdit_nn.setMinimumSize(QtCore.QSize(400, 40))
         self.lineEdit_nn.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.lineEdit_nn.setStyleSheet("")
-        self.lineEdit_nn.setInputMask("")
-        self.lineEdit_nn.setText("")
         self.lineEdit_nn.setMaxLength(32767)
         self.lineEdit_nn.setEchoMode(QtWidgets.QLineEdit.Normal)
         self.lineEdit_nn.setCursorPosition(0)
         self.lineEdit_nn.setReadOnly(True)
         self.lineEdit_nn.setObjectName("lineEdit_nn")
-        self.horizontalLayout_36.addWidget(self.lineEdit_nn)
         
-        self.btn_browse_nn = QtWidgets.QPushButton(self.frame_nn_info)
+        # button for browsing for a nn
+        self.btn_browse_nn = QtWidgets.QPushButton(frame_nn_path_options)
         self.btn_browse_nn.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_browse_nn.setMaximumSize(QtCore.QSize(16777215, 40))
         self.btn_browse_nn.setObjectName("btn_browse_nn")
-        self.horizontalLayout_36.addWidget(self.btn_browse_nn)
         
-        self.verticalLayout_17.addWidget(self.frame_nn_info)
-        spacerItem37 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_17.addItem(spacerItem37)
-        self.frame_apply_nn = QtWidgets.QFrame(self.frame_nn_options)
-        self.frame_apply_nn.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_apply_nn.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_apply_nn.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_apply_nn.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_apply_nn.setObjectName("frame_apply_nn")
-        self.horizontalLayout_37 = QtWidgets.QHBoxLayout(self.frame_apply_nn)
-        self.horizontalLayout_37.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_37.setObjectName("horizontalLayout_37")
+        # add widgets to layout
+        layout_nn_path.addWidget(self.label_nn)
+        layout_nn_path.addItem(spacerItem36)
+        layout_nn_path.addWidget(self.lineEdit_nn)        
+        layout_nn_path.addWidget(self.btn_browse_nn)
+       
+
+        # --- frame for applying nn options ----------------------------------------------- #
+        frame_apply_nn = QtWidgets.QFrame(frame_nn_options)
+        frame_apply_nn.setMinimumSize(QtCore.QSize(0, 30))
+        frame_apply_nn.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_apply_nn.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_apply_nn.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_apply_nn.setObjectName("frame_apply_nn")
+        
+        # layout
+        layout_apply_nn = QtWidgets.QHBoxLayout(frame_apply_nn)
+        layout_apply_nn.setContentsMargins(0, 0, 0, 0)
+        layout_apply_nn.setObjectName("layout_apply_nn")
+        
+        # horizontal spacer
         spacerItem38 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_37.addItem(spacerItem38)
         
-        self.btn_apply_nn = QtWidgets.QPushButton(self.frame_apply_nn)
+        # button to apply nn settings    
+        self.btn_apply_nn = QtWidgets.QPushButton(frame_apply_nn)
         self.btn_apply_nn.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_apply_nn.setStyleSheet("font:bold;")
         self.btn_apply_nn.setObjectName("btn_apply_nn")
         self.btn_apply_nn.setEnabled(False)
-        self.horizontalLayout_37.addWidget(self.btn_apply_nn)
         
-        self.verticalLayout_17.addWidget(self.frame_apply_nn)
-        self.gridLayout_4.addWidget(self.frame_nn_options, 0, 0, 1, 1)
-        spacerItem39 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_4.addItem(spacerItem39, 0, 1, 1, 1)
-        spacerItem40 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout_4.addItem(spacerItem40, 1, 0, 1, 1)
-        self.tabWidget.addTab(self.tab_neuralNet, get_icon(":/icons/icons/nn.png"), "")
+        layout_apply_nn.addItem(spacerItem38)
+        layout_apply_nn.addWidget(self.btn_apply_nn)
         
-        # tab for species
-        self.tab_species = QtWidgets.QWidget()
-        self.tab_species.setObjectName("tab_species")
-        self.gridLayout_6 = QtWidgets.QGridLayout(self.tab_species)
-        self.gridLayout_6.setObjectName("gridLayout_6")
-        self.frame_species_options = QtWidgets.QFrame(self.tab_species)
-        self.frame_species_options.setStyleSheet("")
-        self.frame_species_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_species_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_species_options.setObjectName("frame_species_options")
-        self.verticalLayout_10 = QtWidgets.QVBoxLayout(self.frame_species_options)
-        self.verticalLayout_10.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout_10.setSpacing(7)
-        self.verticalLayout_10.setObjectName("verticalLayout_10")
-        self.listView = QtWidgets.QListView(self.frame_species_options)
-        self.listView.setStyleSheet("background-color:white;\n"
-"border-radius:3px;")
-        self.listView.setObjectName("listView")
-        self.verticalLayout_10.addWidget(self.listView)
-        spacerItem41 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_10.addItem(spacerItem41)
-        self.frame_apply_species = QtWidgets.QFrame(self.frame_species_options)
-        self.frame_apply_species.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_apply_species.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_apply_species.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_apply_species.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_apply_species.setObjectName("frame_apply_species")
-        self.horizontalLayout_35 = QtWidgets.QHBoxLayout(self.frame_apply_species)
-        self.horizontalLayout_35.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_35.setObjectName("horizontalLayout_35")
+        
+        # --- adding widgets to content (nn options) and main frame  ----------------------------------------------- #
+        layout_nn_options.addWidget(frame_nn_path_options)
+        layout_nn_options.addItem(spacerItem37)
+        layout_nn_options.addWidget(frame_apply_nn)
+        
+        layout.addWidget(frame_nn_options, 0, 0, 1, 1)
+        layout.addItem(spacerItem39, 0, 1, 1, 1)
+        layout.addItem(spacerItem40, 1, 0, 1, 1)
+        
+        return tab_neuralNet
+           
+    def createTabSpecies(self):
+        # --- main frame (whole tab) ----------------------------------------------- #
+        tab_species = QtWidgets.QWidget()
+        tab_species.setObjectName("tab_species")
+        
+        # main layout
+        layout = QtWidgets.QGridLayout(tab_species)
+        layout.setObjectName("layout")
+        
+        # horizontal spacer
+        spacerItem43 = QtWidgets.QSpacerItem(600, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)     
+            
+        # --- frame for species options ----------------------------------------------- #
+        frame_species_options = QtWidgets.QFrame(tab_species)
+        frame_species_options.setStyleSheet("")
+        frame_species_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_species_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_species_options.setObjectName("frame_species_options") # @todo change name, wrong spelling
+        
+        # layout of options frame
+        layout_species_options = QtWidgets.QVBoxLayout(frame_species_options)
+        layout_species_options.setContentsMargins(11, 11, 11, 11)
+        layout_species_options.setSpacing(7)
+        layout_species_options.setObjectName("layout_species_options")
+        
+        # @todo replace by QtWidgets.QListView (so one can set rounded corners in styleSheet)
+        # list widget
+        self.list_species = QtWidgets.QListWidget(frame_species_options)
+        self.list_species.setIconSize(QtCore.QSize(150,100))
+        self.list_species.setSelectionMode(1)            # 1 = SingleSelection, 2 = MultiSelection, not necessary, default mode is singleSelection
+        self.list_species.setMinimumWidth(610)
+        self.list_species.setStyleSheet("QListWidget{border:none; border-radius:3px;}\n"
+                                       "QListWidget::item:hover { background: rgb(0, 203, 221, 50); }\n"
+                                       "QListWidget::item:selected { background: rgb(0, 203, 221, 100); }\n")
+        
+        # add widgets to main layout
+        layout.addWidget(frame_species_options, 0, 0, 1, 1)
+        layout.addItem(spacerItem43, 0, 1, 1, 1)      
+
+        
+        # --- frame for buttons ----------------------------------------------- #
+        # frame 
+        frame_buttons = QtWidgets.QFrame(frame_species_options)
+        frame_buttons.setMinimumSize(QtCore.QSize(0, 30))
+        frame_buttons.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_buttons.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_buttons.setObjectName("frame_buttons")
+
+        # layout for buttons frame
+        layout_buttons = QtWidgets.QHBoxLayout(frame_buttons)
+        layout_buttons.setContentsMargins(0, 0, 0, 0)
+        layout_buttons.setObjectName("layout_buttons")
+        
+        # button to add a list entry
+        self.btn_add_species = QtWidgets.QPushButton(frame_buttons)
+        self.btn_add_species.setMinimumSize(QtCore.QSize(70, 40))
+        self.btn_add_species.setObjectName("btn_add_species")
+          
+        # button to remove a list entry
+        self.btn_remove_species = QtWidgets.QPushButton(frame_buttons)
+        self.btn_remove_species.setMinimumSize(QtCore.QSize(70, 40))
+        self.btn_remove_species.setObjectName("btn_remove_species")
+             
+        # add widgets to layout
+        layout_buttons.addWidget(self.btn_add_species)
+        layout_buttons.addWidget(self.btn_remove_species)
+        
+        # --- frame for applying the changes ----------------------------------------------- #
+        frame_apply_species = QtWidgets.QFrame(frame_species_options)
+        frame_apply_species.setMinimumSize(QtCore.QSize(0, 30))
+        frame_apply_species.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_apply_species.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_apply_species.setObjectName("frame_apply_species")     
+    
+        # layout for applying species options frame
+        layout_apply_species = QtWidgets.QHBoxLayout(frame_apply_species)
+        layout_apply_species.setContentsMargins(0, 0, 0, 0)
+        layout_apply_species.setObjectName("layout_apply_species")
+        
+        # horizontal spacer
         spacerItem42 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_35.addItem(spacerItem42)
-        
-        self.btn_apply_species = QtWidgets.QPushButton(self.frame_apply_species)
+            
+        # button for applying the species settings
+        self.btn_apply_species = QtWidgets.QPushButton(frame_apply_species)
         self.btn_apply_species.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_apply_species.setStyleSheet("font:bold;")
         self.btn_apply_species.setObjectName("btn_apply_species")
         self.btn_apply_species.setEnabled(False)
-        self.horizontalLayout_35.addWidget(self.btn_apply_species)
         
-        self.verticalLayout_10.addWidget(self.frame_apply_species)
-        self.gridLayout_6.addWidget(self.frame_species_options, 0, 0, 1, 1)
-        spacerItem43 = QtWidgets.QSpacerItem(609, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_6.addItem(spacerItem43, 0, 1, 1, 1)
-        spacerItem44 = QtWidgets.QSpacerItem(20, 334, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout_6.addItem(spacerItem44, 1, 0, 1, 1)
-        self.tabWidget.addTab(self.tab_species, get_icon(":/icons/icons/fish.png"), "")
+        # add widgets to apply species frame
+        layout_apply_species.addItem(spacerItem42)
+        layout_apply_species.addWidget(self.btn_apply_species)
         
-        # tab for user settings
-        self.tab_user = QtWidgets.QWidget()
-        self.tab_user.setObjectName("tab_user")
-        self.gridLayout = QtWidgets.QGridLayout(self.tab_user)
-        self.gridLayout.setObjectName("gridLayout")
-        self.frame_user_options = QtWidgets.QFrame(self.tab_user)
-        self.frame_user_options.setStyleSheet("")
-        self.frame_user_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_user_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_user_options.setObjectName("frame_user_options")
-        self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.frame_user_options)
-        self.verticalLayout_9.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout_9.setSpacing(7)
-        self.verticalLayout_9.setObjectName("verticalLayout_9")
-        self.frame_distance_chip_lense_4 = QtWidgets.QFrame(self.frame_user_options)
-        self.frame_distance_chip_lense_4.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_distance_chip_lense_4.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_distance_chip_lense_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_distance_chip_lense_4.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_distance_chip_lense_4.setObjectName("frame_distance_chip_lense_4")
-        self.horizontalLayout_32 = QtWidgets.QHBoxLayout(self.frame_distance_chip_lense_4)
-        self.horizontalLayout_32.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_32.setObjectName("horizontalLayout_32")
-        self.label_distance_chip_lense_4 = QtWidgets.QLabel(self.frame_distance_chip_lense_4)
-        self.label_distance_chip_lense_4.setObjectName("label_distance_chip_lense_4")
-        self.horizontalLayout_32.addWidget(self.label_distance_chip_lense_4)
+        
+        # --- content frame ----------------------------------------------- #
+        # add widgets to species options frame
+        layout_species_options.addWidget(self.list_species)
+        layout_species_options.addWidget(frame_buttons)  
+        layout_species_options.addWidget(frame_apply_species)
+ 
+        return tab_species
+
+    def createTabUser(self):
+        # --- main frame (whole tab) ----------------------------------------------- #
+        tab_user = QtWidgets.QWidget()
+        tab_user.setObjectName("tab_user")
+        
+        # main layout
+        gridLayout = QtWidgets.QGridLayout(tab_user)
+        gridLayout.setObjectName("gridLayout")
+        
+        # spacers
+        spacerItem48 = QtWidgets.QSpacerItem(609, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem49 = QtWidgets.QSpacerItem(20, 334, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        
+        # --- frame for user options ----------------------------------------------- #
+        # frame for the user options
+        frame_user_options = QtWidgets.QFrame(tab_user)
+        frame_user_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_user_options.setObjectName("frame_user_options")
+        
+        # layout for the user options frame
+        layout_user_options = QtWidgets.QVBoxLayout(frame_user_options)
+        layout_user_options.setContentsMargins(11, 11, 11, 11)
+        layout_user_options.setSpacing(7)
+        layout_user_options.setObjectName("layout_user_options")       
+        
+        # vertical spacer
+        spacerItem46 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+
+        
+        # --- frame for user id options ----------------------------------------------- #
+        # frame for the options for the user id
+        frame_user_id = QtWidgets.QFrame(frame_user_options)
+        frame_user_id.setMinimumSize(QtCore.QSize(0, 30))
+        frame_user_id.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_user_id.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_user_id.setObjectName("frame_user_id")
+
+        # layout for user id options
+        layout_user_id_row = QtWidgets.QHBoxLayout(frame_user_id)
+        layout_user_id_row.setContentsMargins(0, 0, 0, 0)
+        layout_user_id_row.setObjectName("layout_user_id_row")  
+             
+        # label to display name of parameter "user id"
+        self.label_user_id = QtWidgets.QLabel(frame_user_id)
+        self.label_user_id.setObjectName("label_user_id")
+        
+        # horizontal spacer
         spacerItem45 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_32.addItem(spacerItem45)
-        
-        self.lineEdit_user_id = QtWidgets.QLineEdit(self.frame_distance_chip_lense_4)
+                
+        # line edit for the user id
+        self.lineEdit_user_id = QtWidgets.QLineEdit(frame_user_id)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -574,65 +822,98 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_user_id.setSizePolicy(sizePolicy)
         self.lineEdit_user_id.setMinimumSize(QtCore.QSize(0, 40))
         self.lineEdit_user_id.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.lineEdit_user_id.setStyleSheet("")
-        self.lineEdit_user_id.setInputMask("")
-        self.lineEdit_user_id.setText("")
         self.lineEdit_user_id.setMaxLength(3)
         self.lineEdit_user_id.setEchoMode(QtWidgets.QLineEdit.Normal)
         self.lineEdit_user_id.setCursorPosition(0)
         self.lineEdit_user_id.setReadOnly(False)
         self.lineEdit_user_id.setObjectName("lineEdit_user_id")
         
-        # set a validator to ensure that the user ID consists of up to three letters (at least one)
+        # set a validator to ensure that the user ID consists of up to three letters (at least one letter)
         reg_ex = QtCore.QRegExp("[a-zA-Z]{1,3}")
         input_validator = QtGui.QRegExpValidator(reg_ex, self.lineEdit_user_id)
         self.lineEdit_user_id.setValidator(input_validator)
         
-        self.horizontalLayout_32.addWidget(self.lineEdit_user_id)
+        # add widgets to user id options layout
+        layout_user_id_row.addWidget(self.label_user_id)
+        layout_user_id_row.addItem(spacerItem45)
+        layout_user_id_row.addWidget(self.lineEdit_user_id)
         
-        self.verticalLayout_9.addWidget(self.frame_distance_chip_lense_4)
-        spacerItem46 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_9.addItem(spacerItem46)
-        self.frame_apply_user = QtWidgets.QFrame(self.frame_user_options)
-        self.frame_apply_user.setMinimumSize(QtCore.QSize(0, 30))
-        self.frame_apply_user.setMaximumSize(QtCore.QSize(16777215, 60))
-        self.frame_apply_user.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_apply_user.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_apply_user.setObjectName("frame_apply_user")
-        self.horizontalLayout_33 = QtWidgets.QHBoxLayout(self.frame_apply_user)
-        self.horizontalLayout_33.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_33.setObjectName("horizontalLayout_33")
+    
+        # --- frame for applying user options ----------------------------------------------- #
+        frame_apply_user = QtWidgets.QFrame(frame_user_options)
+        frame_apply_user.setMinimumSize(QtCore.QSize(0, 30))
+        frame_apply_user.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_apply_user.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_apply_user.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_apply_user.setObjectName("frame_apply_user")
+
+        # layout
+        layout_apply_user = QtWidgets.QHBoxLayout(frame_apply_user)
+        layout_apply_user.setContentsMargins(0, 0, 0, 0)
+        layout_apply_user.setObjectName("layout_apply_user")
+            
+        # horizontal spacer
         spacerItem47 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_33.addItem(spacerItem47)
         
-        self.btn_apply_user = QtWidgets.QPushButton(self.frame_apply_user)
+        # button to apply the settings
+        self.btn_apply_user = QtWidgets.QPushButton(frame_apply_user)
         self.btn_apply_user.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_apply_user.setStyleSheet("font:bold;")
         self.btn_apply_user.setObjectName("btn_apply_user")
         self.btn_apply_user.setEnabled(False)
-        self.horizontalLayout_33.addWidget(self.btn_apply_user)
         
-        self.verticalLayout_9.addWidget(self.frame_apply_user)
-        self.gridLayout.addWidget(self.frame_user_options, 0, 0, 1, 1)
-        spacerItem48 = QtWidgets.QSpacerItem(609, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem48, 0, 1, 1, 1)
-        spacerItem49 = QtWidgets.QSpacerItem(20, 334, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem49, 1, 0, 1, 1)
-        self.tabWidget.addTab(self.tab_user, get_icon(":/icons/icons/user_b.png"), "")
-
+        # add widgets to layout
+        layout_apply_user.addItem(spacerItem47)
+        layout_apply_user.addWidget(self.btn_apply_user)
+      
         
-        self.horizontalLayout_10.addWidget(self.tabWidget)
-        self.verticalLayout_4.addWidget(self.frame_settings)
-
-
-        #print(f"page settings init: {time.time() - start_time}")
-
-
-
-
-
-
+        # --- adding widgets to content (user options) and main frame  ----------------------------------------------- #
+        # add widgets to user options frame        
+        layout_user_options.addWidget(frame_user_id)
+        layout_user_options.addItem(spacerItem46)
+        layout_user_options.addWidget(frame_apply_user)
+             
+        # add widgets to main frame
+        gridLayout.addWidget(frame_user_options, 0, 0, 1, 1)       
+        gridLayout.addItem(spacerItem48, 0, 1, 1, 1)       
+        gridLayout.addItem(spacerItem49, 1, 0, 1, 1)
         
+        return tab_user
+
+    # save the current values of the widgets to be able to restore them in case the user doesnt want to apply them
+    def init_oldValues(self):
+        # initalize first values for variables on settings page
+        self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+        self.spinBox_offset_oldValue = self.spinBox_offset.value()
+        self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
+        self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
+        self.lineEdit_nn_oldValue = self.lineEdit_nn.text()
+        self.lineEdit_user_id_oldValue = self.lineEdit_user_id.text() 
+
+    def init_actions(self):
+        # camera tab      
+        self.btn_load.clicked.connect(self.load_config)
+        self.btn_save.clicked.connect(self.save_config)       
+        self.btn_apply_camera.clicked.connect(self.camera_apply_btn_pressed)
+        self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
+        self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
+        self.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
+        
+        # neural net tab
+        self.btn_apply_nn.clicked.connect(self.nn_apply_btn_pressed)
+        self.btn_browse_nn.clicked.connect(self.browse_for_nn)
+        self.lineEdit_nn.textChanged.connect(self.nn_path_changed)
+        
+        # species tab
+        self.btn_add_species.clicked.connect(self.browse_for_species_image)
+        self.btn_remove_species.clicked.connect(self.on_remove_item)  
+        self.btn_apply_species.clicked.connect(self.species_apply_btn_pressed)
+        
+        # user tab
+        #self.btn_apply_user.clicked.connect(self.user_apply_btn_pressed)
+        self.lineEdit_user_id.textEdited.connect(self.user_id_changed)
+    
+
     # def apply_settings_decision(self, answer):
     #     if answer.text() == "&Yes": 
     #         # apply the new values
@@ -644,41 +925,153 @@ class PageSettings(QtWidgets.QWidget):
     # def apply_all_settings(self):
     #     self.camera_apply_btn_pressed()
     #     self.nn_apply_btn_pressed()
-    #     self.user_apply_btn_pressed()
+    #     #print(self.parent().parent())
+    #     self.parent().parent().user_apply_btn_pressed()
     #     self.species_apply_btn_pressed()
     
-    # def restore_old_settings(self):
-    #     print(self.lineEdit_config_path_oldValue)
+    def restore_old_settings(self):
+        print(self.lineEdit_config_path_oldValue)
         
-    #     if self.btn_apply_camera.isEnabled() == True:   
-    #         self.spinBox_offset.setValue(self.spinBox_offset_oldValue)
-    #         self.spinBox_distance_cameras.setValue(self.spinBox_distance_cameras_oldValue)
-    #         self.spinBox_distance_chip_lense.setValue(self.spinBox_distance_chip_lense_oldValue)
-    #         self.lineEdit_config_path.setText(self.lineEdit_config_path_oldValue)   
-    #         self.btn_apply_camera.setEnabled(False)
+        if self.btn_apply_camera.isEnabled() == True:   
+            self.spinBox_offset.setValue(self.spinBox_offset_oldValue)
+            self.spinBox_distance_cameras.setValue(self.spinBox_distance_cameras_oldValue)
+            self.spinBox_distance_chip_lense.setValue(self.spinBox_distance_chip_lense_oldValue)
+            self.lineEdit_config_path.setText(self.lineEdit_config_path_oldValue)   
+            self.btn_apply_camera.setEnabled(False)
         
-    #     if self.btn_apply_nn.isEnabled() == True:
-    #         self.lineEdit_nn.setText(self.lineEdit_nn_oldValue)
-    #         self.btn_apply_nn.setEnabled(False)
+        if self.btn_apply_nn.isEnabled() == True:
+            self.lineEdit_nn.setText(self.lineEdit_nn_oldValue)
+            self.btn_apply_nn.setEnabled(False)
             
-    #     if self.btn_apply_species.isEnabled() == True:
-    #         print("not implemented yet")
-    #         self.btn_apply_species.setEnabled(False)
+        if self.btn_apply_species.isEnabled() == True:
+            print("not implemented yet")
+            self.btn_apply_species.setEnabled(False)
         
-    #     if self.btn_apply_user.isEnabled() == True:
-    #          self.lineEdit_user_id.setText(self.lineEdit_user_id_oldValue)
-    #          self.btn_apply_user.setEnabled(False)
+        if self.btn_apply_user.isEnabled() == True:
+              self.lineEdit_user_id.setText(self.lineEdit_user_id_oldValue)
+              self.btn_apply_user.setEnabled(False)
              
-    # # -------------------- species settings -------------------------------- # 
-    # def species_apply_btn_pressed(self):
-    #     print("not implemented yet")
+                
+# --- actions in camera tab ------------------------------------------------- #
+    def camera_apply_btn_pressed(self):
+        # disable apply btn
+        self.btn_apply_camera.setEnabled(False)
         
-    # def species_changed(self):
-    #     self.btn_apply_species.setEnabled(True)
+        # save the new values of the spinBoxes and the file path
+        self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+        self.spinBox_offset_oldValue = self.spinBox_offset.value()
+        self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
+        self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
         
-    # # -------------------- user settings -------------------------------- #     
+    def camera_spinBox_changed(self):
+        # enable apply button
+        self.btn_apply_camera.setEnabled(True)
+        
+        # remove file path (it is not valid for the new spinBox values anymore)
+        self.lineEdit_config_path.setText("")
+
+    def load_config(self):
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+        df = pd.read_csv(filename[0])
+        
+        # check format of file
+        if(self.check_config_format(df)):
+            # save old values of spinBoxes
+            self.spinBox_offset_oldValue = self.spinBox_offset.value()
+            self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
+            self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
+            
+            # set the respective spinBox values
+            self.spinBox_offset.setValue(df["y-offset"][0])
+            self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
+            self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
+            
+            # display the path to the file in the respective lineEdit
+            self.lineEdit_config_path.setText(filename[0])
+            
+            # set old value for config path
+            self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+        else:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText("File Format Error")
+            msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
+            msg.setWindowTitle("Error")
+            msg.exec_()
+      
+    def check_config_format(self, df_config):
+        # check if the necessary columns are present in the dataframe
+        if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
+            return True
+        else:
+            return False
+        
+    def save_config(self):
+        # create the file dialog
+        dialog = QtWidgets.QFileDialog()
+        filename = dialog.getSaveFileName(self, 'Save File', filter="*.csv")
+        
+        # fill the dataframe and write it
+        data = {"y-offset": [self.spinBox_offset.value()], "camera-distance": [self.spinBox_distance_cameras.value()], "chip-distance": [self.spinBox_distance_chip_lense.value()]}
+        df = pd.DataFrame(data)  
+        df.to_csv(filename[0], index=False)
+
+        # update the lineEdit
+        self.lineEdit_config_path.setText(filename[0])
+        
+        
+# --- actions in nn tab ------------------------------------------------- #
+    def nn_apply_btn_pressed(self):
+        # disable apply btn
+        self.btn_apply_nn.setEnabled(False)
+
+        # save the new value
+        self.lineEdit_nn_oldValue = self.lineEdit_nn.text()
+    
+    def nn_path_changed(self):
+        self.btn_apply_nn.setEnabled(True)
+        
+    def browse_for_nn(self):
+        self.btn_apply_nn.setEnabled(True)
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        self.lineEdit_nn.setText(filename[0])
+        # @todo!! make use of NN
+        
+        
+# --- actions in species tab ------------------------------------------------- #
+    def browse_for_species_image(self):
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        self.addCustomItem(filename[0])
+        
+        self.on_species_changed()
+            
+    def on_remove_item(self):
+        row = self.list_species.currentRow()
+        self.list_species.takeItem(row)
+        
+        self.on_species_changed()
+        
+    def addCustomItem(self, image_path, text=None):
+        customItem = TextImageItemWidget(image_path) # create custom item
+        if text is not None: customItem.set_text(text) # set a custom text, else it will be the file name
+        item = QtWidgets.QListWidgetItem(self.list_species) # create item in list
+        item.setSizeHint(QtCore.QSize(200,110))
+        
+        # add item to list
+        self.list_species.addItem(item)
+        self.list_species.setItemWidget(item, customItem)  
+
+    def species_apply_btn_pressed(self):
+        print("not implemented yet")
+        self.btn_apply_species.setEnabled(False)
+        
+    def on_species_changed(self):
+        self.btn_apply_species.setEnabled(True)
+
+
+# --- actions in user tab ------------------------------------------------- #  
     # def user_apply_btn_pressed(self):
-    #      # disable apply btn
+    #     # disable apply btn
     #     self.btn_apply_user.setEnabled(False)
 
     #     # save the new value
@@ -697,51 +1090,14 @@ class PageSettings(QtWidgets.QWidget):
     #     self.label_user_id_settings_2.setText(self.lineEdit_user_id_oldValue)
     #     self.label_user_id_handbook_2.setText(self.lineEdit_user_id_oldValue)
     #     self.label_user_id_about_2.setText(self.lineEdit_user_id_oldValue)
-        
-    
-    # def user_id_changed(self):
-    #     self.btn_apply_user.setEnabled(True)
+ 
+    def user_id_changed(self):
+        self.btn_apply_user.setEnabled(True)
         
     # def direct_to_user_settings(self):
     #     self.action_to_settings_page()
     #     self.tabWidget.setCurrentIndex(3)
-    
-    # # -------------------- nn settings -------------------------------- # 
-    # def nn_apply_btn_pressed(self):
-    #     # disable apply btn
-    #     self.btn_apply_nn.setEnabled(False)
-
-    #     # save the new value
-    #     self.lineEdit_nn_oldValue = self.lineEdit_nn.text()
-    
-    # def nn_path_changed(self):
-    #     self.btn_apply_nn.setEnabled(True)
         
-    # def browse_for_nn(self):
-    #     filename = QtWidgets.QFileDialog.getOpenFileName()
-    #     self.lineEdit_nn.setText(filename[0])
-    #     # @todo!! make use of NN
-    
-    # # -------------------- camera settings -------------------------------- # 
-    # def camera_apply_btn_pressed(self):
-    #     # disable apply btn
-    #     self.btn_apply_camera.setEnabled(False)
-        
-    #     # save the new values of the spinBoxes and the file path
-    #     self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
-    #     self.spinBox_offset_oldValue = self.spinBox_offset.value()
-    #     self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-    #     self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-        
-
-    # def camera_spinBox_changed(self):
-    #     # enable apply button
-    #     self.btn_apply_camera.setEnabled(True)
-        
-    #     # remove file path (it is not valid for the new spinBox values anymore)
-    #     self.lineEdit_config_path.setText("")
-        
-    
     # def check_all_settings(self):
     #     # check if there are not applied settings
     #     if self.btn_apply_camera.isEnabled() == True or \
@@ -756,59 +1112,6 @@ class PageSettings(QtWidgets.QWidget):
     #         msg.setWindowTitle("Settings changed")
     #         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
     #         msg.buttonClicked.connect(self.apply_settings_decision)
-    #         msg.exec_()
-
-
-    
-    # def load_config(self):
-    #     filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
-    #     df = pd.read_csv(filename[0])
+    #         msg.exec_()      
+       
         
-    #     # check format of file
-    #     if(self.check_config_format(df)):
-    #         # save old values of spinBoxes
-    #         self.spinBox_offset_oldValue = self.spinBox_offset.value()
-    #         self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-    #         self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-            
-    #         # set the respective spinBox values
-    #         self.spinBox_offset.setValue(df["y-offset"][0])
-    #         self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
-    #         self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
-            
-    #         # display the path to the file in the respective lineEdit
-    #         self.lineEdit_config_path.setText(filename[0])
-            
-    #         # set old value for config path
-    #         self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
-    #     else:
-    #         msg = QtWidgets.QMessageBox()
-    #         msg.setIcon(QtWidgets.QMessageBox.Critical)
-    #         msg.setText("File Format Error")
-    #         msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
-    #         msg.setWindowTitle("Error")
-    #         msg.exec_()
-      
-    # def check_config_format(self, df_config):
-    #     type_dict = dict(df_config.dtypes)
-
-    #     # check if the necessary columns are present in the dataframe
-    #     if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
-    #         return True
-    #     else:
-    #         return False
-        
-        
-        
-    # def save_config(self):
-    #     # create the file dialog
-    #     dialog = QtWidgets.QFileDialog()
-    #     filename = dialog.getSaveFileName(self, 'Save File', filter="*.csv")
-        
-    #     # fill the dataframe and write it
-    #     data = {"y-offset": [self.spinBox_offset.value()], "camera-distance": [self.spinBox_distance_cameras.value()], "chip-distance": [self.spinBox_distance_chip_lense.value()]}
-    #     df = pd.DataFrame(data)  
-    #     df.to_csv(filename[0], index=False)
-
-    #     # update the lineEdit
-    #     self.lineEdit_config_path.setText(filename[0])

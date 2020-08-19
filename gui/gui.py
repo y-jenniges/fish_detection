@@ -13,10 +13,6 @@ import time
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):  
         start_time = time.time()
-        
-        # create icon loader
-        #self.icon_loader = Helpers.IconLoader()
-        
         print(f"gui init: {time.time() - start_time}")
         
         # set up main window
@@ -348,12 +344,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_neuralNet), _translate("MainWindow", "Neural Network"))
         self.page_settings.btn_apply_species.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_species), _translate("MainWindow", "Species"))
-        self.page_settings.label_distance_chip_lense_4.setText(_translate("MainWindow", "ID"))
+        self.page_settings.label_user_id.setText(_translate("MainWindow", "ID"))
         self.page_settings.lineEdit_user_id.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
         self.page_settings.lineEdit_user_id.setPlaceholderText(_translate("MainWindow", "User ID..."))
         self.page_settings.btn_apply_user.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_user), _translate("MainWindow", "User"))       
-     
+        self.page_settings.btn_add_species.setText(_translate("MainWindow", "Add"))
+        self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
+        
         # texts for the handbook page
         self.page_handbook.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_handbook.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
@@ -376,15 +374,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "<br>\n"
 "September 2020"))
     
-        # @todo connections should be somewhere else!!!
-        # initalize first values for variables on settings page
-        self.lineEdit_config_path_oldValue = self.page_settings.lineEdit_config_path.text()
-        self.spinBox_offset_oldValue = self.page_settings.spinBox_offset.value()
-        self.spinBox_distance_cameras_oldValue = self.page_settings.spinBox_distance_cameras.value()
-        self.spinBox_distance_chip_lense_oldValue = self.page_settings.spinBox_distance_chip_lense.value()
-        self.lineEdit_nn_oldValue = self.page_settings.lineEdit_nn.text()
-        self.lineEdit_user_id_oldValue = self.page_settings.lineEdit_user_id.text() 
-    
+        # @todo implement somewhere else    
         # connect user button in top bars
         self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
@@ -398,23 +388,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_settings.frame_controlBar.btn_menu)
         self.append_main_menu_to_button(self.page_about.frame_controlBar.btn_menu)
         self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
-        
-        
-        # settings page - connect signals and slots
-        self.page_settings.btn_load.clicked.connect(self.load_config)
-        self.page_settings.btn_save.clicked.connect(self.save_config)
-        
-        self.page_settings.btn_apply_camera.clicked.connect(self.camera_apply_btn_pressed)
-        self.page_settings.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
-        self.page_settings.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
-        self.page_settings.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
-        
+           
+        # @todo implement listener pattern (mainwindow/all pages listen for  user apply button pressed) -> can adapt user id in top bars
         self.page_settings.btn_apply_user.clicked.connect(self.user_apply_btn_pressed)
-        self.page_settings.lineEdit_user_id.textEdited.connect(self.user_id_changed)
-        
-        self.page_settings.btn_apply_nn.clicked.connect(self.nn_apply_btn_pressed)
-        self.page_settings.btn_browse_nn.clicked.connect(self.browse_for_nn)
-        self.page_settings.lineEdit_nn.textChanged.connect(self.nn_path_changed)
         
 
     def apply_settings_decision(self, answer):
@@ -423,106 +399,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.apply_all_settings()
         else:
             # restore all not applied values
-            self.restore_old_settings()
+            self.page_settings.restore_old_settings()
     
     def apply_all_settings(self):
-        self.camera_apply_btn_pressed()
-        self.nn_apply_btn_pressed()
+        self.page_settings.camera_apply_btn_pressed()
+        self.page_settings.nn_apply_btn_pressed()
         self.user_apply_btn_pressed()
-        self.species_apply_btn_pressed()
-    
-    def restore_old_settings(self):  
-        if self.page_settings.btn_apply_camera.isEnabled() == True:   
-            self.page_settings.spinBox_offset.setValue(self.spinBox_offset_oldValue)
-            self.page_settings.spinBox_distance_cameras.setValue(self.spinBox_distance_cameras_oldValue)
-            self.page_settings.spinBox_distance_chip_lense.setValue(self.spinBox_distance_chip_lense_oldValue)
-            self.page_settings.lineEdit_config_path.setText(self.lineEdit_config_path_oldValue)   
-            self.page_settings.btn_apply_camera.setEnabled(False)
-        
-        if self.page_settings.btn_apply_nn.isEnabled() == True:
-            self.page_settings.lineEdit_nn.setText(self.lineEdit_nn_oldValue)
-            self.page_settings.btn_apply_nn.setEnabled(False)
-            
-        if self.page_settings.btn_apply_species.isEnabled() == True:
-            print("not implemented yet")
-            self.page_settings.btn_apply_species.setEnabled(False)
-        
-        if self.page_settings.btn_apply_user.isEnabled() == True:
-             self.page_settings.lineEdit_user_id.setText(self.lineEdit_user_id_oldValue)
-             self.page_settings.btn_apply_user.setEnabled(False)
-             
-    # -------------------- species settings -------------------------------- # 
-    def species_apply_btn_pressed(self):
-        print("not implemented yet")
-        
-    def species_changed(self):
-        self.btn_apply_species.setEnabled(True)
-        
-    # -------------------- user settings -------------------------------- #     
-    def user_apply_btn_pressed(self):
-         # disable apply btn
-        self.page_settings.btn_apply_user.setEnabled(False)
+        self.page_settings.species_apply_btn_pressed()
 
-        # save the new value
-        self.lineEdit_user_id_oldValue = self.page_settings.lineEdit_user_id.text()    
-        
-        # update the userId in the top bar of the software (on every page)
-        self.page_home.frame_topBar.label_user_id.setText(self.lineEdit_user_id_oldValue)
-        self.page_data.frame_topBar.label_user_id.setText(self.lineEdit_user_id_oldValue)
-        self.page_settings.frame_topBar.label_user_id.setText(self.lineEdit_user_id_oldValue)
-        self.page_about.frame_topBar.label_user_id.setText(self.lineEdit_user_id_oldValue)
-        self.page_handbook.frame_topBar.label_user_id.setText(self.lineEdit_user_id_oldValue) 
-        
-        # also update the dummy userIds to preserve the symmetry of the bar
-        self.page_home.frame_topBar.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-        self.page_data.frame_topBar.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-        self.page_settings.frame_topBar.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-        self.page_about.frame_topBar.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-        self.page_handbook.frame_topBar.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-    
-    def user_id_changed(self):
-        self.page_settings.btn_apply_user.setEnabled(True)
-        
-    def direct_to_user_settings(self):
-        self.action_to_settings_page()
-        self.page_settings.tabWidget.setCurrentIndex(3)
-    
-    # -------------------- nn settings -------------------------------- # 
-    def nn_apply_btn_pressed(self):
-        # disable apply btn
-        self.page_settings.btn_apply_nn.setEnabled(False)
-
-        # save the new value
-        self.lineEdit_nn_oldValue = self.page_settings.lineEdit_nn.text()
-    
-    def nn_path_changed(self):
-        self.page_settings.btn_apply_nn.setEnabled(True)
-        
-    def browse_for_nn(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        self.page_settings.lineEdit_nn.setText(filename[0])
-        # @todo!! make use of NN
-    
-    # -------------------- camera settings -------------------------------- # 
-    def camera_apply_btn_pressed(self):
-        # disable apply btn
-        self.page_settings.btn_apply_camera.setEnabled(False)
-        
-        # save the new values of the spinBoxes and the file path
-        self.lineEdit_config_path_oldValue = self.page_settings.lineEdit_config_path.text()
-        self.spinBox_offset_oldValue = self.page_settings.spinBox_offset.value()
-        self.spinBox_distance_cameras_oldValue = self.page_settings.spinBox_distance_cameras.value()
-        self.spinBox_distance_chip_lense_oldValue = self.page_settings.spinBox_distance_chip_lense.value()
-        
-
-    def camera_spinBox_changed(self):
-        # enable apply button
-        self.page_settings.btn_apply_camera.setEnabled(True)
-        
-        # remove file path (it is not valid for the new spinBox values anymore)
-        self.page_settings.lineEdit_config_path.setText("")
-        
-    
     def check_all_settings(self):
         # check if there are not applied settings
         if self.page_settings.btn_apply_camera.isEnabled() == True or \
@@ -538,60 +422,150 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
             msg.buttonClicked.connect(self.apply_settings_decision)
             msg.exec_()
-
-
     
-    def load_config(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
-        df = pd.read_csv(filename[0])
+    # def restore_old_settings(self):  
+    #     if self.page_settings.btn_apply_camera.isEnabled() == True:   
+    #         self.page_settings.spinBox_offset.setValue(self.spinBox_offset_oldValue)
+    #         self.page_settings.spinBox_distance_cameras.setValue(self.spinBox_distance_cameras_oldValue)
+    #         self.page_settings.spinBox_distance_chip_lense.setValue(self.spinBox_distance_chip_lense_oldValue)
+    #         self.page_settings.lineEdit_config_path.setText(self.lineEdit_config_path_oldValue)   
+    #         self.page_settings.btn_apply_camera.setEnabled(False)
         
-        # check format of file
-        if(self.check_config_format(df)):           
-            # set the respective spinBox values
-            self.page_settings.spinBox_offset.setValue(df["y-offset"][0])
-            self.page_settings.spinBox_distance_cameras.setValue(df["camera-distance"][0])
-            self.page_settings.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
+    #     if self.page_settings.btn_apply_nn.isEnabled() == True:
+    #         self.page_settings.lineEdit_nn.setText(self.lineEdit_nn_oldValue)
+    #         self.page_settings.btn_apply_nn.setEnabled(False)
             
-            # display the path to the file in the respective lineEdit
-            self.page_settings.lineEdit_config_path.setText(filename[0])
+    #     if self.page_settings.btn_apply_species.isEnabled() == True:
+    #         print("not implemented yet")
+    #         self.page_settings.btn_apply_species.setEnabled(False)
+        
+    #     if self.page_settings.btn_apply_user.isEnabled() == True:
+    #          self.page_settings.lineEdit_user_id.setText(self.lineEdit_user_id_oldValue)
+    #          self.page_settings.btn_apply_user.setEnabled(False)
+             
+    # # -------------------- species settings -------------------------------- # 
+    # def species_apply_btn_pressed(self):
+    #     print("not implemented yet")
+        
+    # def species_changed(self):
+    #     self.btn_apply_species.setEnabled(True)
+        
+    # -------------------- user settings -------------------------------- #     
+    def user_apply_btn_pressed(self):
+          # disable apply btn
+        self.page_settings.btn_apply_user.setEnabled(False)
+
+        # save the new value
+        self.page_settings.lineEdit_user_id_oldValue = self.page_settings.lineEdit_user_id.text()    
+        
+        # update the userId in the top bar of the software (on every page)
+        self.page_home.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_data.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_settings.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_about.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_handbook.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue) 
+        
+        # also update the dummy userIds to preserve the symmetry of the bar
+        self.page_home.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_data.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_settings.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_about.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
+        self.page_handbook.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
+    
+    # def user_id_changed(self):
+    #     self.page_settings.btn_apply_user.setEnabled(True)
+        
+    def direct_to_user_settings(self):
+        self.action_to_settings_page()
+        self.page_settings.tabWidget.setCurrentIndex(3)
+    
+    # # -------------------- nn settings -------------------------------- # 
+    # def nn_apply_btn_pressed(self):
+    #     # disable apply btn
+    #     self.page_settings.btn_apply_nn.setEnabled(False)
+
+    #     # save the new value
+    #     self.lineEdit_nn_oldValue = self.page_settings.lineEdit_nn.text()
+    
+    # def nn_path_changed(self):
+    #     self.page_settings.btn_apply_nn.setEnabled(True)
+        
+    # def browse_for_nn(self):
+    #     filename = QtWidgets.QFileDialog.getOpenFileName()
+    #     self.page_settings.lineEdit_nn.setText(filename[0])
+    #     # @todo!! make use of NN
+    
+    # # -------------------- camera settings -------------------------------- # 
+    # def camera_apply_btn_pressed(self):
+    #     # disable apply btn
+    #     self.page_settings.btn_apply_camera.setEnabled(False)
+        
+    #     # save the new values of the spinBoxes and the file path
+    #     self.lineEdit_config_path_oldValue = self.page_settings.lineEdit_config_path.text()
+    #     self.spinBox_offset_oldValue = self.page_settings.spinBox_offset.value()
+    #     self.spinBox_distance_cameras_oldValue = self.page_settings.spinBox_distance_cameras.value()
+    #     self.spinBox_distance_chip_lense_oldValue = self.page_settings.spinBox_distance_chip_lense.value()
+        
+
+    # def camera_spinBox_changed(self):
+    #     # enable apply button
+    #     self.page_settings.btn_apply_camera.setEnabled(True)
+        
+    #     # remove file path (it is not valid for the new spinBox values anymore)
+    #     self.page_settings.lineEdit_config_path.setText("")
+        
+    
+    # def load_config(self):
+    #     filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+    #     df = pd.read_csv(filename[0])
+        
+    #     # check format of file
+    #     if(self.check_config_format(df)):           
+    #         # set the respective spinBox values
+    #         self.page_settings.spinBox_offset.setValue(df["y-offset"][0])
+    #         self.page_settings.spinBox_distance_cameras.setValue(df["camera-distance"][0])
+    #         self.page_settings.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
+            
+    #         # display the path to the file in the respective lineEdit
+    #         self.page_settings.lineEdit_config_path.setText(filename[0])
             
 
-        else:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText("File Format Error")
-            msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
-            msg.setWindowTitle("Error")
-            msg.exec_()
+    #     else:
+    #         msg = QtWidgets.QMessageBox()
+    #         msg.setIcon(QtWidgets.QMessageBox.Critical)
+    #         msg.setText("File Format Error")
+    #         msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
+    #         msg.setWindowTitle("Error")
+    #         msg.exec_()
       
-    def check_config_format(self, df_config):
-        #type_dict = dict(df_config.dtypes)
+    # def check_config_format(self, df_config):
+    #     #type_dict = dict(df_config.dtypes)
 
-        # check if the necessary columns are present in the dataframe
-        if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
-            # check if the dataformat is correct
-            # if type_dict["y-offset"] == np.int64 and type_dict["camera-distance"] == np.float64 and type_dict["chip-distance"] == np.int64:
-            #     return True
-            # else:
-            #     return False
-            return True
-        else:
-            return False
+    #     # check if the necessary columns are present in the dataframe
+    #     if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
+    #         # check if the dataformat is correct
+    #         # if type_dict["y-offset"] == np.int64 and type_dict["camera-distance"] == np.float64 and type_dict["chip-distance"] == np.int64:
+    #         #     return True
+    #         # else:
+    #         #     return False
+    #         return True
+    #     else:
+    #         return False
         
         
         
-    def save_config(self):
-        # create the file dialog
-        dialog = QtWidgets.QFileDialog()
-        filename = dialog.getSaveFileName(self, 'Save File', filter="*.csv")
+    # def save_config(self):
+    #     # create the file dialog
+    #     dialog = QtWidgets.QFileDialog()
+    #     filename = dialog.getSaveFileName(self, 'Save File', filter="*.csv")
         
-        # fill the dataframe and write it
-        data = {"y-offset": [self.page_settings.spinBox_offset.value()], "camera-distance": [self.page_settings.spinBox_distance_cameras.value()], "chip-distance": [self.page_settings.spinBox_distance_chip_lense.value()]}
-        df = pd.DataFrame(data)  
-        df.to_csv(filename[0], index=False)
+    #     # fill the dataframe and write it
+    #     data = {"y-offset": [self.page_settings.spinBox_offset.value()], "camera-distance": [self.page_settings.spinBox_distance_cameras.value()], "chip-distance": [self.page_settings.spinBox_distance_chip_lense.value()]}
+    #     df = pd.DataFrame(data)  
+    #     df.to_csv(filename[0], index=False)
 
-        # update the lineEdit
-        self.page_settings.lineEdit_config_path.setText(filename[0])
+    #     # update the lineEdit
+    #     self.page_settings.lineEdit_config_path.setText(filename[0])
       
         
     # -------------------- navigation actions -------------------------------- #    

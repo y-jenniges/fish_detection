@@ -175,7 +175,6 @@ class TopFrame(QtWidgets.QFrame):
         horizontalLayout_34.addWidget(self.btn_user)
 
 
-
 """
 Frame that contains the menu button. It is similar on most pages, except the home page. 
 The latter includes controls instead of a text in this bar.
