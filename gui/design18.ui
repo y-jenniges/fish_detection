@@ -240,7 +240,7 @@ QLabel{
        <number>0</number>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_home_lr">
        <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -3333,7 +3333,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                  <enum>QFrame::Raised</enum>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="2" column="1">
+                 <item row="1" column="1">
                   <widget class="QLineEdit" name="lineEdit_res_file">
                    <property name="minimumSize">
                     <size>
@@ -3352,152 +3352,27 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="label_num_imgs">
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_img_prefix">
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
                    <property name="text">
-                    <string>Numer of images</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="lineEdit_img_dir">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>helge:// SVL/Remos-1/.../time-normized/</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Directory to left and right images...</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QFrame" name="frame_num_imgs">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_21">
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="QPushButton" name="btn_img_dir">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>70</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>70</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>Browse</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="3" column="2">
-                  <widget class="QFrame" name="frame_apply_diverging_data_info">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_23">
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="label_exp_id">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="text">
-                    <string>Experiment ID</string>
+                    <string>Image Prefix</string>
                    </property>
                   </widget>
                  </item>
                  <item row="1" column="0">
+                  <widget class="QLabel" name="label_res_file">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>Result file</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
                   <widget class="QLabel" name="label_img_dir">
                    <property name="styleSheet">
                     <string notr="true"/>
@@ -3507,7 +3382,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="2">
+                 <item row="6" column="2">
                   <widget class="QPushButton" name="btn_apply_diverging_data_info">
                    <property name="minimumSize">
                     <size>
@@ -3529,7 +3404,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
+                 <item row="2" column="1">
                   <widget class="QLineEdit" name="lineEdit_img_prefix">
                    <property name="minimumSize">
                     <size>
@@ -3551,17 +3426,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_res_file">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="text">
-                    <string>Result file</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
+                 <item row="4" column="1">
                   <widget class="QLabel" name="label_num_imgs_text">
                    <property name="styleSheet">
                     <string notr="true">padding-left: 10px;</string>
@@ -3574,37 +3439,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="2">
-                  <widget class="QFrame" name="frame_img_dir">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="frameShadow">
-                    <enum>QFrame::Raised</enum>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_17">
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="2" column="2">
+                 <item row="1" column="2">
                   <widget class="QPushButton" name="btn_res_file">
                    <property name="minimumSize">
                     <size>
@@ -3623,7 +3458,67 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="1">
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_img_dir">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>helge:// SVL/Remos-1/.../time-normized/</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Directory to left and right images...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <spacer name="verticalSpacer_6">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::Expanding</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_num_imgs">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>Numer of images</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
                   <widget class="QLineEdit" name="lineEdit_exp_id">
                    <property name="minimumSize">
                     <size>
@@ -3643,30 +3538,39 @@ QCalendarWidget QSpinBox::down-button:pressed {
                   </widget>
                  </item>
                  <item row="3" column="0">
-                  <widget class="QLabel" name="label_img_prefix">
+                  <widget class="QLabel" name="label_exp_id">
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
                    <property name="text">
-                    <string>Image Prefix</string>
+                    <string>Experiment ID</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1">
-                  <spacer name="verticalSpacer_6">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
+                 <item row="0" column="2">
+                  <widget class="QPushButton" name="btn_img_dir">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Expanding</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
+                   <property name="minimumSize">
                     <size>
-                     <width>20</width>
+                     <width>70</width>
                      <height>40</height>
                     </size>
                    </property>
-                  </spacer>
+                   <property name="maximumSize">
+                    <size>
+                     <width>70</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Browse</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>

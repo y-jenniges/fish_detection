@@ -42,7 +42,6 @@ class TextImageItemWidget (QtWidgets.QWidget):
 Class to create the settings page of the software.
 """
 class PageSettings(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
@@ -245,6 +244,7 @@ class PageSettings(QtWidgets.QWidget):
         # menu bar on about page
         self.frame_controlBar = MenuFrame("Settings", "frame_controlBar_settings")
   
+    
         # --- main frame for the settings --------------------------------------------------- #
         self.frame_settings = QtWidgets.QFrame(self)
         self.frame_settings.setStyleSheet("")
@@ -278,6 +278,7 @@ class PageSettings(QtWidgets.QWidget):
         
         # add tab widget to layout of main settings frame
         self.layout_settings_frame.addWidget(self.tabWidget)
+        
         
         # --- add widgets to main layout ------------------------------------------------------------ #
         self.layout_page_settings.addWidget(self.frame_topBar)
@@ -1040,7 +1041,7 @@ class PageSettings(QtWidgets.QWidget):
         
 # --- actions in species tab ------------------------------------------------- #
     def browse_for_species_image(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
         self.addCustomItem(filename[0])
         
         self.on_species_changed()

@@ -1,39 +1,119 @@
 import time
 
 from PyQt5 import QtCore, QtWidgets
-
+import ntpath
 from Helpers import TopFrame, MenuFrame
+import glob
+
+# IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
+# IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
+# IMAGE_DIRECTORY = ""
+# IMAGE_PREFIX = ""
 
 """
 Class to create the data page of the software.
 """
-class PageData(QtWidgets.QFrame):
-    
+class PageData(QtWidgets.QFrame):   
     def __init__(self, parent=None):
-        start_time = time.time()
-        
+        start_time = time.time()       
         super(QtWidgets.QFrame, self).__init__(parent)
     
-        self.setObjectName("page_data")
+        self.init_ui()
+        self.init_actions()
         
-        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self)
-        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_5.setSpacing(0)
-        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        # init values
+        self.IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
+        self.IMAGE_DIRECTORY = ""
+        self.RES_FILE = ""  
+        self.IMAGE_PREFIX = "TN_Exif_"
+        self.EXPERIMENT_ID = ""
+              
+        self.calenderSelectionChanged()
         
-        # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", "frame_dataBar")     
-        self.verticalLayout_5.addWidget(self.frame_topBar)
+        #print(f"page data init: {time.time() - start_time}")
+    
+    # function to handle when the user changes the img_dir line edit
+    def on_img_dir_edit_changed(self):
+        if ntpath.exists(self.lineEdit_img_dir.text()):
+            self.IMAGE_DIRECTORY = self.lineEdit_img_dir.text()
+            self.updateAllVisuals()
+        else:
+            print("The entered img dir is not a valid path.") # @todo error prompt
+    
+    # function to handle when the user changes the red_file line edit
+    def on_res_file_edit_changed(self):
+        if ntpath.exists(self.lineEdit_res_file.text()):
+            self.RES_FILE = self.lineEdit_res_file.text()
+        else: 
+            print("The enered res file is not a valid path.") # @todo error prompt
+    
+    # function to handle when the user changes the image prefix line edit
+    def on_prefix_edit_changed(self):
+        self.IMAGE_PREFIX = self.lineEdit_img_prefix.text()
+        self.updateNumImages()
         
-        # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Data", "frame_controlBar_data")  
-        self.verticalLayout_5.addWidget(self.frame_controlBar)        
+    # function to handle when the user changes the experiment id line edit
+    def on_exp_id_edit_changed(self):
+        self.EXPERIMENT_ID = self.lineEdit_img_prefix.text()
+    
+    # function to check how many images are in the current IMAGE_DIRECTORY and updates the display of this count
+    def updateNumImages(self):
+        num_images = str(len(glob.glob(self.IMAGE_DIRECTORY + self.IMAGE_PREFIX + "*.jpg"))) #self.getNumImagesInDir(self.IMAGE_DIRECTORY))
+        self.label_num_imgs_text.setText(num_images)   
+    
+    # function that opens a dialog for the user to select a result file in csv format
+    def browseResultFile(self):
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+        self.lineEdit_res_file.setText(filename[0])
+        self.RES_FILE = filename[0] + "/"
+      
+    # function that opens a dialog for the user to select a directory where the images are
+    def browseImageDir(self):
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
+        if len(filename) > 0: 
+            if ntpath.exists(filename):
+                self.IMAGE_DIRECTORY = filename + "/"
+            else:
+                self.IMAGE_DIRECTORY = ""
         
+            self.updateAllVisuals()
+
+    # function to update the image directory according to the input from the calender widget
+    def updateImageDir(self):
+        date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
+        self.IMAGE_DIRECTORY = self.IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
         
-        self.frame_data = QtWidgets.QFrame(self)
-        self.frame_data.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
-        self.frame_data.setAccessibleName("")
-        self.frame_data.setStyleSheet("QLabel{ \n"
+        # enable frame to manipulate data properties
+        self.frame_data_information.setEnabled(True)
+        
+        # if directory exists, fill in the information to the image dir lineEdit
+        if ntpath.exists(self.IMAGE_DIRECTORY):
+            self.EXPERIMENT_ID = "Spitzbergen " + str(self.calendarWidget.selectedDate().year())
+        else:
+            self.IMAGE_DIRECTORY = ""
+            self.EXPERIMENT_ID = ""
+        
+        self.updateAllVisuals()
+
+    # function that sets all visuals to their variable representation
+    def updateAllVisuals(self):
+        self.lineEdit_img_dir.setText(self.IMAGE_DIRECTORY)
+        self.lineEdit_res_file.setText(self.RES_FILE)
+        self.lineEdit_img_prefix.setText(self.IMAGE_PREFIX)
+        self.lineEdit_exp_id.setText(self.EXPERIMENT_ID)
+        self.updateNumImages()
+
+    # function to handle a change of th calender widget selection
+    def calenderSelectionChanged(self):
+        self.label_date.setText(self.calendarWidget.selectedDate().toString("dd.MM.yyyy")) # set the date label
+        self.updateImageDir()
+ 
+    def createFrameData(self):
+        # data frame
+        frame_data = QtWidgets.QFrame(self)
+        frame_data.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        frame_data.setAccessibleName("")
+        frame_data.setStyleSheet("QLabel{ \n"
 "    color:black; \n"
 "    background-color:transparent;\n"
 "}\n"
@@ -92,29 +172,175 @@ class PageData(QtWidgets.QFrame):
 "#btn_apply_diverging_data_info:pressed, #btn_res_file:pressed, #btn_img_dir:pressed, #btn_analyze:pressed{\n"
 "    background-color: rgb(0, 160, 174);\n"
 "}")
-        self.frame_data.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_data.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.frame_data.setObjectName("frame_data")
-        self.verticalLayout_13 = QtWidgets.QVBoxLayout(self.frame_data)
-        self.verticalLayout_13.setObjectName("verticalLayout_13")
-        self.frame_data_options = QtWidgets.QFrame(self.frame_data)
-        self.frame_data_options.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_data_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_data_options.setObjectName("frame_data_options")
-        self.horizontalLayout_22 = QtWidgets.QHBoxLayout(self.frame_data_options)
-        self.horizontalLayout_22.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_22.setSpacing(0)
-        self.horizontalLayout_22.setObjectName("horizontalLayout_22")
-        spacerItem17 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_22.addItem(spacerItem17)
-        self.frame_data_selection = QtWidgets.QFrame(self.frame_data_options)
-        self.frame_data_selection.setStyleSheet("")
-        self.frame_data_selection.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_data_selection.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_data_selection.setObjectName("frame_data_selection")
-        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.frame_data_selection)
+        frame_data.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_data.setObjectName("frame_data")
+        
+        # layout for main data frame
+        self.layout_frame_data = QtWidgets.QVBoxLayout(frame_data)
+        self.layout_frame_data.setObjectName("layout_frame_data")
+        
+        # frame to display the data selection options
+        self.frame_data_options = self.createFrameDataOptions(frame_data)
+        
+        # button to analye the images using the neural network
+        self.btn_analyze = QtWidgets.QPushButton(frame_data)
+        self.btn_analyze.setMinimumSize(QtCore.QSize(0, 40))
+        self.btn_analyze.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.btn_analyze.setObjectName("btn_analyze")      
+        
+        # frame to display the data table
+        self.frame_table = self.createFrameTable(frame_data)
+        
+        # add widgets to layout
+        self.layout_frame_data.addWidget(self.frame_data_options)
+        self.layout_frame_data.addWidget(self.btn_analyze)
+        self.layout_frame_data.addWidget(self.frame_table)    
+        
+        return frame_data
+
+    def createFrameTable(self, frame_data):
+        # frame for displaying data table
+        frame_table = QtWidgets.QFrame(frame_data)
+        frame_table.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_table.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_table.setObjectName("frame_table")
+        
+        # layout
+        self.layout_frame_table = QtWidgets.QVBoxLayout(frame_table)
+        self.layout_frame_table.setContentsMargins(0, 0, 0, 0)
+        self.layout_frame_table.setSpacing(0)
+        self.layout_frame_table.setObjectName("layout_frame_table")
+        
+        # tab widget to switch between the original table and the summary
+        self.tabWidget_2 = QtWidgets.QTabWidget(frame_table)
+        self.tabWidget_2.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.tabWidget_2.setAutoFillBackground(False)
+        self.tabWidget_2.setStyleSheet("/*-------------------------- tab widget ------------------------*/\n"
+"QTabWidget{\n"
+"    font: 10pt \"Century Gothic\";\n"
+"}\n"
+"\n"
+"QTabWidget::pane { /* The tab widget frame */\n"
+"       border:None;\n"
+"}\n"
+"\n"
+"\n"
+"\n"
+"/* Style the tab using the tab sub-control. Note that\n"
+"    it reads QTabBar _not_ QTabWidget */\n"
+"\n"
+"QTabBar::tab {\n"
+"    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+"                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,\n"
+"                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);\n"
+"    border: None;\n"
+"    min-width: 10ex;\n"
+"    padding: 5px;\n"
+"    padding-bottom:5px;\n"
+"}\n"
+"\n"
+"QTabBar::tab:selected, QTabBar::tab:hover {\n"
+"    background: white;\n"
+"}\n"
+"\n"
+"QTabBar::tab:selected {\n"
+"    border-color: #9B9B9B;\n"
+"    border-bottom-color: #C2C7CB; /* same as pane color */\n"
+"}\n"
+"\n"
+"QTabBar::tab:!selected {\n"
+"    margin-top:0px; /* make non-selected tabs look smaller */\n"
+"}\n"
+"")
+        self.tabWidget_2.setTabPosition(QtWidgets.QTabWidget.North)
+        self.tabWidget_2.setObjectName("tabWidget_2")
+        
+        # widget to show the original table
+        self.original = QtWidgets.QWidget()
+        self.original.setObjectName("original") # @todo do i need this widget here?? cant  i just set the layout on the tab? or the table view directly?
+        
+        # layout to place the original table in
+        self.layout_original_table = QtWidgets.QVBoxLayout(self.original)
+        self.layout_original_table.setContentsMargins(0, 0, 0, 0)
+        self.layout_original_table.setSpacing(0)
+        self.layout_original_table.setObjectName("layout_original_table")
+        
+        # table view to display the original table
+        self.tableView_original = QtWidgets.QTableView(self.original)
+        self.tableView_original.setObjectName("tableView_original")
+        self.layout_original_table.addWidget(self.tableView_original)
+            
+        # widget to show the summary table
+        self.summary = QtWidgets.QWidget()  # comment see above @todo
+        self.summary.setObjectName("summary")
+        
+        # layout to place the summary table in
+        self.layout_summary_table = QtWidgets.QVBoxLayout(self.summary)
+        self.layout_summary_table.setContentsMargins(0, 0, 0, 0)
+        self.layout_summary_table.setSpacing(0)
+        self.layout_summary_table.setObjectName("layout_summary_table")
+        
+        # table view to display the summary table
+        self.tableView_summary = QtWidgets.QTableView(self.summary)
+        self.tableView_summary.setObjectName("tableView_summary")
+        self.layout_summary_table.addWidget(self.tableView_summary)
+                
+        # add tabs (original table and summary) to tab widget
+        self.tabWidget_2.addTab(self.original, "")
+        self.tabWidget_2.addTab(self.summary, "")
+        
+        # add tab widget to layout of table frame
+        self.layout_frame_table.addWidget(self.tabWidget_2)
+        
+        return frame_table
+    
+    def createFrameDataOptions(self, frame_data):
+        # frame for data options
+        frame_data_options = QtWidgets.QFrame(frame_data)
+        frame_data_options.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        frame_data_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_data_options.setObjectName("frame_data_options")
+        
+        # layout for data options
+        self.layout_frame_data_options = QtWidgets.QHBoxLayout(frame_data_options)
+        self.layout_frame_data_options.setContentsMargins(0, 0, 0, 0)
+        self.layout_frame_data_options.setSpacing(0)
+        self.layout_frame_data_options.setObjectName("layout_frame_data_options")
+        
+        # spacers
+        spacerItem17 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)      
+        spacerItem20 = QtWidgets.QSpacerItem(70, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem22 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        
+        # frame to offer data selection functionalities
+        self.frame_data_selection = self.createFrameDataSelection(frame_data_options)
+  
+        # frame to display information derived from data selection
+        self.frame_data_information = self.createFrameDataInformation(frame_data_options)
+   
+        # add widgets to layout
+        self.layout_frame_data_options.addItem(spacerItem17)
+        self.layout_frame_data_options.addWidget(self.frame_data_selection)
+        self.layout_frame_data_options.addItem(spacerItem20)
+        self.layout_frame_data_options.addWidget(self.frame_data_information)
+        self.layout_frame_data_options.addItem(spacerItem22)
+        
+        return frame_data_options
+    
+    def createFrameDataSelection(self, frame_data_options):   
+        # data selection frame
+        frame_data_selection = QtWidgets.QFrame(frame_data_options)
+        frame_data_selection.setStyleSheet("")
+        frame_data_selection.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_data_selection.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_data_selection.setObjectName("frame_data_selection")
+        
+        # layout 
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(frame_data_selection)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.calendarWidget = QtWidgets.QCalendarWidget(self.frame_data_selection)
+        
+        # calender widget to select a date from 
+        self.calendarWidget = QtWidgets.QCalendarWidget(frame_data_selection)
         self.calendarWidget.setStyleSheet("QCalenderWidget{\n"
 "border-radius: 10px;\n"
 "}\n"
@@ -230,40 +456,59 @@ class PageData(QtWidgets.QFrame):
         self.calendarWidget.setVerticalHeaderFormat(QtWidgets.QCalendarWidget.NoVerticalHeader)
         self.calendarWidget.setNavigationBarVisible(True)
         self.calendarWidget.setDateEditEnabled(True)
-        self.calendarWidget.setObjectName("calendarWidget")
-        self.verticalLayout_7.addWidget(self.calendarWidget)
-        self.frame_date = QtWidgets.QFrame(self.frame_data_selection)
+        self.calendarWidget.setObjectName("calendarWidget")        
+
+
+        # --- frame to display the current date ----------------------------- #
+        self.frame_date = QtWidgets.QFrame(frame_data_selection)
         self.frame_date.setMinimumSize(QtCore.QSize(0, 40))
         self.frame_date.setMaximumSize(QtCore.QSize(16777214, 40))
         self.frame_date.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_date.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_date.setObjectName("frame_date")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.frame_date)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        
+        # layout for date frame
+        self.layout_frame_date = QtWidgets.QHBoxLayout(self.frame_date)
+        self.layout_frame_date.setContentsMargins(0, 0, 0, 0)
+        self.layout_frame_date.setObjectName("layout_frame_date")
+        
+        # label displaying "date"
         self.label_date_text = QtWidgets.QLabel(self.frame_date)
         self.label_date_text.setStyleSheet("")
         self.label_date_text.setObjectName("label_date_text")
-        self.horizontalLayout.addWidget(self.label_date_text)
+        
+        # spacer
         spacerItem18 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem18)
+        
+        # label displaying the date selected in the calendar
         self.label_date = QtWidgets.QLabel(self.frame_date)
         self.label_date.setObjectName("label_date")
-        self.horizontalLayout.addWidget(self.label_date)
-        self.verticalLayout_7.addWidget(self.frame_date)
-        self.frame_img_filter = QtWidgets.QFrame(self.frame_data_selection)
+        
+        # add widgets to layout
+        self.layout_frame_date.addWidget(self.label_date_text)
+        self.layout_frame_date.addItem(spacerItem18)
+        self.layout_frame_date.addWidget(self.label_date)
+        
+        
+        # --- frame to display data filter options ----------------------------- #
+        self.frame_img_filter = QtWidgets.QFrame(frame_data_selection)
         self.frame_img_filter.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_img_filter.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_img_filter.setObjectName("frame_img_filter")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.frame_img_filter)
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        
+        # layout
+        self.layout_data_filter = QtWidgets.QHBoxLayout(self.frame_img_filter)
+        self.layout_data_filter.setContentsMargins(0, 0, 0, 0)
+        self.layout_data_filter.setObjectName("layout_data_filter")
+        
+        # label to display the text "data filter"
         self.label_image_filter = QtWidgets.QLabel(self.frame_img_filter)
         self.label_image_filter.setStyleSheet("")
         self.label_image_filter.setObjectName("label_image_filter")
-        self.horizontalLayout_2.addWidget(self.label_image_filter)
+                
+        # spacer
         spacerItem19 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem19)
+        
+        # combo box to select a data filter
         self.comboBox_image_filter = QtWidgets.QComboBox(self.frame_img_filter)
         self.comboBox_image_filter.setMinimumSize(QtCore.QSize(250, 40))
         self.comboBox_image_filter.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -271,48 +516,53 @@ class PageData(QtWidgets.QFrame):
         self.comboBox_image_filter.addItem("")
         self.comboBox_image_filter.addItem("")
         self.comboBox_image_filter.addItem("")
-        self.horizontalLayout_2.addWidget(self.comboBox_image_filter)
+        
+        # add widgets to data filter frame
+        self.layout_data_filter.addWidget(self.label_image_filter)
+        self.layout_data_filter.addItem(spacerItem19)
+        self.layout_data_filter.addWidget(self.comboBox_image_filter)
+        
+        
+        # --- add widgets to data selection frame -------------------------- #
+        self.verticalLayout_7.addWidget(self.calendarWidget)
+        self.verticalLayout_7.addWidget(self.frame_date)        
         self.verticalLayout_7.addWidget(self.frame_img_filter)
-        self.horizontalLayout_22.addWidget(self.frame_data_selection)
-        spacerItem20 = QtWidgets.QSpacerItem(70, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_22.addItem(spacerItem20)
-        self.frame_data_information = QtWidgets.QFrame(self.frame_data_options)
-        self.frame_data_information.setEnabled(False)
-        self.frame_data_information.setStyleSheet("")
-        self.frame_data_information.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_data_information.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_data_information.setObjectName("frame_data_information")
-        self.gridLayout_5 = QtWidgets.QGridLayout(self.frame_data_information)
+        
+        return frame_data_selection
+        
+    def createFrameDataInformation(self, frame_data_options):
+        # frame for data information
+        frame_data_information = QtWidgets.QFrame(frame_data_options)
+        frame_data_information.setEnabled(False)
+        frame_data_information.setStyleSheet("")
+        frame_data_information.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_data_information.setObjectName("frame_data_information")
+        
+        # layout
+        self.gridLayout_5 = QtWidgets.QGridLayout(frame_data_information)
         self.gridLayout_5.setObjectName("gridLayout_5")
-        self.lineEdit_res_file = QtWidgets.QLineEdit(self.frame_data_information)
+        
+        # line edit for the result file path
+        self.lineEdit_res_file = QtWidgets.QLineEdit(frame_data_information)
         self.lineEdit_res_file.setMinimumSize(QtCore.QSize(150, 40))
         self.lineEdit_res_file.setMaximumSize(QtCore.QSize(16777215, 40))
         self.lineEdit_res_file.setObjectName("lineEdit_res_file")
-        self.gridLayout_5.addWidget(self.lineEdit_res_file, 2, 1, 1, 1)
-        self.label_num_imgs = QtWidgets.QLabel(self.frame_data_information)
+        
+        # label to display text "number of images"
+        self.label_num_imgs = QtWidgets.QLabel(frame_data_information)
         self.label_num_imgs.setStyleSheet("")
         self.label_num_imgs.setObjectName("label_num_imgs")
-        self.gridLayout_5.addWidget(self.label_num_imgs, 5, 0, 1, 1)
-        self.lineEdit_img_dir = QtWidgets.QLineEdit(self.frame_data_information)
+        self.label_num_imgs.setMinimumSize(QtCore.QSize(0, 40))
+        self.label_num_imgs.setMaximumSize(QtCore.QSize(16777215, 40))
+        
+        # line edit for the image directory path
+        self.lineEdit_img_dir = QtWidgets.QLineEdit(frame_data_information)
         self.lineEdit_img_dir.setMinimumSize(QtCore.QSize(150, 40))
         self.lineEdit_img_dir.setMaximumSize(QtCore.QSize(16777215, 40))
         self.lineEdit_img_dir.setObjectName("lineEdit_img_dir")
-        self.gridLayout_5.addWidget(self.lineEdit_img_dir, 1, 1, 1, 1)
-        self.frame_num_imgs = QtWidgets.QFrame(self.frame_data_information)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.frame_num_imgs.sizePolicy().hasHeightForWidth())
-        self.frame_num_imgs.setSizePolicy(sizePolicy)
-        self.frame_num_imgs.setMinimumSize(QtCore.QSize(0, 40))
-        self.frame_num_imgs.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.frame_num_imgs.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_num_imgs.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_num_imgs.setObjectName("frame_num_imgs")
-        self.horizontalLayout_21 = QtWidgets.QHBoxLayout(self.frame_num_imgs)
-        self.horizontalLayout_21.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_21.setObjectName("horizontalLayout_21")
-        self.btn_img_dir = QtWidgets.QPushButton(self.frame_num_imgs)
+                
+        # button to browse for image directories
+        self.btn_img_dir = QtWidgets.QPushButton(frame_data_information)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -321,156 +571,111 @@ class PageData(QtWidgets.QFrame):
         self.btn_img_dir.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_img_dir.setMaximumSize(QtCore.QSize(70, 40))
         self.btn_img_dir.setObjectName("btn_img_dir")
-        self.horizontalLayout_21.addWidget(self.btn_img_dir)
-        self.gridLayout_5.addWidget(self.frame_num_imgs, 1, 2, 1, 1)
-        self.frame_apply_diverging_data_info = QtWidgets.QFrame(self.frame_data_information)
-        self.frame_apply_diverging_data_info.setMinimumSize(QtCore.QSize(0, 40))
-        self.frame_apply_diverging_data_info.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.frame_apply_diverging_data_info.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_apply_diverging_data_info.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_apply_diverging_data_info.setObjectName("frame_apply_diverging_data_info")
-        self.horizontalLayout_23 = QtWidgets.QHBoxLayout(self.frame_apply_diverging_data_info)
-        self.horizontalLayout_23.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_23.setObjectName("horizontalLayout_23")
-        self.gridLayout_5.addWidget(self.frame_apply_diverging_data_info, 3, 2, 1, 1)
-        self.label_exp_id = QtWidgets.QLabel(self.frame_data_information)
+        
+        # label to display text "experiment id"
+        self.label_exp_id = QtWidgets.QLabel(frame_data_information)
         self.label_exp_id.setStyleSheet("")
         self.label_exp_id.setObjectName("label_exp_id")
-        self.gridLayout_5.addWidget(self.label_exp_id, 4, 0, 1, 1)
-        self.label_img_dir = QtWidgets.QLabel(self.frame_data_information)
+
+        # label to display text "image directory"
+        self.label_img_dir = QtWidgets.QLabel(frame_data_information)
         self.label_img_dir.setStyleSheet("")
         self.label_img_dir.setObjectName("label_img_dir")
-        self.gridLayout_5.addWidget(self.label_img_dir, 1, 0, 1, 1)
-        self.btn_apply_diverging_data_info = QtWidgets.QPushButton(self.frame_data_information)
+
+        # button for applying data information changed by the user
+        self.btn_apply_diverging_data_info = QtWidgets.QPushButton(frame_data_information)
         self.btn_apply_diverging_data_info.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_apply_diverging_data_info.setMaximumSize(QtCore.QSize(16777215, 40))
         self.btn_apply_diverging_data_info.setStyleSheet("font:bold;")
         self.btn_apply_diverging_data_info.setObjectName("btn_apply_diverging_data_info")
-        self.gridLayout_5.addWidget(self.btn_apply_diverging_data_info, 7, 2, 1, 1)
-        self.lineEdit_img_prefix = QtWidgets.QLineEdit(self.frame_data_information)
+
+        # line edit to set the image prefix
+        self.lineEdit_img_prefix = QtWidgets.QLineEdit(frame_data_information)
         self.lineEdit_img_prefix.setMinimumSize(QtCore.QSize(150, 40))
         self.lineEdit_img_prefix.setMaximumSize(QtCore.QSize(16777215, 40))
         self.lineEdit_img_prefix.setObjectName("lineEdit_img_prefix")
-        self.gridLayout_5.addWidget(self.lineEdit_img_prefix, 3, 1, 1, 1)
-        self.label_res_file = QtWidgets.QLabel(self.frame_data_information)
-        self.label_res_file.setStyleSheet("")
+        
+        # label to display the text "result file"
+        self.label_res_file = QtWidgets.QLabel(frame_data_information)
         self.label_res_file.setObjectName("label_res_file")
-        self.gridLayout_5.addWidget(self.label_res_file, 2, 0, 1, 1)
-        self.label_num_imgs_text = QtWidgets.QLabel(self.frame_data_information)
+        
+        # label to display the number of images in the current directory
+        self.label_num_imgs_text = QtWidgets.QLabel(frame_data_information)
         self.label_num_imgs_text.setStyleSheet("padding-left: 10px;")
         self.label_num_imgs_text.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_num_imgs_text.setObjectName("label_num_imgs_text")
-        self.gridLayout_5.addWidget(self.label_num_imgs_text, 5, 1, 1, 1)
-        self.frame_img_dir = QtWidgets.QFrame(self.frame_data_information)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.frame_img_dir.sizePolicy().hasHeightForWidth())
-        self.frame_img_dir.setSizePolicy(sizePolicy)
-        self.frame_img_dir.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_img_dir.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_img_dir.setObjectName("frame_img_dir")
-        self.horizontalLayout_17 = QtWidgets.QHBoxLayout(self.frame_img_dir)
-        self.horizontalLayout_17.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_17.setObjectName("horizontalLayout_17")
-        self.gridLayout_5.addWidget(self.frame_img_dir, 0, 2, 1, 1)
-        self.btn_res_file = QtWidgets.QPushButton(self.frame_data_information)
+                
+        # button to browse files for a result file
+        self.btn_res_file = QtWidgets.QPushButton(frame_data_information)
         self.btn_res_file.setMinimumSize(QtCore.QSize(70, 40))
         self.btn_res_file.setMaximumSize(QtCore.QSize(70, 40))
         self.btn_res_file.setObjectName("btn_res_file")
-        self.gridLayout_5.addWidget(self.btn_res_file, 2, 2, 1, 1)
-        self.lineEdit_exp_id = QtWidgets.QLineEdit(self.frame_data_information)
+        
+        # line edit for the experiment id
+        self.lineEdit_exp_id = QtWidgets.QLineEdit(frame_data_information)
         self.lineEdit_exp_id.setMinimumSize(QtCore.QSize(150, 40))
         self.lineEdit_exp_id.setMaximumSize(QtCore.QSize(16777215, 40))
         self.lineEdit_exp_id.setObjectName("lineEdit_exp_id")
-        self.gridLayout_5.addWidget(self.lineEdit_exp_id, 4, 1, 1, 1)
-        self.label_img_prefix = QtWidgets.QLabel(self.frame_data_information)
+        
+        # label to display text "image prefix"
+        self.label_img_prefix = QtWidgets.QLabel(frame_data_information)
         self.label_img_prefix.setStyleSheet("")
         self.label_img_prefix.setObjectName("label_img_prefix")
-        self.gridLayout_5.addWidget(self.label_img_prefix, 3, 0, 1, 1)
-        spacerItem21 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout_5.addItem(spacerItem21, 6, 1, 1, 1)
-        self.horizontalLayout_22.addWidget(self.frame_data_information)
-        spacerItem22 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_22.addItem(spacerItem22)
-        self.verticalLayout_13.addWidget(self.frame_data_options)
-        self.btn_analyze = QtWidgets.QPushButton(self.frame_data)
-        self.btn_analyze.setMinimumSize(QtCore.QSize(0, 40))
-        self.btn_analyze.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.btn_analyze.setObjectName("btn_analyze")
-        self.verticalLayout_13.addWidget(self.btn_analyze)
-        self.frame_table = QtWidgets.QFrame(self.frame_data)
-        self.frame_table.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.frame_table.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_table.setObjectName("frame_table")
-        self.verticalLayout_14 = QtWidgets.QVBoxLayout(self.frame_table)
-        self.verticalLayout_14.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_14.setSpacing(0)
-        self.verticalLayout_14.setObjectName("verticalLayout_14")
-        self.tabWidget_2 = QtWidgets.QTabWidget(self.frame_table)
-        self.tabWidget_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tabWidget_2.setAutoFillBackground(False)
-        self.tabWidget_2.setStyleSheet("/*-------------------------- tab widget ------------------------*/\n"
-"QTabWidget{\n"
-"    font: 10pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"QTabWidget::pane { /* The tab widget frame */\n"
-"       border:None;\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"/* Style the tab using the tab sub-control. Note that\n"
-"    it reads QTabBar _not_ QTabWidget */\n"
-"\n"
-"QTabBar::tab {\n"
-"    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,\n"
-"                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);\n"
-"    border: None;\n"
-"    min-width: 10ex;\n"
-"    padding: 5px;\n"
-"    padding-bottom:5px;\n"
-"}\n"
-"\n"
-"QTabBar::tab:selected, QTabBar::tab:hover {\n"
-"    background: white;\n"
-"}\n"
-"\n"
-"QTabBar::tab:selected {\n"
-"    border-color: #9B9B9B;\n"
-"    border-bottom-color: #C2C7CB; /* same as pane color */\n"
-"}\n"
-"\n"
-"QTabBar::tab:!selected {\n"
-"    margin-top:0px; /* make non-selected tabs look smaller */\n"
-"}\n"
-"")
-        self.tabWidget_2.setTabPosition(QtWidgets.QTabWidget.North)
-        self.tabWidget_2.setObjectName("tabWidget_2")
-        self.original = QtWidgets.QWidget()
-        self.original.setObjectName("original")
-        self.verticalLayout_15 = QtWidgets.QVBoxLayout(self.original)
-        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_15.setSpacing(0)
-        self.verticalLayout_15.setObjectName("verticalLayout_15")
-        self.tableView_original = QtWidgets.QTableView(self.original)
-        self.tableView_original.setObjectName("tableView_original")
-        self.verticalLayout_15.addWidget(self.tableView_original)
-        self.tabWidget_2.addTab(self.original, "")
-        self.summary = QtWidgets.QWidget()
-        self.summary.setObjectName("summary")
-        self.verticalLayout_16 = QtWidgets.QVBoxLayout(self.summary)
-        self.verticalLayout_16.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_16.setSpacing(0)
-        self.verticalLayout_16.setObjectName("verticalLayout_16")
-        self.tableView_summary = QtWidgets.QTableView(self.summary)
-        self.tableView_summary.setObjectName("tableView_summary")
-        self.verticalLayout_16.addWidget(self.tableView_summary)
-        self.tabWidget_2.addTab(self.summary, "")
-        self.verticalLayout_14.addWidget(self.tabWidget_2)
-        self.verticalLayout_13.addWidget(self.frame_table)
-        self.verticalLayout_5.addWidget(self.frame_data)
         
-        #print(f"page data init: {time.time() - start_time}")
+        # spacer
+        spacerItem21 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+
+
+        # --- add widgets to data information frame -------------------------------------- #
+        self.gridLayout_5.addWidget(self.lineEdit_res_file, 2, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label_num_imgs, 5, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_img_dir, 1, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.btn_img_dir, 1, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.label_exp_id, 4, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.label_img_dir, 1, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.btn_apply_diverging_data_info, 7, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_img_prefix, 3, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label_res_file, 2, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.label_num_imgs_text, 5, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.btn_res_file, 2, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_exp_id, 4, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label_img_prefix, 3, 0, 1, 1)
+        self.gridLayout_5.addItem(spacerItem21, 6, 1, 1, 1)
+        
+        return frame_data_information
+    
+    # function to initialize the UI of data page
+    def init_ui(self):
+        self.setObjectName("page_data")
+        
+        # main layout
+        self.layout_page_data = QtWidgets.QVBoxLayout(self)
+        self.layout_page_data.setContentsMargins(0, 0, 0, 0)
+        self.layout_page_data.setSpacing(0)
+        self.layout_page_data.setObjectName("layout_page_data")
+        
+        # create the blue top bar
+        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", "frame_dataBar")     
+               
+        # create the cotrol bar containing the menu
+        self.frame_controlBar = MenuFrame("Data", "frame_controlBar_data")  
+   
+        # create the main frame for the data
+        self.frame_data = self.createFrameData()
+        
+        # add widgets to data page
+        self.layout_page_data.addWidget(self.frame_topBar)
+        self.layout_page_data.addWidget(self.frame_controlBar)
+        self.layout_page_data.addWidget(self.frame_data)
+    
+    # function to initialize the actions on data page
+    def init_actions(self):
+        self.calendarWidget.selectionChanged.connect(self.calenderSelectionChanged)
+        
+        self.btn_img_dir.clicked.connect(self.browseImageDir)
+        self.btn_res_file.clicked.connect(self.browseResultFile)
+        
+        self.lineEdit_img_dir.editingFinished.connect(self.on_img_dir_edit_changed)
+        self.lineEdit_res_file.editingFinished.connect(self.on_res_file_edit_changed)
+        self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
+        self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)

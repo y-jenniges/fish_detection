@@ -190,17 +190,17 @@ class PageHome(QtWidgets.QWidget):
         self.btn_previous.setObjectName("btn_previous")
         
         # playeholder button to keep symmetry 
-        # self.btn_placeholder = QtWidgets.QPushButton(self.frame_controlBar)
-        # self.btn_placeholder.setEnabled(False)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(self.btn_placeholder.sizePolicy().hasHeightForWidth())
-        # self.btn_placeholder.setSizePolicy(sizePolicy)
-        # self.btn_placeholder.setMinimumSize(QtCore.QSize(40, 40))
-        # self.btn_placeholder.setMaximumSize(QtCore.QSize(40, 40))
-        # self.btn_placeholder.setIconSize(QtCore.QSize(30, 30))
-        # self.btn_placeholder.setObjectName("btn_placeholder")
+        self.btn_placeholder = QtWidgets.QPushButton(self.frame_controlBar)
+        self.btn_placeholder.setEnabled(False)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_placeholder.sizePolicy().hasHeightForWidth())
+        self.btn_placeholder.setSizePolicy(sizePolicy)
+        self.btn_placeholder.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_placeholder.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_placeholder.setIconSize(QtCore.QSize(30, 30))
+        self.btn_placeholder.setObjectName("btn_placeholder")
         
         # button for switching to next animal
         self.btn_next = QtWidgets.QPushButton(self.frame_controlBar)
@@ -214,8 +214,6 @@ class PageHome(QtWidgets.QWidget):
         self.btn_next.setIcon(get_icon(":/icons/icons/arrow_right_small.png"))
         self.btn_next.setIconSize(QtCore.QSize(30, 30))
         self.btn_next.setObjectName("btn_next")
-        self.btn_next.setStyleSheet("margin-left: -100; margin-right:-100;")
-        #self.btn_next.setMargins(10,10,0,0)
         
         # button to activate the remove-animals-mode
         self.btn_delete = QtWidgets.QPushButton(self.frame_controlBar)
@@ -231,17 +229,17 @@ class PageHome(QtWidgets.QWidget):
         self.btn_delete.setObjectName("btn_delete")
         
         # button for undoing the last action
-        # self.btn_undo = QtWidgets.QPushButton(self.frame_controlBar)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(self.btn_undo.sizePolicy().hasHeightForWidth())
-        # self.btn_undo.setSizePolicy(sizePolicy)
-        # self.btn_undo.setMinimumSize(QtCore.QSize(40, 40))
-        # self.btn_undo.setMaximumSize(QtCore.QSize(40, 40))
-        # self.btn_undo.setIcon(get_icon(":/icons/icons/undo.png"))
-        # self.btn_undo.setIconSize(QtCore.QSize(30, 30))
-        # self.btn_undo.setObjectName("btn_undo")
+        self.btn_undo = QtWidgets.QPushButton(self.frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_undo.sizePolicy().hasHeightForWidth())
+        self.btn_undo.setSizePolicy(sizePolicy)
+        self.btn_undo.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_undo.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_undo.setIcon(get_icon(":/icons/icons/undo.png"))
+        self.btn_undo.setIconSize(QtCore.QSize(30, 30))
+        self.btn_undo.setObjectName("btn_undo")
     
         # button for the menu
         self.btn_menu = QtWidgets.QPushButton(self.frame_controlBar)
@@ -281,9 +279,6 @@ class PageHome(QtWidgets.QWidget):
         layout_frame_controlBar.addWidget(self.comboBox_imgRemark)
 
         layout_frame_controlBar.addItem(spacerItem3)
-        #layout_frame_controlBar.addWidget(self.btn_zoom)
-
-        layout_frame_controlBar.addItem(spacerItem7)
         
         layout_frame_controlBar.addWidget(self.btn_zoom)
         layout_frame_controlBar.addItem(spacerItem7)
@@ -292,12 +287,12 @@ class PageHome(QtWidgets.QWidget):
         layout_frame_controlBar.addWidget(self.btn_previous)
         layout_frame_controlBar.addItem(spacerItem7)
 
-        #layout_frame_controlBar.addWidget(self.btn_placeholder)
+        layout_frame_controlBar.addWidget(self.btn_placeholder)
         layout_frame_controlBar.addWidget(self.btn_next)
         layout_frame_controlBar.addItem(spacerItem7)
         layout_frame_controlBar.addWidget(self.btn_delete)
 
-        #layout_frame_controlBar.addWidget(self.btn_undo)
+        layout_frame_controlBar.addWidget(self.btn_undo)
         layout_frame_controlBar.addItem(spacerItem4)
         layout_frame_controlBar.addItem(spacerItem5)
         layout_frame_controlBar.addItem(spacerItem6)
