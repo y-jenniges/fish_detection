@@ -9,7 +9,7 @@ from Helpers import get_icon
 IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 IMAGE_PREFIX = ""
 ANIMAL_LIST = []
-ANIMAL_REMARKS = ["Not determined",  "Animal incomplete"]
+ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
 IMAGE_REMARKS = []
 
 class GroupItemModel(QtCore.QAbstractItemModel):
@@ -50,14 +50,23 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.init_ui()
         
 
-        
+        group_icon_list = [":/animal_markings/animal_markings/square_blue.png", 
+                           ":/animal_markings/animal_markings/square_red.png", 
+                           ":/animal_markings/animal_markings/square_orange.png", 
+                           ":/animal_markings/animal_markings/square_black.png", 
+                           ":/animal_markings/animal_markings/square_gray.png"]
         
         
         self.model_group = self.comboBox_group.model()#GroupItemModel()#combo.model()
+        index = 0
         for group in AnimalGroup:
+            icon = QtGui.QIcon(group_icon_list[index])
+            
             item = QtGui.QStandardItem(str(group.name.title()))
             item.setTextAlignment(QtCore.Qt.AlignRight)
+            item.setIcon(icon)
             self.model_group.appendRow(item)
+            index += 1
        # self.comboBox_group.setModel(model)
        
         self.model_species = self.comboBox_species.model()#GroupItemModel()#combo.model()
@@ -78,36 +87,51 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.updateVisuals()
         self.hide()
         
+        # set tab sequence
+        self.setTabOrder(self.comboBox_group, self.comboBox_species)
+        self.setTabOrder(self.comboBox_species, self.comboBox_remark)
+        self.setTabOrder(self.comboBox_remark, self.spinBox_length)
+        
         # connecting signals and slots
         self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
         self.comboBox_group.currentTextChanged.connect(self.on_group_combobox_changed)
         self.comboBox_species.currentTextChanged.connect(self.on_species_combobox_changed)
         self.comboBox_remark.currentTextChanged.connect(self.on_remark_combobox_changed)
+        self.comboBox_remark.lineEdit().editingFinished.connect(self.on_remark_combobox_edited)
+      
+    def on_remark_combobox_edited(self):
+        text = self.comboBox_remark.currentText()
         
+        # if the text is not yet in the combobox, add it
+        if self.comboBox_remark.findText(text) == -1:
+            item = QtGui.QStandardItem(str(text.title()))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.model_remarks.appendRow(item)
+            self.focusNextChild()
+      
     def on_remark_combobox_changed(self, remark):
-        print(f" combobox remark {remark}")
         self.parent().animal_painter.setAnimalRemark(remark)
         
     def on_species_combobox_changed(self, species):
-        print(f"species combobox changed + {species}")
         if self.comboBox_species.findText(species) != -1:
             self.species = species
             self.parent().animal_painter.setAnimalSpecies(species) #setAnimalGroup(group) 
+            self.focusNextChild()
         else:
             print("Given species was not in combobox")
             
     def on_group_combobox_changed(self, group):
-        print(f"group combobox changed + {group}")
         if self.comboBox_group.findText(group) != -1:
             self.group = group
             self.parent().animal_painter.setAnimalGroup(group) #setAnimalGroup(group) 
+            self.focusNextChild()
         else:
             print("Given group was not in combobox")
      
     def on_length_spinbox_changed(self, value):
-        print("spinbox changed")
         self.length = value
         self.parent().animal_painter.cur_animal.length = value#setAnimalLength(value)
+        self.focusNextChild()
         
     def setAnimal(self, animal):
         # set group
@@ -122,8 +146,11 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         else:
             self.species = animal.species
 
-
-        self.remark = animal.remark
+        if animal.remark is not None:
+            self.remark = animal.remark
+        else:
+            self.remark = ""
+            
         self.length = animal.length
         self.updateVisuals()
     
@@ -131,7 +158,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # set group combobox
         index = self.comboBox_group.findText(self.group) 
         if index != -1:
-            #print(f"set combobox group to index {index}")
             self.comboBox_group.blockSignals(True) # blocking signal to avoid calling on_group_combobox_changed and thus starting a loop
             self.comboBox_group.setCurrentIndex(index)
             self.comboBox_group.blockSignals(False)
@@ -139,7 +165,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # set species combobox
         index = self.comboBox_species.findText(self.species) 
         if index != -1:
-            print(f"set combobox species to index {index}")
             self.comboBox_species.blockSignals(True)
             self.comboBox_species.setCurrentIndex(index)
             self.comboBox_species.blockSignals(False)       
@@ -147,11 +172,10 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # set remark combobox
         index = self.comboBox_remark.findText(self.remark) 
         if index != -1:
-            print(f"set combobox remark to index {index}")
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(index)
             self.comboBox_remark.blockSignals(False)  
-        elif self.remark != "" and self.remark:
+        elif self.remark != "" and self.remark is not None:
             print("adding new remark entry")
             item = QtGui.QStandardItem(str(self.remark))
             item.setTextAlignment(QtCore.Qt.AlignRight)
@@ -194,6 +218,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_group.lineEdit().setReadOnly(True)
         self.comboBox_group.lineEdit().setAlignment(QtCore.Qt.AlignRight)
         self.comboBox_group.setObjectName("comboBox_group")         
+        self.comboBox_group.setIconSize(QtCore.QSize(15, 15))
 
         # combobox for animal species
         self.comboBox_species = QtWidgets.QComboBox(self)
@@ -319,26 +344,28 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.fitInView() 
         
     def wheelEvent(self, event):
-        if self.hasPhoto():          
-            # zoom in if y > 0, else zoom out
+        if self.hasPhoto():   
+            # zoom in if y > 0 (wheel forward), else zoom out
             if event.angleDelta().y() > 0:
-                factor = 1.25
+                factor = 1.15
                 self._zoom += 1
-            else:
-                factor = 0.8
+            elif event.angleDelta().y() < 0:
+                factor = 0.85
                 self._zoom -= 1
             
             # scale the view if zoom is positive, else set it to zero and fit the photo in the view
-            if 20 > self._zoom > 0:
+            if self._zoom > 0:
                 self.scale(factor, factor)
+                self.parent().setArrowShortcuts(False)
             elif self._zoom == 0:
                 self.fitInView()
-            elif self._zoom >= 20:
-                # just zoom in to a factor of 20
-                pass
+                self.parent().setArrowShortcuts(True)
             else:
                 self._zoom = 0
+                self.parent().setArrowShortcuts(True)
+            
 
+            
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):
         self.animal_painter.mousePressEvent(event)       
@@ -484,7 +511,7 @@ class AnimalPainter():
                 # draw line and boundingbox visuals
                 self.drawAnimalLine(self.cur_animal)#cur_animal.line_item_visual = self.imageArea._scene.addLine(self.cur_animal.line, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
                 self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
-     
+                
     def removeHeadVisual(self, animal):
         self.imageArea._scene.removeItem(animal.head_item_visual)
         animal.head_item_visual = None  
@@ -519,7 +546,7 @@ class AnimalPainter():
             # only go to previous animal, if there is one
             if index > 0:
                 self.cur_animal = ANIMAL_LIST[index-1]
-                self.updateBoundingBoxes()            
+                self.updateBoundingBoxes() 
 
     def on_remove_animal(self):
         if(self.is_remove_mode_active):
@@ -536,8 +563,8 @@ class AnimalPainter():
 
     def on_add_animal(self): 
         if(self.is_add_mode_active):
-            # the add mode can only be deactivated when head and tail are drawn
-            if (self.is_head_drawn and self.is_tail_drawn):
+            # the add mode can only be deactivated when head and tail are drawn or none of them is drawn
+            if (self.is_head_drawn and self.is_tail_drawn) or (not self.is_head_drawn and not self.is_tail_drawn):
                 self.is_add_mode_active = False
             else:
                 print("Error: Please draw head and tail before switching off the Add-mode.")
@@ -613,6 +640,7 @@ class AnimalPainter():
                 
                 # add animal to list
                 ANIMAL_LIST.append(self.cur_animal)
+                
  
             else:                
                 # create a new animal
@@ -720,10 +748,14 @@ class PhotoViewer(QtWidgets.QWidget):
         self.btn_next_image.clicked.connect(self.on_next_image)
 
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
-        QtWidgets.QShortcut(QtGui.QKeySequence("left"), self.btn_previous_image, self.on_previous_image)
-        QtWidgets.QShortcut(QtGui.QKeySequence("right"), self.btn_next_image, self.on_next_image)
-        
+        self.shortcut_previous_image = QtWidgets.QShortcut(QtGui.QKeySequence("left"), self.btn_previous_image, self.on_previous_image)
+        self.shortcut_next_image = QtWidgets.QShortcut(QtGui.QKeySequence("right"), self.btn_next_image, self.on_next_image) 
 
+    # enable or disable arrow key shortcuts
+    def setArrowShortcuts(self, are_active):
+        self.shortcut_previous_image.setEnabled(are_active)
+        self.shortcut_next_image.setEnabled(are_active)
+              
         
     def init_ui(self):
         # --- left frame ------------------------------------------------------------------------------------------- # 

@@ -31,6 +31,9 @@ class PageHome(QtWidgets.QWidget):
             self.widget_zoom.show()
     
     def onZoomValueChanged(self, value):
+        # disable arrow key shortcuts for switching images (so they can be used when zoomed in)
+        self.photo_viewer.setArrowShortcuts(False)
+        
         # determine the zoom factor and transform the photo of the photo_viewer
         scale = 1 + value*self.factor/100
         self.photo_viewer.imageArea.setTransform(self.photo_viewer.imageArea.transform().fromScale(scale, scale))
@@ -39,6 +42,8 @@ class PageHome(QtWidgets.QWidget):
         if value < 1:
             self.photo_viewer.imageArea.resetTransform() 
             self.photo_viewer.imageArea.fitInView()
+            self.photo_viewer.setArrowShortcuts(True) # reactivate shortcuts to switch images using shortcuts
+    
      
     def on_add_clicked(self):
         self.photo_viewer.imageArea.animal_painter.on_add_animal()

@@ -38,6 +38,13 @@
     <file>icons/user_b.png</file>
     <file>icons/arrow_down.png</file>
   </qresource>
+  <qresource prefix="animal_markings">
+    <file>animal_markings/square_black.png</file>
+    <file>animal_markings/square_blue.png</file>
+    <file>animal_markings/square_gray.png</file>
+    <file>animal_markings/square_red.png</file>
+    <file>animal_markings/square_orange.png</file>
+  </qresource>
   <qresource prefix="logos">
     <file>logos/logo_awi.png</file>
     <file>logos/logo_uniBremen.png</file>

@@ -20,6 +20,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         MainWindow.resize(1244, 822)
         MainWindow.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))
         
+        
         # create a size policy for the main window
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -193,10 +194,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "    font: 12pt \"Century Gothic\"\n"
 "}\n"
 "\n"
-"#label_user_id, #label_user_id_2{\n"
-"    color:white;\n"
-"    font: 10pt \"Century Gothic\";\n"
-"}\n"
 "\n"
 "#label_settings, #label_data{\n"
 "    color:black;\n"
@@ -314,6 +311,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+
+
 
         print(f"gui init: {time.time() - start_time}")
         
@@ -668,6 +668,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
+    MainWindow.showFullScreen()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()

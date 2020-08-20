@@ -13,8 +13,8 @@ IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 animal_color_map = 1
 
 class AnimalGroup(enum.Enum):
-    FISH = 1, 
-    CRUSTACEA = 2,
+    FISH = 1,  
+    CRUSTACEA = 2, 
     CHAETOGNATHA = 3, 
     JELLYFISH = 4, 
     UNIDENTIFIED = 5
@@ -22,6 +22,7 @@ class AnimalGroup(enum.Enum):
 class AnimalSpecies(enum.Enum):
     A = 2,
     B = 3,
+    C = 4, 
     UNIDENTIFIED = 1
 
 class AnimalSpeciesClass:
