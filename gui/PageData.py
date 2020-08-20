@@ -1,6 +1,6 @@
 import time
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 import ntpath
 from Helpers import TopFrame, MenuFrame
 import glob
@@ -50,8 +50,8 @@ class PageData(QtWidgets.QFrame):
     # function to handle when the user changes the image prefix line edit
     def on_prefix_edit_changed(self):
         self.IMAGE_PREFIX = self.lineEdit_img_prefix.text()
-        self.updateNumImages()
-        
+        self.updateNumImages()    
+    
     # function to handle when the user changes the experiment id line edit
     def on_exp_id_edit_changed(self):
         self.EXPERIMENT_ID = self.lineEdit_img_prefix.text()
@@ -86,12 +86,9 @@ class PageData(QtWidgets.QFrame):
         # enable frame to manipulate data properties
         self.frame_data_information.setEnabled(True)
         
-        # if directory exists, fill in the information to the image dir lineEdit
-        if ntpath.exists(self.IMAGE_DIRECTORY):
-            self.EXPERIMENT_ID = "Spitzbergen " + str(self.calendarWidget.selectedDate().year())
-        else:
+        # if directory does not exist, clear the image directory parameter and visual
+        if not ntpath.exists(self.IMAGE_DIRECTORY):
             self.IMAGE_DIRECTORY = ""
-            self.EXPERIMENT_ID = ""
         
         self.updateAllVisuals()
 
@@ -106,6 +103,7 @@ class PageData(QtWidgets.QFrame):
     # function to handle a change of th calender widget selection
     def calenderSelectionChanged(self):
         self.label_date.setText(self.calendarWidget.selectedDate().toString("dd.MM.yyyy")) # set the date label
+        self.EXPERIMENT_ID = "Spitzbergen " + str(self.calendarWidget.selectedDate().year()) # adapt experiment id
         self.updateImageDir()
  
     def createFrameData(self):

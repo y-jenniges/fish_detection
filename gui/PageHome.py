@@ -19,7 +19,7 @@ class PageHome(QtWidgets.QWidget):
         # slider parameters
         self.slider_max = self.photo_viewer.imageArea.width()*10
         self.slider_min = self.photo_viewer.imageArea.width()
-        self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)      
+        self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)     
 
     def openZoomWidget(self):
         # show the zoom widget if it is not already visible
@@ -253,19 +253,56 @@ class PageHome(QtWidgets.QWidget):
         self.btn_menu.setText("")
         self.btn_menu.setIcon(get_icon(":/icons/icons/menu.png"))
         self.btn_menu.setIconSize(QtCore.QSize(30, 30))
-        self.btn_menu.setObjectName("btn_menu")
+        self.btn_menu.setObjectName("btn_menu")      
 
         # horizontal spacers
-        spacerItem2 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        spacerItem4 = QtWidgets.QSpacerItem(334, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)    
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum) 
-        spacerItem6 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)   
-        
+        spacerItem2 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)        
         spacerItem7 = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem11 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum) 
 
+
+        # --- create dummies to keep the symmetry in the control bar ------------ #
+        # dummy button for switching between left, right and both images
+        self.btn_imgSwitch_dummy = QtWidgets.QPushButton(self.frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_imgSwitch_dummy.sizePolicy().hasHeightForWidth())
+        self.btn_imgSwitch_dummy.setSizePolicy(sizePolicy)
+        self.btn_imgSwitch_dummy.setMinimumSize(QtCore.QSize(60, 40))
+        self.btn_imgSwitch_dummy.setMaximumSize(QtCore.QSize(60, 40))
+        font = QtGui.QFont()
+        font.setFamily("Century Gothic")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.btn_imgSwitch_dummy.setFont(font)
+        self.btn_imgSwitch_dummy.setObjectName("btn_imgSwitch_dummy")
+        self.btn_imgSwitch_dummy.setEnabled(False)
         
-        # layout
+        # dummy button for opening a widget displaying filters
+        self.btn_filter_dummy = QtWidgets.QPushButton(self.frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_filter_dummy.sizePolicy().hasHeightForWidth())
+        self.btn_filter_dummy.setSizePolicy(sizePolicy)
+        self.btn_filter_dummy.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_filter_dummy.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_filter_dummy.setIconSize(QtCore.QSize(30, 30))
+        self.btn_filter_dummy.setObjectName("btn_filter_dummy")
+        self.btn_filter_dummy.setEnabled(False)
+        
+        # dummy combo box for image remarks
+        self.comboBox_imgRemark_dummy = QtWidgets.QComboBox(self.frame_controlBar)
+        self.comboBox_imgRemark_dummy.setFixedSize(QtCore.QSize(self.comboBox_imgRemark.width(), 40))
+        self.comboBox_imgRemark_dummy.setEditable(True)
+        self.comboBox_imgRemark_dummy.setObjectName("comboBox_imgRemark_dummy")
+        self.comboBox_imgRemark_dummy.setStyleSheet("#comboBox_imgRemark_dummy{background-color:transparent;} #comboBox_imgRemark_dummy:down-arrow{ image:none;}")
+        self.comboBox_imgRemark_dummy.setEnabled(False)
+
+        # --- layout of the control bar --------------------------------------- #
         layout_frame_controlBar = QtWidgets.QHBoxLayout(self.frame_controlBar)
         layout_frame_controlBar.setContentsMargins(11, 5, 11, 5)
         layout_frame_controlBar.setSpacing(4)
@@ -277,25 +314,23 @@ class PageHome(QtWidgets.QWidget):
         layout_frame_controlBar.addWidget(self.btn_imgSwitch)
         layout_frame_controlBar.addWidget(self.btn_filter)
         layout_frame_controlBar.addWidget(self.comboBox_imgRemark)
-
-        layout_frame_controlBar.addItem(spacerItem3)
-        
+        layout_frame_controlBar.addItem(spacerItem11) 
         layout_frame_controlBar.addWidget(self.btn_zoom)
         layout_frame_controlBar.addItem(spacerItem7)
         layout_frame_controlBar.addWidget(self.btn_add)
         layout_frame_controlBar.addItem(spacerItem7)
         layout_frame_controlBar.addWidget(self.btn_previous)
         layout_frame_controlBar.addItem(spacerItem7)
-
         layout_frame_controlBar.addWidget(self.btn_placeholder)
         layout_frame_controlBar.addWidget(self.btn_next)
         layout_frame_controlBar.addItem(spacerItem7)
         layout_frame_controlBar.addWidget(self.btn_delete)
-
         layout_frame_controlBar.addWidget(self.btn_undo)
-        layout_frame_controlBar.addItem(spacerItem4)
-        layout_frame_controlBar.addItem(spacerItem5)
-        layout_frame_controlBar.addItem(spacerItem6)
+        layout_frame_controlBar.addItem(spacerItem11)
+        layout_frame_controlBar.addWidget(self.comboBox_imgRemark_dummy)
+        layout_frame_controlBar.addWidget(self.btn_filter_dummy)
+        layout_frame_controlBar.addWidget(self.btn_imgSwitch_dummy)
+        layout_frame_controlBar.addItem(spacerItem2)
         layout_frame_controlBar.addWidget(self.btn_menu)        
         
         
@@ -351,6 +386,7 @@ class PageHome(QtWidgets.QWidget):
         self.widget_zoom.hide()  
         self.placeZoomWidget()
 
+
         #print(f"page home init: {time.time() - start_time}")
      
     def mousePressEvent(self, event):
@@ -364,6 +400,14 @@ class PageHome(QtWidgets.QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.placeZoomWidget()
+
+        #self.spacer.changeSize(self.comboBox_imgRemark.width(), 20)
+        self.comboBox_imgRemark_dummy.setMinimumSize(QtCore.QSize(self.comboBox_imgRemark.width(), 40))
+        self.comboBox_imgRemark_dummy.setMaximumSize(QtCore.QSize(self.comboBox_imgRemark.width(), 40))
+ 
+        print(self.comboBox_imgRemark.width())
+        
+        
         print("resize")
 
         

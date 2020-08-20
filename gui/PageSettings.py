@@ -14,11 +14,19 @@ class TextImageItemWidget (QtWidgets.QWidget):
         self.imagePath = imagePath
         self.title = ntpath.basename(imagePath).split('.')[0]
         
-        # create the label to display the text
-        self.label_text = QtWidgets.QLabel(self.title + "\n" + str(imagePath))
-        self.label_text.setMinimumWidth(400)
-        self.label_text.setWordWrap(True)
-        self.label_text.setStyleSheet("font:10pt 'Century Gothic'")
+        # create the line edit to display the text
+        self.lineEdit_text = QtWidgets.QLineEdit(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_text.sizePolicy().hasHeightForWidth())
+        self.lineEdit_text.setSizePolicy(sizePolicy)
+        self.lineEdit_text.setMinimumSize(QtCore.QSize(400, 40))
+        self.lineEdit_text.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.lineEdit_text.setReadOnly(False)
+        self.setStyleSheet("background-color:transparent;")
+        self.lineEdit_text.setObjectName("lineEdit_text")
+        self.lineEdit_text.setText(self.title)
         
         # create the label to display the image      
         pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.imagePath))
@@ -30,13 +38,20 @@ class TextImageItemWidget (QtWidgets.QWidget):
 
         # define the layout
         horizontalLayout = QtWidgets.QHBoxLayout()
-        horizontalLayout.addWidget(self.label_text)
+        horizontalLayout.addWidget(self.lineEdit_text)
         horizontalLayout.addItem(spacer)
         horizontalLayout.addWidget(self.label_image)
-        self.setLayout(horizontalLayout)  
+        self.setLayout(horizontalLayout) 
+        
+        # connect the line edit to a slot
+        self.lineEdit_text.editingFinished.connect(self.on_lineEdit_changed)
 
     def set_text(self, text):
-        self.label_text.setText(text)
+        self.lineEdit_text.setText(text)
+        
+    def on_lineEdit_changed(self):
+        self.focusNextChild() # change focus
+        
 
 """
 Class to create the settings page of the software.
@@ -1054,6 +1069,7 @@ class PageSettings(QtWidgets.QWidget):
         
     def addCustomItem(self, image_path, text=None):
         customItem = TextImageItemWidget(image_path) # create custom item
+
         if text is not None: customItem.set_text(text) # set a custom text, else it will be the file name
         item = QtWidgets.QListWidgetItem(self.list_species) # create item in list
         item.setSizeHint(QtCore.QSize(200,110))

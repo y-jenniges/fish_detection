@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1685</width>
+    <width>1681</width>
     <height>1548</height>
    </rect>
   </property>
@@ -219,6 +219,54 @@ QLabel{
 #frame_handbookBar,
 #frame_aboutBar
 {background-color: rgb(0, 203, 221);}
+
+
+/*-------------------------- double spin boxes ------------------------*/
+
+QDoubleSpinBox {
+    padding-right: 15px; /* make room for the arrows */
+    /*border-image: url(:/images/frame.png) 4;*/
+    border-radius: 3px;
+	selection-background-color:rgb(0, 203, 221);
+	font:12pt &quot;Century Gothic&quot;;
+}
+
+QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right; /* position at the top right corner */
+
+    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    border-image: url(:/icons/icons/arrow_up.png) 1;
+    border-width: 1px;
+	margin:2px;
+}
+
+QDoubleSpinBox::up-button:hover {
+    border-image: url(:/icons/icons/arrow_up_blue.png) 1;
+}
+
+QDoubleSpinBox::up-button:pressed {
+    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;
+}
+
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right; /* position at bottom right corner */
+
+    width: 16px;
+    border-image: url(:/icons/icons/arrow_down.png) 1;
+    border-width: 1px;
+    border-top-width: 0;
+	margin:2px;
+}
+
+QDoubleSpinBox::down-button:hover {
+    border-image: url(:/icons/icons/arrow_down_blue.png) 1;
+}
+
+QDoubleSpinBox::down-button:pressed {
+    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;
+}
 </string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_15">
@@ -240,7 +288,7 @@ QLabel{
        <number>0</number>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="page_home_lr">
        <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -3850,33 +3898,7 @@ background-color: rgb(0, 160, 174);
 
 
 
-/*-------------------------- double spin boxes ------------------------*/
 
-QDoubleSpinBox {
-    padding-right: 15px; /* make room for the arrows */
-    /*border-image: url(:/images/frame.png) 4;*/
-    border-radius: 3px;
-	selection-background-color:rgb(0, 203, 221);
-	font:12pt &quot;Century Gothic&quot;;
-}
-
-QDoubleSpinBox::up-button {
-    subcontrol-origin: border;
-    subcontrol-position: top right; /* position at the top right corner */
-
-    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
-    border-image: url(:/icons/icons/arrow_up.png) 1;
-    border-width: 1px;
-	margin:2px;
-}
-
-QDoubleSpinBox::up-button:hover {
-    border-image: url(:/icons/icons/arrow_up_blue.png) 1;
-}
-
-QDoubleSpinBox::up-button:pressed {
-    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;
-}
 
 
 
@@ -3900,24 +3922,7 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
 }
 */
 
-QDoubleSpinBox::down-button {
-    subcontrol-origin: border;
-    subcontrol-position: bottom right; /* position at bottom right corner */
 
-    width: 16px;
-    border-image: url(:/icons/icons/arrow_down.png) 1;
-    border-width: 1px;
-    border-top-width: 0;
-	margin:2px;
-}
-
-QDoubleSpinBox::down-button:hover {
-    border-image: url(:/icons/icons/arrow_down_blue.png) 1;
-}
-
-QDoubleSpinBox::down-button:pressed {
-    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;
-}
 </string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -4357,7 +4362,7 @@ QDoubleSpinBox::down-button:pressed {
               <enum>QTabWidget::West</enum>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="tab_camera">
               <attribute name="icon">
@@ -5375,19 +5380,6 @@ border-radius:3px;</string>
                      </item>
                     </layout>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacer_12">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                   <item>
                    <widget class="QFrame" name="frame_apply_species">

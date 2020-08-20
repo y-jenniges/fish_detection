@@ -9,6 +9,259 @@ from Helpers import get_icon
 IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 IMAGE_PREFIX = ""
 ANIMAL_LIST = []
+ANIMAL_REMARKS = ["Not determined",  "Animal incomplete"]
+IMAGE_REMARKS = []
+
+class GroupItemModel(QtCore.QAbstractItemModel):
+    def __init__(self, in_nodes):  
+        QtCore.QAbstractItemModel.__init__(self)  
+        self._root = CustomNode(None)  
+  
+    def rowCount(self, in_index):  
+        if in_index.isValid():  
+            return in_index.internalPointer().childCount()  
+        return self._root.childCount()  
+  
+    def columnCount(self, in_index):  
+        return 1  
+    
+    def index(self):
+        pass
+    
+    def parent(self):
+        pass
+    
+    def data(self):
+        pass
+
+
+"""
+A widget to provide all information of the current animal
+"""
+class AnimalSpecificationsWidget(QtWidgets.QWidget):
+    def __init__ (self, parent = None):
+        super(QtWidgets.QWidget, self).__init__(parent)
+        
+        self.group = AnimalGroup.UNIDENTIFIED.name.title()
+        self.species = AnimalSpecies.A.name.title()
+        self.remark = ""
+        self.length = 0
+        
+        self.init_ui()
+        
+
+        
+        
+        
+        self.model_group = self.comboBox_group.model()#GroupItemModel()#combo.model()
+        for group in AnimalGroup:
+            item = QtGui.QStandardItem(str(group.name.title()))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.model_group.appendRow(item)
+       # self.comboBox_group.setModel(model)
+       
+        self.model_species = self.comboBox_species.model()#GroupItemModel()#combo.model()
+        for species in AnimalSpecies:
+            item = QtGui.QStandardItem(str(species.name.title()))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.model_species.appendRow(item)
+       # self.comboBox_group.setModel(model)
+       
+        self.model_remarks = self.comboBox_remark.model()#GroupItemModel()#combo.model()
+        for remark in ANIMAL_REMARKS:
+            item = QtGui.QStandardItem(str(remark.title()))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.model_remarks.appendRow(item)
+       # self.comboBox_group.setModel(model)
+       
+        # setting visuals to initial values and hiding widget
+        self.updateVisuals()
+        self.hide()
+        
+        # connecting signals and slots
+        self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
+        self.comboBox_group.currentTextChanged.connect(self.on_group_combobox_changed)
+        self.comboBox_species.currentTextChanged.connect(self.on_species_combobox_changed)
+        self.comboBox_remark.currentTextChanged.connect(self.on_remark_combobox_changed)
+        
+    def on_remark_combobox_changed(self, remark):
+        print(f" combobox remark {remark}")
+        self.parent().animal_painter.setAnimalRemark(remark)
+        
+    def on_species_combobox_changed(self, species):
+        print(f"species combobox changed + {species}")
+        if self.comboBox_species.findText(species) != -1:
+            self.species = species
+            self.parent().animal_painter.setAnimalSpecies(species) #setAnimalGroup(group) 
+        else:
+            print("Given species was not in combobox")
+            
+    def on_group_combobox_changed(self, group):
+        print(f"group combobox changed + {group}")
+        if self.comboBox_group.findText(group) != -1:
+            self.group = group
+            self.parent().animal_painter.setAnimalGroup(group) #setAnimalGroup(group) 
+        else:
+            print("Given group was not in combobox")
+     
+    def on_length_spinbox_changed(self, value):
+        print("spinbox changed")
+        self.length = value
+        self.parent().animal_painter.cur_animal.length = value#setAnimalLength(value)
+        
+    def setAnimal(self, animal):
+        # set group
+        if animal.group in AnimalGroup.__members__.values(): 
+            self.group = animal.group.name.title()
+        else:
+            self.group = animal.group
+            
+        # set species
+        if animal.species in AnimalSpecies.__members__.values(): 
+            self.species = animal.species.name.title()
+        else:
+            self.species = animal.species
+
+
+        self.remark = animal.remark
+        self.length = animal.length
+        self.updateVisuals()
+    
+    def updateVisuals(self):
+        # set group combobox
+        index = self.comboBox_group.findText(self.group) 
+        if index != -1:
+            #print(f"set combobox group to index {index}")
+            self.comboBox_group.blockSignals(True) # blocking signal to avoid calling on_group_combobox_changed and thus starting a loop
+            self.comboBox_group.setCurrentIndex(index)
+            self.comboBox_group.blockSignals(False)
+
+        # set species combobox
+        index = self.comboBox_species.findText(self.species) 
+        if index != -1:
+            print(f"set combobox species to index {index}")
+            self.comboBox_species.blockSignals(True)
+            self.comboBox_species.setCurrentIndex(index)
+            self.comboBox_species.blockSignals(False)       
+        
+        # set remark combobox
+        index = self.comboBox_remark.findText(self.remark) 
+        if index != -1:
+            print(f"set combobox remark to index {index}")
+            self.comboBox_remark.blockSignals(True)
+            self.comboBox_remark.setCurrentIndex(index)
+            self.comboBox_remark.blockSignals(False)  
+        elif self.remark != "" and self.remark:
+            print("adding new remark entry")
+            item = QtGui.QStandardItem(str(self.remark))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.model_remarks.appendRow(item)
+        
+        # set length spinbox
+        if self.length: 
+            self.spinBox_length.blockSignals(True)
+            self.spinBox_length.setValue(self.length) 
+            self.spinBox_length.blockSignals(False)
+        else: 
+            self.spinBox_length.setValue(0)
+
+    
+    def init_ui(self):
+        self.setObjectName("animal_specs_widget")
+        self.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:white;} ")
+           
+        # main layout
+        layout = QtWidgets.QGridLayout(self)
+        layout.setObjectName("layout")
+        
+        # labels
+        self.label_group = QtWidgets.QLabel("Group")
+        self.label_species = QtWidgets.QLabel("Species")
+        self.label_remark = QtWidgets.QLabel("Remark")
+        self.label_length = QtWidgets.QLabel("Length")
+        #self.label_height = QtWidgets.QLabel("Height")
+        
+        # combobox for animal group
+        self.comboBox_group = QtWidgets.QComboBox(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBox_group.sizePolicy().hasHeightForWidth())
+        self.comboBox_group.setSizePolicy(sizePolicy)
+        self.comboBox_group.setMinimumSize(QtCore.QSize(0, 40))
+        self.comboBox_group.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.comboBox_group.setEditable(True)
+        self.comboBox_group.lineEdit().setReadOnly(True)
+        self.comboBox_group.lineEdit().setAlignment(QtCore.Qt.AlignRight)
+        self.comboBox_group.setObjectName("comboBox_group")         
+
+        # combobox for animal species
+        self.comboBox_species = QtWidgets.QComboBox(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBox_species.sizePolicy().hasHeightForWidth())
+        self.comboBox_species.setSizePolicy(sizePolicy)
+        self.comboBox_species.setMinimumSize(QtCore.QSize(0, 40))
+        self.comboBox_species.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.comboBox_species.setEditable(True)
+        self.comboBox_species.lineEdit().setReadOnly(True)
+        self.comboBox_species.lineEdit().setAlignment(QtCore.Qt.AlignRight)
+        self.comboBox_species.setObjectName("comboBox_species")
+        
+        # combobox for animal remark
+        self.comboBox_remark = QtWidgets.QComboBox(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBox_remark.sizePolicy().hasHeightForWidth())
+        self.comboBox_remark.setSizePolicy(sizePolicy)
+        self.comboBox_remark.setMinimumSize(QtCore.QSize(0, 40))
+        self.comboBox_remark.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.comboBox_remark.setEditable(True)
+        self.comboBox_remark.lineEdit().setAlignment(QtCore.Qt.AlignRight)
+        self.comboBox_remark.setObjectName("comboBox_remark")
+        
+        self.spinBox_length = QtWidgets.QDoubleSpinBox(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.spinBox_length.sizePolicy().hasHeightForWidth())
+        self.spinBox_length.setSizePolicy(sizePolicy)
+        self.spinBox_length.setMinimumSize(QtCore.QSize(200, 40))
+        self.spinBox_length.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.spinBox_length.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.spinBox_length.setMaximum(99909.99)
+        self.spinBox_length.setObjectName("spinBox_length")
+        
+        # self.spinBox_heigth = QtWidgets.QDoubleSpinBox(self)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.spinBox_heigth.sizePolicy().hasHeightForWidth())
+        # self.spinBox_heigth.setSizePolicy(sizePolicy)
+        # self.spinBox_heigth.setMinimumSize(QtCore.QSize(200, 40))
+        # self.spinBox_heigth.setMaximumSize(QtCore.QSize(16777215, 40))
+        # self.spinBox_heigth.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        # self.spinBox_heigth.setMaximum(9999.99)
+        # self.spinBox_heigth.setObjectName("spinBox_heigth")
+        
+            
+        # add widgets to layout
+        layout.addWidget(self.label_group, 0, 0, 1, 1)
+        layout.addWidget(self.comboBox_group, 0, 1, 1, 1)
+        
+        layout.addWidget(self.label_species, 1, 0, 1, 1)
+        layout.addWidget(self.comboBox_species, 1, 1, 1, 1)
+        
+        layout.addWidget(self.label_remark, 2, 0, 1, 1)
+        layout.addWidget(self.comboBox_remark, 2, 1, 1, 1)
+        
+        layout.addWidget(self.label_length, 3, 0, 1, 1)
+        layout.addWidget(self.spinBox_length, 3, 1, 1, 1)
+           
+        # layout.addWidget(self.label_height, 4, 0, 1, 1)
+        # layout.addWidget(self.spinBox_heigth, 4, 1, 1, 1)
 
 
 """
@@ -115,6 +368,7 @@ class AnimalPainter():
         
         # current animal
         self.cur_animal  = None
+        self.widget_animal_specs = AnimalSpecificationsWidget(imageArea)
         
         # variables to control what interactions are possible
         self.is_add_mode_active = False
@@ -123,14 +377,73 @@ class AnimalPainter():
         # the QGraphicsView to paint on
         self.imageArea = imageArea
  
+    
+    def setAnimalRemark(self, remark):
+        self.cur_animal.remark = remark
+    
+    def setAnimalSpecies(self, species):
+        self.cur_animal.species = species
+
+    def setAnimalGroup(self, group):
+        self.cur_animal.setGroup(group)
+        
+        # update drawing
+        self.cur_animal.head_item_visual.setPixmap(self.cur_animal.pixmap_head)
+        self.cur_animal.tail_item_visual.setPixmap(self.cur_animal.pixmap_tail)
+        
+        # redraw line and boundingbox visuals
+        self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
+        self.drawAnimalLine(self.cur_animal)
+        
+        self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
+        self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+     
+
     def removeAll(self):
         for animal in ANIMAL_LIST:
             self.removeHeadVisual(animal)
             self.removeTailVisual(animal)
             self.removeLineVisual(animal)
             self.removeBoundingBoxVisual(animal)
+     
+    # function to move to specs widget with the bounding bos of the current animal (and prevent it from getting out of the borders of the image)
+    def placeSpecsWidget(self):
+        if self.cur_animal is not None:
+            # reset position of specs widget
+            self.widget_animal_specs.move(0,0)
+        
+            # get position of current bounding box from scene
+            pos = self.imageArea.mapFromScene(self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
             
- 
+            # move the zoom widget a bit below the button position and center it below the button
+            self.widget_animal_specs.move(pos)
+        
+            # get corners of specs widget in scne coordinates
+            top_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topLeft())).toPoint()
+            top_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topRight())).toPoint()
+            bottom_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomLeft())).toPoint()
+            bottom_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomRight())).toPoint()
+                        
+            # if the lower edge of the specs is not visible, display specs above animal
+            if not self.imageArea.rect().contains(bottom_left) and not self.imageArea.rect().contains(bottom_right):
+                new_pos = pos + QtCore.QPoint(0,-self.widget_animal_specs.height() - self.cur_animal.boundingBox_visual.rect().height())
+                self.widget_animal_specs.move(new_pos)
+                
+            # if the left edge of the specs is not visible, display specs right of animal
+            elif not self.imageArea.rect().contains(bottom_left) and not self.imageArea.rect().contains(top_left):
+                new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
+                self.widget_animal_specs.move(new_pos)   
+    
+            # # if the top edge of the specs is not visible, display specs below of animal (as usual)
+            # elif not self.imageArea.rect().contains(top_left) and not self.imageArea.rect().contains(top_right):
+            #     pass
+        
+            # if the right edge of the specs is not visible, display specs left of animal
+            elif not self.imageArea.rect().contains(bottom_right) and not self.imageArea.rect().contains(top_right):
+                new_pos = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
+                self.widget_animal_specs.move(new_pos)
+            
+     
     def updateBoundingBoxes(self):
         # remove bounding of other animals
         for animal in ANIMAL_LIST:
@@ -140,7 +453,13 @@ class AnimalPainter():
         # draw the current animal bounding box
         if self.cur_animal is not None and self.cur_animal in ANIMAL_LIST:
             self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
-                
+            
+            self.widget_animal_specs.setAnimal(self.cur_animal)
+            self.placeSpecsWidget()
+            self.widget_animal_specs.show()
+        else:
+            self.widget_animal_specs.hide()
+            
     def drawAnimalHead(self, animal):
         if animal != None:
             if self.cur_animal.position_head != QtCore.QPoint(-1,-1):
@@ -151,7 +470,7 @@ class AnimalPainter():
                 self.imageArea._scene.addItem(self.cur_animal.head_item_visual)
      
     def drawAnimalLine(self, animal):
-        self.cur_animal.line_item_visual = self.imageArea._scene.addLine(self.cur_animal.line, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+        animal.line_item_visual = self.imageArea._scene.addLine(animal.line, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
      
     def drawAnimalTailLineBoundingBox(self, animal):
         if animal != None:
@@ -268,11 +587,17 @@ class AnimalPainter():
 
 
         # if user is not removing and not adding animals, switch the current animal to what the user clicks on
+        # if the user clicks on no organism, there is no current animal
         elif(not self.is_remove_mode_active and not self.is_add_mode_active):
-             for animal in ANIMAL_LIST:
+            is_click_on_animal = False 
+            for animal in ANIMAL_LIST:
                 if(animal.boundingBox.contains(pos)):
                     self.cur_animal = animal
+                    is_click_on_animal = True
                     break
+            
+            if not is_click_on_animal: self.cur_animal = None
+            
                     
         elif(self.is_add_mode_active):
             # add mode
@@ -300,7 +625,7 @@ class AnimalPainter():
                 # head is now drawn
                 self.is_head_drawn = True
                 self.is_tail_drawn = False
-                
+                            
         self.updateBoundingBoxes()                     
 
     def mouseMoveEvent(self, event):
@@ -362,6 +687,9 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # clear visuals
         self.imageArea.animal_painter.removeAll()
+        
+        # hide animal specs widget
+        self.imageArea.animal_painter.widget_animal_specs.hide()
         
         # clear animal list
         ANIMAL_LIST.clear()
@@ -445,6 +773,9 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # --- image frame ------------------------------------------------------------------------------------------- # 
         self.imageArea = ImageArea()
+        
+        # --- group and species frame ------------------------------------------------------------------------------------------- # 
+        # @todo idea:frame with 2 listwidgets below each other. one for the group, one for species. 
         
         
         # --- right frame ------------------------------------------------------------------------------------------- # 

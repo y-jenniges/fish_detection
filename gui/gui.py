@@ -214,6 +214,53 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "#frame_handbookBar,\n"
 "#frame_aboutBar\n"
 "{background-color: rgb(0, 203, 221);}\n"
+"/*-------------------------- double spin boxes ------------------------*/\n"
+"\n"
+"QDoubleSpinBox {\n"
+"    padding-right: 15; /* make room for the arrows */\n"
+"    /*border-image: url(:/images/frame.png) 4;*/\n"
+"    border-radius: 3px;\n"
+"	selection-background-color:rgb(0, 203, 221);\n"
+"	font:12pt \"Century Gothic\";\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::up-button {\n"
+"    subcontrol-origin: border;\n"
+"    subcontrol-position: top right; /* position at the top right corner */\n"
+"\n"
+"    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */\n"
+"    border-image: url(:/icons/icons/arrow_up.png) 1;\n"
+"    border-width: 1px;\n"
+"	margin:2px;\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::up-button:hover {\n"
+"    border-image: url(:/icons/icons/arro"
+                        "w_up_blue.png) 1;\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::up-button:pressed {\n"
+"    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::down-button {\n"
+"    subcontrol-origin: border;\n"
+"    subcontrol-position: bottom right; /* position at bottom right corner */\n"
+"\n"
+"    width: 16px;\n"
+"    border-image: url(:/icons/icons/arrow_down.png) 1;\n"
+"    border-width: 1px;\n"
+"    border-top-width: 0;\n"
+"	 margin:2px;\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::down-button:hover {\n"
+"    border-image: url(:/icons/icons/arrow_down_blue.png) 1;\n"
+"}\n"
+"\n"
+"QDoubleSpinBox::down-button:pressed {\n"
+"    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
+"}\n"
 "")
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -288,7 +335,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.page_home.comboBox_imgRemark.setItemText(3, _translate("MainWindow", "high turbidity"))
         self.page_home.comboBox_imgRemark.setItemText(4, _translate("MainWindow", "wrong illumination"))
         self.page_home.comboBox_imgRemark.setItemText(5, _translate("MainWindow", "without flashlight"))
-        self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))
+        self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
         
         # data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))

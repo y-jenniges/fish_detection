@@ -71,7 +71,7 @@ class Animal():
         self.species = species
         self.remark = remark
         self.length = None
-        self.width = None
+        #self.height = None
       
         # set the visual for the head, tail and line between them
         self.pos_visual_head = position_head - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
@@ -82,11 +82,6 @@ class Animal():
         self.line = QtCore.QLineF(self.position_head, self.position_tail)  
 
         
-
-        
-        
-       
-
         # set pixmaps for head/tail visuals
         self.get_colors_according_to_group()
         
@@ -103,27 +98,27 @@ class Animal():
     def get_colors_according_to_group(self):
         self.color = ""
         
-        if self.group == AnimalGroup.UNIDENTIFIED:
+        if self.group == AnimalGroup.UNIDENTIFIED or self.group == "Unidentified":
             self.pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
               
-        elif self.group == AnimalGroup.FISH:
+        elif self.group == AnimalGroup.FISH or self.group == "Fish":
             self.pixmap_head = QtGui.QPixmap("animal_markings/o_blue.png")        
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_blue.png")  
             self.color = QtGui.QColor(0, 112, 192)
             
-        elif self.group == AnimalGroup.CRUSTACEA:
+        elif self.group == AnimalGroup.CRUSTACEA or self.group == "Crustacea":
             self.pixmap_head = QtGui.QPixmap("animal_markings/o_red.png")        
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_red.png") 
             self.color = QtGui.QColor(255, 0, 0)
             
-        elif self.group == AnimalGroup.CHAETOGNATHA:
+        elif self.group == AnimalGroup.CHAETOGNATHA or self.group == "Chaetognatha":
             self.pixmap_head = QtGui.QPixmap("animal_markings/o_orange.png")        
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_orange.png")  
             self.color = QtGui.QColor(255, 192, 0)
             
-        elif self.group == AnimalGroup.JELLYFISH:
+        elif self.group == AnimalGroup.JELLYFISH or self.group == "Jellyfish":
             self.pixmap_head = QtGui.QPixmap("animal_markings/o_black.png")        
             self.pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
             self.color = QtGui.QColor(0, 0, 0)
