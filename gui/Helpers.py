@@ -188,7 +188,6 @@ class MenuFrame(QtWidgets.QFrame):
         self.setMinimumSize(QtCore.QSize(0, 50))
         self.setMaximumSize(QtCore.QSize(16777215, 50))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.setFrameShadow(QtWidgets.QFrame.Raised)
         self.setLineWidth(0)
         self.setObjectName(frame_name)
         horizontalLayout_31 = QtWidgets.QHBoxLayout(self)

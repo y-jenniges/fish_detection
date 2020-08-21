@@ -16,10 +16,10 @@ class PageAbout(QtWidgets.QWidget):
           
         # --- elements in main widget --------------------------------------------------------------------- #
         # top bar (the blue one on every page)
-        self.frame_topBar = TopFrame(":/icons/icons/fish_white.png", "frame_aboutBar")
+        self.frame_topBar = TopFrame(":/icons/icons/fish_white.png", "frame_aboutBar", self)
                
         # menu bar on about page
-        self.frame_controlBar = MenuFrame("About MarOMarker", "frame_controlBar_about")
+        self.frame_controlBar = MenuFrame("About MarOMarker", "frame_controlBar_about", self)
         
         # main content frame of about page
         self.frame_about = QtWidgets.QFrame(self)

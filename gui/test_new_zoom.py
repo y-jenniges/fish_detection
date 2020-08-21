@@ -12,27 +12,27 @@ ANIMAL_LIST = []
 ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
 IMAGE_REMARKS = []
 
-class GroupItemModel(QtCore.QAbstractItemModel):
-    def __init__(self, in_nodes):  
-        QtCore.QAbstractItemModel.__init__(self)  
-        self._root = CustomNode(None)  
+# class GroupItemModel(QtCore.QAbstractItemModel):
+#     def __init__(self, in_nodes):  
+#         QtCore.QAbstractItemModel.__init__(self)  
+#         self._root = CustomNode(None)  
   
-    def rowCount(self, in_index):  
-        if in_index.isValid():  
-            return in_index.internalPointer().childCount()  
-        return self._root.childCount()  
+#     def rowCount(self, in_index):  
+#         if in_index.isValid():  
+#             return in_index.internalPointer().childCount()  
+#         return self._root.childCount()  
   
-    def columnCount(self, in_index):  
-        return 1  
+#     def columnCount(self, in_index):  
+#         return 1  
     
-    def index(self):
-        pass
+#     def index(self):
+#         pass
     
-    def parent(self):
-        pass
+#     def parent(self):
+#         pass
     
-    def data(self):
-        pass
+#     def data(self):
+#         pass
 
 
 """
@@ -49,7 +49,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         self.init_ui()
         
-
+        ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
         group_icon_list = [":/animal_markings/animal_markings/square_blue.png", 
                            ":/animal_markings/animal_markings/square_red.png", 
                            ":/animal_markings/animal_markings/square_orange.png", 
@@ -199,10 +199,10 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         layout.setObjectName("layout")
         
         # labels
-        self.label_group = QtWidgets.QLabel("Group")
-        self.label_species = QtWidgets.QLabel("Species")
-        self.label_remark = QtWidgets.QLabel("Remark")
-        self.label_length = QtWidgets.QLabel("Length")
+        self.label_group = QtWidgets.QLabel("Group", self)
+        self.label_species = QtWidgets.QLabel("Species", self)
+        self.label_remark = QtWidgets.QLabel("Remark", self)
+        self.label_length = QtWidgets.QLabel("Length", self)
         #self.label_height = QtWidgets.QLabel("Height")
         
         # combobox for animal group
@@ -299,20 +299,18 @@ class ImageArea(QtWidgets.QGraphicsView):
         self._zoom = 0
         self._scene = QtWidgets.QGraphicsScene()
         self._photo = QtWidgets.QGraphicsPixmapItem()
-
+        self._empty = True
         self._scene.addItem(self._photo)     
         self.setScene(self._scene)
 
         # set properties for graphics view
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
-        #self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        #self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        #self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
         # animal painter to enable adding/removing of animals
         self.animal_painter = AnimalPainter(self)
+
 
     def hasPhoto(self):
         return not self._empty
@@ -324,11 +322,11 @@ class ImageArea(QtWidgets.QGraphicsView):
             if self.hasPhoto():
                 unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
                 self.scale(1 / unity.width(), 1 / unity.height())
-                viewrect = self.viewport().rect()
-                scenerect = self.transform().mapRect(rect)
-                factor = min(viewrect.width() / scenerect.width(),
-                             viewrect.height() / scenerect.height())
-                self.scale(factor, factor)               
+                # viewrect = self.viewport().rect()
+                # scenerect = self.transform().mapRect(rect)
+                # factor = min(viewrect.width() / scenerect.width(),
+                #               viewrect.height() / scenerect.height())
+                # self.scale(factor, factor)   
             self._zoom = 0
 
     def setPhoto(self, pixmap=None):        
@@ -344,27 +342,31 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.fitInView() 
         
     def wheelEvent(self, event):
-        if self.hasPhoto():   
-            # zoom in if y > 0 (wheel forward), else zoom out
-            if event.angleDelta().y() > 0:
+        if self.hasPhoto():  
+            factor = 1
+            
+            # zoom in if y > 0 (wheel forward), else zoom out (maximum zoom level of 30)
+            if event.angleDelta().y() > 0 and self._zoom <= 30:
                 factor = 1.15
                 self._zoom += 1
-            elif event.angleDelta().y() < 0:
-                factor = 0.85
+            elif event.angleDelta().y() <= 0:
+                factor = 0.9
                 self._zoom -= 1
             
             # scale the view if zoom is positive, else set it to zero and fit the photo in the view
             if self._zoom > 0:
                 self.scale(factor, factor)
-                self.parent().setArrowShortcuts(False)
+                self.parent().setArrowShortcutsActive(False)
             elif self._zoom == 0:
                 self.fitInView()
-                self.parent().setArrowShortcuts(True)
+                self.parent().setArrowShortcutsActive(True)
             else:
                 self._zoom = 0
-                self.parent().setArrowShortcuts(True)
+                self.parent().setArrowShortcutsActive(True)
             
-
+            #print(f"zoom {self._zoom}")
+            #print(f"own width and photo width {self.width(), self._photo.pixmap().rect().width(), self.transform().scale()}")
+            #print()
             
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):
@@ -690,8 +692,8 @@ class AnimalPainter():
 A photo viewer that contains a QGraphicsView to display the photos and draw the animals on.
 """              
 class PhotoViewer(QtWidgets.QWidget):
-    def __init__(self):
-        super(PhotoViewer, self).__init__()
+    def __init__(self, parent=None):
+        super(PhotoViewer, self).__init__(parent)
 
         # list of image pathes and the current image index
         self.cur_image_index = 0
@@ -703,10 +705,17 @@ class PhotoViewer(QtWidgets.QWidget):
         # initalize actions
         self.init_actions()
         
+        # load initial image
+        #self.loadImage(self.image_list[self.cur_image_index])
+
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.loadImage(self.image_list[self.cur_image_index])
+        path = self.image_list[self.cur_image_index]
+        photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+        self.imageArea.setPhoto(photo)
+        self.updateImageCountVisual()
+        #self.loadImage(self.image_list[self.cur_image_index])
                 
     def loadImage(self, path):
         photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
@@ -752,7 +761,7 @@ class PhotoViewer(QtWidgets.QWidget):
         self.shortcut_next_image = QtWidgets.QShortcut(QtGui.QKeySequence("right"), self.btn_next_image, self.on_next_image) 
 
     # enable or disable arrow key shortcuts
-    def setArrowShortcuts(self, are_active):
+    def setArrowShortcutsActive(self, are_active):
         self.shortcut_previous_image.setEnabled(are_active)
         self.shortcut_next_image.setEnabled(are_active)
               
@@ -804,7 +813,8 @@ class PhotoViewer(QtWidgets.QWidget):
         
         
         # --- image frame ------------------------------------------------------------------------------------------- # 
-        self.imageArea = ImageArea()
+        self.imageArea = ImageArea(self)
+        #self.imageArea.setStyleSheet("background-color:red;")
         
         # --- group and species frame ------------------------------------------------------------------------------------------- # 
         # @todo idea:frame with 2 listwidgets below each other. one for the group, one for species. 

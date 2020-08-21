@@ -7,9 +7,13 @@ Class to create the handbook page of the software.
 """
 class PageHandbook(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
            
+        # init UI and actions
+        self.init_ui()
+        self.init_actions()
+ 
+    def init_ui(self):
         # set widget property
         self.setObjectName("page_handbook")
         
@@ -19,10 +23,10 @@ class PageHandbook(QtWidgets.QWidget):
         self.layout_page_handbook.setObjectName("layout_page_handbook")
         
         # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/book.png", "frame_handbookBar")     
+        self.frame_topBar = TopFrame(":/icons/icons/book.png", "frame_handbookBar", self)     
             
         # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Handbook", "frame_controlBar_handbook")      
+        self.frame_controlBar = MenuFrame("Handbook", "frame_controlBar_handbook", self)      
         
         # create main frame for the handbook page
         self.frame_handbook = QtWidgets.QFrame(self)
@@ -33,6 +37,7 @@ class PageHandbook(QtWidgets.QWidget):
         # add widgets to layout
         self.layout_page_handbook.addWidget(self.frame_topBar)
         self.layout_page_handbook.addWidget(self.frame_controlBar)
-        self.layout_page_handbook.addWidget(self.frame_handbook)
+        self.layout_page_handbook.addWidget(self.frame_handbook)        
         
-        #print(f"page handbook init: {time.time() - start_time}")
+    def init_actions(self):
+        pass

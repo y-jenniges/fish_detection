@@ -13,10 +13,10 @@ import glob
 """
 Class to create the data page of the software.
 """
-class PageData(QtWidgets.QFrame):   
+class PageData(QtWidgets.QWidget):   
     def __init__(self, parent=None):
         start_time = time.time()       
-        super(QtWidgets.QFrame, self).__init__(parent)
+        super(QtWidgets.QWidget, self).__init__(parent)
     
         self.init_ui()
         self.init_actions()
@@ -254,7 +254,7 @@ class PageData(QtWidgets.QFrame):
         self.tabWidget_2.setObjectName("tabWidget_2")
         
         # widget to show the original table
-        self.original = QtWidgets.QWidget()
+        self.original = QtWidgets.QWidget(self)
         self.original.setObjectName("original") # @todo do i need this widget here?? cant  i just set the layout on the tab? or the table view directly?
         
         # layout to place the original table in
@@ -269,7 +269,7 @@ class PageData(QtWidgets.QFrame):
         self.layout_original_table.addWidget(self.tableView_original)
             
         # widget to show the summary table
-        self.summary = QtWidgets.QWidget()  # comment see above @todo
+        self.summary = QtWidgets.QWidget(self)  # comment see above @todo
         self.summary.setObjectName("summary")
         
         # layout to place the summary table in
@@ -653,10 +653,10 @@ class PageData(QtWidgets.QFrame):
         self.layout_page_data.setObjectName("layout_page_data")
         
         # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", "frame_dataBar")     
+        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", "frame_dataBar", self)     
                
         # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Data", "frame_controlBar_data")  
+        self.frame_controlBar = MenuFrame("Data", "frame_controlBar_data", self)  
    
         # create the main frame for the data
         self.frame_data = self.createFrameData()

@@ -30,18 +30,17 @@ class TextImageItemWidget (QtWidgets.QWidget):
         
         # create the label to display the image      
         pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.imagePath))
-        self.label_image = QtWidgets.QLabel()
+        self.label_image = QtWidgets.QLabel(self)
         self.label_image.setPixmap(pixmap.scaled(QtCore.QSize(150,100), QtCore.Qt.KeepAspectRatio))      
     
         # a spacer between label and image
         spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         # define the layout
-        horizontalLayout = QtWidgets.QHBoxLayout()
+        horizontalLayout = QtWidgets.QHBoxLayout(self)
         horizontalLayout.addWidget(self.lineEdit_text)
         horizontalLayout.addItem(spacer)
         horizontalLayout.addWidget(self.label_image)
-        self.setLayout(horizontalLayout) 
         
         # connect the line edit to a slot
         self.lineEdit_text.editingFinished.connect(self.on_lineEdit_changed)
@@ -254,10 +253,10 @@ class PageSettings(QtWidgets.QWidget):
         self.layout_page_settings.setObjectName("layout_page_settings")
         
         # top bar (the blue one on every page)
-        self.frame_topBar = TopFrame(":/icons/icons/settings.png", "frame_settingsBar")   
+        self.frame_topBar = TopFrame(":/icons/icons/settings.png", "frame_settingsBar", self)   
         
         # menu bar on about page
-        self.frame_controlBar = MenuFrame("Settings", "frame_controlBar_settings")
+        self.frame_controlBar = MenuFrame("Settings", "frame_controlBar_settings", self)
   
     
         # --- main frame for the settings --------------------------------------------------- #
@@ -302,7 +301,7 @@ class PageSettings(QtWidgets.QWidget):
     
     def createTabCamera(self):
         # --- main frame (whole tab) ----------------------------------------------- #
-        tab_camera = QtWidgets.QWidget()
+        tab_camera = QtWidgets.QWidget(self)
         tab_camera.setObjectName("tab_camera")
         
         # main layout
@@ -563,7 +562,7 @@ class PageSettings(QtWidgets.QWidget):
         
     def createTabNeuralNetwork(self):
         # --- main frame (whole tab) ----------------------------------------------- #
-        tab_neuralNet = QtWidgets.QWidget()
+        tab_neuralNet = QtWidgets.QWidget(self)
         tab_neuralNet.setObjectName("tab_neuralNet")
         
         # main layout
@@ -579,7 +578,6 @@ class PageSettings(QtWidgets.QWidget):
         frame_nn_options = QtWidgets.QFrame(tab_neuralNet)
         frame_nn_options.setStyleSheet("")
         frame_nn_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_nn_options.setFrameShadow(QtWidgets.QFrame.Raised)
         frame_nn_options.setObjectName("frame_nn_options")
         
         # layout
@@ -680,7 +678,7 @@ class PageSettings(QtWidgets.QWidget):
            
     def createTabSpecies(self):
         # --- main frame (whole tab) ----------------------------------------------- #
-        tab_species = QtWidgets.QWidget()
+        tab_species = QtWidgets.QWidget(self)
         tab_species.setObjectName("tab_species")
         
         # main layout
@@ -782,7 +780,7 @@ class PageSettings(QtWidgets.QWidget):
 
     def createTabUser(self):
         # --- main frame (whole tab) ----------------------------------------------- #
-        tab_user = QtWidgets.QWidget()
+        tab_user = QtWidgets.QWidget(self)
         tab_user.setObjectName("tab_user")
         
         # main layout
@@ -860,7 +858,6 @@ class PageSettings(QtWidgets.QWidget):
         frame_apply_user.setMinimumSize(QtCore.QSize(0, 30))
         frame_apply_user.setMaximumSize(QtCore.QSize(16777215, 60))
         frame_apply_user.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_apply_user.setFrameShadow(QtWidgets.QFrame.Raised)
         frame_apply_user.setObjectName("frame_apply_user")
 
         # layout
