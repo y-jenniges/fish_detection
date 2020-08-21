@@ -452,7 +452,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
             # if not all changes to the settings were applied, ask the user what to do
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Question)
-            msg.setText("Do you want to apply the changes to the settings?")
+            msg.setText("Settings changed")
+            msg.setInformativeText("Do you want to apply the changes to the settings?")
             msg.setWindowTitle("Settings changed")
             msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
             msg.buttonClicked.connect(self.apply_settings_decision)

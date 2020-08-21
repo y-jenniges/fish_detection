@@ -405,7 +405,7 @@ class AnimalPainter():
         
         # the QGraphicsView to paint on
         self.imageArea = imageArea
- 
+    
     
     def setAnimalRemark(self, remark):
         self.cur_animal.remark = remark
@@ -558,7 +558,7 @@ class AnimalPainter():
                 self.is_add_mode_active = False
                 self.is_remove_mode_active = True
             else:
-                print("Error: Please draw head and tail before switching off the Add-mode.")            
+                self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")           
         else:
             self.is_add_mode_active = False
             self.is_remove_mode_active = True          
@@ -569,10 +569,18 @@ class AnimalPainter():
             if (self.is_head_drawn and self.is_tail_drawn) or (not self.is_head_drawn and not self.is_tail_drawn):
                 self.is_add_mode_active = False
             else:
-                print("Error: Please draw head and tail before switching off the Add-mode.")
+                self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
+
+    def displayErrorMsg(self, text, information, windowTitle):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setText(text)
+        msg.setInformativeText(information)
+        msg.setWindowTitle(windowTitle)
+        msg.exec_()
 
     def mousePressEvent(self, event):
         # convert event position to scene corrdinates
@@ -647,7 +655,7 @@ class AnimalPainter():
             else:                
                 # create a new animal
                 self.cur_animal = Animal(position_head = pos)
-                self.cur_animal.setGroup(AnimalGroup.FISH)
+                self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                                
                 # do the actual drawing of the head
                 self.drawAnimalHead(self.cur_animal)

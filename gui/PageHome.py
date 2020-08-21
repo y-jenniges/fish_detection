@@ -414,8 +414,43 @@ class PageHome(QtWidgets.QWidget):
         self.btn_next.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_next_animal)
         self.btn_previous.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_previous_animal)
         self.btn_zoom.clicked.connect(self.openZoomWidget)
+        self.btn_imgSwitch.clicked.connect(self.switchImageMode)
         self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
-          
+        
+        # --- define shortcuts ------------------------------------------------------------------------------------------- #  
+        self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.imageArea.animal_painter.on_previous_animal)
+        self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.imageArea.animal_painter.on_next_animal)
+        self.shortcut_add_animal = QtWidgets.QShortcut(QtGui.QKeySequence("+"), self.btn_add, self.on_add_clicked)
+        self.shortcut_remove_animal = QtWidgets.QShortcut(QtGui.QKeySequence("-"), self.btn_delete, self.on_remove_clicked)
+        self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
+        self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
+        self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
+     
+    def switchImageMode(self):
+        cur_mode = self.btn_imgSwitch.text()
+        if cur_mode == "L": 
+            self.displayRightImage()
+        elif cur_mode == "R":
+            self.displayBothImages()
+        else:
+            self.displayLeftImage()
+        
+    # @todo implement image switching
+    def displayLeftImage(self):
+        print("on left image")
+        self.btn_imgSwitch.setText("L")
+        pass
+
+    def displayRightImage(self):
+        print("on right image")
+        self.btn_imgSwitch.setText("R")
+        pass
+    
+    def displayBothImages(self):
+        print("on both images")
+        self.btn_imgSwitch.setText("LR")
+        pass
+     
     def mousePressEvent(self, event):
         super().mousePressEvent(event)          
         # hide the zoom widget if it is open and a click somewhere else is registered
