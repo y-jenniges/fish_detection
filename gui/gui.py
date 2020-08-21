@@ -37,21 +37,21 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_home.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
         self.page_home.btn_imgSwitch.setText(_translate("MainWindow", "L"))
-        self.page_home.comboBox_imgRemark.setItemText(0, _translate("MainWindow", "image remark..."))
         self.page_home.comboBox_imgRemark.setItemText(1, _translate("MainWindow", "low turbidity"))
         self.page_home.comboBox_imgRemark.setItemText(2, _translate("MainWindow", "medium turbidity"))
         self.page_home.comboBox_imgRemark.setItemText(3, _translate("MainWindow", "high turbidity"))
         self.page_home.comboBox_imgRemark.setItemText(4, _translate("MainWindow", "wrong illumination"))
         self.page_home.comboBox_imgRemark.setItemText(5, _translate("MainWindow", "without flashlight"))
+        self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))    
         self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
         
-        self.page_home.comboBox_imgRemark_dummy.setItemText(0, _translate("MainWindow", "image remark..."))
+        self.page_home.comboBox_imgRemark.setItemText(0, _translate("MainWindow", "Image remark..."))
         self.page_home.comboBox_imgRemark_dummy.setItemText(1, _translate("MainWindow", "low turbidity"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(2, _translate("MainWindow", "medium turbidity"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(3, _translate("MainWindow", "high turbidity"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(4, _translate("MainWindow", "wrong illumination"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(5, _translate("MainWindow", "without flashlight"))
-        
+
         # data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_data.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))   
