@@ -30,7 +30,7 @@ class PageData(QtWidgets.QWidget):
               
         self.calenderSelectionChanged()
         
-        #print(f"page data init: {time.time() - start_time}")
+
     
     # function to handle when the user changes the img_dir line edit
     def on_img_dir_edit_changed(self):
@@ -154,20 +154,16 @@ class PageData(QtWidgets.QWidget):
 "    font: 10pt \"Century Gothic\";\n"
 "}\n"
 "\n"
-"#btn_apply_diverging_data_info{\n"
-"    background-color:rgb(150, 150, 150);\n"
-"}\n"
-"\n"
 "#btn_res_file, #btn_img_dir, #btn_analyze{\n"
 "    background-color: rgb(200, 200, 200);\n"
 "}\n"
 "\n"
 "\n"
-"#btn_apply_diverging_data_info:hover, #btn_res_file:hover, #btn_img_dir:hover, #btn_analyze:hover{\n"
+"#btn_res_file:hover, #btn_img_dir:hover, #btn_analyze:hover{\n"
 "  background-color: rgb(0, 203, 221);\n"
 "}\n"
 "\n"
-"#btn_apply_diverging_data_info:pressed, #btn_res_file:pressed, #btn_img_dir:pressed, #btn_analyze:pressed{\n"
+"#btn_res_file:pressed, #btn_img_dir:pressed, #btn_analyze:pressed{\n"
 "    background-color: rgb(0, 160, 174);\n"
 "}")
         frame_data.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -580,13 +576,6 @@ class PageData(QtWidgets.QWidget):
         self.label_img_dir.setStyleSheet("")
         self.label_img_dir.setObjectName("label_img_dir")
 
-        # button for applying data information changed by the user
-        self.btn_apply_diverging_data_info = QtWidgets.QPushButton(frame_data_information)
-        self.btn_apply_diverging_data_info.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_apply_diverging_data_info.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.btn_apply_diverging_data_info.setStyleSheet("font:bold;")
-        self.btn_apply_diverging_data_info.setObjectName("btn_apply_diverging_data_info")
-
         # line edit to set the image prefix
         self.lineEdit_img_prefix = QtWidgets.QLineEdit(frame_data_information)
         self.lineEdit_img_prefix.setMinimumSize(QtCore.QSize(150, 40))
@@ -631,14 +620,13 @@ class PageData(QtWidgets.QWidget):
         self.gridLayout_5.addWidget(self.btn_img_dir, 1, 2, 1, 1)
         self.gridLayout_5.addWidget(self.label_exp_id, 4, 0, 1, 1)
         self.gridLayout_5.addWidget(self.label_img_dir, 1, 0, 1, 1)
-        self.gridLayout_5.addWidget(self.btn_apply_diverging_data_info, 7, 2, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_img_prefix, 3, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_res_file, 2, 0, 1, 1)
         self.gridLayout_5.addWidget(self.label_num_imgs_text, 5, 1, 1, 1)
         self.gridLayout_5.addWidget(self.btn_res_file, 2, 2, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_exp_id, 4, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_img_prefix, 3, 0, 1, 1)
-        self.gridLayout_5.addItem(spacerItem21, 6, 1, 1, 1)
+        #self.gridLayout_5.addItem(spacerItem21, 6, 1, 1, 1)
         
         return frame_data_information
     

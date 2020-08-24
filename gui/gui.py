@@ -1,3 +1,7 @@
+"""
+Created on 22 July 2020
+@author: Yvonne Jenniges
+"""
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pandas as pd
 
@@ -11,6 +15,9 @@ import Helpers
 import time
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
+    """
+    Main window class for MarOMarker.
+    """
     
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -28,6 +35,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
 
     def retranslateUi(self):
+        """
+        Function to retranslate the UI and set the inital texts.
+        
+        Args:
+            
+        Returns:
+            
+        """
         _translate = QtCore.QCoreApplication.translate
         
         # main window
@@ -67,7 +82,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.btn_img_dir.setText(_translate("MainWindow", "Browse"))
         self.page_data.label_exp_id.setText(_translate("MainWindow", "Experiment ID"))
         self.page_data.label_img_dir.setText(_translate("MainWindow", "Image directory"))
-        self.page_data.btn_apply_diverging_data_info.setText(_translate("MainWindow", "Apply"))
+        #self.page_data.btn_apply_diverging_data_info.setText(_translate("MainWindow", "Apply"))
         self.page_data.lineEdit_img_prefix.setPlaceholderText(_translate("MainWindow", "Prefix to select images..."))
         self.page_data.label_res_file.setText(_translate("MainWindow", "Result file"))
         self.page_data.label_num_imgs_text.setText(_translate("MainWindow", "0"))
@@ -93,20 +108,16 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.label_unit_ditance_cameras.setText(_translate("MainWindow", "mm"))
         self.page_settings.label_distance_chip_lense.setText(_translate("MainWindow", "Distance between chip and lense"))
         self.page_settings.label_unit_chip_lense.setText(_translate("MainWindow", "pixel"))
-        self.page_settings.btn_apply_camera.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_camera), _translate("MainWindow", "Camera"))
         self.page_settings.label_nn.setText(_translate("MainWindow", "Neural Network"))
         self.page_settings.lineEdit_nn.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
         self.page_settings.lineEdit_nn.setPlaceholderText(_translate("MainWindow", "Path to neural network model..."))
         self.page_settings.btn_browse_nn.setText(_translate("MainWindow", "Browse"))
-        self.page_settings.btn_apply_nn.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_neuralNet), _translate("MainWindow", "Neural Network"))
-        self.page_settings.btn_apply_species.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_species), _translate("MainWindow", "Species"))
         self.page_settings.label_user_id.setText(_translate("MainWindow", "ID"))
         self.page_settings.lineEdit_user_id.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
         self.page_settings.lineEdit_user_id.setPlaceholderText(_translate("MainWindow", "User ID..."))
-        self.page_settings.btn_apply_user.setText(_translate("MainWindow", "Apply"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_user), _translate("MainWindow", "User"))       
         self.page_settings.btn_add_species.setText(_translate("MainWindow", "Add"))
         self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
@@ -134,6 +145,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 "September 2020"))
  
     def init_ui(self):
+        """
+        Function to initialize the UI.
+        """
         # set up main window properties
         self.setObjectName("MainWindow")
         self.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))    
@@ -406,15 +420,19 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.statusbar.setBaseSize(QtCore.QSize(0, 10))
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)    
-
-        
-    def init_actions(self):   
+      
+    def init_actions(self):
+        """
+        Function to initialize actions.
+        """
         # connect user button in top bars
         self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
         self.page_settings.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_about.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
+        
+        self.page_settings.changeUserId.connect(self.updateUserIds)
     
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)
@@ -423,102 +441,65 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_about.frame_controlBar.btn_menu)
         self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
            
-        # @todo implement listener pattern (mainwindow/all pages listen for  user apply button pressed) -> can adapt user id in top bars
-        self.page_settings.btn_apply_user.clicked.connect(self.user_apply_btn_pressed)        
 
 
-    # -------------------- settings -------------------------------- # 
-    def apply_settings_decision(self, answer):
-        if answer.text() == "&Yes": 
-            # apply the new values
-            self.apply_all_settings()
-        else:
-            # restore all not applied values
-            self.page_settings.restore_old_settings()
-    
-    def apply_all_settings(self):
-        self.page_settings.camera_apply_btn_pressed()
-        self.page_settings.nn_apply_btn_pressed()
-        self.user_apply_btn_pressed()
-        self.page_settings.species_apply_btn_pressed()
-
-    def check_all_settings(self):
-        # check if there are not applied settings
-        if self.page_settings.btn_apply_camera.isEnabled() == True or \
-            self.page_settings.btn_apply_nn.isEnabled() == True or \
-            self.page_settings.btn_apply_species.isEnabled() == True or \
-            self.page_settings.btn_apply_user.isEnabled() == True:
- 
-            # if not all changes to the settings were applied, ask the user what to do
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Question)
-            msg.setText("Settings changed")
-            msg.setInformativeText("Do you want to apply the changes to the settings?")
-            msg.setWindowTitle("Settings changed")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-            msg.buttonClicked.connect(self.apply_settings_decision)
-            msg.exec_()
-    
-        
-    # -------------------- user settings -------------------------------- #     
-    def user_apply_btn_pressed(self):
-          # disable apply btn
-        self.page_settings.btn_apply_user.setEnabled(False)
-
-        # save the new value
-        self.page_settings.lineEdit_user_id_oldValue = self.page_settings.lineEdit_user_id.text()    
+    def updateUserIds(self, value):
+        print("user id change arrived")
+        print(f"value: {value}")
         
         # update the userId in the top bar of the software (on every page)
-        self.page_home.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_data.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_settings.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_about.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_handbook.frame_topBar.label_user_id.setText(self.page_settings.lineEdit_user_id_oldValue) 
+        self.page_home.frame_topBar.label_user_id.setText(value)
+        self.page_data.frame_topBar.label_user_id.setText(value)
+        self.page_settings.frame_topBar.label_user_id.setText(value)
+        self.page_about.frame_topBar.label_user_id.setText(value)
+        self.page_handbook.frame_topBar.label_user_id.setText(value) 
         
         # also update the dummy userIds to preserve the symmetry of the bar
-        self.page_home.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_data.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_settings.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_about.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
-        self.page_handbook.frame_topBar.label_user_id_2.setText(self.page_settings.lineEdit_user_id_oldValue)
-    
+        self.page_home.frame_topBar.label_user_id_2.setText(value)
+        self.page_data.frame_topBar.label_user_id_2.setText(value)
+        self.page_settings.frame_topBar.label_user_id_2.setText(value)
+        self.page_about.frame_topBar.label_user_id_2.setText(value)
+        self.page_handbook.frame_topBar.label_user_id_2.setText(value)
+
 
         
-    def direct_to_user_settings(self):
-        self.action_to_settings_page()
-        self.page_settings.tabWidget.setCurrentIndex(3)
+
      
         
     # -------------------- navigation actions -------------------------------- #    
-    def action_to_home_page(self):  
-        self.check_all_settings()
+    def direct_to_user_settings(self):
+        self.direct_to_settings_page()
+        self.page_settings.tabWidget.setCurrentIndex(3)
+        
+    def direct_to_home_page(self):  
+        #self.check_all_settings()
         self.stackedWidget.setCurrentIndex(0)
 
-    def action_to_data_page(self):
-        self.check_all_settings()
+    def direct_to_data_page(self):
+        #self.check_all_settings()
         self.stackedWidget.setCurrentIndex(1)
     
-    def action_to_settings_page(self):
-        self.check_all_settings()
+    def direct_to_settings_page(self):
+        #self.check_all_settings()
         self.stackedWidget.setCurrentIndex(2)
         
-    def action_to_handbook_page(self):
-        self.check_all_settings()
+    def direct_to_handbook_page(self):
+        #self.check_all_settings()
         self.stackedWidget.setCurrentIndex(3)
         
-    def action_to_about_page(self):
-        self.check_all_settings()
+    def direct_to_about_page(self):
+        #self.check_all_settings()
         self.stackedWidget.setCurrentIndex(4)
         
         
     def append_main_menu_to_button(self, btn):
         # create the main menu
         menu = QtWidgets.QMenu()
-        menu.addAction('Home', self.action_to_home_page)
-        menu.addAction('Data', self.action_to_data_page)
-        menu.addAction('Settings', self.action_to_settings_page)
-        menu.addAction('Handbook', self.action_to_handbook_page)
-        menu.addAction('About', self.action_to_about_page)
+        menu.addAction('Home', self.direct_to_home_page)
+        menu.addAction('Data', self.direct_to_data_page)
+        menu.addAction('Settings', self.direct_to_settings_page)
+        menu.addAction('Handbook', self.direct_to_handbook_page)
+        menu.addAction('About', self.direct_to_about_page)
         
         # set the menu style
         menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); border-radius: 3px; font:12pt 'Century Gothic'}\n"

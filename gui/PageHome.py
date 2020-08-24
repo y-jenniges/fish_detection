@@ -1,13 +1,24 @@
+"""
+Created on 22 July 2020
+@author: Yvonne Jenniges
+"""
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from Helpers import TopFrame, MenuFrame, get_icon
 import time
 from test_new_zoom import PhotoViewer
 
-"""
-Class to create the home page of the software.
-"""
+
 class PageHome(QtWidgets.QWidget):
+    """
+    Class to create the home page of the software.
+    Parameters
+    ----------
+    widget_zoom
+        A widget that contains a slider for zooming into the photo.
+    """
+
     def __init__(self, parent=None):        
         super(QtWidgets.QWidget, self).__init__(parent)
         

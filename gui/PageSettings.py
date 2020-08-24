@@ -56,6 +56,9 @@ class TextImageItemWidget (QtWidgets.QWidget):
 Class to create the settings page of the software.
 """
 class PageSettings(QtWidgets.QWidget):
+    # create custom signals 
+    changeUserId = QtCore.pyqtSignal(str)
+        
     def __init__(self, parent=None):
         start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
@@ -63,13 +66,16 @@ class PageSettings(QtWidgets.QWidget):
         # init ui and actions on it
         self.init_ui()
         self.init_actions()
-        self.init_oldValues()
+        #self.init_oldValues()
         
         # add example to list widget
         path1 = "C:/Users/yjenn/Pictures/Wallpapers/23.jpg"
         path2 = "C:/Users/yjenn/Pictures/Wallpapers/tiger_stone_lying_big_cats_predator_52901_3840x2160.jpg"
         self.addCustomItem(path1)
         self.addCustomItem(path2)
+        
+
+
         
         #print(f"page settings init: {time.time() - start_time}")
 
@@ -145,28 +151,16 @@ class PageSettings(QtWidgets.QWidget):
 "    font: 10pt \"Century Gothic\";\n"
 "}\n"
 "\n"
-"#btn_apply_camera, #btn_apply_user, #btn_apply_species, #btn_apply_nn{\n"
-"    background-color:rgb(150, 150, 150);\n"
-"}\n"
-"\n"
 "#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species{\n"
 "    background-color:rgb(200, 200, 200);\n"
 "}\n"
 "\n"
 "\n"
-"#btn_apply_camera:hover , \n"
-"#btn_apply_user:hover, \n"
-"#btn_apply_species:hover, \n"
-"#btn_apply_nn:hover,\n"
 "#btn_load:hover, #btn_save:hover, \n"
 "#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover{\n"
 "  background-color: rgb(0, 203, 221);\n"
 "}\n"
 "\n"
-"#btn_apply_camera:pressed , \n"
-"#btn_apply_user:pressed, \n"
-"#btn_apply_species:pressed, \n"
-"#btn_apply_nn:pressed,\n"
 "#btn_load:pressed, #btn_save:pressed,\n"
 "#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed{\n"
 "background-color: rgb(0, 160, 174);\n"
@@ -518,41 +512,12 @@ class PageSettings(QtWidgets.QWidget):
         layout_distance_cl.addWidget(self.label_unit_chip_lense)
         
         
-        # --- frame for applying camera options ----------------------------------------------- #
-        frame_apply = QtWidgets.QFrame(frame_camera_options)
-        frame_apply.setMinimumSize(QtCore.QSize(0, 30))
-        frame_apply.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_apply.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_apply.setFrameShadow(QtWidgets.QFrame.Raised)
-        frame_apply.setObjectName("frame_apply")
-        
-        # layout
-        layout_apply_camera = QtWidgets.QHBoxLayout(frame_apply)
-        layout_apply_camera.setContentsMargins(0, 0, 0, 0)
-        layout_apply_camera.setObjectName("layout_apply_camera")
-        
-        # horizontal spacer
-        spacerItem33 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        
-        # button for applying camera settings
-        self.btn_apply_camera = QtWidgets.QPushButton(frame_apply)
-        self.btn_apply_camera.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_apply_camera.setStyleSheet("font:bold;")
-        self.btn_apply_camera.setObjectName("btn_apply_camera")
-        self.btn_apply_camera.setEnabled(False)
-        
-        # add widgets to layout
-        layout_apply_camera.addItem(spacerItem33)
-        layout_apply_camera.addWidget(self.btn_apply_camera)
-        
-        
         # --- adding widgets to content (camera options) and main frame  ----------------------------------------------- #
         layout_camera_options.addWidget(frame_config)
         layout_camera_options.addWidget(frame_offset)
         layout_camera_options.addWidget(frame_distance_cameras)
         layout_camera_options.addWidget(frame_distance_chip_lense)
         layout_camera_options.addItem(spacerItem32)
-        layout_camera_options.addWidget(frame_apply)
         
         layout.addWidget(frame_camera_options, 0, 0, 1, 1)
         layout.addItem(spacerItem34, 0, 1, 1, 1)        
@@ -637,38 +602,10 @@ class PageSettings(QtWidgets.QWidget):
         layout_nn_path.addWidget(self.lineEdit_nn)        
         layout_nn_path.addWidget(self.btn_browse_nn)
        
-
-        # --- frame for applying nn options ----------------------------------------------- #
-        frame_apply_nn = QtWidgets.QFrame(frame_nn_options)
-        frame_apply_nn.setMinimumSize(QtCore.QSize(0, 30))
-        frame_apply_nn.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_apply_nn.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_apply_nn.setFrameShadow(QtWidgets.QFrame.Raised)
-        frame_apply_nn.setObjectName("frame_apply_nn")
-        
-        # layout
-        layout_apply_nn = QtWidgets.QHBoxLayout(frame_apply_nn)
-        layout_apply_nn.setContentsMargins(0, 0, 0, 0)
-        layout_apply_nn.setObjectName("layout_apply_nn")
-        
-        # horizontal spacer
-        spacerItem38 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        
-        # button to apply nn settings    
-        self.btn_apply_nn = QtWidgets.QPushButton(frame_apply_nn)
-        self.btn_apply_nn.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_apply_nn.setStyleSheet("font:bold;")
-        self.btn_apply_nn.setObjectName("btn_apply_nn")
-        self.btn_apply_nn.setEnabled(False)
-        
-        layout_apply_nn.addItem(spacerItem38)
-        layout_apply_nn.addWidget(self.btn_apply_nn)
-        
         
         # --- adding widgets to content (nn options) and main frame  ----------------------------------------------- #
         layout_nn_options.addWidget(frame_nn_path_options)
         layout_nn_options.addItem(spacerItem37)
-        layout_nn_options.addWidget(frame_apply_nn)
         
         layout.addWidget(frame_nn_options, 0, 0, 1, 1)
         layout.addItem(spacerItem39, 0, 1, 1, 1)
@@ -743,38 +680,11 @@ class PageSettings(QtWidgets.QWidget):
         layout_buttons.addWidget(self.btn_add_species)
         layout_buttons.addWidget(self.btn_remove_species)
         
-        # --- frame for applying the changes ----------------------------------------------- #
-        frame_apply_species = QtWidgets.QFrame(frame_species_options)
-        frame_apply_species.setMinimumSize(QtCore.QSize(0, 30))
-        frame_apply_species.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_apply_species.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_apply_species.setObjectName("frame_apply_species")     
-    
-        # layout for applying species options frame
-        layout_apply_species = QtWidgets.QHBoxLayout(frame_apply_species)
-        layout_apply_species.setContentsMargins(0, 0, 0, 0)
-        layout_apply_species.setObjectName("layout_apply_species")
-        
-        # horizontal spacer
-        spacerItem42 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-            
-        # button for applying the species settings
-        self.btn_apply_species = QtWidgets.QPushButton(frame_apply_species)
-        self.btn_apply_species.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_apply_species.setStyleSheet("font:bold;")
-        self.btn_apply_species.setObjectName("btn_apply_species")
-        self.btn_apply_species.setEnabled(False)
-        
-        # add widgets to apply species frame
-        layout_apply_species.addItem(spacerItem42)
-        layout_apply_species.addWidget(self.btn_apply_species)
-        
         
         # --- content frame ----------------------------------------------- #
         # add widgets to species options frame
         layout_species_options.addWidget(self.list_species)
         layout_species_options.addWidget(frame_buttons)  
-        layout_species_options.addWidget(frame_apply_species)
  
         return tab_species
 
@@ -852,39 +762,11 @@ class PageSettings(QtWidgets.QWidget):
         layout_user_id_row.addItem(spacerItem45)
         layout_user_id_row.addWidget(self.lineEdit_user_id)
         
-    
-        # --- frame for applying user options ----------------------------------------------- #
-        frame_apply_user = QtWidgets.QFrame(frame_user_options)
-        frame_apply_user.setMinimumSize(QtCore.QSize(0, 30))
-        frame_apply_user.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_apply_user.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_apply_user.setObjectName("frame_apply_user")
-
-        # layout
-        layout_apply_user = QtWidgets.QHBoxLayout(frame_apply_user)
-        layout_apply_user.setContentsMargins(0, 0, 0, 0)
-        layout_apply_user.setObjectName("layout_apply_user")
-            
-        # horizontal spacer
-        spacerItem47 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        
-        # button to apply the settings
-        self.btn_apply_user = QtWidgets.QPushButton(frame_apply_user)
-        self.btn_apply_user.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_apply_user.setStyleSheet("font:bold;")
-        self.btn_apply_user.setObjectName("btn_apply_user")
-        self.btn_apply_user.setEnabled(False)
-        
-        # add widgets to layout
-        layout_apply_user.addItem(spacerItem47)
-        layout_apply_user.addWidget(self.btn_apply_user)
-      
         
         # --- adding widgets to content (user options) and main frame  ----------------------------------------------- #
         # add widgets to user options frame        
         layout_user_options.addWidget(frame_user_id)
         layout_user_options.addItem(spacerItem46)
-        layout_user_options.addWidget(frame_apply_user)
              
         # add widgets to main frame
         gridLayout.addWidget(frame_user_options, 0, 0, 1, 1)       
@@ -893,124 +775,62 @@ class PageSettings(QtWidgets.QWidget):
         
         return tab_user
 
-    # save the current values of the widgets to be able to restore them in case the user doesnt want to apply them
-    def init_oldValues(self):
-        # initalize first values for variables on settings page
-        self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
-        self.spinBox_offset_oldValue = self.spinBox_offset.value()
-        self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-        self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-        self.lineEdit_nn_oldValue = self.lineEdit_nn.text()
-        self.lineEdit_user_id_oldValue = self.lineEdit_user_id.text() 
 
     def init_actions(self):
         # camera tab      
         self.btn_load.clicked.connect(self.load_config)
         self.btn_save.clicked.connect(self.save_config)       
-        self.btn_apply_camera.clicked.connect(self.camera_apply_btn_pressed)
         self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
         self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
         self.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
         
         # neural net tab
-        self.btn_apply_nn.clicked.connect(self.nn_apply_btn_pressed)
         self.btn_browse_nn.clicked.connect(self.browse_for_nn)
-        self.lineEdit_nn.textChanged.connect(self.nn_path_changed)
+        self.lineEdit_nn.textChanged.connect(self.nn_path_changed) #@todo kann man das überhaupt anpassen?
         
         # species tab
         self.btn_add_species.clicked.connect(self.browse_for_species_image)
         self.btn_remove_species.clicked.connect(self.on_remove_item)  
-        self.btn_apply_species.clicked.connect(self.species_apply_btn_pressed)
         
         # user tab
-        #self.btn_apply_user.clicked.connect(self.user_apply_btn_pressed)
         self.lineEdit_user_id.textEdited.connect(self.user_id_changed)
-    
-
-    # def apply_settings_decision(self, answer):
-    #     if answer.text() == "&Yes": 
-    #         # apply the new values
-    #         self.apply_all_settings()
-    #     else:
-    #         # restore all not applied values
-    #         self.restore_old_settings()
-    
-    # def apply_all_settings(self):
-    #     self.camera_apply_btn_pressed()
-    #     self.nn_apply_btn_pressed()
-    #     #print(self.parent().parent())
-    #     self.parent().parent().user_apply_btn_pressed()
-    #     self.species_apply_btn_pressed()
-    
-    def restore_old_settings(self):
-        print(self.lineEdit_config_path_oldValue)
-        
-        if self.btn_apply_camera.isEnabled() == True:   
-            self.spinBox_offset.setValue(self.spinBox_offset_oldValue)
-            self.spinBox_distance_cameras.setValue(self.spinBox_distance_cameras_oldValue)
-            self.spinBox_distance_chip_lense.setValue(self.spinBox_distance_chip_lense_oldValue)
-            self.lineEdit_config_path.setText(self.lineEdit_config_path_oldValue)   
-            self.btn_apply_camera.setEnabled(False)
-        
-        if self.btn_apply_nn.isEnabled() == True:
-            self.lineEdit_nn.setText(self.lineEdit_nn_oldValue)
-            self.btn_apply_nn.setEnabled(False)
-            
-        if self.btn_apply_species.isEnabled() == True:
-            print("not implemented yet")
-            self.btn_apply_species.setEnabled(False)
-        
-        if self.btn_apply_user.isEnabled() == True:
-              self.lineEdit_user_id.setText(self.lineEdit_user_id_oldValue)
-              self.btn_apply_user.setEnabled(False)
+        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())
              
                 
-# --- actions in camera tab ------------------------------------------------- #
-    def camera_apply_btn_pressed(self):
-        # disable apply btn
-        self.btn_apply_camera.setEnabled(False)
-        
-        # save the new values of the spinBoxes and the file path
-        self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
-        self.spinBox_offset_oldValue = self.spinBox_offset.value()
-        self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-        self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-        
+# --- actions in camera tab ------------------------------------------------- #        
     def camera_spinBox_changed(self):
-        # enable apply button
-        self.btn_apply_camera.setEnabled(True)
-        
         # remove file path (it is not valid for the new spinBox values anymore)
         self.lineEdit_config_path.setText("")
 
     def load_config(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
-        df = pd.read_csv(filename[0])
+        if filename[0] != "" : 
+            df = pd.read_csv(filename[0])
         
-        # check format of file
-        if(self.check_config_format(df)):
-            # save old values of spinBoxes
-            self.spinBox_offset_oldValue = self.spinBox_offset.value()
-            self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-            self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-            
-            # set the respective spinBox values
-            self.spinBox_offset.setValue(df["y-offset"][0])
-            self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
-            self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
-            
-            # display the path to the file in the respective lineEdit
-            self.lineEdit_config_path.setText(filename[0])
-            
-            # set old value for config path
-            self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
-        else:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Critical)
-            msg.setText("File Format Error")
-            msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
-            msg.setWindowTitle("Error")
-            msg.exec_()
+            # check format of file
+            if(self.check_config_format(df)):
+                # save old values of spinBoxes
+                self.spinBox_offset_oldValue = self.spinBox_offset.value()
+                self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
+                self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
+                
+                # set the respective spinBox values
+                self.spinBox_offset.setValue(df["y-offset"][0])
+                self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
+                self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
+                
+                # display the path to the file in the respective lineEdit
+                self.lineEdit_config_path.setText(filename[0])
+                
+                # set old value for config path
+                self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+            else:
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.setText("File Format Error")
+                msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
+                msg.setWindowTitle("Error")
+                msg.exec_()
       
     def check_config_format(self, df_config):
         # check if the necessary columns are present in the dataframe
@@ -1033,19 +853,11 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_config_path.setText(filename[0])
         
         
-# --- actions in nn tab ------------------------------------------------- #
-    def nn_apply_btn_pressed(self):
-        # disable apply btn
-        self.btn_apply_nn.setEnabled(False)
-
-        # save the new value
-        self.lineEdit_nn_oldValue = self.lineEdit_nn.text()
-    
+# --- actions in nn tab ------------------------------------------------- #   
     def nn_path_changed(self):
-        self.btn_apply_nn.setEnabled(True)
+        pass
         
     def browse_for_nn(self):
-        self.btn_apply_nn.setEnabled(True)
         filename = QtWidgets.QFileDialog.getOpenFileName()
         self.lineEdit_nn.setText(filename[0])
         # @todo!! make use of NN
@@ -1074,58 +886,11 @@ class PageSettings(QtWidgets.QWidget):
         # add item to list
         self.list_species.addItem(item)
         self.list_species.setItemWidget(item, customItem)  
-
-    def species_apply_btn_pressed(self):
-        print("not implemented yet")
-        self.btn_apply_species.setEnabled(False)
         
     def on_species_changed(self):
-        self.btn_apply_species.setEnabled(True)
+        pass
 
 
 # --- actions in user tab ------------------------------------------------- #  
-    # def user_apply_btn_pressed(self):
-    #     # disable apply btn
-    #     self.btn_apply_user.setEnabled(False)
-
-    #     # save the new value
-    #     self.lineEdit_user_id_oldValue = self.lineEdit_user_id.text()    
-        
-    #     # update the userId in the top bar of the software (on every page)
-    #     self.label_user_id.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_data.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_settings.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_handbook.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_about.setText(self.lineEdit_user_id_oldValue)
-        
-    #     # also update the dummy userIds to preserve the symmetry of the bar
-    #     self.label_user_id_2.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_data_2.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_settings_2.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_handbook_2.setText(self.lineEdit_user_id_oldValue)
-    #     self.label_user_id_about_2.setText(self.lineEdit_user_id_oldValue)
- 
     def user_id_changed(self):
-        self.btn_apply_user.setEnabled(True)
-        
-    # def direct_to_user_settings(self):
-    #     self.action_to_settings_page()
-    #     self.tabWidget.setCurrentIndex(3)
-        
-    # def check_all_settings(self):
-    #     # check if there are not applied settings
-    #     if self.btn_apply_camera.isEnabled() == True or \
-    #         self.btn_apply_nn.isEnabled() == True or \
-    #         self.btn_apply_species.isEnabled() == True or \
-    #         self.btn_apply_user.isEnabled() == True:
- 
-    #         # if not all changes to the settings were applied, ask the user what to do
-    #         msg = QtWidgets.QMessageBox()
-    #         msg.setIcon(QtWidgets.QMessageBox.Question)
-    #         msg.setText("Do you want to apply the changes to the settings?")
-    #         msg.setWindowTitle("Settings changed")
-    #         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-    #         msg.buttonClicked.connect(self.apply_settings_decision)
-    #         msg.exec_()      
-       
-        
+        self.changeUserId.emit(self.lineEdit_user_id.text())
