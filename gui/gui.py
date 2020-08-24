@@ -444,6 +444,18 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)    
       
+        
+    def on_imageDirChanged(self, text):
+        self.page_home.photo_viewer.setImageDir(text)
+        
+    def on_imagePrefixChanged(self, text):
+        self.page_home.photo_viewer.setImagePrefix(text)
+        
+    def on_imageEndingChanged(self, text):
+        self.page_home.photo_viewer.setImageEnding(text)
+        
+        
+        
     def init_actions(self):
         """
         Function to initialize actions.
@@ -455,7 +467,10 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_about.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         
-        self.page_settings.changeUserId.connect(self.updateUserIds)
+        self.page_settings.userIdChanged.connect(self.updateUserIds)
+        self.page_data.imageDirChanged.connect(self.on_imageDirChanged)
+        self.page_data.imagePrefixChanged.connect(self.on_imagePrefixChanged)
+        #self.page_home.imageEndingChanged.connect(lambda: self.page)
     
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)

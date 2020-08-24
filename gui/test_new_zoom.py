@@ -6,8 +6,8 @@ import glob
 from test_graph import Animal, AnimalGroup, AnimalSpecies
 from Helpers import get_icon
 
-IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
-IMAGE_PREFIX = ""
+#IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
+#IMAGE_PREFIX = ""
 ANIMAL_LIST = []
 ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
 IMAGE_REMARKS = []
@@ -310,8 +310,8 @@ class ImageArea(QtWidgets.QGraphicsView):
 
         # animal painter to enable adding/removing of animals
         self.animal_painter = AnimalPainter(self)
-
-
+       
+        
     def hasPhoto(self):
         return not self._empty
 
@@ -329,17 +329,23 @@ class ImageArea(QtWidgets.QGraphicsView):
                 # self.scale(factor, factor)   
             self._zoom = 0
 
-    def setPhoto(self, pixmap=None):        
+    def setPhoto(self, pixmap=None):      
         self._zoom = 0
         if pixmap and not pixmap.isNull():
+            self.setEnableInteraction(True)
             self._empty = False
             #self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
             self._photo.setPixmap(pixmap)
+           
         else:
             self._empty = True
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
+            self.setEnableInteraction(False)
         self.fitInView() 
+        
+    def setEnableInteraction(self, isInteractionEnabled):
+        self.setEnabled(isInteractionEnabled)
         
     def wheelEvent(self, event):
         if self.hasPhoto():  
@@ -553,10 +559,12 @@ class AnimalPainter():
     def on_remove_animal(self):
         if(self.is_remove_mode_active):
             self.is_remove_mode_active = False
+            
         elif self.is_add_mode_active:
-            if (self.is_head_drawn and self.is_tail_drawn):
+            if not self.cur_animal or( self.is_head_drawn and self.is_tail_drawn):
                 self.is_add_mode_active = False
                 self.is_remove_mode_active = True
+                
             else:
                 self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")           
         else:
@@ -680,7 +688,7 @@ class AnimalPainter():
             self.drawAnimalLine(self.cur_animal)
             
         # if there is a tail to draw and if the drag_position is within the widget, move the tail
-        if not self.drag_position_tail.isNull() and self.imageArea.rect().contains(pos):
+        if not self.drag_position_tail.isNull() and self.imageArea.rect().contains(pos) and self.cur_animal is not None:
             self.cur_animal.setPositionTail(pos - self.drag_position_tail)
             
             # remove tail and line on old position and draw it on the new position
@@ -700,33 +708,63 @@ class AnimalPainter():
 A photo viewer that contains a QGraphicsView to display the photos and draw the animals on.
 """              
 class PhotoViewer(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, imageDirectory, imagePrefix, imageEnding="*-L.jpg", parent=None):
         super(PhotoViewer, self).__init__(parent)
+
+        # image directory and prefix (needed for retrieving the iage_list)
+        self.image_directory = imageDirectory
+        self.image_prefix = imagePrefix
+        self.image_ending = imageEnding
 
         # list of image pathes and the current image index
         self.cur_image_index = 0
-        self.image_list = glob.glob(IMAGE_DIRECTORY + IMAGE_PREFIX + "*.jpg")
+        self.image_list = glob.glob(imageDirectory + imagePrefix + imageEnding)
 
-        # initalize gui
+        # initalize gui and actions
         self.init_ui()
-        
-        # initalize actions
         self.init_actions()
         
         # load initial image
         #self.loadImage(self.image_list[self.cur_image_index])
+    
+    def setImageDir(self, text):
+        self.image_directory = text
+        self.updateImageList()
+        
+    def setImagePrefix(self, text):
+        self.image_prefix = text
+        self.updateImageList()
+        
+    def setImageEnding(self, text):
+        self.image_ending = text
+        self.updateImageList()
 
+    def activateLRMode(activateLRMode=False):
+        pass
+
+    def updateImageList(self):
+        self.cur_image_index = 0
+        self.image_list = glob.glob(self.image_directory + self.image_prefix + self.image_ending)
+        if not self.image_list:
+            self.loadImage(path=None)
+        else:
+            self.loadImage(self.image_list[self.cur_image_index])
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        path = self.image_list[self.cur_image_index]
-        photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
-        self.imageArea.setPhoto(photo)
-        self.updateImageCountVisual()
-        #self.loadImage(self.image_list[self.cur_image_index])
+        
+        if self.cur_image_index < len(self.image_list):
+            path = self.image_list[self.cur_image_index]
+            photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+            self.imageArea.setPhoto(photo)
+            self.updateImageCountVisual()
                 
     def loadImage(self, path):
-        photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+        if path:
+            photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+        else:
+            photo = None
+        
         self.imageArea.setPhoto(photo)
         self.updateImageCountVisual()
         
@@ -782,6 +820,11 @@ class PhotoViewer(QtWidgets.QWidget):
         frame_left.setMaximumSize(QtCore.QSize(60, 16777215))
         frame_left.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_left.setObjectName("frame_left")
+  
+        # layout
+        layout_frame_left = QtWidgets.QVBoxLayout(frame_left)
+        layout_frame_left.setContentsMargins(5, 5, 5, 0)
+        layout_frame_left.setObjectName("layout_frame_left")
         
         # vertical spacers
         spacerItem7 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -808,11 +851,6 @@ class PhotoViewer(QtWidgets.QWidget):
         self.label_imgCount.setObjectName("label_imgCount")
         self.label_imgCount.setStyleSheet("font:10pt 'Century Gothic'")
         
-        # layout
-        layout_frame_left = QtWidgets.QVBoxLayout(frame_left)
-        layout_frame_left.setContentsMargins(5, 5, 5, 0)
-        layout_frame_left.setObjectName("layout_frame_left")
-        
         # add widgets to layout
         layout_frame_left.addItem(spacerItem7)
         layout_frame_left.addWidget(self.btn_previous_image)
@@ -821,8 +859,31 @@ class PhotoViewer(QtWidgets.QWidget):
         
         
         # --- image frame ------------------------------------------------------------------------------------------- # 
+        # # frame
+        # self.frame_image = QtWidgets.QFrame(self)
+        # # frame_image.setMinimumSize(QtCore.QSize(60, 0))
+        # # frame_image.setMaximumSize(QtCore.QSize(60, 16777215))
+        # self.frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
+        # self.frame_image.setObjectName("frame_image")
+    
+        # # layout
+        # self.layout_frame_image = QtWidgets.QGridLayout(self.frame_image)
+        # self.layout_frame_image.setContentsMargins(0, 0, 0, 0)
+        # self.layout_frame_image.setObjectName("layout_frame_image")
+
+
+
+        
         self.imageArea = ImageArea(self)
-        #self.imageArea.setStyleSheet("background-color:red;")
+        # self.imageAreaR = ImageArea(self)
+        
+        # self.label_dummy = QtWidgets.QLabel()
+        
+        # self.layout_frame_image.addWidget(self.imageArea, 0, 0, 1, 1)
+        # self.layout_frame_image.addWidget(self.imageAreaR, 1, 0, 1, 1)
+        # self.layout_frame_image.addWidget(self.label_dummy, 1, 1, 1, 1)
+
+
         
         # --- group and species frame ------------------------------------------------------------------------------------------- # 
         # @todo idea:frame with 2 listwidgets below each other. one for the group, one for species. 
@@ -874,7 +935,7 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # adding widgets to main layout 
         layout.addWidget(frame_left)
-        layout.addWidget(self.imageArea)
+        layout.addWidget(self.frame_image)
         layout.addWidget(frame_right)
 
         # set main layout

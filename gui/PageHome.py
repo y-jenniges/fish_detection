@@ -42,6 +42,7 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.btn_zoom.setIcon(get_icon(":/icons/icons/glass_darkBlue.png")) 
             self.widget_zoom.show()
+            self.placeZoomWidget()
             self.photo_viewer.setArrowShortcutsActive(False) # arrows are needed for controlling slider and navigating in zoomed-in photo
     
     def onZoomValueChanged(self, value):
@@ -53,8 +54,7 @@ class PageHome(QtWidgets.QWidget):
         if value < 1:
             self.photo_viewer.imageArea.resetTransform() 
             self.photo_viewer.imageArea.fitInView()
-
-     
+  
     def on_add_clicked(self):
         self.photo_viewer.imageArea.animal_painter.on_add_animal()
         self.updateAddRemoveIcons()
@@ -70,13 +70,12 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.btn_add.setIcon(get_icon(":/icons/icons/plus.png"))
             
-        # adapt icon of the add button
+        # adapt icon of the renive button
         if self.photo_viewer.imageArea.animal_painter.is_remove_mode_active:
             self.btn_delete.setIcon(get_icon(":/icons/icons/bin_open_darkBlue.png"))
         else:
             self.btn_delete.setIcon(get_icon(":/icons/icons/bin_closed.png"))        
-        
-
+ 
     def init_ui(self):
    
         # --- top bar  ------------------------------------------------------------------------------------------- #         
@@ -94,7 +93,7 @@ class PageHome(QtWidgets.QWidget):
         self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding) 
         
         # --- photo viewer  ------------------------------------------------------------------------------------------- #        
-        self.photo_viewer = PhotoViewer(self)
+        self.photo_viewer = PhotoViewer(imageDirectory="", imagePrefix="", imageEnding="*-L.jpg", parent=self)
         self.photo_viewer.setObjectName("photo_viewer")
         
         
@@ -143,9 +142,6 @@ class PageHome(QtWidgets.QWidget):
         
         self.widget_zoom.hide()  
         self.placeZoomWidget()
-
-
-        #print(f"page home init: {time.time() - start_time}")
 
     def createHomeControlBar(self):
         frame_controlBar = QtWidgets.QFrame(self)
@@ -450,16 +446,21 @@ class PageHome(QtWidgets.QWidget):
     def displayLeftImage(self):
         print("on left image")
         self.btn_imgSwitch.setText("L")
+        self.photo_viewer.activateLRMode(False)
+        self.photo_viewer.setImageEnding("*-L.jpg")
         pass
 
     def displayRightImage(self):
         print("on right image")
         self.btn_imgSwitch.setText("R")
+        self.photo_viewer.activateLRMode(False)
+        self.photo_viewer.setImageEnding("*-R.jpg")
         pass
     
     def displayBothImages(self):
         print("on both images")
         self.btn_imgSwitch.setText("LR")
+        self.photo_viewer.activateLRMode(True)
         pass
      
     def mousePressEvent(self, event):

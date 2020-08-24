@@ -6,14 +6,20 @@ from Helpers import TopFrame, MenuFrame
 import glob
 
 # IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
-# IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
+IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
 # IMAGE_DIRECTORY = ""
 # IMAGE_PREFIX = ""
 
 """
 Class to create the data page of the software.
 """
-class PageData(QtWidgets.QWidget):   
+class PageData(QtWidgets.QWidget): 
+    # define custom signals
+    imageDirChanged = QtCore.pyqtSignal(str)
+    resultFilePathChanged = QtCore.pyqtSignal(str)
+    imagePrefixChanged = QtCore.pyqtSignal(str)
+    experimentIdChanged = QtCore.pyqtSignal(str)
+    
     def __init__(self, parent=None):
         start_time = time.time()       
         super(QtWidgets.QWidget, self).__init__(parent)
@@ -22,89 +28,101 @@ class PageData(QtWidgets.QWidget):
         self.init_actions()
         
         # init values
-        self.IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
-        self.IMAGE_DIRECTORY = ""
-        self.RES_FILE = ""  
-        self.IMAGE_PREFIX = "TN_Exif_"
-        self.EXPERIMENT_ID = ""
+        #self.IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
+        # self.IMAGE_DIRECTORY = ""
+        # self.RES_FILE = ""  
+        # self.IMAGE_PREFIX = "TN_Exif_"
+        # self.EXPERIMENT_ID = ""
               
         self.calenderSelectionChanged()
         
 
     
     # function to handle when the user changes the img_dir line edit
-    def on_img_dir_edit_changed(self, updateVisuals=True):
-        if ntpath.exists(self.lineEdit_img_dir.text()):
-            self.IMAGE_DIRECTORY = self.lineEdit_img_dir.text()
-            if updateVisuals: self.updateAllVisuals()
+    def on_img_dir_edit_changed(self, text=None, updateVisuals=True):
+        if text is None: text = self.lineEdit_img_dir.text()
+        if ntpath.exists(text):
+            #self.IMAGE_DIRECTORY = self.lineEdit_img_dir.text()
+            #if updateVisuals: self.updateAllVisuals()
+            #self.on_img_dir_edit_changed(self.lineEdit_img_dir.text())
+            pass
         else:
+            self.lineEdit_img_dir.setText("")
             print("The entered img dir is not a valid path.") # @todo error prompt
+            
+        self.updateNumImages()
+        self.imageDirChanged.emit(self.lineEdit_img_dir.text())
+        #self.on_img_dir_edit_changed(self.lineEdit_img_dir.text())
     
     # function to handle when the user changes the red_file line edit
     def on_res_file_edit_changed(self):
         if ntpath.exists(self.lineEdit_res_file.text()):
-            self.RES_FILE = self.lineEdit_res_file.text()
+            pass
+            #self.RES_FILE = self.lineEdit_res_file.text()
         else: 
+            self.lineEdit_res_file.setText("")
             print(self.lineEdit_res_file.text())
             print("The enered res file is not a valid path.") # @todo error prompt
-    
+            
+        self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
+        
     # function to handle when the user changes the image prefix line edit
     def on_prefix_edit_changed(self):
-        self.IMAGE_PREFIX = self.lineEdit_img_prefix.text()
+        #self.IMAGE_PREFIX = self.lineEdit_img_prefix.text()
+        self.imagePrefixChanged.emit(self.lineEdit_img_prefix.text())
         self.updateNumImages()    
     
     # function to handle when the user changes the experiment id line edit
     def on_exp_id_edit_changed(self):
-        self.EXPERIMENT_ID = self.lineEdit_exp_id.text()
+        #self.EXPERIMENT_ID = self.lineEdit_exp_id.text()
+        self.experimentIdChanged.emit(self.lineEdit_exp_id.text())
+        
     
     # function to check how many images are in the current IMAGE_DIRECTORY and updates the display of this count
     def updateNumImages(self):
-        num_images = str(len(glob.glob(self.IMAGE_DIRECTORY + self.IMAGE_PREFIX + "*.jpg"))) #self.getNumImagesInDir(self.IMAGE_DIRECTORY))
+        #num_images = str(len(glob.glob(IMAGE_DIRECTORY + self.IMAGE_PREFIX + "*-L.jpg"))) 
+        num_images = str(len(glob.glob(self.lineEdit_img_dir.text() + self.lineEdit_img_prefix.text() + "*-L.jpg")))
         self.label_num_imgs_text.setText(num_images)   
     
     # function that opens a dialog for the user to select a result file in csv format
     def browseResultFile(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
         self.lineEdit_res_file.setText(filename[0])
-        self.RES_FILE = filename[0] + "/"
+        self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
       
     # function that opens a dialog for the user to select a directory where the images are
     def browseImageDir(self):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
         if len(filename) > 0: 
             if ntpath.exists(filename):
-                self.IMAGE_DIRECTORY = filename + "/"
-            else:
-                self.IMAGE_DIRECTORY = ""
-        
-            self.updateAllVisuals()
+                self.lineEdit_img_dir.setText(filename + "/")
+                self.on_img_dir_edit_changed(filename+"/")
 
     # function to update the image directory according to the input from the calender widget
     def updateImageDir(self):
         date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
-        self.IMAGE_DIRECTORY = self.IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
+        directory = IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
         
         # enable frame to manipulate data properties
-        self.frame_data_information.setEnabled(True)
+        self.frame_data_information.setEnabled(True) # @todo always enabled
         
         # if directory does not exist, clear the image directory parameter and visual
-        if not ntpath.exists(self.IMAGE_DIRECTORY):
-            self.IMAGE_DIRECTORY = ""
+        if not ntpath.exists(directory):
+            self.lineEdit_img_dir.setText("")
+        else:
+            self.lineEdit_img_dir.setText(directory)
+            self.on_img_dir_edit_changed(directory)
         
-        self.updateAllVisuals()
-
-    # function that sets all visuals to their variable representation
-    def updateAllVisuals(self):
-        self.lineEdit_img_dir.setText(self.IMAGE_DIRECTORY)
-        self.lineEdit_res_file.setText(self.RES_FILE)
-        self.lineEdit_img_prefix.setText(self.IMAGE_PREFIX)
-        self.lineEdit_exp_id.setText(self.EXPERIMENT_ID)
         self.updateNumImages()
-
+        
     # function to handle a change of th calender widget selection
     def calenderSelectionChanged(self):
         self.label_date.setText(self.calendarWidget.selectedDate().toString("dd.MM.yyyy")) # set the date label
-        self.EXPERIMENT_ID = "Spitzbergen " + str(self.calendarWidget.selectedDate().year()) # adapt experiment id
+        
+        new_exp_id = "Spitzbergen " + str(self.calendarWidget.selectedDate().year()) # adapt experiment id
+        self.lineEdit_exp_id.setText(new_exp_id)
+        self.on_exp_id_edit_changed()
+        
         self.updateImageDir()
  
     def createFrameData(self):
@@ -663,6 +681,7 @@ class PageData(QtWidgets.QWidget):
         self.btn_res_file.clicked.connect(self.browseResultFile)
         
         self.lineEdit_img_dir.editingFinished.connect(self.on_img_dir_edit_changed)
+        
         self.lineEdit_res_file.editingFinished.connect(self.on_res_file_edit_changed)
         self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
         self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)

@@ -62,7 +62,7 @@ Class to create the settings page of the software.
 """
 class PageSettings(QtWidgets.QWidget):
     # create custom signals 
-    changeUserId = QtCore.pyqtSignal(str)
+    userIdChanged = QtCore.pyqtSignal(str)
         
     def __init__(self, parent=None):
         start_time = time.time()
@@ -925,7 +925,7 @@ class PageSettings(QtWidgets.QWidget):
 
 # --- actions in user tab ------------------------------------------------- #  
     def user_id_changed(self):
-        self.changeUserId.emit(self.lineEdit_user_id.text())
+        self.userIdChanged.emit(self.lineEdit_user_id.text())
 
 
 # --- functions for saving and restoring options ------------------------------------------------- # 
