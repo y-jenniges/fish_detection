@@ -33,10 +33,10 @@ class PageData(QtWidgets.QWidget):
 
     
     # function to handle when the user changes the img_dir line edit
-    def on_img_dir_edit_changed(self):
+    def on_img_dir_edit_changed(self, updateVisuals=True):
         if ntpath.exists(self.lineEdit_img_dir.text()):
             self.IMAGE_DIRECTORY = self.lineEdit_img_dir.text()
-            self.updateAllVisuals()
+            if updateVisuals: self.updateAllVisuals()
         else:
             print("The entered img dir is not a valid path.") # @todo error prompt
     
@@ -45,6 +45,7 @@ class PageData(QtWidgets.QWidget):
         if ntpath.exists(self.lineEdit_res_file.text()):
             self.RES_FILE = self.lineEdit_res_file.text()
         else: 
+            print(self.lineEdit_res_file.text())
             print("The enered res file is not a valid path.") # @todo error prompt
     
     # function to handle when the user changes the image prefix line edit
@@ -54,7 +55,7 @@ class PageData(QtWidgets.QWidget):
     
     # function to handle when the user changes the experiment id line edit
     def on_exp_id_edit_changed(self):
-        self.EXPERIMENT_ID = self.lineEdit_img_prefix.text()
+        self.EXPERIMENT_ID = self.lineEdit_exp_id.text()
     
     # function to check how many images are in the current IMAGE_DIRECTORY and updates the display of this count
     def updateNumImages(self):
@@ -665,3 +666,28 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_res_file.editingFinished.connect(self.on_res_file_edit_changed)
         self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
         self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)
+        
+        
+# --- functions for saving and restoring options ------------------------------------------------- # 
+    def saveCurrentValues(self, settings):       
+        settings.setValue("date", self.calendarWidget.selectedDate())       
+        settings.setValue("dataFilter", self.comboBox_image_filter.currentIndex())
+        settings.setValue("imgDir", self.lineEdit_img_dir.text())       
+        settings.setValue("resultFile", self.lineEdit_res_file.text())
+        settings.setValue("imgPrefix", self.lineEdit_img_prefix.text())
+        settings.setValue("experimentId", self.lineEdit_exp_id.text())
+        
+    def restoreValues(self, settings):
+        self.calendarWidget.setSelectedDate(settings.value("date"))
+        self.comboBox_image_filter.setCurrentIndex(settings.value("dataFilter"))
+        self.lineEdit_img_dir.setText(settings.value("imgDir"))
+        self.lineEdit_res_file.setText(settings.value("resultFile"))
+        self.lineEdit_img_prefix.setText(settings.value("imgPrefix"))
+        self.lineEdit_exp_id.setText(settings.value("experimentId"))
+        
+        # do not update the visuals when setting the image directory, that would override the restored settings of the other fields
+        self.on_img_dir_edit_changed(updateVisuals=False)
+        self.on_res_file_edit_changed()
+        self.on_prefix_edit_changed()
+        self.on_exp_id_edit_changed()
+        

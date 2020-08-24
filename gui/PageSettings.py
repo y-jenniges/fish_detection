@@ -7,12 +7,15 @@ import time
 import pandas as pd
 
 class TextImageItemWidget (QtWidgets.QWidget):
-    def __init__ (self, imagePath, parent = None):
+    def __init__ (self, imagePath, title=None, parent = None):
         super(TextImageItemWidget, self).__init__(parent)
          
         # the title is the name of the image
         self.imagePath = imagePath
-        self.title = ntpath.basename(imagePath).split('.')[0]
+        if title is None: 
+            self.title = ntpath.basename(imagePath).split('.')[0]
+        else:
+            self.title = title
         
         # create the line edit to display the text
         self.lineEdit_text = QtWidgets.QLineEdit(self)
@@ -47,9 +50,11 @@ class TextImageItemWidget (QtWidgets.QWidget):
 
     def set_text(self, text):
         self.lineEdit_text.setText(text)
+        self.title = text
         
     def on_lineEdit_changed(self):
         self.focusNextChild() # change focus
+        self.title = self.lineEdit_text.text()
         
 
 """
@@ -68,11 +73,11 @@ class PageSettings(QtWidgets.QWidget):
         self.init_actions()
         #self.init_oldValues()
         
-        # add example to list widget
-        path1 = "C:/Users/yjenn/Pictures/Wallpapers/23.jpg"
-        path2 = "C:/Users/yjenn/Pictures/Wallpapers/tiger_stone_lying_big_cats_predator_52901_3840x2160.jpg"
-        self.addCustomItem(path1)
-        self.addCustomItem(path2)
+        # # add example to list widget
+        # path1 = "C:/Users/yjenn/Pictures/Wallpapers/23.jpg"
+        # path2 = "C:/Users/yjenn/Pictures/Wallpapers/tiger_stone_lying_big_cats_predator_52901_3840x2160.jpg"
+        # self.addCustomItem(path1)
+        # self.addCustomItem(path2)
         
 
 
@@ -778,7 +783,8 @@ class PageSettings(QtWidgets.QWidget):
 
     def init_actions(self):
         # camera tab      
-        self.btn_load.clicked.connect(self.load_config)
+        self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
+        self.btn_load.clicked.connect(self.browse_config)
         self.btn_save.clicked.connect(self.save_config)       
         self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
         self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
@@ -787,13 +793,14 @@ class PageSettings(QtWidgets.QWidget):
         # neural net tab
         self.btn_browse_nn.clicked.connect(self.browse_for_nn)
         self.lineEdit_nn.textChanged.connect(self.nn_path_changed) #@todo kann man das überhaupt anpassen?
+        self.lineEdit_nn.returnPressed.connect(lambda: self.focusNextChild())
         
         # species tab
         self.btn_add_species.clicked.connect(self.browse_for_species_image)
         self.btn_remove_species.clicked.connect(self.on_remove_item)  
         
         # user tab
-        self.lineEdit_user_id.textEdited.connect(self.user_id_changed)
+        self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
         self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())
              
                 
@@ -802,10 +809,14 @@ class PageSettings(QtWidgets.QWidget):
         # remove file path (it is not valid for the new spinBox values anymore)
         self.lineEdit_config_path.setText("")
 
-    def load_config(self):
+    def browse_config(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
-        if filename[0] != "" : 
-            df = pd.read_csv(filename[0])
+        self.apply_configFile(filename[0])
+   
+    def apply_configFile(self, path):
+        # check if path is valid
+        if path != "" and ntpath.exists(path): 
+            df = pd.read_csv(path)
         
             # check format of file
             if(self.check_config_format(df)):
@@ -820,7 +831,7 @@ class PageSettings(QtWidgets.QWidget):
                 self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
                 
                 # display the path to the file in the respective lineEdit
-                self.lineEdit_config_path.setText(filename[0])
+                self.lineEdit_config_path.setText(path)
                 
                 # set old value for config path
                 self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
@@ -830,8 +841,9 @@ class PageSettings(QtWidgets.QWidget):
                 msg.setText("File Format Error")
                 msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
                 msg.setWindowTitle("Error")
-                msg.exec_()
-      
+                msg.exec_()  
+            
+        
     def check_config_format(self, df_config):
         # check if the necessary columns are present in the dataframe
         if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
@@ -859,9 +871,13 @@ class PageSettings(QtWidgets.QWidget):
         
     def browse_for_nn(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
-        self.lineEdit_nn.setText(filename[0])
+        self.apply_nnPath(filename[0])
         # @todo!! make use of NN
-        
+    
+    def apply_nnPath(self, path):
+        # check if path is valid
+        if path != "" and ntpath.exists(path):    
+            self.lineEdit_nn.setText(path)
         
 # --- actions in species tab ------------------------------------------------- #
     def browse_for_species_image(self):
@@ -879,14 +895,30 @@ class PageSettings(QtWidgets.QWidget):
     def addCustomItem(self, image_path, text=None):
         customItem = TextImageItemWidget(image_path) # create custom item
 
-        if text is not None: customItem.set_text(text) # set a custom text, else it will be the file name
+        if text is not None: 
+            customItem.set_text(text) # set a custom text, else it will be the file name
+
         item = QtWidgets.QListWidgetItem(self.list_species) # create item in list
         item.setSizeHint(QtCore.QSize(200,110))
-        
+
         # add item to list
         self.list_species.addItem(item)
         self.list_species.setItemWidget(item, customItem)  
         
+
+
+    # takes a list of dicts which has the keys "title" and "imagePath"        
+    def fillSpeciesList(self, list_input):
+        for entry in list_input:
+            self.addCustomItem(entry['imagePath'], entry['title'])
+    
+    def getTitlePathList(self):
+        items = []        
+        for i in range(self.list_species.count()):
+            item = self.list_species.item(i)
+            items.append({"title": self.list_species.itemWidget(item).title, "imagePath": self.list_species.itemWidget(item).imagePath})  
+        return items
+    
     def on_species_changed(self):
         pass
 
@@ -894,3 +926,18 @@ class PageSettings(QtWidgets.QWidget):
 # --- actions in user tab ------------------------------------------------- #  
     def user_id_changed(self):
         self.changeUserId.emit(self.lineEdit_user_id.text())
+
+
+# --- functions for saving and restoring options ------------------------------------------------- # 
+    def saveCurrentValues(self, settings):       
+        settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
+        settings.setValue("nnPath", self.lineEdit_nn.text()) 
+        settings.setValue("speciesList", self.getTitlePathList())
+        settings.setValue("userId", self.lineEdit_user_id.text())
+        
+    def restoreValues(self, settings):
+        self.apply_configFile(settings.value("cameraConfigPath"))
+        self.apply_nnPath(settings.value("nnPath"))
+        self.fillSpeciesList(settings.value("speciesList"))
+        self.lineEdit_user_id.setText(settings.value("userId"))
+        

@@ -23,6 +23,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
         self.start_time = time.time()
                 
+        # variable to save settings outside program
+        self.settings = QtCore.QSettings("MarOMarker", "MarOMarker")        
+        
         # init UI and actions
         self.init_ui()
         self.init_actions()
@@ -32,8 +35,29 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
         self.page_data.tabWidget_2.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
+        
+        # restore settings from previous session
+        self.restorePreviousSettings()
 
+        print(self.settings.fileName())
 
+    def restorePreviousSettings(self):
+        try:
+            self.resize(self.settings.value("windowSize"))
+            self.move(self.settings.value("windowPosition"))
+            self.page_settings.restoreValues(self.settings)
+            self.page_data.restoreValues(self.settings)
+        except:
+            pass        
+        
+    # save some values and options when closing the program
+    def closeEvent(self, event):
+        print("close event")
+        self.settings.setValue("windowSize", self.size())
+        self.settings.setValue("windowPosition", self.pos())
+        self.page_settings.saveCurrentValues(self.settings)
+        self.page_data.saveCurrentValues(self.settings)
+        
     def retranslateUi(self):
         """
         Function to retranslate the UI and set the inital texts.
@@ -60,7 +84,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))    
         self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
         
-        self.page_home.comboBox_imgRemark.setItemText(0, _translate("MainWindow", "Image remark..."))
+        self.page_home.comboBox_imgRemark_dummy.setItemText(0, _translate("MainWindow", "Image remark..."))
         self.page_home.comboBox_imgRemark_dummy.setItemText(1, _translate("MainWindow", "low turbidity"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(2, _translate("MainWindow", "medium turbidity"))
         self.page_home.comboBox_imgRemark_dummy.setItemText(3, _translate("MainWindow", "high turbidity"))
@@ -82,7 +106,6 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.btn_img_dir.setText(_translate("MainWindow", "Browse"))
         self.page_data.label_exp_id.setText(_translate("MainWindow", "Experiment ID"))
         self.page_data.label_img_dir.setText(_translate("MainWindow", "Image directory"))
-        #self.page_data.btn_apply_diverging_data_info.setText(_translate("MainWindow", "Apply"))
         self.page_data.lineEdit_img_prefix.setPlaceholderText(_translate("MainWindow", "Prefix to select images..."))
         self.page_data.label_res_file.setText(_translate("MainWindow", "Result file"))
         self.page_data.label_num_imgs_text.setText(_translate("MainWindow", "0"))
@@ -443,10 +466,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
            
 
 
-    def updateUserIds(self, value):
-        print("user id change arrived")
-        print(f"value: {value}")
-        
+    def updateUserIds(self, value):       
         # update the userId in the top bar of the software (on every page)
         self.page_home.frame_topBar.label_user_id.setText(value)
         self.page_data.frame_topBar.label_user_id.setText(value)
