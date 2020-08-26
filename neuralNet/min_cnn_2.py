@@ -5,7 +5,6 @@ Created on Tue Aug 25 16:06:25 2020
 @author: yjenn
 """
 
-
 import json
 import os
 import pickle
@@ -19,11 +18,15 @@ import keras
 from keras.models import Sequential
 #from keras.layers import Dense, Dropout
 from keras import layers
+from tensorflow import random
 
+# fix random seeds of numpy and tensorflow for reproducability
+np.random.seed(0)
+random.set_seed(2)
 
 
 # output directory
-out_path = "../data/output/43/"
+out_path = "../data/output/47/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
@@ -129,9 +132,7 @@ x_test = np.asarray(x_test)
 
 
 
-# reproducible results??
-np.random.seed = 0
-PYTHONHASHSEED = 0
+
 
 
 # overfitting one batch
