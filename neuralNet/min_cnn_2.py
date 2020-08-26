@@ -23,7 +23,7 @@ from keras import layers
 
 
 # output directory
-out_path = "../data/output/42/"
+out_path = "../data/output/43/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
@@ -31,7 +31,7 @@ label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
-#labels = labels[:2]
+labels = labels[:2]
  
 
 
@@ -188,7 +188,7 @@ model.compile(loss='binary_crossentropy',
 model.summary()
 
 history = model.fit(x_train, y_train, 
-                    epochs=100, 
+                    epochs=1, 
                     batch_size=4, 
                     verbose=1, 
                     validation_data=(x_test, y_test))
@@ -196,5 +196,5 @@ history = model.fit(x_train, y_train,
 
 
 model.save(f"{out_path}model-L")
-with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:
+with open(f"{out_path}trainHistory-L1.pickle", 'wb') as file:
     pickle.dump(history.history, file) 
