@@ -22,7 +22,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/38/"
+out_path = f"../data/output/46/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -41,13 +41,36 @@ with open(os.path.join(label_root, label_path), 'r') as f:
     train_labels_no_animals = json.load(f)
 
 # only use images that contain fish
+nothing_id = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+# do i need this?
+
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
-test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
+train_fish_labels = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
+test_fish_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
+
+crust_id =          [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+train_crust_labels = helpers.filter_labels_for_animal_group(train_labels_animals, crust_id)
+test_crust_labels = helpers.filter_labels_for_animal_group(test_labels, crust_id)
+
+chaetognatha_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+train_chaeto_labels = helpers.filter_labels_for_animal_group(train_labels_animals, chaetognatha_id)
+test_chaeto_labels = helpers.filter_labels_for_animal_group(test_labels, chaetognatha_id)
+
+unidentified_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]  
+train_unidentified_labels = helpers.filter_labels_for_animal_group(train_labels_animals, unidentified_id)
+test_unidentified_labels = helpers.filter_labels_for_animal_group(test_labels, unidentified_id)
+
+jellyfish_id =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+train_jellyfish_labels = helpers.filter_labels_for_animal_group(train_labels_animals, jellyfish_id)
+test_jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish_id)
+
+
+train_labels_animals = train_fish_labels + train_crust_labels #+ train_chaeto_labels + train_unidentified_labels + train_jellyfish_labels
+test_labels = test_fish_labels + test_crust_labels #+ test_chaeto_labels + test_unidentified_labels + test_jellyfish_labels
 
 # only take first 5 labels
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -143,7 +166,7 @@ x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
-x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+x = layers.Conv2D (4, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 # output layers

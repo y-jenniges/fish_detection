@@ -36,15 +36,23 @@ labels = labels[:2]
 
 
 num_classes = 2   
-fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-    
+nothing_id =        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+fish_id =           [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+crust_id =          [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+chaetognatha_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+unidentified_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]  
+jellyfish_id =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 
 test_ratio = 0.05
 
 
 # splitting data into test and train for every organism
+# NOTHINGS
+nothing = helpers.filter_labels_for_animal_group(labels, nothing_id)
+nothing_test_length = math.ceil(test_ratio*len(nothing))
+test_nothing = nothing[:nothing_test_length]
+train_nothing = nothing[nothing_test_length:]
+
 # FISH
 fish = helpers.filter_labels_for_animal_group(labels, fish_id)
 fish_test_length = math.ceil(test_ratio*len(fish))
@@ -58,10 +66,23 @@ test_crust = crust[:crust_test_length]
 train_crust = crust[crust_test_length:]
 
 # JELLYFISH
-# jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
-# jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
-# test_jellyfish = jellyfish[:jellyfish_test_length]
-# train_jellyfish = jellyfish[jellyfish_test_length:]
+jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
+jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
+test_jellyfish = jellyfish[:jellyfish_test_length]
+train_jellyfish = jellyfish[jellyfish_test_length:]
+
+# CHAETOGNATHA
+chaetognatha = helpers.filter_labels_for_animal_group(labels, chaetognatha_id)
+chaetognatha_test_length = math.ceil(test_ratio*len(chaetognatha))
+test_chaetognatha = chaetognatha[:chaetognatha_test_length]
+train_chaetognatha = chaetognatha[chaetognatha_test_length:]
+
+# UNIDENTIFIED
+unidentified = helpers.filter_labels_for_animal_group(labels, unidentified_id)
+unidentified_test_length = math.ceil(test_ratio*len(unidentified))
+test_unidentified = unidentified[:unidentified_test_length]
+train_unidentified = unidentified[unidentified_test_length:]
+
 
 # sample image
 image_example = helpers.loadImage(fish[0]['filename'])
@@ -93,14 +114,37 @@ def generateY(entry):
     hm_2_head = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart="front")
     hm_2_tail = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart="back")
     
+    # hm_3_head = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart="front")
+    # hm_3_tail = HeatmapClass.Heatmap(entry, resolution='low', group=3, bodyPart="back")
+    
+    # hm_4_head = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart="front")
+    # hm_4_tail = HeatmapClass.Heatmap(entry, resolution='low', group=4, bodyPart="back")
+    
+    # hm_5_head = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart="front")
+    # hm_5_tail = HeatmapClass.Heatmap(entry, resolution='low', group=5, bodyPart="back")
+    
+    
+    # nothing is one empty heatmap
+    
     hm_1_head.downsample()
     hm_1_tail.downsample()
     hm_2_head.downsample()
     hm_2_tail.downsample()
+    # hm_3_head.downsample()
+    # hm_3_tail.downsample()
+    # hm_4_head.downsample()
+    # hm_4_tail.downsample()
+    # hm_5_head.downsample()
+    # hm_5_tail.downsample()
     
     #print(f"{hm_2_head.hm.shape}")
     
-    heatmaps = [hm_1_head.hm, hm_1_tail.hm, hm_2_head.hm, hm_2_tail.hm]
+    heatmaps = [hm_1_head.hm, hm_1_tail.hm, 
+                hm_2_head.hm, hm_2_tail.hm,
+                # hm_3_head.hm, hm_3_tail.hm,
+                # hm_4_head.hm, hm_4_tail.hm,
+                # hm_5_head.hm, hm_5_tail.hm,
+                ]
     #heatmaps = keras.backend.stack(heatmaps)
     heatmaps = np.concatenate(heatmaps, axis=2)
     #classification = [[0,1,0], [0,0,1]]

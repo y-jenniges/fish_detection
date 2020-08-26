@@ -12,7 +12,7 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/37/"
+test_path = "../data/output/45/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -72,8 +72,10 @@ f39 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39
 f51 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
 f60 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
 
+f309 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/309.jpg"
+
 #tests = {"f0":0, "f22":22, "f39":39, "f51":51, "f60":60}
-tests = {"0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
+tests = {"309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
 
 for k, v in tests.items():
     entry = [entry for entry in test_labels if entry['filename'] == v][0]
@@ -98,12 +100,18 @@ for k, v in tests.items():
     #    json.dump(yHat.tolist(), f)
     
     
+    
     #helpers.showImageWithAnnotation(entry)
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1, filename=f"{out_path}test{k}{res}_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 0], gt=entry['animals'], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_1front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 1], gt=entry['animals'], exaggerate=1, group=1, bodyPart="back", filename=f"{out_path}test{k}{res}_1back_exag1.jpg")
+    
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 2], gt=entry['animals'], exaggerate=1, group=2, bodyPart="front", filename=f"{out_path}test{k}{res}_2front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 3], gt=entry['animals'], exaggerate=1, group=2, bodyPart="back", filename=f"{out_path}test{k}{res}_2back_exag1.jpg")
+    
     #helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=10)#, filename=f"{out_path}test{k}{res}_exag10.jpg")
     # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=100, filename=f"{out_path}test{k}{res}_exag100.jpg")
    # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=1)
-    print(helpers.entropy(yHat))
+    #print(helpers.entropy(yHat))
 
 # show heatmap only
 # with open(out_path+str(i)+".json","r") as f:

@@ -224,14 +224,17 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
  
         factor = img.shape[0]//hm.shape[0]
 
+        print(f"img, hm shape {image.shape, hm.shape}")
+
         assert hm.shape[0]*factor==img.shape[0] and hm.shape[1]*factor==img.shape[1]
-        assert len(hm.shape)==3
+        #assert len(hm.shape)==3
         
         hmResized = np.repeat (hm, factor, axis=0) # y
         hmResized = np.repeat (hmResized, factor, axis=1) #x
-        hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
+       # hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
         hmResized = np.clip (hmResized*2, 0, 1)
-        
+        hmResized = hmResized[:, :, np.newaxis]
+        print(f"hmresized shape {hmResized.shape}")
         if img.dtype =="uint8":
             img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
         else:
@@ -252,7 +255,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]
          
 
-            plt.scatter(x_front, y_front, marker='o', c='b',)
+            plt.scatter(x_front, y_front, s=100, marker='o', c='b',)
             plt.scatter(x_back, y_back, marker='x', c='b',)
             #plt.legend(loc='upper left')
             #plt.show()
@@ -268,7 +271,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
             
             marker = "o" if bodyPart == "front" else "x"
-            plt.scatter (x, y, marker=marker, c="b")
+            plt.scatter (x, y,s=10, marker=marker, c="b")
         
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')
