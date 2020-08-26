@@ -6,14 +6,6 @@ Created on Tue Aug 25 16:24:11 2020
 """
 
 
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 25 16:06:25 2020
-
-@author: yjenn
-"""
-
-
 import json
 import os
 import pickle
@@ -31,7 +23,7 @@ from keras import layers
 
 
 # output directory
-out_path = "../data/output/44/"
+out_path = "../data/output/45/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
@@ -77,8 +69,8 @@ plt.imshow(image_example)
 plt.show()
 
 # create final test and train data
-test_labels = test_fish #+ test_crust
-train_labels = train_fish #+ train_crust
+test_labels = test_fish + test_crust
+train_labels = train_fish + train_crust
 
 def generateY(entry):
 
@@ -97,40 +89,46 @@ def generateY(entry):
     # idea here: fish head only
     hm_1_head = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="front")
     hm_1_tail = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="back")
+    
+    hm_2_head = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart="front")
+    hm_2_tail = HeatmapClass.Heatmap(entry, resolution='low', group=2, bodyPart="back")
+    
     hm_1_head.downsample()
     hm_1_tail.downsample()
+    hm_2_head.downsample()
+    hm_2_tail.downsample()
     
-    heatmaps = [hm_1_head.hm, hm_1_tail.hm]
+    heatmaps = [hm_1_head.hm, hm_1_tail.hm, hm_2_head, hm_2_tail]
     #heatmaps = keras.backend.stack(heatmaps)
     heatmaps = np.concatenate(heatmaps, axis=2)
-    classification = [[0,1,0], [0,0,1]]
+    #classification = [[0,1,0], [0,0,1]]
     
         
-    return np.asarray(image), np.asarray(heatmaps), np.asarray(classifications)
+    return np.asarray(image), np.asarray(heatmaps)#, np.asarray(classifications)
 
 
 x_train = []
 x_test = []
 
 heatmaps=[]
-classifications = []
+#classifications = []
 for entry in train_labels:
     img, hms, cs = generateY(entry)
     x_train.append(img)
     heatmaps.append(hms)
-    classifications.append(cs)
+    #classifications.append(cs)
 
 a = heatmaps 
 y_train = np.asarray(heatmaps)
 #y_train = {"heatmap": np.array(heatmaps), "classification": np.array(classifications)}
 
 heatmaps=[]
-classifications = []
+#classifications = []
 for entry in test_labels:
     img, hms, cs = generateY(entry)
     x_test.append(img)
     heatmaps.append(hms)
-    classifications.append(cs)
+    #classifications.append(cs)
 
 y_test = np.asarray(heatmaps)
 #y_test = {"heatmap": np.array(heatmaps), "classification": np.array(classifications)}
@@ -198,7 +196,7 @@ x = layers.ReLU(6.)(x)
 # output_h = layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same')(x)
 # output_h = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999)(output_h)
 # output_h = layers.ReLU(6.)(output_h)
-output_h = layers.Conv2D(2, 1, padding='same', activation="sigmoid", name = "heatmap")(x)
+output_h = layers.Conv2D(4, 1, padding='same', activation="sigmoid", name = "heatmap")(x)
 
 # output_c = layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same')(x)
 # output_c = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999)(output_c)
