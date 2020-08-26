@@ -31,7 +31,7 @@ label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
   
-#labels = labels[:2]
+labels = labels[:2]
  
 
 
@@ -98,7 +98,9 @@ def generateY(entry):
     hm_2_head.downsample()
     hm_2_tail.downsample()
     
-    heatmaps = [hm_1_head.hm, hm_1_tail.hm, hm_2_head, hm_2_tail]
+    #print(f"{hm_2_head.hm.shape}")
+    
+    heatmaps = [hm_1_head.hm, hm_1_tail.hm, hm_2_head.hm, hm_2_tail.hm]
     #heatmaps = keras.backend.stack(heatmaps)
     heatmaps = np.concatenate(heatmaps, axis=2)
     #classification = [[0,1,0], [0,0,1]]
@@ -113,7 +115,7 @@ x_test = []
 heatmaps=[]
 #classifications = []
 for entry in train_labels:
-    img, hms, cs = generateY(entry)
+    img, hms = generateY(entry)
     x_train.append(img)
     heatmaps.append(hms)
     #classifications.append(cs)
@@ -125,7 +127,7 @@ y_train = np.asarray(heatmaps)
 heatmaps=[]
 #classifications = []
 for entry in test_labels:
-    img, hms, cs = generateY(entry)
+    img, hms = generateY(entry)
     x_test.append(img)
     heatmaps.append(hms)
     #classifications.append(cs)
