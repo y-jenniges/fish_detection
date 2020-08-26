@@ -227,13 +227,20 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         print(f"img, hm shape {image.shape, hm.shape}")
 
         assert hm.shape[0]*factor==img.shape[0] and hm.shape[1]*factor==img.shape[1]
-        #assert len(hm.shape)==3
+        assert len(hm.shape)==3 or len(hm.shape) ==2
         
-        hmResized = np.repeat (hm, factor, axis=0) # y
-        hmResized = np.repeat (hmResized, factor, axis=1) #x
-       # hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
-        hmResized = np.clip (hmResized*2, 0, 1)
-        hmResized = hmResized[:, :, np.newaxis]
+        if len(hm.shape) == 3:
+            hmResized = np.repeat (hm, factor, axis=0) # y
+            hmResized = np.repeat (hmResized, factor, axis=1) #x
+            hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
+            hmResized = np.clip (hmResized*2, 0, 1)
+        elif len(hm.shape) == 2:
+            hmResized = np.repeat (hm, factor, axis=0) # y
+            hmResized = np.repeat (hmResized, factor, axis=1) #x
+           # hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
+            hmResized = np.clip (hmResized*2, 0, 1)
+            hmResized = hmResized[:, :, np.newaxis]
+        
         print(f"hmresized shape {hmResized.shape}")
         if img.dtype =="uint8":
             img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)

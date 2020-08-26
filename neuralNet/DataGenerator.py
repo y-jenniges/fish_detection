@@ -90,17 +90,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     #heatmaps = keras.backend.stack(heatmaps)
     heatmaps = np.concatenate(heatmaps, axis=2)
     
-    #heatmaps = hm
-    #classification = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-    # heatmaps.append(hm)
-    # classification.append(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
-    #helpers.showImageWithHeatmap(image, hm)
-
-
-    return np.asarray(image), np.asarray(heatmaps)#, np.asarray(classification)
-
-  
-
+    return np.asarray(image), np.asarray(heatmaps)
 
 def prepareEntryHighResHeatmap (entry, hm_folder=None):
     """Get's an entry of the dataset (filename, annotation), load filename and
@@ -123,9 +113,6 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     else:
         #print("Calculating heatmap...")
         heatmaps = generateAllHeatmaps(entry, res="high")
-        # hm = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
-        # #hm.showImageWithHeatmap()
-        # hm = hm.hm
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
@@ -135,35 +122,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
 
     heatmaps = np.concatenate(heatmaps, axis=2)
     
-    #heatmaps=[]
-    #classification=[]
-    
-    #heatmaps = hm
-    #classification = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-    
-    # # idea here: return only necessary heatmaps and classes
-    # for animal in entry['animals']:
-    #     group = math.ceil(animal['group'].index(1)/2)
-    #     #group = str(math.floor(animal['group'].index(1)/2))
-    #     bodyPart = 'front' if animal['group'].index(1)%2==0 else 'back'
-        
-    #     hm = HeatmapClass.Heatmap(entry, resolution='low', group=group, bodyPart=bodyPart)
-    #     hm.showImageWithHeatmap()
-        
-    #     heatmaps.append(hm)
-    #     # heatmaps.append(np.array(hm_json["hm_" + group + bodyPart]))
-    #     classification.append(np.array(animal['group']))
-        
-    # for animal in entry['animals']:
-    #     group = str(math.floor(animal['group'].index(1)/2))
-    #     bodyPart = 'f' if animal['group'].index(1)%2==0 else 'b'
-        
-    #     heatmaps.append(hm_json["hm_" + group + bodyPart])
-    #     classification.append(animal['group'])
-       
-
-    return np.asarray(image), np.asarray(heatmaps)#, np.asarray(classification)
-
+    return np.asarray(image), np.asarray(heatmaps)
 
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
