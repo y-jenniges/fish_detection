@@ -12,7 +12,7 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/47/"
+test_path = "../data/output/48/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -80,7 +80,7 @@ f575 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/5
 f193 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/193.jpg" #unidentified
 
 #tests = {"f0":0, "f22":22, "f39":39, "f51":51, "f60":60}
-tests = {"193":f193}#,"575":f575, "913":f913,883":f883,"867":f867, "309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
+tests = {"193":f193,"575":f575, "913":f913,883":f883,"867":f867, "309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
 
 for k, v in tests.items():
     entry = [entry for entry in test_labels if entry['filename'] == v][0]
