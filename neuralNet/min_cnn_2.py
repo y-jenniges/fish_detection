@@ -26,21 +26,25 @@ random.set_seed(2)
 
 
 # output directory
-out_path = "../data/output/47/"
+out_path = "../data/output/48/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
 label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
     labels = json.load(f)
-  
+ 
+label_path = "test_labels.json"
+with open(os.path.join(label_root, label_path), 'r') as f:
+    test_labels = json.load(f)
+    
 labels = labels[:2]
  
 
 
-num_classes = 2   
+#num_classes = 2   
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+#crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 #jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     
 
@@ -55,10 +59,10 @@ test_fish = fish[:fish_test_length]
 train_fish = fish[fish_test_length:]
 
 # CRUSTACEA
-crust = helpers.filter_labels_for_animal_group(labels, crust_id)
-crust_test_length = math.ceil(test_ratio*len(crust))
-test_crust = crust[:crust_test_length]
-train_crust = crust[crust_test_length:]
+# crust = helpers.filter_labels_for_animal_group(labels, crust_id)
+# crust_test_length = math.ceil(test_ratio*len(crust))
+# test_crust = crust[:crust_test_length]
+# train_crust = crust[crust_test_length:]
 
 # JELLYFISH
 # jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)

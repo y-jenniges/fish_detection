@@ -26,14 +26,14 @@ def generateAllHeatmaps(entry, res='low'):
     hm_2_head = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="front")
     hm_2_tail = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="back")
     
-    # hm_3_head = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="front")
-    # hm_3_tail = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="back")
+    hm_3_head = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="front")
+    hm_3_tail = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="back")
     
-    # hm_4_head = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="front")
-    # hm_4_tail = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="back")
+    hm_4_head = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="front")
+    hm_4_tail = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="back")
     
-    # hm_5_head = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="front")
-    # hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
+    hm_5_head = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="front")
+    hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
     
     #hm.showImageWithHeatmap()
     #hm = helpers.downsample(hm.hm)
@@ -41,18 +41,18 @@ def generateAllHeatmaps(entry, res='low'):
     hm_1_tail.downsample()
     hm_2_head.downsample()
     hm_2_tail.downsample()
-    # hm_3_head.downsample()
-    # hm_3_tail.downsample()
-    # hm_4_head.downsample()
-    # hm_4_tail.downsample()
-    # hm_5_head.downsample()
-    # hm_5_tail.downsample()
+    hm_3_head.downsample()
+    hm_3_tail.downsample()
+    hm_4_head.downsample()
+    hm_4_tail.downsample()
+    hm_5_head.downsample()
+    hm_5_tail.downsample()
     
     return [hm_1_head.hm, hm_1_tail.hm, 
-            hm_2_head.hm, hm_2_tail.hm#,
-            # hm_3_head.hm, hm_3_tail.hm,
-            # hm_4_head.hm, hm_4_tail.hm,
-            # hm_5_head.hm, hm_5_tail.hm
+            hm_2_head.hm, hm_2_tail.hm,
+            hm_3_head.hm, hm_3_tail.hm,
+            hm_4_head.hm, hm_4_tail.hm,
+            hm_5_head.hm, hm_5_tail.hm
             ]
 
 def prepareEntryLowResHeatmap (entry, hm_folder=None):

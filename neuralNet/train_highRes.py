@@ -7,7 +7,11 @@ import time
 import json
 import os
 import pickle
+from tensorflow import random
 
+# fix random seeds of numpy and tensorflow for reproducability
+np.random.seed(0)
+random.set_seed(2)
 """group: 
     0 - nothing, 
     1 - fish, 

@@ -4,6 +4,8 @@ import math
 import matplotlib.pyplot as plt
 import Globals
 import cv2
+import os
+import json
 from PIL import Image, ImageEnhance, ImageOps
 
 # Label file helpers ---------------------------------------------------------------#
@@ -17,6 +19,83 @@ def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0,
                 break
     return filtered_list
 
+def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
+    label_path = "training_labels_animals.json"
+    with open(os.path.join(label_root, label_path) , 'r') as f:
+        train_labels_animals = json.load(f)
+        
+    label_path = "test_labels.json"
+    with open(os.path.join(label_root, label_path), 'r') as f:
+        all_test_labels = json.load(f)
+        
+    label_path = "training_labels_no_animals.json"
+    with open(os.path.join(label_root, label_path), 'r') as f:
+        train_labels_no_animals = json.load(f)
+    
+    # only use images that contain fish
+    nothing_id = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    # do i need this?
+    
+    fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    train_fish_labels = filter_labels_for_animal_group(train_labels_animals, fish_id)
+    test_fish_labels = filter_labels_for_animal_group(all_test_labels, fish_id)
+    
+    crust_id =          [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    train_crust_labels = filter_labels_for_animal_group(train_labels_animals, crust_id)
+    test_crust_labels = filter_labels_for_animal_group(all_test_labels, crust_id)
+    
+    chaetognatha_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    train_chaeto_labels = filter_labels_for_animal_group(train_labels_animals, chaetognatha_id)
+    test_chaeto_labels = filter_labels_for_animal_group(all_test_labels, chaetognatha_id)
+    
+    unidentified_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]  
+    train_unidentified_labels = filter_labels_for_animal_group(train_labels_animals, unidentified_id)
+    test_unidentified_labels = filter_labels_for_animal_group(all_test_labels, unidentified_id)
+    
+    jellyfish_id =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+    train_jellyfish_labels = filter_labels_for_animal_group(train_labels_animals, jellyfish_id)
+    test_jellyfish_labels = filter_labels_for_animal_group(all_test_labels, jellyfish_id)
+    
+    
+    # split test labels into test and validation labels
+    test_ratio = 0.9
+    len_test_fish = math.ceil(len(test_fish_labels)*test_ratio)
+    len_test_crust = math.ceil(len(test_crust_labels)*test_ratio)
+    len_test_chaet = math.ceil(len(test_chaeto_labels)*test_ratio)
+    len_test_unid = math.ceil(len(test_unidentified_labels)*test_ratio)
+    len_test_jell = math.ceil(len(test_jellyfish_labels)*test_ratio)
+    
+    train_labels_animals = train_fish_labels \
+                        + train_crust_labels \
+                        + train_chaeto_labels \
+                        + train_unidentified_labels \
+                        + train_jellyfish_labels
+    
+    test_labels = test_fish_labels[:len_test_fish] \
+                + test_crust_labels[:len_test_crust] \
+                + test_chaeto_labels[:len_test_chaet] \
+                + test_unidentified_labels[:len_test_unid]  \
+                + test_jellyfish_labels[:len_test_jell]
+    
+    val_labels = test_fish_labels[len_test_fish:] \
+                + test_crust_labels[len_test_crust:] \
+                + test_chaeto_labels[len_test_chaet:] \
+                + test_unidentified_labels[len_test_unid:]  \
+                + test_jellyfish_labels[len_test_jell:]
+    
+    # remove duplicates (search only the remaining list in every iteration)
+    train_labels_animals = [i for n, i in enumerate(train_labels_animals) if i not in train_labels_animals[n + 1:]]
+    test_labels = [i for n, i in enumerate(test_labels) if i not in test_labels[n + 1:]]
+    test_labels = [x for x in test_labels if x not in val_labels]
+    val_labels = [i for n, i in enumerate(val_labels) if i not in val_labels[n + 1:]]
+    
+    # add some empty images to the test and validation data
+    empty_ratio= 0.05
+    empty_test_labels = [x for x in all_test_labels if x not in test_labels and x not in val_labels]
+    test_labels += empty_test_labels[:math.ceil(len(test_labels)*empty_ratio)]
+    val_labels += empty_test_labels[:math.ceil(len(val_labels)*empty_ratio)]
+    
+    return test_labels, train_labels_animals, train_labels_no_animals, val_labels
 
 # image helpers --------------------------------------------------------------------#
 def loadImage(fname, equalize=False):
