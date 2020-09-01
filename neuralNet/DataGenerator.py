@@ -20,6 +20,8 @@ def dummyPrepareEntry (entry, hm_folder):
 
 
 def generateAllHeatmaps(entry, res='low'):
+    hm_0 = HeatmapClass.Heatmap(entry, resolution=res, group=0, bodyPart="front")
+    
     hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
     hm_1_tail = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="back")
     
@@ -37,18 +39,21 @@ def generateAllHeatmaps(entry, res='low'):
     
     #hm.showImageWithHeatmap()
     #hm = helpers.downsample(hm.hm)
-    hm_1_head.downsample()
-    hm_1_tail.downsample()
-    hm_2_head.downsample()
-    hm_2_tail.downsample()
-    hm_3_head.downsample()
-    hm_3_tail.downsample()
-    hm_4_head.downsample()
-    hm_4_tail.downsample()
-    hm_5_head.downsample()
-    hm_5_tail.downsample()
+    if res=="low":
+        hm_0.downsample()
+        hm_1_head.downsample()
+        hm_1_tail.downsample()
+        hm_2_head.downsample()
+        hm_2_tail.downsample()
+        hm_3_head.downsample()
+        hm_3_tail.downsample()
+        hm_4_head.downsample()
+        hm_4_tail.downsample()
+        hm_5_head.downsample()
+        hm_5_tail.downsample()
     
-    return [hm_1_head.hm, hm_1_tail.hm, 
+    return [hm_0.hm, 
+            hm_1_head.hm, hm_1_tail.hm, 
             hm_2_head.hm, hm_2_tail.hm,
             hm_3_head.hm, hm_3_tail.hm,
             hm_4_head.hm, hm_4_tail.hm,
