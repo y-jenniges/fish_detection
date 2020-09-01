@@ -24,18 +24,25 @@ def generateAllHeatmaps(entry, res='low'):
     
     hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
     hm_1_tail = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="back")
+    hm_1_body = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="connection")
     
     hm_2_head = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="front")
     hm_2_tail = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="back")
+    hm_2_body = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="connection")
     
     hm_3_head = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="front")
     hm_3_tail = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="back")
+    hm_3_body = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="connection")
     
     hm_4_head = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="front")
     hm_4_tail = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="back")
+    hm_4_body = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="connection")
     
     hm_5_head = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="front")
     hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
+    hm_5_body = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="connection")
+    
+
     
     #hm.showImageWithHeatmap()
     #hm = helpers.downsample(hm.hm)
@@ -43,22 +50,31 @@ def generateAllHeatmaps(entry, res='low'):
         hm_0.downsample()
         hm_1_head.downsample()
         hm_1_tail.downsample()
+        hm_1_body.downsample()
         hm_2_head.downsample()
         hm_2_tail.downsample()
+        hm_2_body.downsample()
         hm_3_head.downsample()
         hm_3_tail.downsample()
+        hm_3_body.downsample()
         hm_4_head.downsample()
         hm_4_tail.downsample()
+        hm_4_body.downsample()
         hm_5_head.downsample()
         hm_5_tail.downsample()
+        hm_5_body.downsample()
+    
+    # assemble connection head-tail heatmap 
+    hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)
+    hm_body = np.clip (hm_body, 0, 1, out=hm_body)
     
     return [hm_0.hm, 
             hm_1_head.hm, hm_1_tail.hm, 
             hm_2_head.hm, hm_2_tail.hm,
             hm_3_head.hm, hm_3_tail.hm,
             hm_4_head.hm, hm_4_tail.hm,
-            hm_5_head.hm, hm_5_tail.hm
-            ]
+            hm_5_head.hm, hm_5_tail.hm,
+            ], hm_body
 
 def prepareEntryLowResHeatmap (entry, hm_folder=None):
     """Get's an entry of the dataset (filename, annotation), load filename and
@@ -77,7 +93,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
             np.clip (hm, 0, 1, out=hm)
     else:
         #print("Calculating heatmap...")
-        heatmaps = generateAllHeatmaps(entry, res="low")
+        heatmaps, hm_body = generateAllHeatmaps(entry, res="low")
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])
@@ -95,7 +111,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     #heatmaps = keras.backend.stack(heatmaps)
     heatmaps = np.concatenate(heatmaps, axis=2)
     
-    return np.asarray(image), np.asarray(heatmaps)
+    return np.asarray(image), np.asarray(heatmaps), np.asarray(hm_body)
 
 def prepareEntryHighResHeatmap (entry, hm_folder=None):
     """Get's an entry of the dataset (filename, annotation), load filename and
@@ -117,7 +133,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
             np.clip (hm, 0, 1, out=hm)
     else:
         #print("Calculating heatmap...")
-        heatmaps = generateAllHeatmaps(entry, res="high")
+        heatmaps, hm_body = generateAllHeatmaps(entry, res="high")
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
@@ -127,7 +143,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
 
     heatmaps = np.concatenate(heatmaps, axis=2)
     
-    return np.asarray(image), np.asarray(heatmaps)
+    return np.asarray(image), np.asarray(heatmaps), np.asarray(hm_body)
 
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
@@ -224,6 +240,9 @@ class DataGenerator(keras.utils.Sequence):
         
         X = np.array([e[0] for e in batch])
         heatmaps = np.array([e[1] for e in batch])
+        hm_body = np.array([e[2] for e in batch])
+    
+        
         #classification = np.array([e[2] for e in batch])
         #y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
         
@@ -232,7 +251,7 @@ class DataGenerator(keras.utils.Sequence):
         #print(f"heatmaps shape {np.asarray(heatmaps).shape}")
         #print(f"heatmaps[0] shape {np.asarray(heatmaps[0]).shape}")
 
-        return X, heatmaps #{"heatmap": heatmaps, "classification": classification}
+        return X,  {"heatmap":heatmaps, "connection":hm_body}#heatmaps#{"heatmap": heatmaps, "classification": classification}
         #return X, [heatmaps, classification]
         #return X, heatmaps
         

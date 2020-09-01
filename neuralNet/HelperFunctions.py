@@ -276,6 +276,7 @@ def gaussian (sigma, dim):
     cy=dim//2
     return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
 
+# @todo needed here?
 def downsample (T, factor=32):
   """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
      Downsamples the height and width dimension of T by the given factor. 

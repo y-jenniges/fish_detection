@@ -4,43 +4,84 @@ import HelperFunctions as helpers
 import Globals
 
 
-# todo load image before giving shape to heatmap! (due to padding)
+# @todo load image before giving shape to heatmap! (due to padding)
 
 # This class stores a heatmap and performs the calculations
 class Heatmap():
-    def __init__(self, entry, resolution='low', group = 1, bodyPart = 'front'):
+    def __init__(self, entry, resolution='low', group = 1, bodyPart = 'front' ):
         
-        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
+        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both" or bodyPart=="connection"
         assert group in range(Globals.NUM_GROUPS)
         
-        #self.resolution = resolution
         self.imagePath = entry['filename']
         self.image = helpers.loadImage(self.imagePath)
         self.gt = entry['animals']
         self.group = group
         self.bodyPart = bodyPart
-              
-        # if self.resolution =='low':
-        #     self.annotationToHeatmap = self.annotationToLowResHeatmap
-        # elif self.resolution == 'high':
-        #     self.annotationToHeatmap = self.annotationToHighResHeatmap
-        # else:
-        #     raise Exception(f"Resolution undefined: Resolution must be either 'low' or 'high'")
-         
-        self.gaussian = helpers.gaussian(8,50)
-         
+            
+        # calculate the gaussian function (used to generate the heatmap)
+        self.gaussian = helpers.gaussian(8,50)      
          
         # calculate heatmap
         if bodyPart == "both":
             self.calculateHeadTailHeatmap(self.group)
+        elif bodyPart == "connection":
+            self.annotationToConnectionHm()
         else:
             self.annotationToHeatmap()
+
+    def annotationToConnectionHm(self):
+        """ Converts a list of heads and tails, which are 2D coordinates, 
+        into a heatmap which displays the connection between heads and tails.
+        """
+        # a different gaussian shape (so that the line is not too thick)
+        self.gaussian = helpers.gaussian(8,10)
+        
+        # initialize the heatmap
+        hm_y, hm_x = self.image.shape[0], self.image.shape[1]
+        self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
+        
+        # arrays for matching the animal group
+        group_head = np.zeros(Globals.channels)
+        group_tail = np.zeros(Globals.channels)
+        group_head[self.group*2-1] = 1
+        group_tail[self.group*2] = 1
+
+        # initalize list for heads and tails
+        heads = []
+        tails = []
+        
+        # get all heads and tails from the groundtruth
+        for animal in self.gt:
+            if np.array_equal(animal['group'], group_head):
+                heads.append([animal['position'][0], animal['position'][1]])
+            if np.array_equal(animal['group'], group_tail):
+                tails.append([animal['position'][0], animal['position'][1]])
+        
+        # iterate over animals        
+        for i in range(len(heads)):      
+            # calculate slope and intercept of the line connecting head and tail of the animal
+            m = (heads[i][1] - tails[i][1])/(heads[i][0] - tails[i][0])
+            b = heads[i][1] - m*heads[i][0]
+            
+            # calculate the y-values of the line
+            x = np.array(range(int(heads[i][0]), int(tails[i][0]+1)))
+            y = m*x + b
+
+            # for every point on the line, add a gaussian to the heatmap
+            for j in range(len(x)-1):
+                if 0 <= x[j] < self.hm.shape[1] and 0 <= y[j] < self.hm.shape[0]: 
+                    self.addToHeatmap (self.gaussian, x[j]-self.gaussian.shape[1]//2, y[j]-self.gaussian.shape[0]//2)
+          
+        # clip the heatmap to range [0, 1]
+        np.clip (self.hm, 0, 1, out=self.hm)
+                       
 
     def annotationToHeatmap(self):
         """Converts a list of points (each a dict with 'x' and 'y' component) into 
         a heatmap with original image resolution using myGaussian. For every 
-        strawberry, the Gaussian myGaussian (peak 1) centered at the 
-        annotated strawberry point is added."""
+        head and every tail, the Gaussian myGaussian (peak 1) centered at the 
+        annotated head/tail point is added."""
         hm_y, hm_x = self.image.shape[0], self.image.shape[1]
         self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
 
@@ -54,6 +95,7 @@ class Heatmap():
                 group_array[self.group*2] = 1 
             elif self.bodyPart=='both':
                 print("annotation to high res heatmap: invalid bodyPart")
+            
             
         for animal in self.gt:
             if np.array_equal(animal['group'], group_array):
@@ -197,7 +239,7 @@ class Heatmap():
         if group==None: group=self.group
         if bodyPart==None: bodyPart=self.bodyPart
         
-        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
+        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both" or bodyPart=="connection"
         assert group in range(Globals.NUM_GROUPS)
         
         # copy image (so the heatmap is not drawn on original)
@@ -301,10 +343,6 @@ class Heatmap():
         # combine both heatmaps by taking the average
         self.bodyPart = 'both'
         self.hm = (hm_front + hm_back)/2
-        
-        
-    #def calculateAverageHeatmap(self, group):       
- 
 
     def downsample (self, factor=32):
       """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
