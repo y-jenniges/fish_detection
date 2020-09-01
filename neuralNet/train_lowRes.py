@@ -10,10 +10,12 @@ import pickle
 import math
 import numpy as np
 from tensorflow import random
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
 random.set_seed(2)
+#set_random_seed(2)
 
 
 """group: 
@@ -30,87 +32,12 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/48/"
+out_path = f"../data/output/49/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
 label_root = "../data/maritime_dataset_25/labels/"
  
-# label_path = "training_labels_animals.json"
-# with open(os.path.join(label_root, label_path) , 'r') as f:
-#     train_labels_animals = json.load(f)
-    
-# label_path = "test_labels.json"
-# with open(os.path.join(label_root, label_path), 'r') as f:
-#     all_test_labels = json.load(f)
-    
-# label_path = "training_labels_no_animals.json"
-# with open(os.path.join(label_root, label_path), 'r') as f:
-#     train_labels_no_animals = json.load(f)
-
-# # only use images that contain fish
-# nothing_id = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# # do i need this?
-
-# fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# train_fish_labels = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
-# test_fish_labels = helpers.filter_labels_for_animal_group(all_test_labels, fish_id)
-
-# crust_id =          [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# train_crust_labels = helpers.filter_labels_for_animal_group(train_labels_animals, crust_id)
-# test_crust_labels = helpers.filter_labels_for_animal_group(all_test_labels, crust_id)
-
-# chaetognatha_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# train_chaeto_labels = helpers.filter_labels_for_animal_group(train_labels_animals, chaetognatha_id)
-# test_chaeto_labels = helpers.filter_labels_for_animal_group(all_test_labels, chaetognatha_id)
-
-# unidentified_id =   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]  
-# train_unidentified_labels = helpers.filter_labels_for_animal_group(train_labels_animals, unidentified_id)
-# test_unidentified_labels = helpers.filter_labels_for_animal_group(all_test_labels, unidentified_id)
-
-# jellyfish_id =      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-# train_jellyfish_labels = helpers.filter_labels_for_animal_group(train_labels_animals, jellyfish_id)
-# test_jellyfish_labels = helpers.filter_labels_for_animal_group(all_test_labels, jellyfish_id)
-
-
-# # split test labels into test and validation labels
-# test_ratio = 0.9
-# len_test_fish = math.ceil(len(test_fish_labels)*test_ratio)
-# len_test_crust = math.ceil(len(test_crust_labels)*test_ratio)
-# len_test_chaet = math.ceil(len(test_chaeto_labels)*test_ratio)
-# len_test_unid = math.ceil(len(test_unidentified_labels)*test_ratio)
-# len_test_jell = math.ceil(len(test_jellyfish_labels)*test_ratio)
-
-# train_labels_animals = train_fish_labels \
-#                     + train_crust_labels \
-#                     + train_chaeto_labels \
-#                     + train_unidentified_labels \
-#                     + train_jellyfish_labels
-
-# test_labels = test_fish_labels[:len_test_fish] \
-#             + test_crust_labels[:len_test_crust] \
-#             + test_chaeto_labels[:len_test_chaet] \
-#             + test_unidentified_labels[:len_test_unid]  \
-#             + test_jellyfish_labels[:len_test_jell]
-
-# val_labels = test_fish_labels[len_test_fish:] \
-#             + test_crust_labels[len_test_crust:] \
-#             + test_chaeto_labels[len_test_chaet:] \
-#             + test_unidentified_labels[len_test_unid:]  \
-#             + test_jellyfish_labels[len_test_jell:]
-
-# # remove duplicates (search only the remaining list in every iteration)
-# train_labels_animals = [i for n, i in enumerate(train_labels_animals) if i not in train_labels_animals[n + 1:]]
-# test_labels = [i for n, i in enumerate(test_labels) if i not in test_labels[n + 1:]]
-# test_labels = [x for x in test_labels if x not in val_labels]
-# val_labels = [i for n, i in enumerate(val_labels) if i not in val_labels[n + 1:]]
-
-# # add some empty images to the test and validation data
-# empty_ratio= 0.05
-# empty_test_labels = [x for x in all_test_labels if x not in test_labels and x not in val_labels]
-# test_labels += empty_test_labels[:math.ceil(len(test_labels)*empty_ratio)]
-# val_labels += empty_test_labels[:math.ceil(len(val_labels)*empty_ratio)]
-
 test_labels, train_labels, train_labels_no_animals, val_labels = helpers.loadAndSplitLabels(label_root)
 
 
@@ -213,7 +140,7 @@ x = ourBlock (x, "block_17")
 
 # Final output layer with sigmoid, because heatmap is within 0..1
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
-x = layers.Conv2D (10, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 # output layers

@@ -15,6 +15,7 @@ import numpy as np
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
 random.set_seed(2)
+#set_ranom_seed(2)
 
 """group: 
     0 - nothing, 
@@ -56,7 +57,7 @@ label_root = "../data/maritime_dataset_25/labels/"
 # test_labels = test_labels[:4]
 
 
-test_labels, train_labels, train_labels_no_animals, val_labels = helpers.loadAndSplitLabels(label_root)
+test_labels, train_labels_animals, train_labels_no_animals, val_labels = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
 
 # image path
@@ -173,7 +174,7 @@ x = ourBlock (x, "block_17")
    
 # Final output layer with sigmoid, because heatmap is within 0..1
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
-x = layers.Conv2D (10, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 # compile model
@@ -230,7 +231,7 @@ x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
 x = ourBlock (x, 'block_23', channels=4)
 
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
-x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 
 
 modelH = keras.Model(inputs=input, outputs=x)
