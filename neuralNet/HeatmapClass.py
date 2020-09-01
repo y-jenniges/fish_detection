@@ -13,19 +13,19 @@ class Heatmap():
         assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both"
         assert group in range(Globals.NUM_GROUPS)
         
-        self.resolution = resolution
+        #self.resolution = resolution
         self.imagePath = entry['filename']
         self.image = helpers.loadImage(self.imagePath)
         self.gt = entry['animals']
         self.group = group
         self.bodyPart = bodyPart
               
-        if self.resolution =='low':
-            self.annotationToHeatmap = self.annotationToLowResHeatmap
-        elif self.resolution == 'high':
-            self.annotationToHeatmap = self.annotationToHighResHeatmap
-        else:
-            raise Exception(f"Resolution undefined: Resolution must be either 'low' or 'high'")
+        # if self.resolution =='low':
+        #     self.annotationToHeatmap = self.annotationToLowResHeatmap
+        # elif self.resolution == 'high':
+        #     self.annotationToHeatmap = self.annotationToHighResHeatmap
+        # else:
+        #     raise Exception(f"Resolution undefined: Resolution must be either 'low' or 'high'")
          
         self.gaussian = helpers.gaussian(8,50)
          
@@ -36,7 +36,7 @@ class Heatmap():
         else:
             self.annotationToHeatmap()
 
-    def annotationToHm(self):
+    def annotationToHeatmap(self):
         """Converts a list of points (each a dict with 'x' and 'y' component) into 
         a heatmap with original image resolution using myGaussian. For every 
         strawberry, the Gaussian myGaussian (peak 1) centered at the 
@@ -45,12 +45,15 @@ class Heatmap():
         self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
 
         group_array = np.zeros(Globals.channels)
-        if self.bodyPart=='front':
-            group_array[self.group*2-1] = 1 
-        elif self.bodyPart=='back':
-            group_array[self.group*2] = 1 
-        elif self.bodyPart=='both':
-            print("annotation to high res heatmap: invalid bodyPart")
+        if self.group == 0:
+            group_array[0] = 1 
+        else:
+            if self.bodyPart=='front':
+                group_array[self.group*2-1] = 1 
+            elif self.bodyPart=='back':
+                group_array[self.group*2] = 1 
+            elif self.bodyPart=='both':
+                print("annotation to high res heatmap: invalid bodyPart")
             
         for animal in self.gt:
             if np.array_equal(animal['group'], group_array):
@@ -62,11 +65,11 @@ class Heatmap():
                 
         np.clip (self.hm, 0, 1, out=self.hm)
      
-    def annotationToLowResHeatmap (self):   
-        self.annotationToHm()
+    # def annotationToLowResHeatmap (self):   
+    #     self.annotationToHm()
         
-    def annotationToHighResHeatmap (self):   
-        self.annotationToHm()
+    # def annotationToHighResHeatmap (self):   
+    #     self.annotationToHm()
         
     # def annotationToLowResHeatmap (self):
     #     """Converts a list of points (each a dict with 'x' and 'y' component) into 
