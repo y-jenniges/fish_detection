@@ -61,7 +61,14 @@ class Heatmap():
         # iterate over animals        
         for i in range(len(heads)):      
             # calculate slope and intercept of the line connecting head and tail of the animal
-            m = (heads[i][1] - tails[i][1])/(heads[i][0] - tails[i][0])
+            deltaY = heads[i][1] - tails[i][1]
+            deltaX = heads[i][0] - tails[i][0]
+            
+            if deltaX == 0: 
+                m = 0
+            else:
+                m = deltaY/deltaX
+                
             b = heads[i][1] - m*heads[i][0]
             
             # calculate the y-values of the line
