@@ -20,7 +20,7 @@ def dummyPrepareEntry (entry, hm_folder):
 
 
 def generateAllHeatmaps(entry, res='low'):
-    hm_0 = HeatmapClass.Heatmap(entry, resolution=res, group=0, bodyPart="front")
+   # hm_0 = HeatmapClass.Heatmap(entry, resolution=res, group=0, bodyPart="front")
     
     hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
     hm_1_tail = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="back")
@@ -41,13 +41,12 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_head = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="front")
     hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
     hm_5_body = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="connection")
-    
-
+                   
     
     #hm.showImageWithHeatmap()
     #hm = helpers.downsample(hm.hm)
     if res=="low":
-        hm_0.downsample()
+        #hm_0.downsample()
         hm_1_head.downsample()
         hm_1_tail.downsample()
         hm_1_body.downsample()
@@ -68,7 +67,21 @@ def generateAllHeatmaps(entry, res='low'):
     hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)
     hm_body = np.clip (hm_body, 0, 1, out=hm_body)
     
-    return [hm_0.hm, 
+    image = helpers.loadImage(entry['filename'])
+    helpers.downsample(image)
+   # hm_y, hm_x = image.shape[0], image.shape[1]
+    
+    hm_y, hm_x = hm_1_head.hm.shape[0], hm_1_head.hm.shape[1]
+    hm_0 = np.ones((hm_y, hm_x, 1), dtype=np.float32)
+    hm_0 -= hm_1_head.hm + hm_1_tail.hm + \
+            hm_2_head.hm + hm_2_tail.hm + \
+            hm_3_head.hm + hm_3_tail.hm + \
+            hm_4_head.hm + hm_4_tail.hm + \
+            hm_5_head.hm + hm_5_tail.hm + hm_body
+    
+    hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
+    
+    return [hm_0, 
             hm_1_head.hm, hm_1_tail.hm, 
             hm_2_head.hm, hm_2_tail.hm,
             hm_3_head.hm, hm_3_tail.hm,
@@ -251,9 +264,9 @@ class DataGenerator(keras.utils.Sequence):
         #print(f"heatmaps shape {np.asarray(heatmaps).shape}")
         #print(f"heatmaps[0] shape {np.asarray(heatmaps[0]).shape}")
 
-        return X,  {"heatmap":heatmaps, "connection":hm_body}#heatmaps#{"heatmap": heatmaps, "classification": classification}
+        #return X,  {"heatmap":heatmaps, "connection":hm_body}#heatmaps#{"heatmap": heatmaps, "classification": classification}
         #return X, [heatmaps, classification]
-        #return X, heatmaps
+        return X, heatmaps
         
     def get_ground_truth (self, index):
         #print("DataGenerator: get_ground_truth")
