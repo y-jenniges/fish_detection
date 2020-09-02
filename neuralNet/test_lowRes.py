@@ -12,7 +12,7 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/48/"
+test_path = "../data/output/52/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -80,7 +80,14 @@ f575 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/5
 f193 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/193.jpg" #unidentified
 
 #tests = {"f0":0, "f22":22, "f39":39, "f51":51, "f60":60}
-tests = {"193":f193,"575":f575, "913":f913,883":f883,"867":f867, "309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
+tests = {"193":f193,"575":f575, "913":f913,"883":f883,"867":f867, "309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
+tests = {"60":f60}
+tests = {"309":f309}
+tests = {"867":f867}
+tests = {"913":f913}
+tests = {"575":f575}
+tests = {"193":f193}
+tests = {"51":f51}
 
 for k, v in tests.items():
     entry = [entry for entry in test_labels if entry['filename'] == v][0]
@@ -110,28 +117,28 @@ for k, v in tests.items():
     #helpers.showImageWithAnnotation(entry)
     animal="fish"
     print(animal)
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 0], gt=entry['animals'], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 1], gt=entry['animals'], exaggerate=1, group=1, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 1], gt=entry['animals'], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 2], gt=entry['animals'], exaggerate=1, group=1, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
     
     animal="crustacea"
     print("crustacea")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 2], gt=entry['animals'], exaggerate=1, group=2, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 3], gt=entry['animals'], exaggerate=1, group=2, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 3], gt=entry['animals'], exaggerate=1, group=2, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 4], gt=entry['animals'], exaggerate=1, group=2, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
     
     animal="chaetognatha"
     print("chaetognatha")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 4], gt=entry['animals'], exaggerate=1, group=3, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 5], gt=entry['animals'], exaggerate=1, group=3, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 5], gt=entry['animals'], exaggerate=1, group=3, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 6], gt=entry['animals'], exaggerate=1, group=3, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
     
     animal="unidentified"
     print("unidentified")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 6], gt=entry['animals'], exaggerate=1, group=4, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 7], gt=entry['animals'], exaggerate=1, group=4, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 7], gt=entry['animals'], exaggerate=1, group=4, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 8], gt=entry['animals'], exaggerate=1, group=4, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
     
     animal="jellyfish"
     print("jellyfish")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 8], gt=entry['animals'], exaggerate=1, group=5, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
-    helpers.showImageWithHeatmap(image, yHat[0, :, :, 9], gt=entry['animals'], exaggerate=1, group=5, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 9], gt=entry['animals'], exaggerate=1, group=5, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+    helpers.showImageWithHeatmap(image, yHat[0, :, :, 10], gt=entry['animals'], exaggerate=1, group=5, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
     
     #helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=10)#, filename=f"{out_path}test{k}{res}_exag10.jpg")
     # helpers.showImageWithHeatmap(image, yHat[0, :, :, :], gt=entry['animals'], exaggerate=100, filename=f"{out_path}test{k}{res}_exag100.jpg")
