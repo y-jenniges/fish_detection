@@ -32,14 +32,14 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/52/"
+out_path = f"../data/output/53/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
 label_root = "../data/maritime_dataset_25/labels/"
  
 test_labels, train_labels, train_labels_no_animals, val_labels = helpers.loadAndSplitLabels(label_root)
-
+val_labels = val_labels + test_labels
 
 # only take first 5 labels
 # train_labels = train_labels[:4]
@@ -141,9 +141,9 @@ x = ourBlock (x, "block_17")
 # Final output layer with sigmoid, because heatmap is within 0..1
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
 
-x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
-#out_h = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
-#out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
+#x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+out_h = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
 
 # output layers
 
@@ -166,8 +166,8 @@ x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer
 opt = keras.optimizers.Adam()
 
 modelL = keras.Model(inputs=input, outputs=x)#[out_h, out_connection])
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-#modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+#modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -191,8 +191,8 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-#modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+#modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
 
 
