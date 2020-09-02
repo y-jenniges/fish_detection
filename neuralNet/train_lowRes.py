@@ -165,7 +165,8 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 #opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.001, amsgrad=False)
 opt = keras.optimizers.Adam()
 
-modelL = keras.Model(inputs=input, outputs=x)#[out_h, out_connection])
+#modelL = keras.Model(inputs=input, outputs=x)
+modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
 
