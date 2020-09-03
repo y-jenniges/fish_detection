@@ -32,7 +32,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/53/"
+out_path = f"../data/output/54/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"

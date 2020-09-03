@@ -236,7 +236,7 @@ def adaptContrast(image, factor=1, auto=False):
 def equalizePil(image):
     # convert to PIL format
     img = Image.fromarray(image)
-    
+
     # equalize
     im_output = ImageOps.equalize(img)
     
