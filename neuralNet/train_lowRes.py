@@ -142,7 +142,7 @@ x = ourBlock (x, "block_17")
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
 
 #x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
-out_h = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
 
 # output layers
@@ -168,7 +168,7 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -192,7 +192,7 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
 
@@ -205,7 +205,7 @@ print(f"Training took {time.time() - start}")
 # save model, weights and history
 modelL.save(f"{out_path}model-L")
 
-# modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
+modelL.save_weights(f"{out_path}weights-L.h5") # saves weights (e.g. a checkpoint) locally
 # # save the history(todo: is it already contained in modelL.save? and also weights?)
 # # history.history is a dict
 # with open(f"{out_path}trainHistory-L.pickle", 'wb') as file:

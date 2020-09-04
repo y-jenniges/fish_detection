@@ -8,14 +8,14 @@ import json
 import os
 import pickle
 #from tensorflow import random 
-from tensorflow set_ranom_seed
+from tensorflow import set_random_seed
 import numpy as np
 
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
 #random.set_seed(2)
-set_ranom_seed(2)
+set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -175,7 +175,7 @@ x = ourBlock (x, "block_17")
 # Final output layer with sigmoid, because heatmap is within 0..1
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_18_conv_output")(x)
 #x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
-out_h = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
 
 
@@ -184,7 +184,7 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 
 
 
@@ -195,7 +195,8 @@ modelL.summary()
 start_L  = time.time()
 
 # for training mobilenet too 
-history_L1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL)
+history_L1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=testGenL)
+#@todo make epochs 10 again
 
 # activate all layers for training
 for l in modelL.layers:
@@ -203,7 +204,7 @@ for l in modelL.layers:
     
 # compile and fit model again
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 
@@ -232,16 +233,17 @@ x = layers.Concatenate(name="block_22_concat")([x,modelL.get_layer("expanded_con
 x = ourBlock (x, 'block_22')
 
 x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
-#x = layers.Concatenate(name="block_23_concat")([x, input])
-#x = layers.Conv2D (8, 3, padding='same', name = "block_23_conv")(x)
-#x = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='block_23_BN')(x)
-#x = layers.ReLU(6., name='block_23_relu')(x)
-x = ourBlock (x, 'block_23', channels=4)
+# # x = layers.Concatenate(name="block_23_concat")([x, input])
+# # x = layers.Conv2D (8, 3, padding='same', name = "block_23_conv")(x)
+# # x = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='block_23_BN')(x)
+# # x = layers.ReLU(6., name='block_23_relu')(x)
+# # x = ourBlock (x, 'block_23', channels=4) # @todo why 4 channels here only?
+x = ourBlock (x, 'block_23', channels=12)
 
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
 
 #x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
-out_h = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
+out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
 
 
@@ -249,12 +251,25 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelH = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelH.compile(loss={"heatmap":Globals.loss, "connection":"binary_crossentropy"}, optimizer=opt, metrics=Globals.metrics)
+modelH.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 
 
 modelH.summary()
 
-
+# @todo: save initial weights to make models more comparable, add more metrics
+# METRICS = [
+#       keras.metrics.MeanAbsoluteError(),
+#       keras.metrics.CategoricalCrossentropy(),
+#       keras.metrics.TruePositives(name='tp'),
+#       keras.metrics.FalsePositives(name='fp'),
+#       keras.metrics.TrueNegatives(name='tn'),
+#       keras.metrics.FalseNegatives(name='fn'), 
+#       keras.metrics.BinaryAccuracy(name='accuracy'),
+#       keras.metrics.Precision(name='precision'),
+#       keras.metrics.Recall(name='recall'),
+#       keras.metrics.AUC(name='auc'),
+# ]
+# @todo: check metric for this model and then for a model with class weights
 
 # # take time of training process
 # start  = time.time()
