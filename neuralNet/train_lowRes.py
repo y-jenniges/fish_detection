@@ -185,7 +185,7 @@ start  = time.time()
 #history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
     
 # for training mobilenet too 
-history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=valGenL)
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=valGenL)
 
 # activate all layers for training
 for l in modelL.layers:

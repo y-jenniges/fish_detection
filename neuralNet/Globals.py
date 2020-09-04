@@ -22,8 +22,8 @@ optimizer = 'adam'
 # metrics = {'heatmap':['mae'],
 #             'classification':['acc']}
 metrics = [
-      metrics.MeanAbsoluteError(),
-      metrics.CategoricalCrossentropy(),
+      metrics.MeanAbsoluteError(name='mae'),
+      metrics.CategoricalCrossentropy(name="categorical_crossentropy"),
       metrics.TruePositives(name='tp'),
       metrics.FalsePositives(name='fp'),
       metrics.TrueNegatives(name='tn'),
@@ -35,5 +35,5 @@ metrics = [
 ]
 
 
-epochs_L = 50
+epochs_L = 1
 epochs_H = 20
