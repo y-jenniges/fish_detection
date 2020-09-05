@@ -31,8 +31,30 @@ bodyPart:
     'both'
 """
 
+metrics = {"heatmap": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]}
+
 # output directory
-out_path = f"../data/output/54/"
+out_path = f"../data/output/55/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -42,9 +64,9 @@ test_labels, train_labels, train_labels_no_animals, val_labels = helpers.loadAnd
 val_labels = val_labels + test_labels
 
 # only take first 5 labels
-# train_labels = train_labels[:4]
-# test_labels = test_labels[:4]
-# val_labels = val_labels[:4]
+train_labels = train_labels[:4]
+test_labels = test_labels[:4]
+val_labels = val_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -168,7 +190,7 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -192,7 +214,7 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
 

@@ -21,19 +21,19 @@ optimizer = 'adam'
 #metrics = ['mae']
 # metrics = {'heatmap':['mae'],
 #             'classification':['acc']}
-metrics = [
-      metrics.MeanAbsoluteError(name='mae'),
-      metrics.CategoricalCrossentropy(name="categorical_crossentropy"),
-      metrics.TruePositives(name='tp'),
-      metrics.FalsePositives(name='fp'),
-      metrics.TrueNegatives(name='tn'),
-      metrics.FalseNegatives(name='fn'), 
-      metrics.BinaryAccuracy(name='accuracy'),
-      metrics.Precision(name='precision'),
-      metrics.Recall(name='recall'),
-      metrics.AUC(name='auc'),
-]
+#metrics = [ "mae", "acc", "categorical_crossentropy", "tp", "fp", "tn", "fn", "precision", "recall", "auc"]
+#       metrics.MeanAbsoluteError(name='mae'),
+#       metrics.CategoricalCrossentropy(name="categorical_crossentropy"),
+#       metrics.TruePositives(name='tp'),
+#       metrics.FalsePositives(name='fp'),
+#       metrics.TrueNegatives(name='tn'),
+#       metrics.FalseNegatives(name='fn'), 
+#       metrics.BinaryAccuracy(name='accuracy'),
+#       metrics.Precision(name='precision'),
+#       metrics.Recall(name='recall'),
+#       metrics.AUC(name='auc'),
+# ]
 
 
-epochs_L = 1
+epochs_L = 2
 epochs_H = 20

@@ -12,7 +12,7 @@ import DataGenerator as dg
 import Globals
 
 
-test_path = "../data/output/53/"
+test_path = "../data/output/55/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -208,18 +208,20 @@ for k, v in tests.items():
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-print(f"MAE: {history['mae']}")
+key = "mae"
+
+print(f"key: {history[key]}")
 print(f"Loss: {history['loss']}")
 
 
 # plot mae history
-plt.plot(history['mae'])
-plt.plot(history['val_mae'])
-plt.title(f'model{res} mean absolute error')
-plt.ylabel('mae')
+plt.plot(history[key])
+plt.plot(history[f'val_{key}'])
+plt.title(f'model{res} {key}')
+plt.ylabel(key)
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper right')
-plt.savefig(out_path+f"mae{res}2.png")
+plt.savefig(out_path+f"{key}{res}2.png")
 plt.show()
 
 # plot loss history
