@@ -190,7 +190,27 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -214,7 +234,27 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": [keras.metrics.MeanAbsoluteError(),
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
 
