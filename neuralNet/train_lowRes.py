@@ -190,7 +190,27 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.CategoricalAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": ["mae", "acc", 
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -207,14 +227,34 @@ start  = time.time()
 #history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
     
 # for training mobilenet too 
-history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=valGenL, class_weight=class_weights)
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=valGenL, class_weight=class_weights)
 
 # activate all layers for training
 for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.CategoricalAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": ["mae", "acc", 
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL, class_weight=class_weights)
 
