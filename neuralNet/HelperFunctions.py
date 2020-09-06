@@ -56,6 +56,19 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     train_jellyfish_labels = filter_labels_for_animal_group(train_labels_animals, jellyfish_id)
     test_jellyfish_labels = filter_labels_for_animal_group(all_test_labels, jellyfish_id)
     
+  
+    # calculating class weight accroding to the number of available data
+    max_class_length = max(len(train_fish_labels), len(train_crust_labels), len(train_chaeto_labels), len(train_unidentified_labels), len(train_jellyfish_labels))  
+    weight_fish =  max_class_length/len(train_fish_labels)
+    weight_crust = max_class_length/len(train_crust_labels)
+    weight_chaeto = max_class_length/len(train_chaeto_labels)
+    weight_unid = max_class_length/len(train_unidentified_labels)
+    weight_jelly = max_class_length/len(train_jellyfish_labels)
+    class_weights = {0: 1, 1:weight_fish, 2:weight_fish, 
+                     3: weight_crust, 4: weight_crust, 
+                     5: weight_chaeto, 6: weight_chaeto, 
+                     7: weight_unid, 8: weight_unid, 
+                     9: weight_jelly, 10:weight_jelly}
     
     # split test labels into test and validation labels
     test_ratio = 0.9
@@ -95,7 +108,7 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     test_labels += empty_test_labels[:math.ceil(len(test_labels)*empty_ratio)]
     val_labels += empty_test_labels[:math.ceil(len(val_labels)*empty_ratio)]
     
-    return test_labels, train_labels_animals, train_labels_no_animals, val_labels
+    return test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights
 
 # image helpers --------------------------------------------------------------------#
 def loadImage(fname, equalize=False):

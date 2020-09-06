@@ -10,9 +10,10 @@ import time
 import HeatmapClass
 import DataGenerator as dg
 import Globals
+import tensorflow as tf
 
 
-test_path = "../data/output/55/"
+test_path = "../data/output/54/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -54,14 +55,15 @@ c = "trainHistory-H.pickle"
 
 # load model
 # todo look for file name (depends on timestamp)
-modelL = keras.models.load_model(os.path.join(test_path,model_path))
+modelL = tf.keras.models.load_model(os.path.join(test_path,model_path))
 
 # load training history
 with open(os.path.join(test_path, a),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
-
+#with keras.utils.CustomObjectScope({'precision': keras.metrics.Precision()}):model = keras.models.load_model(os.path.join(test_path,model_path))
+#with tf.keras.utils.CustomObjectScope({'precision': tf.keras.metrics.Precision()}):model = tf.keras.models.load_model(os.path.join(test_path,model_path))
 
 print("Loading done")
 
@@ -83,11 +85,11 @@ f193 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/1
 tests = {"193":f193,"575":f575, "913":f913,"883":f883,"867":f867, "309":f309, "0":f0, "22":f22, "39":f39, "51":f51, "60":f60}
 tests = {"60":f60}
 tests = {"309":f309}
-tests = {"867":f867}
-tests = {"913":f913}
-tests = {"575":f575}
-tests = {"193":f193}
-tests = {"51":f51}
+#tests = {"867":f867}
+#tests = {"913":f913}
+#tests = {"575":f575}
+#tests = {"193":f193}
+#tests = {"51":f51}
 
 for k, v in tests.items():
     entry = [entry for entry in test_labels if entry['filename'] == v][0]
@@ -208,12 +210,9 @@ for k, v in tests.items():
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-key = "mae"
+key = "heatmap_tp"
 
 print(f"key: {history[key]}")
-print(f"Loss: {history['loss']}")
-
-
 # plot mae history
 plt.plot(history[key])
 plt.plot(history[f'val_{key}'])
@@ -224,6 +223,7 @@ plt.legend(['train', 'test'], loc='upper right')
 plt.savefig(out_path+f"{key}{res}2.png")
 plt.show()
 
+print(f"Loss: {history['loss']}")
 # plot loss history
 plt.plot(history['loss'])
 plt.plot(history['val_loss'])

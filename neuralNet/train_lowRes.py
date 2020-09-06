@@ -31,17 +31,17 @@ bodyPart:
     'both'
 """
 
-metrics = {"heatmap": [keras.metrics.MeanAbsoluteError(),
+metrics = {"heatmap": ["mae", "acc", 
       keras.metrics.CategoricalCrossentropy(),
       keras.metrics.TruePositives(),
       keras.metrics.FalsePositives(),
       keras.metrics.TrueNegatives(),
       keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
+      keras.metrics.CategoricalAccuracy(),
       keras.metrics.Precision(),
       keras.metrics.Recall(),
       keras.metrics.AUC(),
-], "connection": [keras.metrics.MeanAbsoluteError(),
+], "connection": ["mae", "acc", 
       keras.metrics.BinaryCrossentropy(),
       keras.metrics.TruePositives(),
       keras.metrics.FalsePositives(),
@@ -60,13 +60,13 @@ out_path = f"../data/output/55/"
 #label_root = "../data/maritime_dataset/labels/"
 label_root = "../data/maritime_dataset_25/labels/"
  
-test_labels, train_labels, train_labels_no_animals, val_labels = helpers.loadAndSplitLabels(label_root)
+test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 val_labels = val_labels + test_labels
 
 # only take first 5 labels
-train_labels = train_labels[:4]
-test_labels = test_labels[:4]
-val_labels = val_labels[:4]
+# train_labels = train_labels[:4]
+# test_labels = test_labels[:4]
+# val_labels = val_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -190,27 +190,7 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": [keras.metrics.MeanAbsoluteError(),
-      keras.metrics.CategoricalCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "connection": [keras.metrics.MeanAbsoluteError(),
-      keras.metrics.BinaryCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-]})
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
 
 
 # modelL = keras.Model(inputs=input_tensor, outputs=[output_h, output_c])
@@ -227,36 +207,16 @@ start  = time.time()
 #history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
     
 # for training mobilenet too 
-history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=valGenL)
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=valGenL, class_weight=class_weights)
 
 # activate all layers for training
 for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": [keras.metrics.MeanAbsoluteError(),
-      keras.metrics.CategoricalCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "connection": [keras.metrics.MeanAbsoluteError(),
-      keras.metrics.BinaryCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-]})
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=metrics)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
+history_phase2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL, class_weight=class_weights)
 
 
 
