@@ -3,21 +3,18 @@ Created on 22 July 2020
 @author: Yvonne Jenniges
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pandas as pd
 
 import PageHome
 import PageSettings
 import PageAbout
 import PageHandbook
 import PageData
-import Helpers 
+from Models import Models
 
 import time
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
-    """
-    Main window class for MarOMarker.
-    """
+    """ Main window class for MarOMarker. """
     
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -26,13 +23,16 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # variable to save settings outside program
         self.settings = QtCore.QSettings("MarOMarker", "MarOMarker")        
         
+        # init data models
+        self.models = Models()
+        
         # init UI and actions
         self.init_ui()
         self.init_actions()
 
         # translate UI and set starting tabs
         self.retranslateUi()
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
         self.page_data.tabWidget_2.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
@@ -76,21 +76,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_home.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
         self.page_home.btn_imgSwitch.setText(_translate("MainWindow", "L"))
-        self.page_home.comboBox_imgRemark.setItemText(1, _translate("MainWindow", "low turbidity"))
-        self.page_home.comboBox_imgRemark.setItemText(2, _translate("MainWindow", "medium turbidity"))
-        self.page_home.comboBox_imgRemark.setItemText(3, _translate("MainWindow", "high turbidity"))
-        self.page_home.comboBox_imgRemark.setItemText(4, _translate("MainWindow", "wrong illumination"))
-        self.page_home.comboBox_imgRemark.setItemText(5, _translate("MainWindow", "without flashlight"))
         self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))    
         self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
         
-        self.page_home.comboBox_imgRemark_dummy.setItemText(0, _translate("MainWindow", "Image remark..."))
-        self.page_home.comboBox_imgRemark_dummy.setItemText(1, _translate("MainWindow", "low turbidity"))
-        self.page_home.comboBox_imgRemark_dummy.setItemText(2, _translate("MainWindow", "medium turbidity"))
-        self.page_home.comboBox_imgRemark_dummy.setItemText(3, _translate("MainWindow", "high turbidity"))
-        self.page_home.comboBox_imgRemark_dummy.setItemText(4, _translate("MainWindow", "wrong illumination"))
-        self.page_home.comboBox_imgRemark_dummy.setItemText(5, _translate("MainWindow", "without flashlight"))
-
         # data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_data.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))   
@@ -174,8 +162,6 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # set up main window properties
         self.setObjectName("MainWindow")
         self.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))    
-        self.resize(1200,900)
-        self.showMaximized()  
         
         # some general properties
         self.setTabShape(QtWidgets.QTabWidget.Rounded)
@@ -412,17 +398,17 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         print(f"gui init: {time.time() - self.start_time}")
         
         # home page
-        self.page_home = PageHome.PageHome(self)
+        self.page_home = PageHome.PageHome(self.models, self)
         self.stackedWidget.addWidget(self.page_home)
         print(f"home init: {time.time() - self.start_time}")
         
         # data page
-        self.page_data = PageData.PageData(self)
+        self.page_data = PageData.PageData(self.models, self)
         self.stackedWidget.addWidget(self.page_data)
         print(f"data init: {time.time() - self.start_time}")
         
         # settings page
-        self.page_settings = PageSettings.PageSettings(self)
+        self.page_settings = PageSettings.PageSettings(self.models, self)
         self.stackedWidget.addWidget(self.page_settings)
         print(f"settings init: {time.time() - self.start_time}")
         
@@ -454,12 +440,15 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
     def on_imageEndingChanged(self, text):
         self.page_home.photo_viewer.setImageEnding(text)
         
+    def on_resFileChanged(self, text):
+        self.page_home.photo_viewer.setResFilePath(text)
         
+    # def on_speciesListChanged(self, list_species):
+    #     self.page_home.update_species_list(list_species)
+
         
     def init_actions(self):
-        """
-        Function to initialize actions.
-        """
+        """ function to initialize actions """
         # connect user button in top bars
         self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
@@ -470,7 +459,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.userIdChanged.connect(self.updateUserIds)
         self.page_data.imageDirChanged.connect(self.on_imageDirChanged)
         self.page_data.imagePrefixChanged.connect(self.on_imagePrefixChanged)
+        self.page_data.resultFilePathChanged.connect(self.on_resFileChanged)
         #self.page_home.imageEndingChanged.connect(lambda: self.page)
+       # self.page_settings.speciesListChanged.connect(self.on_speciesListChanged)
     
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)

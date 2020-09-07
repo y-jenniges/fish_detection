@@ -4,32 +4,37 @@ Created on 22 July 2020
 """
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from keras.preprocessing.image import load_img, img_to_array
 from Helpers import TopFrame, MenuFrame, get_icon
 import time
 from test_new_zoom import PhotoViewer
-
+import HelperFunctions as helpers
 
 class PageHome(QtWidgets.QWidget):
     """
     Class to create the home page of the software.
-    Parameters
+    Args
     ----------
     widget_zoom
         A widget that contains a slider for zooming into the photo.
     """
 
-    def __init__(self, parent=None):        
+    def __init__(self, models, parent=None):        
         super(QtWidgets.QWidget, self).__init__(parent)
+        
+        # data models
+        self.models = models
         
         # init UI and actions
         self.init_ui()
         self.init_actions()
+        self.init_models()
        
         # slider parameters
         self.slider_max = self.photo_viewer.imageArea.width()*10
         self.slider_min = self.photo_viewer.imageArea.width()
         self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)  
+        
         
     
     def openZoomWidget(self):
@@ -76,6 +81,27 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.btn_delete.setIcon(get_icon(":/icons/icons/bin_closed.png"))        
  
+    def on_filter_clicked(self):
+        print("Filters are not implemented yet.")
+        # img_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
+        # img = img_to_array(load_img(img_path), dtype="uint8")
+        # img = helpers.equalizePil(img)
+        # h,w,c = img.shape
+        # qimage = QtGui.QImage(img, h, w, 3*h, QtGui.QImage.Format_RGB888)
+        # self.photo_viewer.imageArea.setPhoto(QtGui.QPixmap.fromImage(qimage))
+
+    def update_species_list(self, list_species):
+        for i in range(len(list_species)):
+            existing_items = self.models.model_species.findItems(list_species[i]["title"])
+
+            # only append new item if it is not already in the list
+            if len(existing_items) == 0:
+                item = QtGui.QStandardItem(list_species[i]["title"])           
+                item.setTextAlignment(QtCore.Qt.AlignRight)
+                self.models.model_species.appendRow(item)
+
+                
+    
     def init_ui(self):
    
         # --- top bar  ------------------------------------------------------------------------------------------- #         
@@ -93,7 +119,7 @@ class PageHome(QtWidgets.QWidget):
         self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding) 
         
         # --- photo viewer  ------------------------------------------------------------------------------------------- #        
-        self.photo_viewer = PhotoViewer(imageDirectory="", imagePrefix="", imageEnding="*-L.jpg", parent=self)
+        self.photo_viewer = PhotoViewer(self.models, imageDirectory="", imagePrefix="", resFilePath="", imageEnding="*_L.jpg", parent=self)
         self.photo_viewer.setObjectName("photo_viewer")
         
         
@@ -212,12 +238,12 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark.setMaximumSize(QtCore.QSize(16777215, 40))
         self.comboBox_imgRemark.setEditable(True)
         self.comboBox_imgRemark.setObjectName("comboBox_imgRemark")
-        self.comboBox_imgRemark.addItem("")
-        self.comboBox_imgRemark.addItem("")
-        self.comboBox_imgRemark.addItem("")
-        self.comboBox_imgRemark.addItem("")
-        self.comboBox_imgRemark.addItem("")
-        self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
+        # self.comboBox_imgRemark.addItem("")
         
         # button for opening a widget for zooming into photo
         self.btn_zoom = QtWidgets.QPushButton(frame_controlBar)
@@ -377,12 +403,12 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark_dummy.setEnabled(False)
         self.comboBox_imgRemark_dummy.setStyleSheet("#comboBox_imgRemark_dummy{background-color:transparent; color:transparent;} #comboBox_imgRemark_dummy:down-arrow{ image:none;}")
         self.comboBox_imgRemark_dummy.setObjectName("comboBox_imgRemark_dummy")
-        self.comboBox_imgRemark_dummy.addItem("")
-        self.comboBox_imgRemark_dummy.addItem("")
-        self.comboBox_imgRemark_dummy.addItem("")
-        self.comboBox_imgRemark_dummy.addItem("")
-        self.comboBox_imgRemark_dummy.addItem("")
-        self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
+        # self.comboBox_imgRemark_dummy.addItem("")
 
         # --- add widgets to layout of the control bar --------------------------------------- #
         # add widgets to layout 
@@ -423,6 +449,8 @@ class PageHome(QtWidgets.QWidget):
         self.btn_zoom.clicked.connect(self.openZoomWidget)
         self.btn_imgSwitch.clicked.connect(self.switchImageMode)
         self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
+        self.photo_viewer.newImageLoaded.connect(self.setComboboxImageRemark)
+        self.btn_filter.clicked.connect(self.on_filter_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
         self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.imageArea.animal_painter.on_previous_animal)
@@ -433,6 +461,24 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
      
+        
+    def init_models(self):
+        self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
+        self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
+        
+        
+    def setComboboxImageRemark(self, text):
+        # if the remark is not in the combobox, add it. Else choose its index
+        index = self.comboBox_imgRemark.findText(text) 
+        
+        if self.comboBox_imgRemark.findText(text) == -1:
+            item = QtGui.QStandardItem(str(text))
+            item.setTextAlignment(QtCore.Qt.AlignLeft)
+            self.models.model_image_remarks.appendRow(item)
+            self.comboBox_imgRemark.setCurrentIndex(self.comboBox_imgRemark.count()-1)
+        else:
+            self.comboBox_imgRemark.setCurrentIndex(index)
+    
     def switchImageMode(self):
         cur_mode = self.btn_imgSwitch.text()
         if cur_mode == "L": 
@@ -447,14 +493,14 @@ class PageHome(QtWidgets.QWidget):
         print("on left image")
         self.btn_imgSwitch.setText("L")
         self.photo_viewer.activateLRMode(False)
-        self.photo_viewer.setImageEnding("*-L.jpg")
+        self.photo_viewer.setImageEnding("*_L.jpg")
         pass
 
     def displayRightImage(self):
         print("on right image")
         self.btn_imgSwitch.setText("R")
         self.photo_viewer.activateLRMode(False)
-        self.photo_viewer.setImageEnding("*-R.jpg")
+        self.photo_viewer.setImageEnding("*_R.jpg")
         pass
     
     def displayBothImages(self):

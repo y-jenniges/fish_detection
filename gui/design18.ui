@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1685</width>
-    <height>1557</height>
+    <width>1659</width>
+    <height>1525</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -288,7 +288,7 @@ QDoubleSpinBox::down-button:pressed {
        <number>0</number>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_home_lr">
        <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -3197,10 +3197,7 @@ QPushButton{
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_22">
-              <property name="spacing">
-               <number>0</number>
-              </property>
+             <layout class="QGridLayout" name="gridLayout_8">
               <property name="leftMargin">
                <number>0</number>
               </property>
@@ -3213,23 +3210,18 @@ QPushButton{
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item>
-               <spacer name="horizontalSpacer_34">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_3">
+                <property name="styleSheet">
+                 <string notr="true">font:bold;  
+color: rgb(150,150,150);</string>
                 </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
+                <property name="text">
+                 <string>Select</string>
                 </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>50</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
+               </widget>
               </item>
-              <item>
+              <item row="1" column="2">
                <widget class="QFrame" name="frame_data_selection">
                 <property name="styleSheet">
                  <string notr="true"/>
@@ -3524,23 +3516,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
                 </layout>
                </widget>
               </item>
-              <item>
-               <spacer name="horizontalSpacer_25">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>70</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
+              <item row="1" column="4">
                <widget class="QFrame" name="frame_data_information">
                 <property name="enabled">
                  <bool>false</bool>
@@ -3555,112 +3531,6 @@ QCalendarWidget QSpinBox::down-button:pressed {
                  <enum>QFrame::Raised</enum>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="lineEdit_res_file">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Path of result file...</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_img_prefix">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="text">
-                    <string>Image Prefix</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_res_file">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="text">
-                    <string>Result file</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_img_dir">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="text">
-                    <string>Image directory</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="2">
-                  <widget class="QPushButton" name="btn_apply_diverging_data_info">
-                   <property name="minimumSize">
-                    <size>
-                     <width>70</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">font:bold;</string>
-                   </property>
-                   <property name="text">
-                    <string>Apply</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="lineEdit_img_prefix">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>TN_Exif_</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Prefix to select images...</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QLabel" name="label_num_imgs_text">
-                   <property name="styleSheet">
-                    <string notr="true">padding-left: 10px;</string>
-                   </property>
-                   <property name="text">
-                    <string>48</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="1" column="2">
                   <widget class="QPushButton" name="btn_res_file">
                    <property name="minimumSize">
@@ -3679,44 +3549,6 @@ QCalendarWidget QSpinBox::down-button:pressed {
                     <string>Browse</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="lineEdit_img_dir">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>helge:// SVL/Remos-1/.../time-normized/</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Directory to left and right images...</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <spacer name="verticalSpacer_6">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Expanding</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_num_imgs">
@@ -3740,6 +3572,16 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_exp_id">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>Experiment ID</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="3" column="1">
                   <widget class="QLineEdit" name="lineEdit_exp_id">
                    <property name="minimumSize">
@@ -3759,13 +3601,13 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_exp_id">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_img_dir">
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
                    <property name="text">
-                    <string>Experiment ID</string>
+                    <string>Image directory</string>
                    </property>
                   </widget>
                  </item>
@@ -3794,10 +3636,148 @@ QCalendarWidget QSpinBox::down-button:pressed {
                    </property>
                   </widget>
                  </item>
+                 <item row="5" column="2">
+                  <widget class="QPushButton" name="btn_apply_diverging_data_info">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">font:bold;</string>
+                   </property>
+                   <property name="text">
+                    <string>Apply</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="lineEdit_res_file">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Path of result file...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLabel" name="label_num_imgs_text">
+                   <property name="styleSheet">
+                    <string notr="true">padding-left: 10px;</string>
+                   </property>
+                   <property name="text">
+                    <string>48</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="lineEdit_img_prefix">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>TN_Exif_</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Prefix to select images...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_img_dir">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>helge:// SVL/Remos-1/.../time-normized/</string>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Directory to left and right images...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_img_prefix">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>Image Prefix</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_res_file">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="text">
+                    <string>Result file</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>
-              <item>
+              <item row="0" column="4">
+               <widget class="QLabel" name="label_4">
+                <property name="font">
+                 <font>
+                  <family>Century Gothic</family>
+                  <pointsize>12</pointsize>
+                  <weight>75</weight>
+                  <italic>false</italic>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">font: bold;
+color: rgb(150,150,150);</string>
+                </property>
+                <property name="text">
+                 <string>Check</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="5">
                <spacer name="horizontalSpacer_33">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -3808,6 +3788,38 @@ QCalendarWidget QSpinBox::down-button:pressed {
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>50</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="0">
+               <spacer name="horizontalSpacer_34">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>50</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="3">
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>80</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -3831,7 +3843,7 @@ QCalendarWidget QSpinBox::down-button:pressed {
               </size>
              </property>
              <property name="text">
-              <string>Analyze images</string>
+              <string>Run Neural Netowork</string>
              </property>
             </widget>
            </item>

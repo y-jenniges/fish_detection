@@ -1,64 +1,76 @@
 import time
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 import ntpath
 from Helpers import TopFrame, MenuFrame
 import glob
 
+from Models import TableModel
+import pandas as pd
 # IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
 IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
 # IMAGE_DIRECTORY = ""
 # IMAGE_PREFIX = ""
+# class TableModel(QtCore.QAbstractTableModel):
+#     def __init__(self, data):
+#         super(TableModel, self).__init__()
+#         self._data = data
 
-"""
-Class to create the data page of the software.
-"""
+#     def data(self, index, role):
+#         if role == QtCore.Qt.DisplayRole:
+#             # See below for the nested-list data structure.
+#             # .row() indexes into the outer list,
+#             # .column() indexes into the sub-list
+#             return self._data[index.row()][index.column()]
+
+#     def rowCount(self, index):
+#         # The length of the outer list.
+#         return len(self._data)
+
+#     def columnCount(self, index):
+#         # The following takes the first sub-list, and returns
+#         # the length (only works if all rows are an equal length)
+#         return len(self._data[0])
+
 class PageData(QtWidgets.QWidget): 
+    """ Class to create the data page of the software """
     # define custom signals
     imageDirChanged = QtCore.pyqtSignal(str)
     resultFilePathChanged = QtCore.pyqtSignal(str)
     imagePrefixChanged = QtCore.pyqtSignal(str)
     experimentIdChanged = QtCore.pyqtSignal(str)
     
-    def __init__(self, parent=None):
+    def __init__(self, models, parent=None):
         start_time = time.time()       
         super(QtWidgets.QWidget, self).__init__(parent)
-    
+        # data models
+        self.models = models
+        
+        # init UI, actions
         self.init_ui()
         self.init_actions()
+        self.init_models()
         
-        # init values
-        #self.IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
-        # self.IMAGE_DIRECTORY = ""
-        # self.RES_FILE = ""  
-        # self.IMAGE_PREFIX = "TN_Exif_"
-        # self.EXPERIMENT_ID = ""
-              
         self.calenderSelectionChanged()
         
 
-    
-    # function to handle when the user changes the img_dir line edit
     def on_img_dir_edit_changed(self, text=None, updateVisuals=True):
+        """ function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
-        if ntpath.exists(text):
-            #self.IMAGE_DIRECTORY = self.lineEdit_img_dir.text()
-            #if updateVisuals: self.updateAllVisuals()
-            #self.on_img_dir_edit_changed(self.lineEdit_img_dir.text())
-            pass
-        else:
+        if not ntpath.exists(text): # check if path exists
             self.lineEdit_img_dir.setText("")
             print("The entered img dir is not a valid path.") # @todo error prompt
             
         self.updateNumImages()
         self.imageDirChanged.emit(self.lineEdit_img_dir.text())
         #self.on_img_dir_edit_changed(self.lineEdit_img_dir.text())
-    
-    # function to handle when the user changes the red_file line edit
+     
     def on_res_file_edit_changed(self):
+        """ function to handle when the user changes the res_file line edit """
+        # check if entered result file exists 
+        # (else replace it by an empty string)
         if ntpath.exists(self.lineEdit_res_file.text()):
             pass
-            #self.RES_FILE = self.lineEdit_res_file.text()
         else: 
             self.lineEdit_res_file.setText("")
             print(self.lineEdit_res_file.text())
@@ -66,66 +78,83 @@ class PageData(QtWidgets.QWidget):
             
         self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
         
-    # function to handle when the user changes the image prefix line edit
     def on_prefix_edit_changed(self):
-        #self.IMAGE_PREFIX = self.lineEdit_img_prefix.text()
+        """ function to handle when the user changes the image prefix line edit """
         self.imagePrefixChanged.emit(self.lineEdit_img_prefix.text())
         self.updateNumImages()    
     
-    # function to handle when the user changes the experiment id line edit
     def on_exp_id_edit_changed(self):
-        #self.EXPERIMENT_ID = self.lineEdit_exp_id.text()
+        """ function to handle when the user changes the experiment id line edit """
         self.experimentIdChanged.emit(self.lineEdit_exp_id.text())
         
-    
-    # function to check how many images are in the current IMAGE_DIRECTORY and updates the display of this count
     def updateNumImages(self):
-        #num_images = str(len(glob.glob(IMAGE_DIRECTORY + self.IMAGE_PREFIX + "*-L.jpg"))) 
-        num_images = str(len(glob.glob(self.lineEdit_img_dir.text() + self.lineEdit_img_prefix.text() + "*-L.jpg")))
+        """ function to check how many images are in the current 
+        IMAGE_DIRECTORY and updates the display of this count """
+        num_images = str(len(glob.glob(self.lineEdit_img_dir.text() + self.lineEdit_img_prefix.text() + "*_L.jpg")))
         self.label_num_imgs_text.setText(num_images)   
     
-    # function that opens a dialog for the user to select a result file in csv format
     def browseResultFile(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+        """ function that opens a dialog for the user to select a result file 
+        in csv format """
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv; *.xlsx")
         self.lineEdit_res_file.setText(filename[0])
         self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
       
-    # function that opens a dialog for the user to select a directory where the images are
     def browseImageDir(self):
+        """ function that opens a dialog for the user to select a directory 
+        where the images are """
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
         if len(filename) > 0: 
             if ntpath.exists(filename):
                 self.lineEdit_img_dir.setText(filename + "/")
                 self.on_img_dir_edit_changed(filename+"/")
 
-    # function to update the image directory according to the input from the calender widget
     def updateImageDir(self):
+        """ function to update the image directory according to the input 
+        from the calender widget """
         date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
         directory = IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
         
         # enable frame to manipulate data properties
         self.frame_data_information.setEnabled(True) # @todo always enabled
         
-        # if directory does not exist, clear the image directory parameter and visual
+        # if directory does not exist, clear the image directory
         if not ntpath.exists(directory):
             self.lineEdit_img_dir.setText("")
         else:
             self.lineEdit_img_dir.setText(directory)
             self.on_img_dir_edit_changed(directory)
         
-        self.updateNumImages()
-        
-    # function to handle a change of th calender widget selection
-    def calenderSelectionChanged(self):
-        self.label_date.setText(self.calendarWidget.selectedDate().toString("dd.MM.yyyy")) # set the date label
-        
-        new_exp_id = "Spitzbergen " + str(self.calendarWidget.selectedDate().year()) # adapt experiment id
-        self.lineEdit_exp_id.setText(new_exp_id)
+        # update the number of images
+        self.updateNumImages() 
+
+        # adapt experiment id  
+        new_exp_id = "Spitzbergen " \
+            + str(self.calendarWidget.selectedDate().year())     
+        self.lineEdit_exp_id.setText(new_exp_id) 
         self.on_exp_id_edit_changed()
         
+        # adapt result file path
+        self.lineEdit_res_file.setText(directory
+                                       +"result_"
+                                       +str(date.rsplit("-",1)[0])
+                                       +"neuralNet.csv")
+        self.on_res_file_edit_changed() # has to be called manually since the 
+        # lineEdit is only connected with "editingFinished" slot
+        
+        
+    def calenderSelectionChanged(self):
+        """ function to handle a change of the calender widget selection """
+        # set the date label
+        self.label_date.setText(self.calendarWidget.selectedDate() \
+                                .toString("dd.MM.yyyy")) 
+        
+        # adapt image directory
         self.updateImageDir()
+        
  
     def createFrameData(self):
+        """ creates the data page UI """
         # data frame
         frame_data = QtWidgets.QFrame(self)
         frame_data.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
@@ -149,6 +178,7 @@ class PageData(QtWidgets.QWidget):
 "    font: 10pt \"Century Gothic\";\n"
 "    background-color: white;  \n"
 "    border-radius:3px;\n"
+"    color: black;"
 "}\n"
 "\n"
 "/*-------------------------- line edit ------------------------*/\n"
@@ -212,6 +242,7 @@ class PageData(QtWidgets.QWidget):
         return frame_data
 
     def createFrameTable(self, frame_data):
+        """ creates the frame showing the data table """
         # frame for displaying data table
         frame_table = QtWidgets.QFrame(frame_data)
         frame_table.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -282,6 +313,19 @@ class PageData(QtWidgets.QWidget):
         self.tableView_original = QtWidgets.QTableView(self.original)
         self.tableView_original.setObjectName("tableView_original")
         self.layout_original_table.addWidget(self.tableView_original)
+        
+
+
+
+
+
+
+
+        # data = pd.read_excel("C:/Users/yjenn/Downloads/result_2015_08_step3.xlsx")
+        # df = pd.DataFrame(data)
+        
+        # self.model = TableModel(df)
+        # self.tableView_original.setModel(self.model)#models.model_animals)
             
         # widget to show the summary table
         self.summary = QtWidgets.QWidget(self)  # comment see above @todo
@@ -308,6 +352,8 @@ class PageData(QtWidgets.QWidget):
         return frame_table
     
     def createFrameDataOptions(self, frame_data):
+        """ created frame that contains all elements to adapt the 
+        data selection """
         # frame for data options
         frame_data_options = QtWidgets.QFrame(frame_data)
         frame_data_options.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -341,6 +387,8 @@ class PageData(QtWidgets.QWidget):
         return frame_data_options
     
     def createFrameDataSelection(self, frame_data_options):   
+        """ creates frame with the main data selection options (calendar and 
+        data filter combobox) """
         # data selection frame
         frame_data_selection = QtWidgets.QFrame(frame_data_options)
         frame_data_selection.setStyleSheet("")
@@ -544,6 +592,8 @@ class PageData(QtWidgets.QWidget):
         return frame_data_selection
         
     def createFrameDataInformation(self, frame_data_options):
+        """ creates frame that shows image directory, result file path, 
+        image prefix and experiment ID """
         # frame for data information
         frame_data_information = QtWidgets.QFrame(frame_data_options)
         frame_data_information.setEnabled(False)
@@ -629,10 +679,9 @@ class PageData(QtWidgets.QWidget):
         self.label_img_prefix.setObjectName("label_img_prefix")
         
         # spacer
-        spacerItem21 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        #spacerItem21 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
-
-        # --- add widgets to data information frame -------------------------------------- #
+        # --- add widgets to data information frame ------------------------ #
         self.gridLayout_5.addWidget(self.lineEdit_res_file, 2, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_num_imgs, 5, 0, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_img_dir, 1, 1, 1, 1)
@@ -649,8 +698,8 @@ class PageData(QtWidgets.QWidget):
         
         return frame_data_information
     
-    # function to initialize the UI of data page
     def init_ui(self):
+        """ function to initialize the UI of data page """
         self.setObjectName("page_data")
         
         # main layout
@@ -660,10 +709,12 @@ class PageData(QtWidgets.QWidget):
         self.layout_page_data.setObjectName("layout_page_data")
         
         # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", "frame_dataBar", self)     
+        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", 
+                                     "frame_dataBar", self)     
                
         # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Data", "frame_controlBar_data", self)  
+        self.frame_controlBar = MenuFrame("Data", 
+                                          "frame_controlBar_data", self)  
    
         # create the main frame for the data
         self.frame_data = self.createFrameData()
@@ -673,8 +724,8 @@ class PageData(QtWidgets.QWidget):
         self.layout_page_data.addWidget(self.frame_controlBar)
         self.layout_page_data.addWidget(self.frame_data)
     
-    # function to initialize the actions on data page
     def init_actions(self):
+        """ function to initialize the actions on data page """
         self.calendarWidget.selectionChanged.connect(self.calenderSelectionChanged)
         
         self.btn_img_dir.clicked.connect(self.browseImageDir)
@@ -685,10 +736,14 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_res_file.editingFinished.connect(self.on_res_file_edit_changed)
         self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
         self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)
+  
+    def init_models(self):
+        self.tableView_original.setModel(self.models.model_animals)
+        print("table view connected")
         
-        
-# --- functions for saving and restoring options ------------------------------------------------- # 
-    def saveCurrentValues(self, settings):       
+# --- functions for saving and restoring options --------------------------- # 
+    def saveCurrentValues(self, settings):     
+        """ saves current settings on data page fornext program start """
         settings.setValue("date", self.calendarWidget.selectedDate())       
         settings.setValue("dataFilter", self.comboBox_image_filter.currentIndex())
         settings.setValue("imgDir", self.lineEdit_img_dir.text())       
@@ -697,6 +752,7 @@ class PageData(QtWidgets.QWidget):
         settings.setValue("experimentId", self.lineEdit_exp_id.text())
         
     def restoreValues(self, settings):
+        """ restores settings of page data from last program start """
         self.calendarWidget.setSelectedDate(settings.value("date"))
         self.comboBox_image_filter.setCurrentIndex(settings.value("dataFilter"))
         self.lineEdit_img_dir.setText(settings.value("imgDir"))
@@ -704,7 +760,8 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_img_prefix.setText(settings.value("imgPrefix"))
         self.lineEdit_exp_id.setText(settings.value("experimentId"))
         
-        # do not update the visuals when setting the image directory, that would override the restored settings of the other fields
+        # do not update the visuals when setting the image directory, 
+        # that would override the restored settings of the other fields
         self.on_img_dir_edit_changed(updateVisuals=False)
         self.on_res_file_edit_changed()
         self.on_prefix_edit_changed()

@@ -2,15 +2,18 @@
 # https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview
 from PyQt5 import QtCore, QtGui, QtWidgets
 import glob
+import pandas as pd
+import ntpath
 
-from test_graph import Animal, AnimalGroup, AnimalSpecies
+from test_graph import Animal
+from Models import AnimalGroup, AnimalSpecies, TableModel
 from Helpers import get_icon
 
 #IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 #IMAGE_PREFIX = ""
 ANIMAL_LIST = []
-ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
-IMAGE_REMARKS = []
+# ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
+# IMAGE_REMARKS = []
 
 # class GroupItemModel(QtCore.QAbstractItemModel):
 #     def __init__(self, in_nodes):  
@@ -35,53 +38,21 @@ IMAGE_REMARKS = []
 #         pass
 
 
-"""
-A widget to provide all information of the current animal
-"""
+
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
-    def __init__ (self, parent = None):
+    """ A widget to provide all information of the current animal. """
+    def __init__ (self, models, parent = None):
         super(QtWidgets.QWidget, self).__init__(parent)
         
         self.group = AnimalGroup.UNIDENTIFIED.name.title()
-        self.species = AnimalSpecies.A.name.title()
+        self.species = AnimalSpecies.UNIDENTIFIED.name.title()
         self.remark = ""
         self.length = 0
+        self.models = models
         
         self.init_ui()
-        
-        ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
-        group_icon_list = [":/animal_markings/animal_markings/square_blue.png", 
-                           ":/animal_markings/animal_markings/square_red.png", 
-                           ":/animal_markings/animal_markings/square_orange.png", 
-                           ":/animal_markings/animal_markings/square_black.png", 
-                           ":/animal_markings/animal_markings/square_gray.png"]
-        
-        
-        self.model_group = self.comboBox_group.model()#GroupItemModel()#combo.model()
-        index = 0
-        for group in AnimalGroup:
-            icon = QtGui.QIcon(group_icon_list[index])
-            
-            item = QtGui.QStandardItem(str(group.name.title()))
-            item.setTextAlignment(QtCore.Qt.AlignRight)
-            item.setIcon(icon)
-            self.model_group.appendRow(item)
-            index += 1
-       # self.comboBox_group.setModel(model)
-       
-        self.model_species = self.comboBox_species.model()#GroupItemModel()#combo.model()
-        for species in AnimalSpecies:
-            item = QtGui.QStandardItem(str(species.name.title()))
-            item.setTextAlignment(QtCore.Qt.AlignRight)
-            self.model_species.appendRow(item)
-       # self.comboBox_group.setModel(model)
-       
-        self.model_remarks = self.comboBox_remark.model()#GroupItemModel()#combo.model()
-        for remark in ANIMAL_REMARKS:
-            item = QtGui.QStandardItem(str(remark.title()))
-            item.setTextAlignment(QtCore.Qt.AlignRight)
-            self.model_remarks.appendRow(item)
-       # self.comboBox_group.setModel(model)
+        self.init_actions()
+        self.init_models()
        
         # setting visuals to initial values and hiding widget
         self.updateVisuals()
@@ -92,13 +63,20 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.setTabOrder(self.comboBox_species, self.comboBox_remark)
         self.setTabOrder(self.comboBox_remark, self.spinBox_length)
         
+
+    def init_actions(self):
         # connecting signals and slots
         self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
         self.comboBox_group.currentTextChanged.connect(self.on_group_combobox_changed)
         self.comboBox_species.currentTextChanged.connect(self.on_species_combobox_changed)
         self.comboBox_remark.currentTextChanged.connect(self.on_remark_combobox_changed)
         self.comboBox_remark.lineEdit().editingFinished.connect(self.on_remark_combobox_edited)
-      
+                 
+    def init_models(self):
+        self.comboBox_group.setModel(self.models.model_group)
+        self.comboBox_species.setModel(self.models.model_species)
+        self.comboBox_remark.setModel(self.models.model_animal_remarks)
+        
     def on_remark_combobox_edited(self):
         text = self.comboBox_remark.currentText()
         
@@ -110,10 +88,10 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.focusNextChild()
       
     def on_remark_combobox_changed(self, remark):
-        self.parent().animal_painter.setAnimalRemark(remark)
+        self.parent().animal_painter.setAnimalRemark(str(remark))
         
     def on_species_combobox_changed(self, species):
-        if self.comboBox_species.findText(species) != -1:
+        if self.comboBox_species.findText(species) != -1 and hasattr(self.parent(), "animal__painter"):
             self.species = species
             self.parent().animal_painter.setAnimalSpecies(species) #setAnimalGroup(group) 
             self.focusNextChild()
@@ -121,7 +99,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             print("Given species was not in combobox")
             
     def on_group_combobox_changed(self, group):
-        if self.comboBox_group.findText(group) != -1:
+        if self.comboBox_group.findText(group) != -1 and hasattr(self.parent(), "animal__painter"):
             self.group = group
             self.parent().animal_painter.setAnimalGroup(group) #setAnimalGroup(group) 
             self.focusNextChild()
@@ -147,7 +125,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.species = animal.species
 
         if animal.remark is not None:
-            self.remark = animal.remark
+            self.remark = str(animal.remark)
         else:
             self.remark = ""
             
@@ -175,11 +153,16 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(index)
             self.comboBox_remark.blockSignals(False)  
+        elif self.remark == "nan":
+            self.comboBox_remark.blockSignals(True)
+            self.comboBox_remark.setCurrentIndex(0)
+            self.comboBox_remark.blockSignals(False)            
         elif self.remark != "" and self.remark is not None:
             print("adding new remark entry")
             item = QtGui.QStandardItem(str(self.remark))
             item.setTextAlignment(QtCore.Qt.AlignRight)
-            self.model_remarks.appendRow(item)
+            self.models.model_animal_remarks.appendRow(item)
+            #self.model_remarks.appendRow(item)
         
         # set length spinbox
         if self.length: 
@@ -289,13 +272,16 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # layout.addWidget(self.spinBox_heigth, 4, 1, 1, 1)
 
 
-"""
-An implementation of QGraphicsView to enable painting of animals on a photo as well as loading of photos. Moreover, it provides a wheel zoom functionality.
-"""
+
 class ImageArea(QtWidgets.QGraphicsView):
-    def __init__(self, parent=None):
+    """
+    An implementation of QGraphicsView to enable painting of animals on a 
+    photo as well as loading of photos. Moreover, it provides a 
+    wheel zoom functionality.
+    """
+    def __init__(self, models, parent=None):
         super(ImageArea, self).__init__(parent)
-        
+        print("init image area")
         self._zoom = 0
         self._scene = QtWidgets.QGraphicsScene()
         self._photo = QtWidgets.QGraphicsPixmapItem()
@@ -309,8 +295,7 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
         # animal painter to enable adding/removing of animals
-        self.animal_painter = AnimalPainter(self)
-       
+        self.animal_painter = AnimalPainter(models, self)      
         
     def hasPhoto(self):
         return not self._empty
@@ -387,23 +372,22 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.animal_painter.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event) 
 
-"""
-Class providing the logic for adding/removing/moving and jumping between animals. It needs a QGraphicsView that it can paint on and that delegates the mouse events to the AnimalPainter.
-"""
+
 class AnimalPainter():
-    def __init__(self, imageArea):
+    """
+    Class providing the logic for adding/removing/moving and jumping between 
+    animals. It needs a QGraphicsView that it can paint on and that delegates 
+    the mouse events to the AnimalPainter.
+    """
+    def __init__(self, models, imageArea):
 
         # dragging offset when moving the markings for head and/or tail
         self.drag_position_head = QtCore.QPoint()
         self.drag_position_tail = QtCore.QPoint()
-
-        # indicate if head/tail is already created
-        self.is_head_drawn = False
-        self.is_tail_drawn = False
         
         # current animal
         self.cur_animal  = None
-        self.widget_animal_specs = AnimalSpecificationsWidget(imageArea)
+        self.widget_animal_specs = AnimalSpecificationsWidget(models, imageArea)
         
         # variables to control what interactions are possible
         self.is_add_mode_active = False
@@ -411,6 +395,10 @@ class AnimalPainter():
         
         # the QGraphicsView to paint on
         self.imageArea = imageArea
+        
+        # original size of image
+        self.original_img_width = 0
+        self.original_img_height = 0
     
     
     def setAnimalRemark(self, remark):
@@ -440,6 +428,9 @@ class AnimalPainter():
             self.removeTailVisual(animal)
             self.removeLineVisual(animal)
             self.removeBoundingBoxVisual(animal)
+            
+            animal.is_head_drawn = False
+            animal.is_tail_drawn = False
      
     # function to move to specs widget with the bounding bos of the current animal (and prevent it from getting out of the borders of the image)
     def placeSpecsWidget(self):
@@ -453,7 +444,7 @@ class AnimalPainter():
             # move the zoom widget a bit below the button position and center it below the button
             self.widget_animal_specs.move(pos)
         
-            # get corners of specs widget in scne coordinates
+            # get corners of specs widget in scene coordinates
             top_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topLeft())).toPoint()
             top_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topRight())).toPoint()
             bottom_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomLeft())).toPoint()
@@ -496,29 +487,37 @@ class AnimalPainter():
             self.widget_animal_specs.hide()
             
     def drawAnimalHead(self, animal):
+        """ Draws the head of an animal. """
         if animal != None:
-            if self.cur_animal.position_head != QtCore.QPoint(-1,-1):
+            if animal.position_head != QtCore.QPoint(-1,-1):
                 # draw the head visual
-                self.cur_animal.head_item_visual = QtWidgets.QGraphicsPixmapItem(self.cur_animal.pixmap_head)
-                self.cur_animal.head_item_visual.setPos(self.cur_animal.rect_head.center() - QtCore.QPoint(self.cur_animal.pixmap_width/4, self.cur_animal.pixmap_width/4))
-                self.cur_animal.head_item_visual.ItemIsMovable = True
-                self.imageArea._scene.addItem(self.cur_animal.head_item_visual)
+                animal.head_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_head)
+                animal.head_item_visual.setPos(animal.rect_head.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
+                animal.head_item_visual.ItemIsMovable = True
+                self.imageArea._scene.addItem(animal.head_item_visual)
+                animal.is_head_drawn = True
      
     def drawAnimalLine(self, animal):
+        """ Draws the line between head an tail of an animal. """
         animal.line_item_visual = self.imageArea._scene.addLine(animal.line, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
      
     def drawAnimalTailLineBoundingBox(self, animal):
+        """ Draws the tail of an animal, the line betwen head and tail and 
+        the bounding box around it. """
+        
         if animal != None:
-            if self.cur_animal.position_tail != QtCore.QPoint(-1,-1):
+            if animal.position_tail != QtCore.QPoint(-1,-1):
                 # draw the tail visual
-                self.cur_animal.tail_item_visual = QtWidgets.QGraphicsPixmapItem(self.cur_animal.pixmap_tail)
-                self.cur_animal.tail_item_visual.setPos(self.cur_animal.rect_tail.center() - QtCore.QPoint(self.cur_animal.pixmap_width/4, self.cur_animal.pixmap_width/4))
-                self.cur_animal.tail_item_visual.ItemIsMovable = True
-                self.imageArea._scene.addItem(self.cur_animal.tail_item_visual)
+                animal.tail_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_tail)
+                animal.tail_item_visual.setPos(animal.rect_tail.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
+                animal.tail_item_visual.ItemIsMovable = True
+                self.imageArea._scene.addItem(animal.tail_item_visual)
                 
                 # draw line and boundingbox visuals
-                self.drawAnimalLine(self.cur_animal)#cur_animal.line_item_visual = self.imageArea._scene.addLine(self.cur_animal.line, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
-                self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+                self.drawAnimalLine(animal)
+                animal.boundingBox_visual = self.imageArea._scene.addRect(animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
+                
+                animal.is_tail_drawn = True
                 
     def removeHeadVisual(self, animal):
         self.imageArea._scene.removeItem(animal.head_item_visual)
@@ -537,6 +536,10 @@ class AnimalPainter():
         animal.boundingBox_visual = None  
       
     def on_next_animal(self):
+        # if no animal ist selected, then select first one
+        if self.cur_animal is None and len(ANIMAL_LIST) >0:
+            self.cur_animal = ANIMAL_LIST[0]          
+            
         # only switch animals if the current one is in the list (and not None)
         if self.cur_animal in ANIMAL_LIST:
             index = ANIMAL_LIST.index(self.cur_animal)
@@ -561,7 +564,7 @@ class AnimalPainter():
             self.is_remove_mode_active = False
             
         elif self.is_add_mode_active:
-            if not self.cur_animal or( self.is_head_drawn and self.is_tail_drawn):
+            if not self.cur_animal or( self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
                 self.is_add_mode_active = False
                 self.is_remove_mode_active = True
                 
@@ -574,10 +577,11 @@ class AnimalPainter():
     def on_add_animal(self): 
         if(self.is_add_mode_active):
             # the add mode can only be deactivated when head and tail are drawn or none of them is drawn
-            if (self.is_head_drawn and self.is_tail_drawn) or (not self.is_head_drawn and not self.is_tail_drawn):
-                self.is_add_mode_active = False
-            else:
-                self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
+            if self.cur_animal is not None:
+                if (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn) or (not self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
+                    self.is_add_mode_active = False
+                else:
+                    self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
@@ -595,13 +599,14 @@ class AnimalPainter():
         pos = self.imageArea.mapToScene(event.pos()).toPoint()
         
         # enable dragging for current animal (when add mode is not active and the current animal is completey drawn)
-        if(self.is_head_drawn and self.is_tail_drawn and self.cur_animal is not None and not self.is_add_mode_active):
-            if (2 * QtGui.QVector2D(pos - self.cur_animal.rect_head.center()).length()
-                < self.cur_animal.rect_head.width()):
-                self.drag_position_head = pos - self.cur_animal.position_head
-            
-            if(self.cur_animal.rect_tail.contains(pos)):
-                self.drag_position_tail = pos - self.cur_animal.position_tail
+        if self.cur_animal is not None and not self.is_add_mode_active:
+            if(self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
+                if (2 * QtGui.QVector2D(pos - self.cur_animal.rect_head.center()).length()
+                    < self.cur_animal.rect_head.width()):
+                    self.drag_position_head = pos - self.cur_animal.position_head
+                
+                if(self.cur_animal.rect_tail.contains(pos)):
+                    self.drag_position_tail = pos - self.cur_animal.position_tail
          
         if(self.is_remove_mode_active):
             # remove mode
@@ -645,33 +650,44 @@ class AnimalPainter():
             
                     
         elif(self.is_add_mode_active):
+            # calculate click position in original format
+            original_x = round(pos.x()*self.original_img_width/self.imageArea.width())
+            original_y = round(pos.y()*self.original_img_height/self.imageArea.height())
+            
             # add mode
-            if(self.is_head_drawn and not self.is_tail_drawn):
-                # adapt the tail position of the current animal
-                self.cur_animal.setPositionTail(pos)
-                
-                # do the actual drawing
-                self.drawAnimalTailLineBoundingBox(self.cur_animal)
-                
-                # tail is now defined and will be drawn
-                self.is_tail_drawn = True
-                
-                # add animal to list
-                ANIMAL_LIST.append(self.cur_animal)
-                
+            if self.cur_animal:
+                if(self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
+                    # adapt the tail position of the current animal
+                    self.cur_animal.setPositionTail(pos)
+                    self.cur_animal.original_pos_tail = QtCore.QPoint(original_x, original_y)
+                    
+                    # do the actual drawing
+                    self.drawAnimalTailLineBoundingBox(self.cur_animal)
+                    
+                    # add animal to list
+                    ANIMAL_LIST.append(self.cur_animal)
+                else:
+                    # create a new animal
+                    self.cur_animal = Animal(position_head = pos)
+                    self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
+                              
+                    # calculate position in original format
+                    self.cur_animal.original_pos_head = QtCore.QPoint(original_x, original_y)
+                    
+                    # do the actual drawing of the head
+                    self.drawAnimalHead(self.cur_animal)
  
             else:                
                 # create a new animal
                 self.cur_animal = Animal(position_head = pos)
                 self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
-                               
+                
+                # calculate position in original format
+                self.cur_animal.original_pos_head = QtCore.QPoint(original_x, original_y)
+                
                 # do the actual drawing of the head
                 self.drawAnimalHead(self.cur_animal)
-                
-                # head is now drawn
-                self.is_head_drawn = True
-                self.is_tail_drawn = False
-                            
+
         self.updateBoundingBoxes()                     
 
     def mouseMoveEvent(self, event):
@@ -703,22 +719,98 @@ class AnimalPainter():
         self.drag_position_head = QtCore.QPoint()
         self.drag_position_tail = QtCore.QPoint()
 
+    def setOriginalWidthHeight(self, width=None, height=None):
+        if width:
+            self.original_img_width = width
+        if height:
+            self.original_img_height = height
 
-"""
-A photo viewer that contains a QGraphicsView to display the photos and draw the animals on.
-"""              
+    def updateAnimalPosition(self, animal):
+        pos_h = QtCore.QPoint(-1, -1)
+        pos_t = QtCore.QPoint(-1, -1)
+
+        # transform coordinates of head and tail from original image to scene cooridnates
+        pos_h.setX(round(animal.original_pos_head.x()*self.imageArea.width()/self.original_img_width))
+        pos_h.setY(round(animal.original_pos_head.y()*self.imageArea.height()/self.original_img_height))
+        
+        pos_t.setX(round(animal.original_pos_tail.x()*self.imageArea.width()/self.original_img_width))
+        pos_t.setY(round(animal.original_pos_tail.y()*self.imageArea.height()/self.original_img_height))
+        
+        animal.setPositionHead(pos_h)
+        animal.setPositionTail(pos_t)
+
+    def drawAnimalsFromList(self, animal_list, image_ending="_L"):
+        """ Draws animals from a list on the current image. """
+        for i in range(len(animal_list)):  
+            # get the head and tail position form the list
+            if image_ending=="*_L.jpg":
+                original_pos_h = QtCore.QPoint(int(animal_list["LX1"].iloc[i]), int(animal_list["LY1"].iloc[i]))
+                original_pos_t = QtCore.QPoint(int(animal_list["LX2"].iloc[i]), int(animal_list["LY2"].iloc[i]))
+            elif image_ending == "*_R.jpg":
+                original_pos_h = QtCore.QPoint(int(animal_list["RX1"].iloc[i]), int(animal_list["RY1"].iloc[i]))
+                original_pos_t = QtCore.QPoint(int(animal_list["RX2"].iloc[i]), int(animal_list["RY2"].iloc[i]))   
+            else:
+                print("AnimalPainter: Error - no such image ending!")
+
+            # only add an animal if there is a value for the coordinates
+            if original_pos_h != QtCore.QPoint(-1, -1) and original_pos_t != QtCore.QPoint(-1, -1):
+                # transform coordinates from original image to scene cooridnates
+                pos_h = QtCore.QPoint(-1,-1)
+                pos_h.setX(round(original_pos_h.x()*self.imageArea.width()/self.original_img_width))
+                pos_h.setY(round(original_pos_h.y()*self.imageArea.height()/self.original_img_height))
+                
+                pos_t = QtCore.QPoint(-1,-1)
+                pos_t.setX(round(original_pos_t.x()*self.imageArea.width()/self.original_img_width))
+                pos_t.setY(round(original_pos_t.y()*self.imageArea.height()/self.original_img_height))
+    
+                animal_remark = str(animal_list["object_remarks"].iloc[i])
+                if not animal_remark: animal_remark = ""       
+        
+                # create a new animal
+                self.cur_animal = Animal(position_head = pos_h, 
+                                          position_tail=pos_t,
+                                          group=str(animal_list["group"].iloc[i]),
+                                          species=str(animal_list["species"].iloc[i]),
+                                          remark=animal_remark)
+                
+                # set the position in the original image     
+                self.cur_animal.original_pos_head = original_pos_h
+                self.cur_animal.original_pos_tail = original_pos_t
+            
+                # do the actual drawing of the head
+                self.drawAnimalHead(self.cur_animal)
+                self.drawAnimalTailLineBoundingBox(self.cur_animal)
+                
+                # append animal to list
+                ANIMAL_LIST.append(self.cur_animal)   
+                
+                # update bounding boxes
+                self.imageArea.animal_painter.updateBoundingBoxes()      
+       
 class PhotoViewer(QtWidgets.QWidget):
-    def __init__(self, imageDirectory, imagePrefix, imageEnding="*-L.jpg", parent=None):
+    """
+    A photo viewer that contains a QGraphicsView to display the photos and 
+    draw the animals on.
+    """    
+    newImageLoaded = QtCore.pyqtSignal(str)
+    
+    def __init__(self, models, imageDirectory, imagePrefix, resFilePath="", imageEnding="*_L.jpg", parent=None):
         super(PhotoViewer, self).__init__(parent)
 
-        # image directory and prefix (needed for retrieving the iage_list)
+        # data models
+        self.models = models
+
+        # image directory and prefix (needed for retrieving the image_list)
         self.image_directory = imageDirectory
         self.image_prefix = imagePrefix
         self.image_ending = imageEnding
+        self.res_file_path = resFilePath
 
         # list of image pathes and the current image index
         self.cur_image_index = 0
         self.image_list = glob.glob(imageDirectory + imagePrefix + imageEnding)
+        #self.res_file = None
+        self.loadResFile()
 
         # initalize gui and actions
         self.init_ui()
@@ -726,9 +818,33 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # load initial image
         #self.loadImage(self.image_list[self.cur_image_index])
+        #self.layout.invalidate()
+        #self.layout.activate()
+    
+    
+    def loadResFile(self):
+        if ntpath.exists(self.res_file_path):
+            res_file = pd.read_excel(self.res_file_path)
+            self.models.model_animals.update(res_file)
+            #self.image_list = self.res_file["file_id"].unique() + "_L.jpg"
+        
+            # self.cur_image_index = 0
+            # if len(self.image_list) == 0:
+            #     self.loadImage(path=None)
+            # else:               
+            #     self.loadImage(self.image_directory + self.image_list[self.cur_image_index])
+        
+    def setResFilePath(self, text):
+        self.res_file_path = text
+        self.loadResFile()
     
     def setImageDir(self, text):
         self.image_directory = text
+        self.cur_image_index = 0
+        # if len(self.image_list) == 0:
+        #     self.loadImage(path=None)
+        # else:
+        #     self.loadImage(self.image_directory + self.image_list[self.cur_image_index])
         self.updateImageList()
         
     def setImagePrefix(self, text):
@@ -739,29 +855,70 @@ class PhotoViewer(QtWidgets.QWidget):
         self.image_ending = text
         self.updateImageList()
 
-    def activateLRMode(activateLRMode=False):
+    def activateLRMode(self, activateLRMode=False):
         pass
 
     def updateImageList(self):
-        self.cur_image_index = 0
+        #self.cur_image_index = 0
         self.image_list = glob.glob(self.image_directory + self.image_prefix + self.image_ending)
+        
         if not self.image_list:
             self.loadImage(path=None)
         else:
+            
             self.loadImage(self.image_list[self.cur_image_index])
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        
+        #print("resize in photo viewer")
         if self.cur_image_index < len(self.image_list):
+            # reload photo
             path = self.image_list[self.cur_image_index]
             photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
             self.imageArea.setPhoto(photo)
             self.updateImageCountVisual()
-                
+        
+        # remove animals
+        self.imageArea.animal_painter.removeAll()
+        
+        # redraw animals
+        for animal in ANIMAL_LIST:
+            # update positions
+            #print(animal.position_head)
+            self.imageArea.animal_painter.updateAnimalPosition(animal)#, self.imageArea.img_width, self.imageArea.img_height)
+        
+            # redraw animals
+            self.imageArea.animal_painter.drawAnimalHead(animal)
+            self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
+            
+            #print(animal.position_head)
+        
+        self.imageArea.animal_painter.updateBoundingBoxes()
+
+        # self.imageArea.img_width = self.imageArea.width()
+        # self.imageArea.img_height = self.imageArea.height()     
+        
+        
+ 
+
+        # # update animal list
+        # # ANIMAL_LIST.clear()
+        
+        # # find current image in result file and draw all animals from it
+        # if self.res_file is not None:
+        #     cur_file_entries = self.res_file[self.res_file['file_id'] ==  ntpath.basename(path)[:-6]]
+        #     self.imageArea.animal_painter.drawAnimalsFromList(cur_file_entries, self.image_ending)
+            
+        #     self.imageArea.animal_painter.cur_animal = None
+        #     self.imageArea.animal_painter.updateBoundingBoxes()
+
+        # print()
+
     def loadImage(self, path):
         if path:
-            photo = QtGui.QPixmap(path).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+            image = QtGui.QImage(path)
+            photo = QtGui.QPixmap().fromImage(image).scaled(QtCore.QSize(self.imageArea.width(), self.imageArea.height()))
+            self.imageArea.animal_painter.setOriginalWidthHeight(width=image.width(), height = image.height())
         else:
             photo = None
         
@@ -771,12 +928,23 @@ class PhotoViewer(QtWidgets.QWidget):
         # clear visuals
         self.imageArea.animal_painter.removeAll()
         
-        # hide animal specs widget
-        self.imageArea.animal_painter.widget_animal_specs.hide()
-        
-        # clear animal list
+        # update animal list
         ANIMAL_LIST.clear()
-  
+        
+        # find current image in result file and draw all animals from it
+        if self.models.model_animals is not None and path is not None:
+            cur_file_entries = self.models.model_animals[self.models.model_animals['file_id'] ==  ntpath.basename(path)[:-6]]
+            self.imageArea.animal_painter.drawAnimalsFromList(cur_file_entries, self.image_ending)       
+            if len(cur_file_entries) > 0: 
+                remark = str(cur_file_entries['image_remarks'].iloc[0])
+                if remark == "nan": remark = ""
+                self.newImageLoaded.emit(remark)
+            
+        # reset current animal, hide specs widget and update bounding boxes (none should be drawn since cur_animal is None)
+        self.imageArea.animal_painter.cur_animal = None
+        self.imageArea.animal_painter.widget_animal_specs.hide()
+        self.imageArea.animal_painter.updateBoundingBoxes() 
+    
     def on_next_image(self):
         # if there is a next image, load it
         if self.cur_image_index < len(self.image_list) - 1:
@@ -791,6 +959,7 @@ class PhotoViewer(QtWidgets.QWidget):
             path = self.image_list[self.cur_image_index-1]
             self.cur_image_index = self.cur_image_index - 1
             self.loadImage(path) 
+
 
     def updateImageCountVisual(self):
         num_images = len(self.image_list)
@@ -874,7 +1043,7 @@ class PhotoViewer(QtWidgets.QWidget):
 
 
         
-        self.imageArea = ImageArea(self)
+        self.imageArea = ImageArea(self.models, self)
         # self.imageAreaR = ImageArea(self)
         
         # self.label_dummy = QtWidgets.QLabel()
@@ -928,92 +1097,16 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # --- main widget ------------------------------------------------------------------------------------------- #      
         # main layout
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.setObjectName("layout")
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.layout.setObjectName("layout")
         
         # adding widgets to main layout 
-        layout.addWidget(frame_left)
-        layout.addWidget(self.frame_image)
-        layout.addWidget(frame_right)
+        self.layout.addWidget(frame_left)
+        self.layout.addWidget(self.imageArea)
+        self.layout.addWidget(frame_right)
 
         # set main layout
-        self.layout = layout
+        self.layout = self.layout
         
-
-        
-
-
-class MyWindow(QtWidgets.QMainWindow):
-    
-    def setupUi(self, MainWindow):
-
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1244, 822)
-        
-        self.photo_viewer = PhotoViewer()
-        
-        # create central widget
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.horizontalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.horizontalLayout.setContentsMargins(11, 11, 11, 11)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-
-        # create widgets and gui objects 
-        button_add = QtWidgets.QPushButton('Add')
-        button_remove = QtWidgets.QPushButton('Remove')
-        button_next = QtWidgets.QPushButton('Next')
-        button_previous = QtWidgets.QPushButton('Previous')
-        
-        self.slider_zoom = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.slider_zoom.setMaximum(100)
-        self.slider_zoom.setMinimum(0)
-                 
-        # add objects to layout
-        self.horizontalLayout.addWidget(button_add)
-        self.horizontalLayout.addWidget(button_remove)
-        self.horizontalLayout.addWidget(button_next)
-        self.horizontalLayout.addWidget(button_previous)
-        self.horizontalLayout.addWidget(self.slider_zoom)
-        self.horizontalLayout.addWidget(self.photo_viewer)
-  
-        MainWindow.setCentralWidget(self.centralwidget)       
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        # define gui actions
-        self.slider_zoom.valueChanged.connect(self.onValueChanged)
-        button_add.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_add_animal)
-        button_remove.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_remove_animal)
-        button_next.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_next_animal)
-        button_previous.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_previous_animal)
-       
-        self.slider_max = self.photo_viewer.imageArea.width()*10
-        self.slider_min = self.photo_viewer.imageArea.width()
-        self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)
-
-    # def resizeEvent(self, event):
-    #     super().resizeEvent(event)
-    #     self.slider_max = self.photo_viewer.imageArea.width()*10
-    #     self.slider_min = self.photo_viewer.imageArea.width()
-    #     self.factor = 1*(self.slider_max - self.slider_min)/(1*self.slider_max)
-            
-        
-    def onValueChanged(self, value):
-        scale = 1 + value*self.factor/100
-        self.photo_viewer.imageArea.setTransform(self.photo_viewer.imageArea.transform().fromScale(scale, scale))
-
-        if value < 1:
-            self.photo_viewer.imageArea.resetTransform() 
-            self.photo_viewer.imageArea.fitInView()
-
-
-if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = MyWindow(MainWindow)
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

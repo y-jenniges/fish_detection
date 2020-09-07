@@ -57,14 +57,14 @@ class TextImageItemWidget (QtWidgets.QWidget):
         self.title = self.lineEdit_text.text()
         
 
-"""
-Class to create the settings page of the software.
-"""
 class PageSettings(QtWidgets.QWidget):
+    """ Class to create the settings page of the software."""
+
     # create custom signals 
     userIdChanged = QtCore.pyqtSignal(str)
+ #   speciesListChanged = QtCore.pyqtSignal(list)
         
-    def __init__(self, parent=None):
+    def __init__(self, models, parent=None):
         start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
 
@@ -653,6 +653,17 @@ class PageSettings(QtWidgets.QWidget):
                                        "QListWidget::item:hover { background: rgb(0, 203, 221, 50); }\n"
                                        "QListWidget::item:selected { background: rgb(0, 203, 221, 100); }\n")
         
+#        self.model_species = QtGui.QStandardItemModel()
+        # self.delegate_species = TextImageItem(parent=self)
+        
+        # self.listView_species = QtWidgets.QListView(frame_species_options)   
+        # self.listView_species.setStyleSheet("QListView{background-color:white; border-radius:3px; border:none;}\n"
+        #                         "QListView::item:hover { background: rgb(0, 203, 221, 50); }\n"
+        #                         "QListView::item:selected { background: rgb(0, 203, 221, 100); color:black;}\n")
+        # self.listView_species.setModel(self.model_species)
+        # self.listView_species.setItemDelegate(self.delegate_species)
+        
+        
         # add widgets to main layout
         layout.addWidget(frame_species_options, 0, 0, 1, 1)
         layout.addItem(spacerItem43, 0, 1, 1, 1)      
@@ -688,6 +699,7 @@ class PageSettings(QtWidgets.QWidget):
         
         # --- content frame ----------------------------------------------- #
         # add widgets to species options frame
+#        layout_species_options.addWidget(self.listView_species)
         layout_species_options.addWidget(self.list_species)
         layout_species_options.addWidget(frame_buttons)  
  
@@ -883,9 +895,7 @@ class PageSettings(QtWidgets.QWidget):
     def browse_for_species_image(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
         self.addCustomItem(filename[0])
-        
-        self.on_species_changed()
-            
+          
     def on_remove_item(self):
         row = self.list_species.currentRow()
         self.list_species.takeItem(row)
@@ -905,6 +915,17 @@ class PageSettings(QtWidgets.QWidget):
         self.list_species.addItem(item)
         self.list_species.setItemWidget(item, customItem)  
         
+        self.on_species_changed()
+        
+        # for i in range(self.list_species.count()):
+        #     print(self.list_species.item(i))
+        
+        # a = QtGui.QStandardItem(image_path)
+        # if text is not None: 
+        #     a.set_text(text) # set a custom text, else it will be the file name
+            
+        #self.model_species.appendRow(a)
+        #self.model_species.appendRow(customItem)
 
 
     # takes a list of dicts which has the keys "title" and "imagePath"        
@@ -920,7 +941,17 @@ class PageSettings(QtWidgets.QWidget):
         return items
     
     def on_species_changed(self):
-        pass
+        # adapt data models
+        for i in range(len(list_species)):
+            existing_items = self.models.model_species.findItems(list_species[i]["title"])
+
+            # only append new item if it is not already in the list
+            if len(existing_items) == 0:
+                item = QtGui.QStandardItem(list_species[i]["title"])           
+                item.setTextAlignment(QtCore.Qt.AlignRight)
+                self.models.model_species.appendRow(item)
+
+        
 
 
 # --- actions in user tab ------------------------------------------------- #  

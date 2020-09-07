@@ -5,6 +5,7 @@ import enum
 import sympy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from Models import AnimalGroup, AnimalSpecies
 
 # dict contains all animals on that image
 animal_list = []
@@ -12,31 +13,29 @@ IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
 # map to assign a color to an animal group
 animal_color_map = 1
 
-class AnimalGroup(enum.Enum):
-    FISH = 1,  
-    CRUSTACEA = 2, 
-    CHAETOGNATHA = 3, 
-    JELLYFISH = 4, 
-    UNIDENTIFIED = 5
 
-class AnimalSpecies(enum.Enum):
-    A = 2,
-    B = 3,
-    C = 4, 
-    UNIDENTIFIED = 1
+# class AnimalGroup(enum.Enum):
+#     FISH = 1,  
+#     CRUSTACEA = 2, 
+#     CHAETOGNATHA = 3, 
+#     JELLYFISH = 4, 
+#     UNIDENTIFIED = 5
 
-class AnimalSpeciesClass:
-    def add_species():
-        print("add species")
+# class AnimalSpecies(enum.Enum):
+#     UNIDENTIFIED = 0
+
+# class AnimalSpeciesClass:
+#     def add_species():
+#         print("add species")
     
-    def remove_species():
-        print("remove species")
+#     def remove_species():
+#         print("remove species")
 
 
 
-class AnimalVisualRepresentation():
-     def __init__(self):
-         print("aha")
+# class AnimalVisualRepresentation():
+#      def __init__(self):
+#          print("aha")
 
 
 
@@ -56,15 +55,23 @@ class AnimalVisualRepresentation():
      
        
 
-"""
-Class to represent an animal on an image.
-"""
+
 class Animal():
-# the input position refers to the center of the visual!
-    def __init__(self, position_head=QtCore.QPoint(-1,-1), position_tail=QtCore.QPoint(-1,-1), group=AnimalGroup.UNIDENTIFIED, species=AnimalSpecies.UNIDENTIFIED, remark=""):
+    """ Class to represent an animal on an image. """
+    # the input position refers to the center of the visual!
+    def __init__(self, position_head=QtCore.QPoint(-1,-1), 
+                 position_tail=QtCore.QPoint(-1,-1), 
+                 group=AnimalGroup.UNIDENTIFIED, 
+                 species=AnimalSpecies.UNIDENTIFIED, remark=""):
                 
         # size of the head/tail visuals
         self.pixmap_width = 20
+        self.pixmap_head = None
+        self.pixmap_tail = None
+        
+        # store the position on the original image
+        self.original_pos_head = QtCore.QPoint(position_head)
+        self.original_pos_tail = QtCore.QPoint(position_tail)
         
         self.position_head = position_head
         self.position_tail = position_tail
@@ -82,7 +89,11 @@ class Animal():
         self.rect_tail = QtCore.QRect(self.pos_visual_tail, QtCore.QSize(self.pixmap_width, self.pixmap_width))       
         self.line = QtCore.QLineF(self.position_head, self.position_tail)  
 
-        
+        # indicate if head/tail is already drawn
+        self.is_head_drawn = False
+        self.is_tail_drawn = False
+                
+
         # set pixmaps for head/tail visuals
         self.get_colors_according_to_group()
         
@@ -241,14 +252,8 @@ class MeasurementWidget(QtWidgets.QWidget):
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine))
     
         # draw background      
-        #
-        pix = self.pixmap.scaled(QtCore.QSize(self.width(), self.height()))#, transformMode=QtCore.Qt.SmoothTransformation)
+        pix = self.pixmap.scaled(QtCore.QSize(self.width(), self.height()))
         painter.fillRect(self.rect(), QtGui.QBrush(pix))
-
-        #painter.fillRect(self.rect(), QtGui.QBrush(self.pixmap))
-
-        #painter.setBackground(QtGui.QBrush(pix))
-        #painter.scale(self.scale_offset[0], self.scale_offset[1])
     
         # draw all animals in the list
         for animal in self.animals:
@@ -257,13 +262,11 @@ class MeasurementWidget(QtWidgets.QWidget):
             
             # draw a line that is not displayed within the circle representing the head
             painter.setPen(QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))  
-            painter.drawLine(animal.line)#self.get_line_to_draw(animal))
+            painter.drawLine(animal.line)
                    
             painter.setPen(QtGui.QPen(QtGui.QColor(0,0,0,0), 2, QtCore.Qt.SolidLine)) 
             painter.drawRoundedRect(animal.boundingBox, 10, 10)
-            
-          
-         
+
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine))
         
         # draw the current animal with it s bounding box
@@ -351,29 +354,6 @@ class MeasurementWidget(QtWidgets.QWidget):
                       
         super().mousePressEvent(event)
 
-
-    # def wheelEvent(self, event):
-    #    # if self.hasPhoto():
-    #     if event.angleDelta().y() > 0:
-    #         print("event angle delta")
-    #         factor = 1.25
-    #         self.zoom += 1
-    #     else:
-    #         print("event angle delta else")
-    #         factor = 0.8
-    #         self.zoom -= 1
-            
-    #     if self.zoom > 0:
-    #         print(f"scale factor {factor}")
-    #         self.scale_offset = [factor, factor]
-    #     elif self.zoom == 0:
-    #         print("fit view")
-    #         self.fitInView()
-    #     else:
-    #         print("no zoom")
-    #         self.zoom = 0
-
-
     def mouseMoveEvent(self, event):
         # if there is a head to draw and if the drag_position is within the widget, move the head
         if self.cur_animal != None and not self.drag_position_head.isNull() and self.rect().contains(event.pos()):         
@@ -432,79 +412,75 @@ class MeasurementWidget(QtWidgets.QWidget):
     def setZoom(self, zoom, width, height):
         self.zoom = zoom
         new_size = QtCore.QSize(width+(self.max_width - width)/100.0*zoom, height+(self.max_height - height)/100.0*zoom)
-        
-        #self.pixmap.scaled(new_size, QtCore.Qt.KeepAspectRatio)
-        #self.resize(self.width()+zoom, self.height()+zoom)
         self.resize(new_size)
         self.update()
-        #self.resize(self.size()*self.zoom*1.01)
 
 
-class MyWindow(QtWidgets.QMainWindow):
+# class MyWindow(QtWidgets.QMainWindow):
     
-    def setupUi(self, MainWindow):
+#     def setupUi(self, MainWindow):
 
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1244, 822)
+#         MainWindow.setObjectName("MainWindow")
+#         MainWindow.resize(1244, 822)
         
-        # create central widget
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.horizontalLayout_15 = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+#         # create central widget
+#         self.centralwidget = QtWidgets.QWidget(MainWindow)
+#         self.centralwidget.setObjectName("centralwidget")
+#         self.horizontalLayout_15 = QtWidgets.QVBoxLayout(self.centralwidget)
+#         self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
+#         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
 
 
 
-        # create widgets and gui objects
-        self.measurementWidget = MeasurementWidget()    
-        button_add = QtWidgets.QPushButton('Add')
-        button_remove = QtWidgets.QPushButton('Remove')
-        button_next = QtWidgets.QPushButton('Next')
-        button_previous = QtWidgets.QPushButton('Previous')
+#         # create widgets and gui objects
+#         self.measurementWidget = MeasurementWidget()    
+#         button_add = QtWidgets.QPushButton('Add')
+#         button_remove = QtWidgets.QPushButton('Remove')
+#         button_next = QtWidgets.QPushButton('Next')
+#         button_previous = QtWidgets.QPushButton('Previous')
         
-        self.scrollArea = QtWidgets.QScrollArea()
-        self.scrollArea.setWidget(self.measurementWidget)
-        self.scrollArea.setVisible(True)
-        self.scrollArea.setWidgetResizable(True)
+#         self.scrollArea = QtWidgets.QScrollArea()
+#         self.scrollArea.setWidget(self.measurementWidget)
+#         self.scrollArea.setVisible(True)
+#         self.scrollArea.setWidgetResizable(True)
         
-        self.slider_zoom = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.slider_zoom.setMaximum(100)
+#         self.slider_zoom = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+#         self.slider_zoom.setMaximum(100)
                  
-        # add objects to layout
-        self.horizontalLayout_15.addWidget(button_add)
-        self.horizontalLayout_15.addWidget(button_remove)
-        self.horizontalLayout_15.addWidget(button_next)
-        self.horizontalLayout_15.addWidget(button_previous)
-        self.horizontalLayout_15.addWidget(self.slider_zoom)
-        self.horizontalLayout_15.addWidget(self.scrollArea)
+#         # add objects to layout
+#         self.horizontalLayout_15.addWidget(button_add)
+#         self.horizontalLayout_15.addWidget(button_remove)
+#         self.horizontalLayout_15.addWidget(button_next)
+#         self.horizontalLayout_15.addWidget(button_previous)
+#         self.horizontalLayout_15.addWidget(self.slider_zoom)
+#         self.horizontalLayout_15.addWidget(self.scrollArea)
                
-        MainWindow.setCentralWidget(self.centralwidget)       
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+#         MainWindow.setCentralWidget(self.centralwidget)       
+#         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
-        # connect signals and slots      
-        button_add.clicked.connect(self.measurementWidget.on_add_animal)
-        button_remove.clicked.connect(self.measurementWidget.on_remove_animal)
-        button_next.clicked.connect(self.measurementWidget.on_next_animal)
-        button_previous.clicked.connect(self.measurementWidget.on_previous_animal)
-        self.slider_zoom.valueChanged.connect(self.on_slider_zoom)
+#         # connect signals and slots      
+#         button_add.clicked.connect(self.measurementWidget.on_add_animal)
+#         button_remove.clicked.connect(self.measurementWidget.on_remove_animal)
+#         button_next.clicked.connect(self.measurementWidget.on_next_animal)
+#         button_previous.clicked.connect(self.measurementWidget.on_previous_animal)
+#         self.slider_zoom.valueChanged.connect(self.on_slider_zoom)
 
-    def on_slider_zoom(self):
-        print(f"slider {self.slider_zoom.value()}")
-        self.scrollArea.setWidgetResizable(False)
-        self.measurementWidget.setZoom(self.slider_zoom.value(), self.scrollArea.width(), self.scrollArea.height())
-        self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:20px;}");
-        self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:20px;}");
-        if self.slider_zoom.value() == 0:
-            self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:0px;}");
-            self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:0px;}");
+#     def on_slider_zoom(self):
+#         print(f"slider {self.slider_zoom.value()}")
+#         self.scrollArea.setWidgetResizable(False)
+#         self.measurementWidget.setZoom(self.slider_zoom.value(), self.scrollArea.width(), self.scrollArea.height())
+#         self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:20px;}");
+#         self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:20px;}");
+#         if self.slider_zoom.value() == 0:
+#             self.scrollArea.horizontalScrollBar().setStyleSheet("QScrollBar {height:0px;}");
+#             self.scrollArea.verticalScrollBar().setStyleSheet("QScrollBar {width:0px;}");
         
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = MyWindow(MainWindow)
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     import sys
+#     app = QtWidgets.QApplication(sys.argv)
+#     MainWindow = QtWidgets.QMainWindow()
+#     ui = MyWindow(MainWindow)
+#     ui.setupUi(MainWindow)
+#     MainWindow.show()
+#     sys.exit(app.exec_())
 
