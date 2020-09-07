@@ -65,33 +65,64 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
 
     def init_actions(self):
+        """ Function to connect signals and slots. """
         # connecting signals and slots
         self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
         self.comboBox_group.currentTextChanged.connect(self.on_group_combobox_changed)
         self.comboBox_species.currentTextChanged.connect(self.on_species_combobox_changed)
         self.comboBox_remark.currentTextChanged.connect(self.on_remark_combobox_changed)
         self.comboBox_remark.lineEdit().editingFinished.connect(self.on_remark_combobox_edited)
-                 
+        self.comboBox_remark.lineEdit().returnPressed.connect(self.on_remark_combobox_return_pressed)
+        
     def init_models(self):
+        """ Function to set the data models on class widgets. """
         self.comboBox_group.setModel(self.models.model_group)
         self.comboBox_species.setModel(self.models.model_species)
         self.comboBox_remark.setModel(self.models.model_animal_remarks)
         
-    def on_remark_combobox_edited(self):
+    def on_remark_combobox_return_pressed(self):
+        """ Function dealing with the return event on the editable combobox 
+        for animal remarks. This ensures that the newly typed entry is 
+        capitalized and right-aligned. """
         text = self.comboBox_remark.currentText()
+        index = self.comboBox_remark.findText(text)
         
-        # if the text is not yet in the combobox, add it
-        if self.comboBox_remark.findText(text) == -1:
+        if index != -1:
+            # remove item from animal remarks model
+            items = self.models.model_animal_remarks.findItems(text)
+            for item in items:
+                self.models.model_animal_remarks.removeRow(item.row())
+            
+            # add a capitalized, right-aligned entry in model
             item = QtGui.QStandardItem(str(text.title()))
             item.setTextAlignment(QtCore.Qt.AlignRight)
-            self.model_remarks.appendRow(item)
+            self.models.model_animal_remarks.appendRow(item)
+            
+            # set current combobox image to the new entry and switch focus
+            self.comboBox_remark.setCurrentIndex(index)
+            self.focusNextChild()
+
+        
+    def on_remark_combobox_edited(self):
+        text = self.comboBox_remark.currentText()
+        print(f"editing finsihed {text}")
+        
+        # if the text is not yet in the combobox, add it
+        if len(self.models.model_animal_remarks.findItems(text)) == 0:
+            print("on remark combobox edited adding to model")
+        #if self.comboBox_remark.findText(text) == -1:
+            item = QtGui.QStandardItem(str(text.title()))
+            item.setTextAlignment(QtCore.Qt.AlignRight)
+            self.models.model_animal_remarks.appendRow(item)
             self.focusNextChild()
       
     def on_remark_combobox_changed(self, remark):
+        print(f"on remark comboboc changed {remark}")
         self.parent().animal_painter.setAnimalRemark(str(remark))
         
     def on_species_combobox_changed(self, species):
-        if self.comboBox_species.findText(species) != -1 and hasattr(self.parent(), "animal__painter"):
+        if len(self.models.model_species.findItems(species)) > 0 and hasattr(self.parent(), "animal_painter"):
+        #if self.comboBox_species.findText(species) != -1 and hasattr(self.parent(), "animal__painter"):
             self.species = species
             self.parent().animal_painter.setAnimalSpecies(species) #setAnimalGroup(group) 
             self.focusNextChild()
@@ -99,7 +130,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             print("Given species was not in combobox")
             
     def on_group_combobox_changed(self, group):
-        if self.comboBox_group.findText(group) != -1 and hasattr(self.parent(), "animal__painter"):
+        if len(self.models.model_group.findItems(group)) > -1 and hasattr(self.parent(), "animal_painter"):
+        #if self.comboBox_group.findText(group) != -1 and hasattr(self.parent(), "animal_painter"):
             self.group = group
             self.parent().animal_painter.setAnimalGroup(group) #setAnimalGroup(group) 
             self.focusNextChild()
@@ -149,7 +181,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         # set remark combobox
         index = self.comboBox_remark.findText(self.remark) 
-        if index != -1:
+        if len(self.models.model_animal_remarks.findItems(self.remark)) != 0 or \
+        len(self.models.model_animal_remarks.findItems(self.remark.title())):
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(index)
             self.comboBox_remark.blockSignals(False)  
@@ -158,11 +191,14 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_remark.setCurrentIndex(0)
             self.comboBox_remark.blockSignals(False)            
         elif self.remark != "" and self.remark is not None:
-            print("adding new remark entry")
-            item = QtGui.QStandardItem(str(self.remark))
+            print("adding new remark entry----------------------")
+            item = QtGui.QStandardItem(str(self.remark).title())
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
+            self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
             #self.model_remarks.appendRow(item)
+            
+  
         
         # set length spinbox
         if self.length: 
@@ -826,13 +862,6 @@ class PhotoViewer(QtWidgets.QWidget):
         if ntpath.exists(self.res_file_path):
             res_file = pd.read_excel(self.res_file_path)
             self.models.model_animals.update(res_file)
-            #self.image_list = self.res_file["file_id"].unique() + "_L.jpg"
-        
-            # self.cur_image_index = 0
-            # if len(self.image_list) == 0:
-            #     self.loadImage(path=None)
-            # else:               
-            #     self.loadImage(self.image_directory + self.image_list[self.cur_image_index])
         
     def setResFilePath(self, text):
         self.res_file_path = text
@@ -932,8 +961,8 @@ class PhotoViewer(QtWidgets.QWidget):
         ANIMAL_LIST.clear()
         
         # find current image in result file and draw all animals from it
-        if self.models.model_animals is not None and path is not None:
-            cur_file_entries = self.models.model_animals[self.models.model_animals['file_id'] ==  ntpath.basename(path)[:-6]]
+        if self.models.model_animals.data is not None and path is not None:
+            cur_file_entries = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  ntpath.basename(path)[:-6]]
             self.imageArea.animal_painter.drawAnimalsFromList(cur_file_entries, self.image_ending)       
             if len(cur_file_entries) > 0: 
                 remark = str(cur_file_entries['image_remarks'].iloc[0])

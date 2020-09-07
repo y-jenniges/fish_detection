@@ -39,6 +39,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # restore settings from previous session
         self.restorePreviousSettings()
 
+        #self.page_data.tableView_original.setModel(self.models.model_animals)
+        #self.page_home.photo_viewer.imageArea.animal_painter.models = self.models
+
         print(self.settings.fileName())
 
     def restorePreviousSettings(self):

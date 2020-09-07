@@ -68,6 +68,9 @@ class PageSettings(QtWidgets.QWidget):
         start_time = time.time()
         super(QtWidgets.QWidget, self).__init__(parent)
 
+        # data models
+        self.models = models
+
         # init ui and actions on it
         self.init_ui()
         self.init_actions()
@@ -942,12 +945,14 @@ class PageSettings(QtWidgets.QWidget):
     
     def on_species_changed(self):
         # adapt data models
-        for i in range(len(list_species)):
-            existing_items = self.models.model_species.findItems(list_species[i]["title"])
+        items_in_list_species = self.getTitlePathList()
+        
+        for i in range(len(items_in_list_species)):
+            existing_items = self.models.model_species.findItems(items_in_list_species[i]["title"])
 
             # only append new item if it is not already in the list
             if len(existing_items) == 0:
-                item = QtGui.QStandardItem(list_species[i]["title"])           
+                item = QtGui.QStandardItem(items_in_list_species[i]["title"])           
                 item.setTextAlignment(QtCore.Qt.AlignRight)
                 self.models.model_species.appendRow(item)
 

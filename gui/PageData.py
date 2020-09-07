@@ -739,7 +739,7 @@ class PageData(QtWidgets.QWidget):
   
     def init_models(self):
         self.tableView_original.setModel(self.models.model_animals)
-        print("table view connected")
+        
         
 # --- functions for saving and restoring options --------------------------- # 
     def saveCurrentValues(self, settings):     

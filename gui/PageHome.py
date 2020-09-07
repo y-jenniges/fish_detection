@@ -34,9 +34,7 @@ class PageHome(QtWidgets.QWidget):
         self.slider_max = self.photo_viewer.imageArea.width()*10
         self.slider_min = self.photo_viewer.imageArea.width()
         self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)  
-        
-        
-    
+
     def openZoomWidget(self):
         # show the zoom widget if it is not already visible
         if self.widget_zoom.isVisible():
