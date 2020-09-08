@@ -142,9 +142,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_handbook.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Handbook"))
    
         # texts for the about page        
-        self.page_about.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
-        self.page_about.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))     
-        self.page_about.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
+        self.page_about.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
+        self.page_about.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
+        self.page_about.frame_control_bar.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
         self.page_about.label_about_text.setText(_translate("MainWindow", "This software (MarOMarker) was developed in the scope of the Master\'s thesis <em>Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN</em> by Yvonne Jenniges. The thesis was a cooperation between the University of Bremen, the Alfred Wegener Institute and the Fraunhofer IFAM.\n"
 "<br>\n"
 "<br>\n"
@@ -457,7 +457,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
         self.page_settings.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
-        self.page_about.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
+        self.page_about.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
         
         self.page_settings.userIdChanged.connect(self.updateUserIds)
         self.page_data.imageDirChanged.connect(self.on_imageDirChanged)
@@ -470,7 +470,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_home.btn_menu)
         self.append_main_menu_to_button(self.page_data.frame_controlBar.btn_menu)
         self.append_main_menu_to_button(self.page_settings.frame_controlBar.btn_menu)
-        self.append_main_menu_to_button(self.page_about.frame_controlBar.btn_menu)
+        self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
            
 
@@ -480,14 +480,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.frame_topBar.label_user_id.setText(value)
         self.page_data.frame_topBar.label_user_id.setText(value)
         self.page_settings.frame_topBar.label_user_id.setText(value)
-        self.page_about.frame_topBar.label_user_id.setText(value)
+        self.page_about.frame_top_bar.label_user_id.setText(value)
         self.page_handbook.frame_topBar.label_user_id.setText(value) 
         
         # also update the dummy userIds to preserve the symmetry of the bar
         self.page_home.frame_topBar.label_user_id_2.setText(value)
         self.page_data.frame_topBar.label_user_id_2.setText(value)
         self.page_settings.frame_topBar.label_user_id_2.setText(value)
-        self.page_about.frame_topBar.label_user_id_2.setText(value)
+        self.page_about.frame_top_bar.label_user_id_2.setText(value)
         self.page_handbook.frame_topBar.label_user_id_2.setText(value)
 
 
