@@ -42,6 +42,18 @@ ANIMAL_LIST = []
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
     """ A widget to provide all information of the current animal. """
     def __init__ (self, models, parent = None):
+        """
+        Init function.
+
+        Parameters
+        ----------
+        models : Models
+            Contains all necessary data models, i.e. models for the animal 
+            species, group, remark, as well as image remark and the general
+            animal data from the result table.
+        parent : TYPE, optional
+            DESCRIPTION. The default is None.
+        """
         super(QtWidgets.QWidget, self).__init__(parent)
         
         self.group = AnimalGroup.UNIDENTIFIED.name.title()
@@ -102,8 +114,11 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_remark.setCurrentIndex(index)
             self.focusNextChild()
 
-        
+    # @todo would editfinsihed not be enough?   
     def on_remark_combobox_edited(self):
+        """
+        Function called when animal remark is edited. 
+        """
         text = self.comboBox_remark.currentText()
         print(f"editing finsihed {text}")
         
@@ -115,12 +130,25 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.focusNextChild()
-      
+     
+    # @todo why to i need this?
     def on_remark_combobox_changed(self, remark):
-        print(f"on remark comboboc changed {remark}")
+        """ Function handling when the animal remark combobox gets changed, 
+        i.e. the editing is not finished yet. """
         self.parent().animal_painter.setAnimalRemark(str(remark))
         
     def on_species_combobox_changed(self, species):
+        """ Function called when the species combobox is changed. 
+        It sets the species of the current animal. 
+
+        Parameters
+        ----------
+        species : string
+            The selected species of the animal. 
+            Selectable from the Enum AnimalSpecies.
+        """
+        
+        # check if model contains the species and adds it otherwise
         if len(self.models.model_species.findItems(species)) > 0 and hasattr(self.parent(), "animal_painter"):
         #if self.comboBox_species.findText(species) != -1 and hasattr(self.parent(), "animal__painter"):
             self.species = species
@@ -128,8 +156,19 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.focusNextChild()
         else:
             print("Given species was not in combobox")
+            #@todo add species to model
             
     def on_group_combobox_changed(self, group):
+        """
+        Function called when group combobox entry is changed. It sets the
+        group of the current animal.
+
+        Parameters
+        ----------
+        group : string
+            The selected group of the animal. 
+            Selectable from the Enum AnimalGroup.
+        """
         if len(self.models.model_group.findItems(group)) > -1 and hasattr(self.parent(), "animal_painter"):
         #if self.comboBox_group.findText(group) != -1 and hasattr(self.parent(), "animal_painter"):
             self.group = group
@@ -317,7 +356,7 @@ class ImageArea(QtWidgets.QGraphicsView):
     """
     def __init__(self, models, parent=None):
         super(ImageArea, self).__init__(parent)
-        print("init image area")
+        
         self._zoom = 0
         self._scene = QtWidgets.QGraphicsScene()
         self._photo = QtWidgets.QGraphicsPixmapItem()
@@ -416,7 +455,22 @@ class AnimalPainter():
     the mouse events to the AnimalPainter.
     """
     def __init__(self, models, imageArea):
+        """
+        Init function.
 
+        Parameters
+        ----------
+        models : Models
+            Contains all necessary data models, i.e. models for the animal 
+            species, group, remark, as well as image remark and the general
+            animal data from the result table.
+        imageArea : ImageArea
+            A QGraphicsView providing a photo to paint on and that passes the
+            mouse events to AnimalPainter.
+        """
+        # data models
+        self.models = models
+        
         # dragging offset when moving the markings for head and/or tail
         self.drag_position_head = QtCore.QPoint()
         self.drag_position_tail = QtCore.QPoint()
@@ -432,16 +486,17 @@ class AnimalPainter():
         # the QGraphicsView to paint on
         self.imageArea = imageArea
         
-        # original size of image
+        # original size of image (needed for resizing, i.e. recalculating 
+        # coordinates)
         self.original_img_width = 0
         self.original_img_height = 0
     
     
     def setAnimalRemark(self, remark):
-        self.cur_animal.remark = remark
+        self.cur_animal.setRemark(remark)
     
     def setAnimalSpecies(self, species):
-        self.cur_animal.species = species
+        self.cur_animal.setSpecies(species)
 
     def setAnimalGroup(self, group):
         self.cur_animal.setGroup(group)
@@ -523,7 +578,14 @@ class AnimalPainter():
             self.widget_animal_specs.hide()
             
     def drawAnimalHead(self, animal):
-        """ Draws the head of an animal. """
+        """
+        Draws the head of an animal.
+
+        Parameters
+        ----------
+        animal : Animal
+            The animal whose head is to be painted.
+        """
         if animal != None:
             if animal.position_head != QtCore.QPoint(-1,-1):
                 # draw the head visual
@@ -534,7 +596,14 @@ class AnimalPainter():
                 animal.is_head_drawn = True
      
     def drawAnimalLine(self, animal):
-        """ Draws the line between head an tail of an animal. """
+        """
+        Draws the line between head an tail of an animal.
+
+        Parameters
+        ----------
+        animal : Animal
+            The animal whose line is to be painted.
+        """
         animal.line_item_visual = self.imageArea._scene.addLine(animal.line, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
      
     def drawAnimalTailLineBoundingBox(self, animal):
@@ -584,6 +653,10 @@ class AnimalPainter():
             if index < len(ANIMAL_LIST)-1:
                 self.cur_animal = ANIMAL_LIST[index+1]
                 self.updateBoundingBoxes()
+            else:
+                # else, go to first image
+                self.cur_animal = ANIMAL_LIST[0]
+                self.updateBoundingBoxes()
                    
     def on_previous_animal(self):
         # only switch animals if the current one is in the list (and not None)
@@ -594,6 +667,10 @@ class AnimalPainter():
             if index > 0:
                 self.cur_animal = ANIMAL_LIST[index-1]
                 self.updateBoundingBoxes() 
+            else:
+                # else, go to last image
+                self.cur_animal = ANIMAL_LIST[len(ANIMAL_LIST)-1]
+                self.updateBoundingBoxes()                 
 
     def on_remove_animal(self):
         if(self.is_remove_mode_active):
@@ -667,8 +744,13 @@ class AnimalPainter():
                     self.imageArea._scene.removeItem(animal.tail_item_visual)
                     self.imageArea._scene.removeItem(animal.line_item_visual)
                     
-                    # remove animal from list
+                    # remove animal from list and data model
+                    pos = self.models.model_animals.data.index.get_loc(animal.row_index)
+                    self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())
+
                     ANIMAL_LIST.remove(animal) 
+                     
+                    
                     break
 
 
@@ -702,9 +784,20 @@ class AnimalPainter():
                     
                     # add animal to list
                     ANIMAL_LIST.append(self.cur_animal)
+                    
+                    cur_image_path = self.imageArea.parent().image_list[self.imageArea.parent().cur_image_index]
+                    image_remark = self.imageArea.parent().parent().comboBox_imgRemark.currentText()
+                    experiment_id = self.imageArea.parent().parent().parent().parent().page_data.lineEdit_exp_id.text()
+                    user_id = self.imageArea.parent().parent().parent().parent().page_settings.lineEdit_user_id.text()
+                    self.models.model_animals.insertRows(
+                        self.models.model_animals.rowCount(), 1, 
+                        [self.cur_animal], cur_image_path, 
+                        image_remark, experiment_id, user_id)
+                    
                 else:
                     # create a new animal
-                    self.cur_animal = Animal(position_head = pos)
+                    self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount(),
+                                             position_head = pos)
                     self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                               
                     # calculate position in original format
@@ -715,7 +808,8 @@ class AnimalPainter():
  
             else:                
                 # create a new animal
-                self.cur_animal = Animal(position_head = pos)
+                self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount(),
+                                         position_head = pos)
                 self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                 
                 # calculate position in original format
@@ -739,6 +833,11 @@ class AnimalPainter():
             self.drawAnimalHead(self.cur_animal)
             self.drawAnimalLine(self.cur_animal)
             
+            self.updateOriginalAnimalPosition(self.cur_animal)
+            
+            self.updateBoundingBoxes()            
+            self.cur_animal.setManuallyCorrected(True)
+
         # if there is a tail to draw and if the drag_position is within the widget, move the tail
         if not self.drag_position_tail.isNull() and self.imageArea.rect().contains(pos) and self.cur_animal is not None:
             self.cur_animal.setPositionTail(pos - self.drag_position_tail)
@@ -748,8 +847,9 @@ class AnimalPainter():
             self.removeLineVisual(self.cur_animal)  
             self.removeBoundingBoxVisual(self.cur_animal)
             self.drawAnimalTailLineBoundingBox(self.cur_animal)
-         
-        self.updateBoundingBoxes()    
+
+            self.updateBoundingBoxes()            
+            self.cur_animal.setManuallyCorrected(True)
 
     def mouseReleaseEvent(self, event):
         self.drag_position_head = QtCore.QPoint()
@@ -774,9 +874,46 @@ class AnimalPainter():
         
         animal.setPositionHead(pos_h)
         animal.setPositionTail(pos_t)
+        
+    def updateOriginalAnimalPosition(self, animal):
+        if animal is not None:
+            pos_oh = QtCore.QPoint(-1, -1)
+            pos_ot = QtCore.QPoint(-1, -1)
+    
+            # transform coordinates of head and tail from current image to original image coordinates
+            pos_oh.setX(round(animal.position_head.x()*self.original_img_width/self.imageArea.width()))
+            pos_oh.setY(round(animal.position_head.y()*self.original_img_height/self.imageArea.height()))
+            
+            pos_ot.setX(round(animal.position_tail.x()*self.original_img_width/self.imageArea.width()))
+            pos_ot.setY(round(animal.position_tail.y()*self.original_img_height/self.imageArea.height()))
+            
+            animal.original_pos_head = pos_oh
+            animal.original_pos_tail = pos_ot
+            
+            # update data model
+            self.models.model_animals.data.loc[self.cur_animal.row_index, "LX1"] = self.cur_animal.original_pos_head.x()
+            self.models.model_animals.data.loc[self.cur_animal.row_index, "LY1"] = self.cur_animal.original_pos_head.y()
+            self.models.model_animals.data.loc[self.cur_animal.row_index, "LX2"] = self.cur_animal.original_pos_tail.x()
+            self.models.model_animals.data.loc[self.cur_animal.row_index, "LY2"] = self.cur_animal.original_pos_tail.y()
+
 
     def drawAnimalsFromList(self, animal_list, image_ending="_L"):
-        """ Draws animals from a list on the current image. """
+        """
+        Draws animals from a list on the current image. 
+
+        Parameters
+        ----------
+        animal_list : DataFrame
+            The list of animals to draw. Necessary columns: 
+            LX1, LY1 (head position on left image), 
+            LX2, LY2 (tail position on left image), 
+            RX1, RY1 (head position on right image), 
+            RX2, RY2 (tail position on right image),
+            group, species, object_remarks
+        image_ending : string, optional
+            Indicates wether to draw animals from left or right image. 
+            The default is "_L".
+        """
         for i in range(len(animal_list)):  
             # get the head and tail position form the list
             if image_ending=="*_L.jpg":
@@ -803,11 +940,13 @@ class AnimalPainter():
                 if not animal_remark: animal_remark = ""       
         
                 # create a new animal
-                self.cur_animal = Animal(position_head = pos_h, 
-                                          position_tail=pos_t,
-                                          group=str(animal_list["group"].iloc[i]),
-                                          species=str(animal_list["species"].iloc[i]),
-                                          remark=animal_remark)
+                self.cur_animal = Animal(self.models,
+                                         row_index=animal_list.index[i],
+                                         position_head=pos_h, 
+                                         position_tail=pos_t,
+                                         group=str(animal_list["group"].iloc[i]),
+                                         species=str(animal_list["species"].iloc[i]),
+                                         remark=animal_remark)
                 
                 # set the position in the original image     
                 self.cur_animal.original_pos_head = original_pos_h
@@ -856,12 +995,21 @@ class PhotoViewer(QtWidgets.QWidget):
         #self.loadImage(self.image_list[self.cur_image_index])
         #self.layout.invalidate()
         #self.layout.activate()
+
     
     
     def loadResFile(self):
         if ntpath.exists(self.res_file_path):
-            res_file = pd.read_excel(self.res_file_path)
+            substring = "_neuralNet_output"
+            if substring in self.res_file_path:
+                if ntpath.exists(self.res_file_path.replace(substring,"")):
+                    self.res_file_path = self.res_file_path.replace(substring,"")  
+            else:
+                self.res_file_path = self.res_file_path
+                
+            res_file = pd.read_csv(self.res_file_path, sep=",")
             self.models.model_animals.update(res_file)
+            
         
     def setResFilePath(self, text):
         self.res_file_path = text
@@ -974,20 +1122,45 @@ class PhotoViewer(QtWidgets.QWidget):
         self.imageArea.animal_painter.widget_animal_specs.hide()
         self.imageArea.animal_painter.updateBoundingBoxes() 
     
+    
+    def exportToCsv(self):
+        res_file_path = self.parent().parent().parent().page_data.lineEdit_res_file.text()
+        self.models.model_animals.exportToCsv(res_file_path)
+    
     def on_next_image(self):
+        # current file_id
+        cur_file_id = ntpath.basename(self.image_list[self.cur_image_index])[:-6]
+        
+        # set current image to status "checked"
+        cur_file_indices = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  cur_file_id].index
+        for idx in cur_file_indices:
+            self.models.model_animals.data.loc[idx, "status"] = "checked"
+        
         # if there is a next image, load it
         if self.cur_image_index < len(self.image_list) - 1:
             # get the new image and load it
             path = self.image_list[self.cur_image_index+1]
             self.cur_image_index = self.cur_image_index + 1        
             self.loadImage(path)
+            
+        self.exportToCsv()
        
     def on_previous_image(self):
+        # current file_id
+        cur_file_id = ntpath.basename(self.image_list[self.cur_image_index])[:-6]
+        
+        # set current image to status "checked"
+        cur_file_indices = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  cur_file_id].index
+        for idx in cur_file_indices:
+            self.models.model_animals.data.loc[idx, "status"] = "checked"
+            
         # if there is a previous image, load it
         if self.cur_image_index > 0:
             path = self.image_list[self.cur_image_index-1]
             self.cur_image_index = self.cur_image_index - 1
             self.loadImage(path) 
+        
+        self.exportToCsv()
 
 
     def updateImageCountVisual(self):

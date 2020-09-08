@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from keras.preprocessing.image import load_img, img_to_array
 from Helpers import TopFrame, MenuFrame, get_icon
 import time
+import ntpath
 from test_new_zoom import PhotoViewer
 import HelperFunctions as helpers
 
@@ -448,6 +449,8 @@ class PageHome(QtWidgets.QWidget):
         self.btn_imgSwitch.clicked.connect(self.switchImageMode)
         self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
         self.photo_viewer.newImageLoaded.connect(self.setComboboxImageRemark)
+        #self.photo_viewer.newImageLoaded.connect(self.exportToCsv)
+        self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
         self.btn_filter.clicked.connect(self.on_filter_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
@@ -458,13 +461,15 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
-     
         
     def init_models(self):
         self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
         self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
-        
-        
+
+    # def exportToCsv(self):
+    #     res_file_path = self.parent().parent().page_data.lineEdit_res_file.text()
+    #     self.models.model_animals.exportToCsv(res_file_path)
+
     def setComboboxImageRemark(self, text):
         # if the remark is not in the combobox, add it. Else choose its index
         index = self.comboBox_imgRemark.findText(text) 
@@ -476,6 +481,15 @@ class PageHome(QtWidgets.QWidget):
             self.comboBox_imgRemark.setCurrentIndex(self.comboBox_imgRemark.count()-1)
         else:
             self.comboBox_imgRemark.setCurrentIndex(index)
+        
+        # get the current photo ID
+        cur_image_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
+        file_id = ntpath.basename(cur_image_path)[:-6]
+    
+        # adapt the image remark in the data model
+        cur_indices = self.models.model_animals.data[self.models.model_animals.data['file_id']==file_id].index
+        for idx in cur_indices:
+            self.models.model_animals.data.loc[idx, 'image_remarks'] = text
     
     def switchImageMode(self):
         cur_mode = self.btn_imgSwitch.text()
