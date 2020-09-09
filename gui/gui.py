@@ -1,4 +1,5 @@
 import time
+import ntpath
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import Models
 import PageHome
@@ -56,6 +57,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.saveCurrentValues(self.settings)
         self.page_data.saveCurrentValues(self.settings)
         
+        # save image data
+        cur_file_id = ntpath.basename(self.page_home.photo_viewer.image_list[self.page_home.photo_viewer.cur_image_index])[:-6]
+        res_file_path = self.page_data.lineEdit_res_file.text()
+        self.models.model_animals.exportToCsv(res_file_path=res_file_path,
+                                              file_id=cur_file_id)
+
     def retranslateUi(self):
         """
         Function to retranslate the UI and set the inital texts.
@@ -467,8 +474,6 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_settings.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
-           
-
 
     def updateUserIds(self, value):       
         # update the userId in the top bar of the software (on every page)

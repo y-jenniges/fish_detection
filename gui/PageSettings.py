@@ -918,7 +918,7 @@ class PageSettings(QtWidgets.QWidget):
         
         self.on_species_changed()
         
-    def addCustomItem(self, image_path, text=None):
+    def addCustomItem(self, image_path, text=None, add_to_model=True):
         customItem = TextImageItemWidget(image_path) # create custom item
 
         if text is not None: 
@@ -931,7 +931,8 @@ class PageSettings(QtWidgets.QWidget):
         self.list_species.addItem(item)
         self.list_species.setItemWidget(item, customItem)  
         
-        self.on_species_changed()
+        if add_to_model:
+            self.on_species_changed()
         
         # for i in range(self.list_species.count()):
         #     print(self.list_species.item(i))

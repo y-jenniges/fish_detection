@@ -996,21 +996,38 @@ class PhotoViewer(QtWidgets.QWidget):
         #self.layout.invalidate()
         #self.layout.activate()
 
-    
-    
     def loadResFile(self):
         if ntpath.exists(self.res_file_path):
             substring = "_neuralNet_output"
+            
+            # load the neural network result file or the previsouly saved one
             if substring in self.res_file_path:
                 if ntpath.exists(self.res_file_path.replace(substring,"")):
                     self.res_file_path = self.res_file_path.replace(substring,"")  
             else:
                 self.res_file_path = self.res_file_path
-                
-            res_file = pd.read_csv(self.res_file_path, sep=",")
-            self.models.model_animals.update(res_file)
             
-        
+            # load the result file
+            res_file = pd.read_csv(self.res_file_path, sep=",")
+            
+            # set data on animal model
+            self.models.model_animals.update(res_file) 
+      
+            # add image remarks to model
+            img_remarks = res_file["image_remarks"].unique()
+            for remark in img_remarks:
+                self.models.add_image_remark(remark)
+            
+            # add animal remarks to model
+            animal_remarks = res_file["object_remarks"].unique()
+            for remark in animal_remarks:
+                self.models.add_animal_remark(remark)               
+            
+            # add species to list
+            species = res_file["species"].unique()
+            for spec in species:
+                self.models.add_species(spec, self.parent().parent().parent().page_settings)
+                               
     def setResFilePath(self, text):
         self.res_file_path = text
         self.loadResFile()
