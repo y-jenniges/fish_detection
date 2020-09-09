@@ -184,7 +184,27 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.CategoricalAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": ["mae", "acc", 
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 
 
 
@@ -204,7 +224,27 @@ for l in modelL.layers:
     
 # compile and fit model again
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.CategoricalAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": ["mae", "acc", 
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
 
 
@@ -251,7 +291,27 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelH = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelH.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
+modelH.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
+      keras.metrics.CategoricalCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.CategoricalAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+], "connection": ["mae", "acc", 
+      keras.metrics.BinaryCrossentropy(),
+      keras.metrics.TruePositives(),
+      keras.metrics.FalsePositives(),
+      keras.metrics.TrueNegatives(),
+      keras.metrics.FalseNegatives(), 
+      keras.metrics.BinaryAccuracy(),
+      keras.metrics.Precision(),
+      keras.metrics.Recall(),
+      keras.metrics.AUC(),
+]})
 
 
 modelH.summary()
