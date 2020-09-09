@@ -27,16 +27,17 @@ class PageAbout(QtWidgets.QWidget):
         Parameters
         ----------
         parent : optional
+            The default is None.
         """
         super(QtWidgets.QWidget, self).__init__(parent)          
         # --- elements in main widget --------------------------------------- #
         # top bar (the blue one on every page)
         self.frame_top_bar = TopFrame(":/icons/icons/fish_white.png",
-                                     "frame_aboutBar", self)
+                                     "frame_about_bar", self)
                
         # menu bar on about page
         self.frame_control_bar = MenuFrame("About MarOMarker",
-                                          "frame_controlBar_about", self)
+                                          "frame_control_bar_about", self)
         
         # main content frame of about page
         self._frame_about = QtWidgets.QFrame(self)

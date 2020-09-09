@@ -2,10 +2,11 @@ from PyQt5 import QtWidgets
 from Helpers import TopFrame, MenuFrame
 import time
 
-"""
-Class to create the handbook page of the software.
-"""
+
 class PageHandbook(QtWidgets.QWidget):
+    """
+    Class to create the handbook page of the software.
+    """
     def __init__(self, parent=None):
         super(QtWidgets.QWidget, self).__init__(parent)
            
@@ -23,10 +24,10 @@ class PageHandbook(QtWidgets.QWidget):
         self.layout_page_handbook.setObjectName("layout_page_handbook")
         
         # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/book.png", "frame_handbookBar", self)     
+        self.frame_topBar = TopFrame(":/icons/icons/book.png", "frame_handbook_bar", self)     
             
         # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Handbook", "frame_controlBar_handbook", self)      
+        self.frame_controlBar = MenuFrame("Handbook", "frame_control_bar_handbook", self)      
         
         # create main frame for the handbook page
         self.frame_handbook = QtWidgets.QFrame(self)

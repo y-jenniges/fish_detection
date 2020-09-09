@@ -1,10 +1,9 @@
+import ntpath
+import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from TabWidget import TabWidget
 from Helpers import TopFrame, MenuFrame, get_icon
-import ntpath
-import time
-import pandas as pd
+
 
 class TextImageItemWidget (QtWidgets.QWidget):
     def __init__ (self, imagePath, title=None, parent = None):
@@ -58,194 +57,210 @@ class TextImageItemWidget (QtWidgets.QWidget):
         
 
 class PageSettings(QtWidgets.QWidget):
-    """ Class to create the settings page of the software."""
-
+    """ 
+    Class to create the settings page of the software. It contains tabs for
+    different types of settings (e.g. camera, user, neural network, species).
+    
+    Attributes
+    ----------
+    @todo 
+    frame_top_bar : TopFrame
+        frame at the top of the window to display user ID and an icon
+    frame_control_bar : MenuFrame
+        frame below the top bar to display controls of the page and the menu
+    label_about_text : string
+        text for the about page
+        
+    Methods
+    -------
+    info(additional=""):
+        Prints the person's name and age.
+        
+    """
     # create custom signals 
     userIdChanged = QtCore.pyqtSignal(str)
- #   speciesListChanged = QtCore.pyqtSignal(list)
         
     def __init__(self, models, parent=None):
-        start_time = time.time()
+        """
+        Init function. It creates the UI and the connections between 
+        elements (also to other classes).
+
+        Parameters
+        ----------
+        models : Models
+            Contains all necessary data models, i.e. models for the animal 
+            species, group, remark, as well as image remark and the general
+            animal data from the result table.
+        parent : optional
+            The default is None.
+        """
         super(QtWidgets.QWidget, self).__init__(parent)
 
         # data models
         self.models = models
 
-        # init ui and actions on it
-        self.init_ui()
-        self.init_actions()
-        #self.init_oldValues()
-        
-        # # add example to list widget
-        # path1 = "C:/Users/yjenn/Pictures/Wallpapers/23.jpg"
-        # path2 = "C:/Users/yjenn/Pictures/Wallpapers/tiger_stone_lying_big_cats_predator_52901_3840x2160.jpg"
-        # self.addCustomItem(path1)
-        # self.addCustomItem(path2)
-        
-
-
-        
-        #print(f"page settings init: {time.time() - start_time}")
-
-    def init_ui(self):               
-        self.setStyleSheet("/*-------------------------- line edit ------------------------*/\n"
-"QLineEdit{\n"
-"    background-color:white;\n"
-"    border-radius: 3px;\n"
-"    font: 12pt \"Century Gothic\";\n"
-"    selection-background-color:rgb(0, 203, 221);\n"
-"    selection-color:white;\n"
-"    color:black;\n"
-"    padding-left: 10px;\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"/*-------------------------- tab widget ------------------------*/\n"
-"QTabWidget{\n"
-"    font: 12pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"QTabWidget::pane { /* The tab widget frame */\n"
-"       border:None;\n"
-"}\n"
-"\n"
-"\n"
-"/* Style the tab using the tab sub-control. Note that\n"
-"    it reads QTabBar _not_ QTabWidget */\n"
-"QTabBar::tab {\n"
-"    font: 12pt \"Century Gothic\";\n"
-"    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,\n"
-"                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);\n"
-"    border: None;\n"
-"    min-width: 8ex;\n"
-"    min-height: 60ex;\n"
-"    padding: 2px;\n"
-"    padding-bottom:30px;\n"
-"\n"
-"}\n"
-"\n"
-"QTabBar::tab:selected, QTabBar::tab:hover {\n"
-"background-color: rgb(240, 240, 240);\n"
-"}\n"
-"\n"
-"QTabBar::tab:selected {\n"
-"    border-color: #9B9B9B;\n"
-"    border-bottom-color: #C2C7CB; /* same as pane color */\n"
-"}\n"
-"\n"
-"QTabBar::tab:!selected {\n"
-"    margin-top:0px; /* make non-selected tabs look smaller */\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"#frame_camera_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
-"#frame_user_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
-"#frame_species_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
-"#frame_nn_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
-"\n"
-"\n"
-"/*-------------------------- labels ------------------------*/\n"
-"QLabel{\n"
-"    color:black;\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"/*-------------------------- buttons ------------------------*/\n"
-"QPushButton{\n"
-"    font: 10pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species{\n"
-"    background-color:rgb(200, 200, 200);\n"
-"}\n"
-"\n"
-"\n"
-"#btn_load:hover, #btn_save:hover, \n"
-"#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover{\n"
-"  background-color: rgb(0, 203, 221);\n"
-"}\n"
-"\n"
-"#btn_load:pressed, #btn_save:pressed,\n"
-"#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed{\n"
-"background-color: rgb(0, 160, 174);\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"/*-------------------------- double spin boxes ------------------------*/\n"
-"\n"
-"QDoubleSpinBox {\n"
-"    padding-right: 15px; /* make room for the arrows */\n"
-"    /*border-image: url(:/images/frame.png) 4;*/\n"
-"    border-radius: 3px;\n"
-"    selection-background-color:rgb(0, 203, 221);\n"
-"    font:12pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button {\n"
-"    subcontrol-origin: border;\n"
-"    subcontrol-position: top right; /* position at the top right corner */\n"
-"\n"
-"    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */\n"
-"    border-image: url(:/icons/icons/arrow_up.png) 1;\n"
-"    border-width: 1px;\n"
-"    margin:2px;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button:hover {\n"
-"    border-image: url(:/icons/icons/arrow_up_blue.png) 1;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button:pressed {\n"
-"    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"/*\n"
-"QDoubleSpinBox::up-arrow {\n"
-"    image:url(:/icons/icons/arrow_up.png);\n"
-"    width: 7px;\n"
-"    height: 7px;\n"
-"}\n"
-"QDoubleSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */\n"
-" /*  image: url(:/images/up_arrow_disabled.png);\n"
-"}\n"
-"QDoubleSpinBox::down-arrow {\n"
-"    image: url(:/icons/icons/arrow_down.png);\n"
-"    width: 7px;\n"
-"    height: 7px;\n"
-"}\n"
-"QDoubleSpinBox::down-arrow:disabled,\n"
-"QDoubleSpinBox::down-arrow:off { /* off state when value in min */\n"
-" /*  image: url(:/icons/icons/arrow_down.png) 1;\n"
-"}\n"
-"*/\n"
-"\n"
-"QDoubleSpinBox::down-button {\n"
-"    subcontrol-origin: border;\n"
-"    subcontrol-position: bottom right; /* position at bottom right corner */\n"
-"\n"
-"    width: 16px;\n"
-"    border-image: url(:/icons/icons/arrow_down.png) 1;\n"
-"    border-width: 1px;\n"
-"    border-top-width: 0;\n"
-"    margin:2px;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::down-button:hover {\n"
-"    border-image: url(:/icons/icons/arrow_down_blue.png) 1;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::down-button:pressed {\n"
-"    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
-"}\n"
-"")
-        # --- main page --------------------------------------------------- #
+        # init UI and actions on it
+        self._init_ui()
+        self._init_actions()
+                
+    def _init_ui(self):  
+        """
+        Function that initializes the UI components for the settings page.
+        """             
+        self.setStyleSheet(
+            "/*------------------------ line edit -----------------------*/\n"
+            "QLineEdit{\n"
+            "    background-color:white;\n"
+            "    border-radius: 3px;\n"
+            "    font: 12pt \"Century Gothic\";\n"
+            "    selection-background-color:rgb(0, 203, 221);\n"
+            "    selection-color:white;\n"
+            "    color:black;\n"
+            "    padding-left: 10px;\n"
+            "}\n"
+            "/*------------------------ tab widget ----------------------*/\n"
+            "QTabWidget{\n"
+            "    font: 12pt \"Century Gothic\";\n"
+            "}\n"
+            "\n"
+            "QTabWidget::pane { /* The tab widget frame */\n"
+            "       border:None;\n"
+            "}\n"
+            "/* Style the tab using the tab sub-control. Note that\n"
+            "    it reads QTabBar _not_ QTabWidget */\n"
+            "QTabBar::tab {\n"
+            "    font: 12pt \"Century Gothic\";\n"
+            "    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+            "                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,\n"
+            "                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);\n"
+            "    border: None;\n"
+            "    min-width: 8ex;\n"
+            "    min-height: 60ex;\n"
+            "    padding: 2px;\n"
+            "    padding-bottom:30px;\n"
+            "\n"
+            "}\n"
+            "\n"
+            "QTabBar::tab:selected, QTabBar::tab:hover {\n"
+            "background-color: rgb(240, 240, 240);\n"
+            "}\n"
+            "\n"
+            "QTabBar::tab:selected {\n"
+            "    border-color: #9B9B9B;\n"
+            "    border-bottom-color: #C2C7CB; /* same as pane color */\n"
+            "}\n"
+            "\n"
+            "QTabBar::tab:!selected {\n"
+            "    margin-top:0px; /* make non-selected tabs look smaller */\n"
+            "}\n"
+            "\n"
+            "\n"
+            "\n"
+            "#frame_camera_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
+            "#frame_user_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
+            "#frame_species_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
+            "#frame_nn_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
+            "\n"
+            "\n"
+            "/*-------------------------- labels ------------------------*/\n"
+            "QLabel{\n"
+            "    color:black;\n"
+            "}\n"
+            "\n"
+            "\n"
+            "\n"
+            "/*-------------------------- buttons ------------------------*/\n"
+            "QPushButton{\n"
+            "    font: 10pt \"Century Gothic\";\n"
+            "}\n"
+            "\n"
+            "#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species{\n"
+            "    background-color:rgb(200, 200, 200);\n"
+            "}\n"
+            "\n"
+            "\n"
+            "#btn_load:hover, #btn_save:hover, \n"
+            "#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover{\n"
+            "  background-color: rgb(0, 203, 221);\n"
+            "}\n"
+            "\n"
+            "#btn_load:pressed, #btn_save:pressed,\n"
+            "#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed{\n"
+            "background-color: rgb(0, 160, 174);\n"
+            "}\n"
+            "\n"
+            "\n"
+            "\n"
+            "/*--------------------- double spin boxes -------------------*/\n"
+            "\n"
+            "QDoubleSpinBox {\n"
+            "    padding-right: 15px; /* make room for the arrows */\n"
+            "    /*border-image: url(:/images/frame.png) 4;*/\n"
+            "    border-radius: 3px;\n"
+            "    selection-background-color:rgb(0, 203, 221);\n"
+            "    font:12pt \"Century Gothic\";\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button {\n"
+            "    subcontrol-origin: border;\n"
+            "    subcontrol-position: top right; /* position at the top right corner */\n"
+            "\n"
+            "    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */\n"
+            "    border-image: url(:/icons/icons/arrow_up.png) 1;\n"
+            "    border-width: 1px;\n"
+            "    margin:2px;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button:hover {\n"
+            "    border-image: url(:/icons/icons/arrow_up_blue.png) 1;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button:pressed {\n"
+            "    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;\n"
+            "}\n"
+            "\n"
+            "\n"
+            "\n"
+            "/*\n"
+            "QDoubleSpinBox::up-arrow {\n"
+            "    image:url(:/icons/icons/arrow_up.png);\n"
+            "    width: 7px;\n"
+            "    height: 7px;\n"
+            "}\n"
+            "QDoubleSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */\n"
+            " /*  image: url(:/images/up_arrow_disabled.png);\n"
+            "}\n"
+            "QDoubleSpinBox::down-arrow {\n"
+            "    image: url(:/icons/icons/arrow_down.png);\n"
+            "    width: 7px;\n"
+            "    height: 7px;\n"
+            "}\n"
+            "QDoubleSpinBox::down-arrow:disabled,\n"
+            "QDoubleSpinBox::down-arrow:off { /* off state when value in min */\n"
+            " /*  image: url(:/icons/icons/arrow_down.png) 1;\n"
+            "}\n"
+            "*/\n"
+            "\n"
+            "QDoubleSpinBox::down-button {\n"
+            "    subcontrol-origin: border;\n"
+            "    subcontrol-position: bottom right; /* position at bottom right corner */\n"
+            "\n"
+            "    width: 16px;\n"
+            "    border-image: url(:/icons/icons/arrow_down.png) 1;\n"
+            "    border-width: 1px;\n"
+            "    border-top-width: 0;\n"
+            "    margin:2px;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::down-button:hover {\n"
+            "    border-image: url(:/icons/icons/arrow_down_blue.png) 1;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::down-button:pressed {\n"
+            "    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
+            "}\n")
+       
+        # --- main page ----------------------------------------------------- #
         self.setObjectName("page_settings")
         
         # main layout
@@ -255,13 +270,12 @@ class PageSettings(QtWidgets.QWidget):
         self.layout_page_settings.setObjectName("layout_page_settings")
         
         # top bar (the blue one on every page)
-        self.frame_topBar = TopFrame(":/icons/icons/settings.png", "frame_settingsBar", self)   
+        self.frame_top_bar = TopFrame(":/icons/icons/settings.png", "frame_settings_bar", self)   
         
         # menu bar on about page
-        self.frame_controlBar = MenuFrame("Settings", "frame_controlBar_settings", self)
+        self.frame_control_bar = MenuFrame("Settings", "frame_control_bar_settings", self)
   
-    
-        # --- main frame for the settings --------------------------------------------------- #
+        # --- main frame for the settings ----------------------------------- #
         self.frame_settings = QtWidgets.QFrame(self)
         self.frame_settings.setStyleSheet("")
         self.frame_settings.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -296,13 +310,13 @@ class PageSettings(QtWidgets.QWidget):
         self.layout_settings_frame.addWidget(self.tabWidget)
         
         
-        # --- add widgets to main layout ------------------------------------------------------------ #
-        self.layout_page_settings.addWidget(self.frame_topBar)
-        self.layout_page_settings.addWidget(self.frame_controlBar)
+        # --- add widgets to main layout ------------------------------------ #
+        self.layout_page_settings.addWidget(self.frame_top_bar)
+        self.layout_page_settings.addWidget(self.frame_control_bar)
         self.layout_page_settings.addWidget(self.frame_settings)
     
     def createTabCamera(self):
-        # --- main frame (whole tab) ----------------------------------------------- #
+        # --- main frame (whole tab) ---------------------------------------- #
         tab_camera = QtWidgets.QWidget(self)
         tab_camera.setObjectName("tab_camera")
         
@@ -315,7 +329,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem35 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         
         
-        # --- frame for camera options ----------------------------------------------- #
+        # --- frame for camera options -------------------------------------- #
         frame_camera_options = QtWidgets.QFrame(tab_camera)
         frame_camera_options.setStyleSheet("")
         frame_camera_options.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -332,7 +346,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem32 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         
         
-        # --- frame for camera config file ----------------------------------------------- #
+        # --- frame for camera config file ---------------------------------- #
         frame_config = QtWidgets.QFrame(frame_camera_options)
         frame_config.setMinimumSize(QtCore.QSize(0, 50))
         frame_config.setMaximumSize(QtCore.QSize(16777215, 60))
@@ -374,7 +388,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_config.addWidget(self.btn_save)
         
         
-        # --- frame for offset options ----------------------------------------------- # 
+        # --- frame for offset options -------------------------------------- # 
         frame_offset = QtWidgets.QFrame(frame_camera_options)
         frame_offset.setMinimumSize(QtCore.QSize(0, 30))
         frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
@@ -424,7 +438,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_offset.addWidget(self.label_unit_offset)
         
         
-        # --- frame for camera distance options ----------------------------------------------- #
+        # --- frame for camera distance options ----------------------------- #
         frame_distance_cameras = QtWidgets.QFrame(frame_camera_options)
         frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
         frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
@@ -469,7 +483,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_distance.addWidget(self.label_unit_ditance_cameras)
         
         
-        # --- frame for distance chip lense options ----------------------------------------------- #
+        # --- frame for distance chip lense options ------------------------- #
         frame_distance_chip_lense = QtWidgets.QFrame(frame_camera_options)
         frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
         frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
@@ -520,7 +534,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_distance_cl.addWidget(self.label_unit_chip_lense)
         
         
-        # --- adding widgets to content (camera options) and main frame  ----------------------------------------------- #
+        # --- adding widgets to content (camera options) and main frame ----- #
         layout_camera_options.addWidget(frame_config)
         layout_camera_options.addWidget(frame_offset)
         layout_camera_options.addWidget(frame_distance_cameras)
@@ -534,7 +548,7 @@ class PageSettings(QtWidgets.QWidget):
         return tab_camera
         
     def createTabNeuralNetwork(self):
-        # --- main frame (whole tab) ----------------------------------------------- #
+        # --- main frame (whole tab) ---------------------------------------- #
         tab_neuralNet = QtWidgets.QWidget(self)
         tab_neuralNet.setObjectName("tab_neuralNet")
         
@@ -547,7 +561,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem40 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         
         
-        # --- frame for nn options ----------------------------------------------- #
+        # --- frame for nn options ------------------------------------------ #
         frame_nn_options = QtWidgets.QFrame(tab_neuralNet)
         frame_nn_options.setStyleSheet("")
         frame_nn_options.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -563,7 +577,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem37 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         
         
-        # --- frame for nn path options ----------------------------------------------- #
+        # --- frame for nn path options ------------------------------------- #
         frame_nn_path_options = QtWidgets.QFrame(frame_nn_options)
         frame_nn_path_options.setMinimumSize(QtCore.QSize(0, 30))
         frame_nn_path_options.setMaximumSize(QtCore.QSize(16777215, 60))
@@ -611,7 +625,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_nn_path.addWidget(self.btn_browse_nn)
        
         
-        # --- adding widgets to content (nn options) and main frame  ----------------------------------------------- #
+        # --- adding widgets to content (nn options) and main frame --------- #
         layout_nn_options.addWidget(frame_nn_path_options)
         layout_nn_options.addItem(spacerItem37)
         
@@ -622,7 +636,7 @@ class PageSettings(QtWidgets.QWidget):
         return tab_neuralNet
            
     def createTabSpecies(self):
-        # --- main frame (whole tab) ----------------------------------------------- #
+        # --- main frame (whole tab) ---------------------------------------- #
         tab_species = QtWidgets.QWidget(self)
         tab_species.setObjectName("tab_species")
         
@@ -633,7 +647,7 @@ class PageSettings(QtWidgets.QWidget):
         # horizontal spacer
         spacerItem43 = QtWidgets.QSpacerItem(600, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)     
             
-        # --- frame for species options ----------------------------------------------- #
+        # --- frame for species options ------------------------------------- #
         frame_species_options = QtWidgets.QFrame(tab_species)
         frame_species_options.setStyleSheet("")
         frame_species_options.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -670,9 +684,8 @@ class PageSettings(QtWidgets.QWidget):
         # add widgets to main layout
         layout.addWidget(frame_species_options, 0, 0, 1, 1)
         layout.addItem(spacerItem43, 0, 1, 1, 1)      
-
         
-        # --- frame for buttons ----------------------------------------------- #
+        # --- frame for buttons --------------------------------------------- #
         # frame 
         frame_buttons = QtWidgets.QFrame(frame_species_options)
         frame_buttons.setMinimumSize(QtCore.QSize(0, 30))
@@ -700,7 +713,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_buttons.addWidget(self.btn_remove_species)
         
         
-        # --- content frame ----------------------------------------------- #
+        # --- content frame ------------------------------------------------- #
         # add widgets to species options frame
 #        layout_species_options.addWidget(self.listView_species)
         layout_species_options.addWidget(self.list_species)
@@ -709,7 +722,7 @@ class PageSettings(QtWidgets.QWidget):
         return tab_species
 
     def createTabUser(self):
-        # --- main frame (whole tab) ----------------------------------------------- #
+        # --- main frame (whole tab) ---------------------------------------- #
         tab_user = QtWidgets.QWidget(self)
         tab_user.setObjectName("tab_user")
         
@@ -721,7 +734,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem48 = QtWidgets.QSpacerItem(609, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         spacerItem49 = QtWidgets.QSpacerItem(20, 334, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         
-        # --- frame for user options ----------------------------------------------- #
+        # --- frame for user options ---------------------------------------- #
         # frame for the user options
         frame_user_options = QtWidgets.QFrame(tab_user)
         frame_user_options.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -737,7 +750,7 @@ class PageSettings(QtWidgets.QWidget):
         spacerItem46 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         
-        # --- frame for user id options ----------------------------------------------- #
+        # --- frame for user id options ------------------------------------- #
         # frame for the options for the user id
         frame_user_id = QtWidgets.QFrame(frame_user_options)
         frame_user_id.setMinimumSize(QtCore.QSize(0, 30))
@@ -783,7 +796,7 @@ class PageSettings(QtWidgets.QWidget):
         layout_user_id_row.addWidget(self.lineEdit_user_id)
         
         
-        # --- adding widgets to content (user options) and main frame  ----------------------------------------------- #
+        # --- adding widgets to content (user options) and main frame ------- #
         # add widgets to user options frame        
         layout_user_options.addWidget(frame_user_id)
         layout_user_options.addItem(spacerItem46)
@@ -796,7 +809,7 @@ class PageSettings(QtWidgets.QWidget):
         return tab_user
 
 
-    def init_actions(self):
+    def _init_actions(self):
         # camera tab      
         self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
         self.btn_load.clicked.connect(self.browse_config)
@@ -880,7 +893,7 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_config_path.setText(filename[0])
         
         
-# --- actions in nn tab ------------------------------------------------- #   
+# --- actions in nn tab ----------------------------------------------------- #   
     def nn_path_changed(self):
         pass
         
@@ -894,7 +907,7 @@ class PageSettings(QtWidgets.QWidget):
         if path != "" and ntpath.exists(path):    
             self.lineEdit_nn.setText(path)
         
-# --- actions in species tab ------------------------------------------------- #
+# --- actions in species tab ------------------------------------------------ #
     def browse_for_species_image(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
         self.addCustomItem(filename[0])
@@ -959,12 +972,12 @@ class PageSettings(QtWidgets.QWidget):
         
 
 
-# --- actions in user tab ------------------------------------------------- #  
+# --- actions in user tab --------------------------------------------------- #  
     def user_id_changed(self):
         self.userIdChanged.emit(self.lineEdit_user_id.text())
 
 
-# --- functions for saving and restoring options ------------------------------------------------- # 
+# --- functions for saving and restoring options ---------------------------- # 
     def saveCurrentValues(self, settings):       
         settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
         settings.setValue("nnPath", self.lineEdit_nn.text()) 

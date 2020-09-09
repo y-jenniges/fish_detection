@@ -1,17 +1,12 @@
-"""
-Created on 22 July 2020
-@author: Yvonne Jenniges
-"""
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from Models import Models
 import PageHome
 import PageSettings
 import PageAbout
 import PageHandbook
 import PageData
-from Models import Models
 
-import time
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
     """ Main window class for MarOMarker. """
@@ -109,9 +104,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
        
         # texts for settings page
-        self.page_settings.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
-        self.page_settings.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))     
-        self.page_settings.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Settings"))     
+        self.page_settings.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
+        self.page_settings.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
+        self.page_settings.frame_control_bar.label_settings_3.setText(_translate("MainWindow", "Settings"))     
         self.page_settings.lineEdit_config_path.setToolTip(_translate("MainWindow", "Select a camera configuration file using the \"Load\" button on the right"))
         self.page_settings.lineEdit_config_path.setPlaceholderText(_translate("MainWindow", "Path to camera configuration file..."))    
         self.page_settings.btn_load.setText(_translate("MainWindow", "Load"))
@@ -176,9 +171,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setObjectName("stackedWidget")
         self.stackedWidget.setStyleSheet("#frame_controlBar{background-color:rgb(200, 200, 200); }\n"
 "#frame_controlBar_data{background-color:rgb(200, 200, 200); }\n"
-"#frame_controlBar_settings{background-color:rgb(200, 200, 200); }\n"
-"#frame_controlBar_handbook{background-color:rgb(200, 200, 200); }\n"
-"#frame_controlBar_about{background-color:rgb(200, 200, 200); }\n"
+"#frame_control_bar_settings{background-color:rgb(200, 200, 200); }\n"
+"#frame_control_bar_handbook{background-color:rgb(200, 200, 200); }\n"
+"#frame_control_bar_about{background-color:rgb(200, 200, 200); }\n"
 "\n"
 "QPushButton{\n"
 "background-color:transparent;\n"
@@ -344,9 +339,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 "\n"
 "#frame_homeBar,\n"
 "#frame_dataBar,\n"
-"#frame_settingsBar,\n"
-"#frame_handbookBar,\n"
-"#frame_aboutBar\n"
+"#frame_settings_bar,\n"
+"#frame_handbook_bar,\n"
+"#frame_about_bar\n"
 "{background-color: rgb(0, 203, 221);}\n"
 "/*-------------------------- double spin boxes ------------------------*/\n"
 "\n"
@@ -455,7 +450,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # connect user button in top bars
         self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
-        self.page_settings.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
+        self.page_settings.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_about.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
         
@@ -469,7 +464,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)
         self.append_main_menu_to_button(self.page_data.frame_controlBar.btn_menu)
-        self.append_main_menu_to_button(self.page_settings.frame_controlBar.btn_menu)
+        self.append_main_menu_to_button(self.page_settings.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
            
@@ -479,14 +474,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # update the userId in the top bar of the software (on every page)
         self.page_home.frame_topBar.label_user_id.setText(value)
         self.page_data.frame_topBar.label_user_id.setText(value)
-        self.page_settings.frame_topBar.label_user_id.setText(value)
+        self.page_settings.frame_top_bar.label_user_id.setText(value)
         self.page_about.frame_top_bar.label_user_id.setText(value)
         self.page_handbook.frame_topBar.label_user_id.setText(value) 
         
         # also update the dummy userIds to preserve the symmetry of the bar
         self.page_home.frame_topBar.label_user_id_2.setText(value)
         self.page_data.frame_topBar.label_user_id_2.setText(value)
-        self.page_settings.frame_topBar.label_user_id_2.setText(value)
+        self.page_settings.frame_top_bar.label_user_id_2.setText(value)
         self.page_about.frame_top_bar.label_user_id_2.setText(value)
         self.page_handbook.frame_topBar.label_user_id_2.setText(value)
 

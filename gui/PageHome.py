@@ -1,15 +1,8 @@
-"""
-Created on 22 July 2020
-@author: Yvonne Jenniges
-"""
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from keras.preprocessing.image import load_img, img_to_array
-from Helpers import TopFrame, MenuFrame, get_icon
-import time
 import ntpath
+from PyQt5 import QtCore, QtGui, QtWidgets
+from Helpers import TopFrame, get_icon
 from test_new_zoom import PhotoViewer
-import HelperFunctions as helpers
+
 
 class PageHome(QtWidgets.QWidget):
     """

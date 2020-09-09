@@ -51,8 +51,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             Contains all necessary data models, i.e. models for the animal 
             species, group, remark, as well as image remark and the general
             animal data from the result table.
-        parent : TYPE, optional
-            DESCRIPTION. The default is None.
+        parent : optional
+            The default is None.
         """
         super(QtWidgets.QWidget, self).__init__(parent)
         
@@ -1123,9 +1123,9 @@ class PhotoViewer(QtWidgets.QWidget):
         self.imageArea.animal_painter.updateBoundingBoxes() 
     
     
-    def exportToCsv(self):
+    def exportToCsv(self, file_id):
         res_file_path = self.parent().parent().parent().page_data.lineEdit_res_file.text()
-        self.models.model_animals.exportToCsv(res_file_path)
+        self.models.model_animals.exportToCsv(res_file_path, file_id)
     
     def on_next_image(self):
         # current file_id
@@ -1142,8 +1142,9 @@ class PhotoViewer(QtWidgets.QWidget):
             path = self.image_list[self.cur_image_index+1]
             self.cur_image_index = self.cur_image_index + 1        
             self.loadImage(path)
-            
-        self.exportToCsv()
+        
+        # update the previous image in the csv file
+        self.exportToCsv(cur_file_id)
        
     def on_previous_image(self):
         # current file_id
@@ -1160,7 +1161,8 @@ class PhotoViewer(QtWidgets.QWidget):
             self.cur_image_index = self.cur_image_index - 1
             self.loadImage(path) 
         
-        self.exportToCsv()
+        # update the previous image in the csv file
+        self.exportToCsv(cur_file_id)
 
 
     def updateImageCountVisual(self):
