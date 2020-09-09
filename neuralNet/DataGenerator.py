@@ -62,6 +62,22 @@ def generateAllHeatmaps(entry, res='low'):
         hm_5_head.downsample()
         hm_5_tail.downsample()
         hm_5_body.downsample()
+    elif res=="high":
+        hm_1_head.downsample(factor=2)
+        hm_1_tail.downsample(factor=2)
+        hm_1_body.downsample(factor=2)
+        hm_2_head.downsample(factor=2)
+        hm_2_tail.downsample(factor=2)
+        hm_2_body.downsample(factor=2)
+        hm_3_head.downsample(factor=2)
+        hm_3_tail.downsample(factor=2)
+        hm_3_body.downsample(factor=2)
+        hm_4_head.downsample(factor=2)
+        hm_4_tail.downsample(factor=2)
+        hm_4_body.downsample(factor=2)
+        hm_5_head.downsample(factor=2)
+        hm_5_tail.downsample(factor=2)
+        hm_5_body.downsample(factor=2)
     
     # assemble connection head-tail heatmap 
     hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)

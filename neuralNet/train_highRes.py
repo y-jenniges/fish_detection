@@ -30,7 +30,7 @@ bodyPart:
     'both'
 """
 # output directory
-out_path = f"../data/output/54/"
+out_path = f"../data/output/56/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -53,12 +53,14 @@ label_root = "../data/maritime_dataset_25/labels/"
 # train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
 # test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
 
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
+
 
 
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
+
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -184,27 +186,27 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
 modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "connection": ["mae", "acc", 
-      keras.metrics.BinaryCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-]})
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
+#       keras.metrics.CategoricalCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.CategoricalAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ], "connection": ["mae", "acc", 
+#       keras.metrics.BinaryCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.BinaryAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ]})
 
 
 
@@ -215,7 +217,7 @@ modelL.summary()
 start_L  = time.time()
 
 # for training mobilenet too 
-history_L1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=testGenL)
+history_L1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=testGenL, class_weight=class_weights)
 #@todo make epochs 10 again
 
 # activate all layers for training
@@ -224,28 +226,28 @@ for l in modelL.layers:
     
 # compile and fit model again
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "connection": ["mae", "acc", 
-      keras.metrics.BinaryCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-]})
-history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL)
+modelL.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
+#       keras.metrics.CategoricalCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.CategoricalAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ], "connection": ["mae", "acc", 
+#       keras.metrics.BinaryCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.BinaryAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ]})
+history_L2 = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=testGenL, class_weight=class_weights)
 
 
 end_L = time.time() - start_L
@@ -291,27 +293,27 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 modelH = keras.Model(inputs=input, outputs=[out_h, out_connection])
-modelH.compile(loss=Globals.loss, optimizer=opt, metrics={"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "connection": ["mae", "acc", 
-      keras.metrics.BinaryCrossentropy(),
-      keras.metrics.TruePositives(),
-      keras.metrics.FalsePositives(),
-      keras.metrics.TrueNegatives(),
-      keras.metrics.FalseNegatives(), 
-      keras.metrics.BinaryAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
-]})
+modelH.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
+#       keras.metrics.CategoricalCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.CategoricalAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ], "connection": ["mae", "acc", 
+#       keras.metrics.BinaryCrossentropy(),
+#       keras.metrics.TruePositives(),
+#       keras.metrics.FalsePositives(),
+#       keras.metrics.TrueNegatives(),
+#       keras.metrics.FalseNegatives(), 
+#       keras.metrics.BinaryAccuracy(),
+#       keras.metrics.Precision(),
+#       keras.metrics.Recall(),
+#       keras.metrics.AUC(),
+# ]})
 
 
 modelH.summary()
@@ -338,7 +340,7 @@ modelH.summary()
 # #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 # #for ctr in range(10):
 start_H = time.time()
-historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH)
+historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH, class_weight=class_weights)
 end_H = time.time() - start_H
 # # print the time used for training
 # print(f"Training took {time.time() - start}")
