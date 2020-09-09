@@ -111,7 +111,7 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     return test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights
 
 # image helpers --------------------------------------------------------------------#
-def loadImage(fname, equalize=False):
+def loadImage(fname, factor=32, equalize=False):
     "Loads an image as a h*w*3 numpy array"
     
     # load image in PIL format (either first equalized or not)
@@ -125,11 +125,11 @@ def loadImage(fname, equalize=False):
         img = img_to_array(load_img(fname), dtype="uint8")
 
     #print(f"image before {img.shape}")
-    rest_x, rest_y = img.shape[0]%32, img.shape[1]%32
+    rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
     if rest_x != 0:
-        img = np.pad(img, ((0,32-rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
+        img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
     if rest_y != 0:        
-        img = np.pad(img, ((0,0),(0, 32-rest_y),(0,0)), 'constant', constant_values=0)
+        img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', constant_values=0)
        
     return img
 

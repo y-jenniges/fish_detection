@@ -14,7 +14,9 @@ class Heatmap():
         assert group in range(Globals.NUM_GROUPS)
         
         self.imagePath = entry['filename']
-        self.image = helpers.loadImage(self.imagePath)
+        factor=64
+        #if resolution=="high": factor=
+        self.image = helpers.loadImage(self.imagePath, factor)
         self.gt = entry['animals']
         self.group = group
         self.bodyPart = bodyPart
