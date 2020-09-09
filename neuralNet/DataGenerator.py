@@ -67,8 +67,8 @@ def generateAllHeatmaps(entry, res='low'):
     hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)
     hm_body = np.clip (hm_body, 0, 1, out=hm_body)
     
-    image = helpers.loadImage(entry['filename'])
-    helpers.downsample(image)
+    # image = helpers.loadImage(entry['filename'])
+    # helpers.downsample(image)
    # hm_y, hm_x = image.shape[0], image.shape[1]
     
     hm_y, hm_x = hm_1_head.hm.shape[0], hm_1_head.hm.shape[1]
@@ -111,7 +111,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])
     image = 2.*image/np.max(image) - 1
-
+    image = helpers.downsample(image, factor=2)
     
     #classification=[]
  
@@ -153,6 +153,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     #image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     #image = 2.*(image - np.min(image))/np.ptp(image)-1
     image = 2.*image/np.max(image) - 1
+    image = helpers.downsample(image, factor=2)
 
     heatmaps = np.concatenate(heatmaps, axis=2)
     

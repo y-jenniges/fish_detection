@@ -14,9 +14,7 @@ class Heatmap():
         assert group in range(Globals.NUM_GROUPS)
         
         self.imagePath = entry['filename']
-        factor=64
-        #if resolution=="high": factor=
-        self.image = helpers.loadImage(self.imagePath, factor)
+        self.image = helpers.loadImage(self.imagePath)
         self.gt = entry['animals']
         self.group = group
         self.bodyPart = bodyPart
@@ -357,6 +355,7 @@ class Heatmap():
       """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
          Downsamples the height and width dimension of T by the given factor. 
          The length in these dimensions must be a multiple of factor."""
+      factor=64
       sh = self.hm.shape
       assert sh[-3]%factor==0
       assert sh[-2]%factor==0

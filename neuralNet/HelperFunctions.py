@@ -113,7 +113,7 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
 # image helpers --------------------------------------------------------------------#
 def loadImage(fname, factor=32, equalize=False):
     "Loads an image as a h*w*3 numpy array"
-    
+    factor=64
     # load image in PIL format (either first equalized or not)
     #img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
     if equalize:
@@ -294,6 +294,7 @@ def downsample (T, factor=32):
   """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
      Downsamples the height and width dimension of T by the given factor. 
      The length in these dimensions must be a multiple of factor."""
+  factor=64
   sh = T.shape
   assert sh[-3]%factor==0
   assert sh[-2]%factor==0
