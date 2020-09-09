@@ -111,9 +111,8 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     return test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights
 
 # image helpers --------------------------------------------------------------------#
-def loadImage(fname, factor=32, equalize=False):
+def loadImage(fname, factor=64, equalize=False):
     "Loads an image as a h*w*3 numpy array"
-    factor=64
     # load image in PIL format (either first equalized or not)
     #img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
     if equalize:
@@ -136,7 +135,7 @@ def loadImage(fname, factor=32, equalize=False):
 # Load the first image an d get the shape of that: All images have the same size
 def shapeOfFilename(fname):
     "Returns the imageshape of fname (filename)."
-    imageShape = loadImage(fname)
+    imageShape = downsample(loadImage(fname),2)
     return imageShape.shape
 
 # todo head and tail are switched!!
@@ -290,11 +289,10 @@ def gaussian (sigma, dim):
     return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
 
 # @todo needed here?
-def downsample (T, factor=32):
+def downsample (T, factor=64):
   """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
      Downsamples the height and width dimension of T by the given factor. 
      The length in these dimensions must be a multiple of factor."""
-  factor=64
   sh = T.shape
   assert sh[-3]%factor==0
   assert sh[-2]%factor==0

@@ -351,11 +351,10 @@ class Heatmap():
         self.bodyPart = 'both'
         self.hm = (hm_front + hm_back)/2
 
-    def downsample (self, factor=32):
+    def downsample (self, factor=64):
       """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
          Downsamples the height and width dimension of T by the given factor. 
          The length in these dimensions must be a multiple of factor."""
-      factor=64
       sh = self.hm.shape
       assert sh[-3]%factor==0
       assert sh[-2]%factor==0

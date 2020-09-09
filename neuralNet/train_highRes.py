@@ -59,8 +59,8 @@ label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
 
-train_labels_animals = train_labels_animals[:4]
-test_labels = test_labels[:4]
+# train_labels_animals = train_labels_animals[:4]
+# test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
@@ -217,7 +217,7 @@ modelL.summary()
 start_L  = time.time()
 
 # for training mobilenet too 
-history_L1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=testGenL, class_weight=class_weights)
+history_L1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL, class_weight=class_weights)
 #@todo make epochs 10 again
 
 # activate all layers for training

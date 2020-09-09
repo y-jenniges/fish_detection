@@ -35,5 +35,5 @@ optimizer = 'adam'
 # ]
 
 
-epochs_L = 1
-epochs_H = 1
+epochs_L = 50
+epochs_H = 20
