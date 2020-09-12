@@ -133,9 +133,9 @@ def loadImage(fname, factor=64, equalize=False):
     return img
 
 # Load the first image an d get the shape of that: All images have the same size
-def shapeOfFilename(fname):
+def shapeOfFilename(fname, factor=2):
     "Returns the imageshape of fname (filename)."
-    imageShape = downsample(loadImage(fname),2)
+    imageShape = downsample(loadImage(fname),factor)
     return imageShape.shape
 
 # todo head and tail are switched!!
@@ -347,11 +347,11 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             group_array_back = np.zeros(Globals.channels)
             group_array_back[group*2+1] = 1
             
-            x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)] 
-            y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]
+            x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)]/2 
+            y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]/2
             
-            x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_back)]
-            y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]
+            x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_back)]/2
+            y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]/2
          
 
             plt.scatter(x_front, y_front, s=100, marker='o', c='b',)
@@ -366,8 +366,8 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             elif bodyPart=='back':
                 group_array[group*2] = 1 
                 
-            x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array) ]
-            y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
+            x = [animal['position'][0]/2 for animal in gt if np.array_equal(animal['group'], group_array)]
+            y = [animal['position'][1]/2 for animal in gt if np.array_equal(animal['group'], group_array)]
             
             marker = "o" if bodyPart == "front" else "x"
             plt.scatter (x, y,s=10, marker=marker, c="b")

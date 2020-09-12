@@ -30,7 +30,7 @@ bodyPart:
     'both'
 """
 # output directory
-out_path = f"../data/output/56/"
+out_path = f"../data/output/57/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -59,14 +59,16 @@ label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
 
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
 data_root = "../data/maritime_dataset_25/"
-imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"))
-print(f"Image format {imageShape}.")
+imageShapeL = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=1)
+imageShapeH = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=2)
+print(f"Image format {imageShapeL}.")
+print(f"Image format {imageShapeH}.")
 
 # data generators
 trainGenL = dg.DataGenerator (dataset=train_labels_animals,
@@ -161,9 +163,10 @@ def ourBlock (x, basename, channels=12):
     return x
 
 alpha = 1.0
-input = keras.layers.Input(shape=imageShape)
+inputL = keras.layers.Input(shape=imageShapeL)
+inputH = keras.layers.Input(shape=imageShapeH)
 
-backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
+backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=inputL, include_top=False, weights='imagenet', pooling=None)
 #for l in backbone.layers[:-25]:
 for l in backbone.layers:
     l.trainable = False
@@ -185,7 +188,7 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
+modelL = keras.Model(inputs=inputL, outputs=[out_h, out_connection])
 modelL.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
 #       keras.metrics.CategoricalCrossentropy(),
 #       keras.metrics.TruePositives(),
@@ -292,7 +295,7 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
-modelH = keras.Model(inputs=input, outputs=[out_h, out_connection])
+modelH = keras.Model(inputs=inputH, outputs=[out_h, out_connection])
 modelH.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
 #       keras.metrics.CategoricalCrossentropy(),
 #       keras.metrics.TruePositives(),

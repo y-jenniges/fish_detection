@@ -13,10 +13,10 @@ import Globals
 import tensorflow as tf
 
 
-test_path = "../data/output/54/"
+test_path = "../data/output/56/"
 out_path = test_path #+ "output/"
 
-res = "-L"
+res = "-H"
 
 model_path = "model" + res
 testGen_path = "serialized_testGen" + res+ ".pickle"
@@ -58,7 +58,7 @@ c = "trainHistory-H.pickle"
 modelL = tf.keras.models.load_model(os.path.join(test_path,model_path))
 
 # load training history
-with open(os.path.join(test_path, a),'rb') as file:
+with open(os.path.join(test_path, b),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
@@ -79,6 +79,7 @@ f867 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/8
 f883 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/883.jpg" #chaeto
 f913 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/913.jpg" #chaeto
 f575 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/575.jpg" #jellyfish
+f826 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/826.jpg" #jellyfish
 f193 = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/193.jpg" #unidentified
 
 #tests = {"f0":0, "f22":22, "f39":39, "f51":51, "f60":60}
@@ -90,12 +91,14 @@ tests = {"309":f309}
 #tests = {"575":f575}
 #tests = {"193":f193}
 #tests = {"51":f51}
-
+tests = {"826":f826}
+tests = {"60":f60}
 for k, v in tests.items():
     entry = [entry for entry in test_labels if entry['filename'] == v][0]
     #entry = test_labels[i]
     image = np.asarray(helpers.loadImage(entry['filename']))
     image = 2.*image/np.max(image) - 1
+    image = helpers.downsample(image, factor=2)
     
     # groundtruth heatmap
     hm = HeatmapClass.Heatmap(entry)
@@ -210,7 +213,7 @@ for k, v in tests.items():
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-key = "heatmap_tp"
+key = "heatmap_mae"
 
 print(f"key: {history[key]}")
 # plot mae history
