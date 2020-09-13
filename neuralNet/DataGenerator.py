@@ -45,7 +45,7 @@ def generateAllHeatmaps(entry, res='low'):
     
     #hm.showImageWithHeatmap()
     #hm = helpers.downsample(hm.hm)
-    if res=="low": f=64
+    if res=="low": f=32
     else: f=2
     #hm_0.downsample()
     hm_1_head.downsample(f)
@@ -112,7 +112,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])
     image = 2.*image/np.max(image) - 1
-    image = helpers.downsample(image, factor=2)
+    #image = helpers.downsample(image, factor=2)
     
     #classification=[]
  
@@ -154,7 +154,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     #image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     #image = 2.*(image - np.min(image))/np.ptp(image)-1
     image = 2.*image/np.max(image) - 1
-    image = helpers.downsample(image, factor=2)
+    #image = helpers.downsample(image, factor=2)
 
     heatmaps = np.concatenate(heatmaps, axis=2)
     
@@ -181,23 +181,23 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     #print(y['heatmap'].shape)
     #print(y['classification'].shape)
    #print(f"len of y: {len(y)} and shape of y[0]: {y[0].shape}")
-    #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['classification'] has shape {y['classification'].shape}")
+    print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['connection'] has shape {y['connection'].shape}")
     #print(f"classification is {y['classification']}")
     print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
 
 
     # todo how to i know the resolution
-    if showHeatmaps:
+    #if showHeatmaps:
         # hm_folder_path = "../data/heatmaps_lowRes/"
         # hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
         # with open(hm_file_path, 'r') as f:
         #     hms = json.load(f)
             
         # show heatmap for 2 batches
-        for j in range(2):
+        # for j in range(2):
             #print(j)
             #print(X[i])
-            helpers.showImageWithHeatmap (X[i], y[i][j])
+            #helpers.showImageWithHeatmap (X[i], y[i][j])
 
         
 

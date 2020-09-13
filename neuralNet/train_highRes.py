@@ -65,10 +65,9 @@ test_labels = test_labels[:4]
 # image path
 #data_root = "../data/maritime_dataset/"
 data_root = "../data/maritime_dataset_25/"
-imageShapeL = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=1)
-imageShapeH = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=2)
-print(f"Image format {imageShapeL}.")
-print(f"Image format {imageShapeH}.")
+imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=1)
+
+print(f"Image format {imageShape}.")
 
 # data generators
 trainGenL = dg.DataGenerator (dataset=train_labels_animals,
@@ -163,10 +162,9 @@ def ourBlock (x, basename, channels=12):
     return x
 
 alpha = 1.0
-inputL = keras.layers.Input(shape=imageShapeL)
-inputH = keras.layers.Input(shape=imageShapeH)
+input = keras.layers.Input(shape=imageShape)
 
-backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=inputL, include_top=False, weights='imagenet', pooling=None)
+backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
 #for l in backbone.layers[:-25]:
 for l in backbone.layers:
     l.trainable = False
@@ -188,7 +186,7 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=x)
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL = keras.Model(inputs=inputL, outputs=[out_h, out_connection])
+modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 modelL.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
 #       keras.metrics.CategoricalCrossentropy(),
 #       keras.metrics.TruePositives(),
@@ -277,13 +275,13 @@ x = layers.UpSampling2D(interpolation='bilinear', name='block_22_upto2')(x)
 x = layers.Concatenate(name="block_22_concat")([x,modelL.get_layer("expanded_conv_project_BN").output])
 x = ourBlock (x, 'block_22')
 
-x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
+#x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
 # # x = layers.Concatenate(name="block_23_concat")([x, input])
 # # x = layers.Conv2D (8, 3, padding='same', name = "block_23_conv")(x)
 # # x = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name='block_23_BN')(x)
 # # x = layers.ReLU(6., name='block_23_relu')(x)
 # # x = ourBlock (x, 'block_23', channels=4) # @todo why 4 channels here only?
-x = ourBlock (x, 'block_23', channels=12)
+#x = ourBlock (x, 'block_23', channels=12)
 
 #x = layers.Conv2D (1, 1, padding='same', activation=Globals.activation_outLayer, name = "block_23_conv_output")(x)
 
@@ -295,7 +293,7 @@ out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name
 
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
-modelH = keras.Model(inputs=inputH, outputs=[out_h, out_connection])
+modelH = keras.Model(inputs=input, outputs=[out_h, out_connection])
 modelH.compile(loss=Globals.loss, optimizer=opt, metrics=["mae", "acc"])#{"heatmap": ["mae", "acc", 
 #       keras.metrics.CategoricalCrossentropy(),
 #       keras.metrics.TruePositives(),
