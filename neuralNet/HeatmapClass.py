@@ -8,9 +8,9 @@ import Globals
 
 # This class stores a heatmap and performs the calculations
 class Heatmap():
-    def __init__(self, entry, resolution='low', group = 1, bodyPart = 'front' ):
+    def __init__(self, entry, resolution='low', group = 1, bodyPart = 'front'):
         
-        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both" or bodyPart=="connection"
+        assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both" or bodyPart=="connection" #or bodyPart=="vectors"
         assert group in range(Globals.NUM_GROUPS)
         
         self.imagePath = entry['filename']
@@ -27,8 +27,34 @@ class Heatmap():
             self.calculateHeadTailHeatmap(self.group)
         elif bodyPart == "connection":
             self.annotationToConnectionHm()
+        elif bodyPart == "vectors":
+            self.annotationToVectorField()
         else:
             self.annotationToHeatmap()
+
+    # def annotationToVectorField(self, scale_factor=200):
+    #     hm_y, hm_x = self.image.shape[0], self.image.shape[1]
+    #     head_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+    #     tail_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+        
+    #     for i in range(0, len(self.gt["animals"]), 2):
+    #         # vector pointing from head to tail
+    #         head_dx = (self.gt["animals"][i+1]["position"][0] - self.gt["animals"][i]["position"][0])/scale_factor
+    #         head_dy = (self.gt["animals"][i+1]["position"][1] - self.gt["animals"][i]["position"][1])/scale_factor
+            
+    #         # vector pointing from tail to head
+    #         tail_dx = -1*head_dx
+    #         tail_dy = -1*head_dy
+            
+    #         head_vectors[round(self.gt["animals"][i]["position"][1]), 
+    #                      round(self.gt["animals"][i]["position"][0])] \
+    #         = np.array([head_dx, head_dy])
+            
+    #         tail_vectors[round(self.gt["animals"][i+1]["position"][1]), 
+    #                      round(self.gt["animals"][i+1]["position"][0])] \
+    #         = np.array([tail_dx, tail_dy])
+        
+    #     return head_vectors, tail_vectors
 
     def annotationToConnectionHm(self):
         """ Converts a list of heads and tails, which are 2D coordinates, 
@@ -236,7 +262,7 @@ class Heatmap():
             self.hm[hylo:hyhi,hxlo:hxhi] += block[bylo:byhi,bxlo:bxhi]
     
     
-    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None, exagerate=1):
+    def showImageWithHeatmap (self, group=None, bodyPart=None, filename=None, exaggerate=1):
         """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
          The hm.shape must be an integer fraction of the image shape. gt must 
          have be a list of dicts with 'x' and 'y' entries as in the dataset. 
@@ -274,9 +300,9 @@ class Heatmap():
             
             # todo adapt abdunkel factor
             if img.dtype =="uint8":
-                img = img + (128*exagerate*hmResized).astype(np.uint8)
+                img = img + (128*exaggerate*hmResized).astype(np.uint8)
             else:
-                img = ((img+1)*64 + 128*exagerate*hmResized).astype(np.uint8)
+                img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
         plt.imshow(img)
         
         
@@ -316,12 +342,27 @@ class Heatmap():
                 x = [animal['position'][0] for animal in self.gt if np.array_equal(animal['group'], group_array) ]
                 y = [animal['position'][1] for animal in self.gt if np.array_equal(animal['group'], group_array)]
                 
+                # factor = 200
+                # head_vectors, tail_vectors = helpers.get_head_tail_vectors(self.gt, scale_factor=factor)
+            
                 if bodyPart=='front':
                     marker='o'
                     color='r'
+                    # for i in range(len(x)):
+                    #     plt.quiver(x[i], y[i], 
+                    #                head_vectors[i,0]*factor, 
+                    #                head_vectors[i,1]*factor, 
+                    #                color=["w"], width=1/250, 
+                    #                angles='xy', scale_units='xy', scale=1)
                 else:
                     marker='x'
                     color='b'
+                    # for i in range(len(x)):
+                    #     plt.quiver(x[i], y[i], 
+                    #                tail_vectors[i,0]*factor, 
+                    #                tail_vectors[i,1]*factor, 
+                    #                color=["w"], width=1/250, 
+                    #                angles='xy', scale_units='xy', scale=1)
                 plt.scatter (x, y, s=20, marker=marker, c=color)
             
         if filename is not None:

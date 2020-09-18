@@ -8,6 +8,7 @@ import os
 import json
 from PIL import Image, ImageEnhance, ImageOps
 
+
 # Label file helpers ---------------------------------------------------------------#
 def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
     filtered_list = []
@@ -299,6 +300,54 @@ def downsample (T, factor=64):
   newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
   return T.reshape(newSh).mean(axis=(-4, -2))
 
+def get_head_tail_vectors(entry, scale_factor=200.0):
+    image = loadImage(entry['filename'])
+    hm_y, hm_x = image.shape[0], image.shape[1]
+    
+    head_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+    tail_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+    
+    for i in range(0, len(entry["animals"]), 2):
+        # vector pointing from head to tail
+        head_dx = (entry["animals"][i+1]["position"][0] - entry["animals"][i]["position"][0])/scale_factor
+        head_dy = (entry["animals"][i+1]["position"][1] - entry["animals"][i]["position"][1])/scale_factor
+        
+        # vector pointing from tail to head
+        tail_dx = -1*head_dx
+        tail_dy = -1*head_dy
+        
+        head_vectors[round(entry["animals"][i]["position"][1]), 
+                     round(entry["animals"][i]["position"][0])] \
+        = np.array([head_dx, head_dy])
+        
+        tail_vectors[round(entry["animals"][i+1]["position"][1]), 
+                     round(entry["animals"][i+1]["position"][0])] \
+        = np.array([tail_dx, tail_dy])
+        
+    return head_vectors, tail_vectors
+# def get_head_tail_vectors(entry, scale_factor=200.0):
+#     head_vector_list = []
+#     tail_vector_list = []
+    
+#     if type(entry) is dict and "animals" in entry.keys():
+#         entry = entry["animals"]
+        
+#     # iterate over all animal heads on the given image
+#     for i in range(0, len(entry), 2):
+#         # vector pointing from head to tail
+#         head_dx = (entry[i+1]["position"][0] - entry[i]["position"][0])/scale_factor
+#         head_dy = (entry[i+1]["position"][1] - entry[i]["position"][1])/scale_factor
+        
+#         # vector pointing from tail to head
+#         tail_dx = -1*head_dx
+#         tail_dy = -1*head_dy
+        
+#         head_vector_list.append(np.array([head_dx, head_dy]))
+#         tail_vector_list.append(np.array([tail_dx, tail_dy]))
+        
+#     return np.array(head_vector_list), np.array(tail_vector_list)
+    
+
 # nned to calcualte heatmap anyway, so this funtcion is not very useful
 def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", filename=None, exaggerate=1):
     """Shows image, the annotation by a heatmap hm [0..1] and the groundTruth gt. 
@@ -313,7 +362,6 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
     img = image.copy()
        
     if hm is not None:
- 
         factor = img.shape[0]//hm.shape[0]
 
         print(f"img, hm shape {image.shape, hm.shape}")
@@ -340,37 +388,98 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
             img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)
     
-    if gt is not None:               
+    
+    if gt is not None:            
+        group_array = np.zeros(Globals.channels)
+        if bodyPart=='front':
+            group_array[group*2-1] = 1 
+        elif bodyPart=='back' or bodyPart=='both':
+            group_array[group*2] = 1 
+            
+        
         if bodyPart=='both':
-            group_array_front = np.zeros(Globals.channels())
-            group_array_front[group*2] = 1
-            group_array_back = np.zeros(Globals.channels)
-            group_array_back[group*2+1] = 1
+            group_array_front = np.copy(group_array)
+            group_array_front[np.argwhere(group_array==1)-1] = 1
+            group_array_front[np.argwhere(group_array==1)] = 0
             
-            x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)]/2 
-            y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]/2
+            #print(f"group_array {group_array}\ngroup array front {group_array_front}")
             
-            x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_back)]/2
-            y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]/2
-         
+            x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)] 
+            y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]
+            
+            x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array)]
+            y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
 
-            plt.scatter(x_front, y_front, s=100, marker='o', c='b',)
-            plt.scatter(x_back, y_back, marker='x', c='b',)
+            #print(f"x front {x_front}\ny front {y_front}\nx back {x_back}\ny back {y_back}")
+
+            plt.scatter(x_front, y_front, s=20, marker='o', c='r')
+            plt.scatter(x_back, y_back, s=20, marker='x', c='b')
             #plt.legend(loc='upper left')
             #plt.show()
          
         else:
-            group_array = np.zeros(Globals.channels)
-            if bodyPart=='front':
-                group_array[group*2-1] = 1 
-            elif bodyPart=='back':
-                group_array[group*2] = 1 
-                
-            x = [animal['position'][0]/2 for animal in gt if np.array_equal(animal['group'], group_array)]
-            y = [animal['position'][1]/2 for animal in gt if np.array_equal(animal['group'], group_array)]
+            #print("gt is not None")
+            x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array) ]
+            y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
             
-            marker = "o" if bodyPart == "front" else "x"
-            plt.scatter (x, y,s=10, marker=marker, c="b")
+            # factor = 200
+            # head_vectors, tail_vectors = get_head_tail_vectors(gt, scale_factor=factor)
+            
+            if bodyPart=='front':
+                marker='o'
+                color='r'
+                # for i in range(len(x)):
+                #     plt.quiver(x[i], y[i], 
+                #                head_vectors[i,0]*factor, head_vectors[i,1]*factor, 
+                #                color=["w"], width=1/250, 
+                #                angles='xy', scale_units='xy', scale=1)
+            else:
+                marker='x'
+                color='b'
+                # for i in range(len(x)):
+                #     plt.quiver(x[i], y[i], 
+                #                tail_vectors[i,0]*factor, tail_vectors[i,1]*factor, 
+                #                color=["w"], width=1/250, 
+                #                angles='xy', scale_units='xy', scale=1)
+            plt.scatter (x, y, s=20, marker=marker, c=color)
+        
+    # if gt is not None:  
+    #     print("gt not none")             
+    #     if bodyPart=='both':
+    #         group_array_front = np.zeros(Globals.channels)
+    #         group_array_front[group*2] = 1
+    #         group_array_back = np.zeros(Globals.channels)
+    #         group_array_back[group*2+1] = 1
+            
+    #         x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)]
+    #         y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]
+            
+    #         x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_back)]
+    #         y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_back)]
+         
+    #         head_vectors, tail_vectors = get_head_tail_vectors(gt)
+
+    #         origin = [0], [0] # origin point
+            
+    #         #plt.quiver(*origin, head_vectors[:,0], head_vectors[:,1], color=['r','b','g'], scale=21)
+            
+    #         plt.scatter(x_front, y_front, s=100, marker='o', c='b',)
+    #         plt.scatter(x_back, y_back, marker='x', c='b',)
+    #         #plt.legend(loc='upper left')
+    #         #plt.show()
+         
+    #     else:
+    #         group_array = np.zeros(Globals.channels)
+    #         if bodyPart=='front':
+    #             group_array[group*2-1] = 1 
+    #         elif bodyPart=='back':
+    #             group_array[group*2] = 1 
+                
+    #         x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array)]
+    #         y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
+            
+    #         marker = "o" if bodyPart == "front" else "x"
+    #         plt.scatter (x, y,s=10, marker=marker, c="b")
         
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')

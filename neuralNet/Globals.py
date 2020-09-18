@@ -15,7 +15,8 @@ batch_size = 2
 #activation_outLayer = "softmax"
 
 loss = {"heatmap":"categorical_crossentropy", 
-        "connection":"binary_crossentropy"}
+        #"connection":"binary_crossentropy"}
+        "vectors":"mean_squared_error"}
 
 optimizer = 'adam'
 #metrics = ['mae']
