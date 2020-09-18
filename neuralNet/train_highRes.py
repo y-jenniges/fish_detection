@@ -36,25 +36,6 @@ out_path = f"../data/output/57/"
 #label_root = "../data/maritime_dataset/labels/"
 label_root = "../data/maritime_dataset_25/labels/"
  
-# label_path = "training_labels_animals.json"
-# with open(os.path.join(label_root, label_path) , 'r') as f:
-#     train_labels_animals = json.load(f)
-    
-# label_path = "test_labels.json"
-# with open(os.path.join(label_root, label_path), 'r') as f:
-#     test_labels = json.load(f)
-    
-# label_path = "training_labels_no_animals.json"
-# with open(os.path.join(label_root, label_path), 'r') as f:
-#     train_labels_no_animals = json.load(f)
-
-# # only use images that contain fish
-# fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# train_labels_animals = helpers.filter_labels_for_animal_group(train_labels_animals, fish_id)
-# test_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
-
-
-
 
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
