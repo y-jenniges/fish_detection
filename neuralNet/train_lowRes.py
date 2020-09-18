@@ -41,10 +41,10 @@ label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 val_labels = val_labels + test_labels
 
-# only take first 5 labels
-train_labels = train_labels[:4]
-test_labels = test_labels[:4]
-val_labels = val_labels[:4]
+# # only take first 5 labels
+# train_labels = train_labels[:4]
+# test_labels = test_labels[:4]
+# val_labels = val_labels[:4]
 
 # image path
 #data_root = "../data/maritime_dataset/"
