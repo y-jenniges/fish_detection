@@ -9,13 +9,13 @@ import os
 import pickle
 import math
 import numpy as np
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 
 """group: 
@@ -32,7 +32,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/59/"
+out_path = f"../data/output/60/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -208,7 +208,7 @@ start  = time.time()
 #history = modelL.fit_generator(generator=trainGenL, epochs=Globals.epochs_L, validation_data=valGenL)
     
 # for training mobilenet too 
-history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=valGenL, class_weight=class_weights)
+history_phase1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=valGenL, class_weight=class_weights)
 
 # activate all layers for training
 for l in modelL.layers:
