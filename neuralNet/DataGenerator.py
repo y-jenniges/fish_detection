@@ -119,7 +119,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
     else:
         #print("Calculating heatmap...")
         #head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
-        heatmaps, hm_body = generateAllHeatmaps(entry, res="low")
+        #heatmaps, hm_body = generateAllHeatmaps(entry, res="low")
         heatmaps, vectors = generateAllHeatmaps(entry, res="low")
         
     
@@ -163,9 +163,10 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
             np.clip (hm, 0, 1, out=hm)
     else:
         #print("Calculating heatmap...")
-        heatmaps, hm_body = generateAllHeatmaps(entry, res="high")
+        #heatmaps, hm_body = generateAllHeatmaps(entry, res="high")
+        heatmaps, vectors = generateAllHeatmaps(entry, res="high")
         
-    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
+    #head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
     
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
@@ -175,7 +176,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     #image = helpers.downsample(image, factor=2)
 
     heatmaps = np.concatenate(heatmaps, axis=2)
-    vectors = np.concatenate([head_vectors, tail_vectors], axis=2)
+    vectors = np.concatenate(vectors, axis=2)
   
     
     
