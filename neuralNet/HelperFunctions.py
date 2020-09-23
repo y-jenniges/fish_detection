@@ -311,15 +311,16 @@ def show_image_with_vectors(image, vectors, vector_scale=200, filename=None):
     uz = u[ui]
     vz = v[vi]
 
+    factor = 1
     if image is not None: 
         factor = image.shape[1]/vectors.shape[1]
-        image = cv2.resize(image, (vectors[:,:,0].shape[1], vectors[:,:,0].shape[0]))
+        #image = cv2.resize(image, (vectors[:,:,0].shape[1], vectors[:,:,0].shape[0]))
         print(image.shape)
         plt.imshow(image)
     
     # display non-zero vectors
     for i in range(len(ui)):
-        plt.quiver(ui[1], ui[0], 
+        plt.quiver(ui[1]*factor, ui[0]*factor, 
                     vz*vector_scale, uz*vector_scale, 
                     color=["r"], width=1/250, 
                     angles='xy', scale_units='xy', scale=1)   
@@ -350,12 +351,16 @@ def get_head_tail_vectors(entry, scale_factor=200.0):
         b = entry["animals"][i]["position"][1] - m*entry["animals"][i]["position"][0]
         
         # calculate the y-values of the line
-        x = np.array(range(int(entry["animals"][i]["position"][0]), int(entry["animals"][i+1]["position"][0]+1)))
+        low = min(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
+        high = max(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
+        #x = np.array(range(int(low), int(high+1)))
+        x = np.array(range(int(low), int(high)))
         y = m*x + b       
 
         # for every point on the line, add a vector from it to the tail
         for j in range(len(x)-1):
-            if 0 <= x[j] < head_vectors.shape[1] and 0 <= y[j] < head_vectors.shape[0]:         
+            if 0 <= x[j] < head_vectors.shape[1] and 0 <= y[j] < head_vectors.shape[0]:   
+               
                 # vector pointing from point on line to tail
                 head_dx = (entry["animals"][i+1]["position"][0] - x[j])/scale_factor
                 head_dy = (entry["animals"][i+1]["position"][1] - y[j])/scale_factor
@@ -365,7 +370,7 @@ def get_head_tail_vectors(entry, scale_factor=200.0):
                 tail_dy = -1*head_dy
                 
                 head_vectors[round(y[j]), round(x[j])] = np.array([head_dx, head_dy])
-                tail_vectors[round(y[j]), round(x[j])] = np.array([tail_dx, tail_dy])
+                tail_vectors[round(y[len(x)-1-j]), round(x[len(x)-1-j])] = np.array([tail_dx, tail_dy])
                 
     return head_vectors, tail_vectors
 
