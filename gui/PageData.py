@@ -1,12 +1,12 @@
-import ntpath
+import os
 import glob
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from Helpers import TopFrame, MenuFrame
 
 
 # IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
 IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
-
+IMAGE_DIRECTORY_ROOT = "G:/Universität/UniBremen/Semester4/Data/moreTestData/"
 
 class PageData(QtWidgets.QWidget): 
     """ Class to create the data page of the software """
@@ -24,32 +24,30 @@ class PageData(QtWidgets.QWidget):
         # init UI, actions
         self.init_ui()
         self.init_actions()
-        self.init_models()
+        #self.init_models()
         
         self.calenderSelectionChanged()
         
 
     def on_img_dir_edit_changed(self, text=None, updateVisuals=True):
-        """ function to handle when the user changes the img_dir line edit """
+        """ Function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
-        if not ntpath.exists(text): # check if path exists
+        if not os.path.isdir(text): # check if directory exists
             self.lineEdit_img_dir.setText("")
-            print("The entered img dir is not a valid path.") # @todo error prompt
+            print("The entered img dir is not a valid path.") 
             
         self.updateNumImages()
         self.imageDirChanged.emit(self.lineEdit_img_dir.text())
-        #self.on_img_dir_edit_changed(self.lineEdit_img_dir.text())
      
     def on_res_file_edit_changed(self):
-        """ function to handle when the user changes the res_file line edit """
+        """ Function to handle when the user changes the res_file line edit """
         # check if entered result file exists 
         # (else replace it by an empty string)
-        if ntpath.exists(self.lineEdit_res_file.text()):
+        if os.path.isfile(self.lineEdit_res_file.text()):
             pass
         else: 
             self.lineEdit_res_file.setText("")
-            print(self.lineEdit_res_file.text())
-            print("The enered res file is not a valid path.") # @todo error prompt
+            print("The enered res file is not a valid path.") 
             
         self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
         
@@ -64,10 +62,16 @@ class PageData(QtWidgets.QWidget):
         
     def updateNumImages(self):
         """ function to check how many images are in the current 
-        IMAGE_DIRECTORY and updates the display of this count """
-        num_images = str(len(glob.glob(self.lineEdit_img_dir.text() + self.lineEdit_img_prefix.text() + "*_L.jpg")))
+        IMAGE_DIRECTORY with the current prefix for the current date and 
+        updates the display of this count """
+        date = self.calendarWidget.selectedDate().toString("yyyy.MM.dd")
+        images_with_prefix = glob.glob(self.lineEdit_img_dir.text() \
+                                       + self.lineEdit_img_prefix.text() + "*")
+        images_with_date = [x for x in images_with_prefix if date in x]
+        num_images = str(len(images_with_date))
+        
         self.label_num_imgs_text.setText(num_images)   
-    
+        
     def browseResultFile(self):
         """ function that opens a dialog for the user to select a result file 
         in csv format """
@@ -80,21 +84,21 @@ class PageData(QtWidgets.QWidget):
         where the images are """
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
         if len(filename) > 0: 
-            if ntpath.exists(filename):
+            if os.path.isdir(filename):
                 self.lineEdit_img_dir.setText(filename + "/")
                 self.on_img_dir_edit_changed(filename+"/")
 
     def updateImageDir(self):
         """ function to update the image directory according to the input 
         from the calender widget """
-        date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
+        date = self.calendarWidget.selectedDate().toString("yyyy-MM")
         directory = IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
         
         # enable frame to manipulate data properties
         self.frame_data_information.setEnabled(True) # @todo always enabled
         
         # if directory does not exist, clear the image directory
-        if not ntpath.exists(directory):
+        if not os.path.isdir(directory):
             self.lineEdit_img_dir.setText("")
         else:
             self.lineEdit_img_dir.setText(directory)
@@ -149,13 +153,13 @@ class PageData(QtWidgets.QWidget):
             "    border-radius:3px;\n"
             "}\n"
             "\n"
-            "\n"
-            "QTableView{\n"
-            "    font: 10pt \"Century Gothic\";\n"
-            "    background-color: white;  \n"
-            "    border-radius:3px;\n"
-            "    color: black;"
-            "}\n"
+            "/*------------------------- frames --------------------------*/\n"
+            "#frame_data_options{background-color:rgb(230,230,230); border:none; border-radius:3px;}"
+            "#frame_nn_activation, #frame_pred_check, #frame_rectify_match, "
+            "#frame_check_match, #frame_length_measurement{"
+            "   background-color: rgb(230, 230, 230); "
+            "   border:none; "
+            "   border-radius:3px;}"
             "\n"
             "/*------------------------ line edit ------------------------*/\n"
             "QLineEdit{\n"
@@ -177,146 +181,241 @@ class PageData(QtWidgets.QWidget):
             "/*-------------------------- buttons ------------------------*/\n"
             "QPushButton{\n"
             "    font: 10pt \"Century Gothic\";\n"
+            "    border:none; border-radius:3px;\n"
+            "    padding:10;"
             "}\n"
             "\n"
-            "#btn_res_file, #btn_img_dir, #btn_analyze{\n"
+            "#btn_res_file, #btn_img_dir, #btn_nn_activation, #btn_pred_check,"
+            "#btn_rectify_match, #btn_check_match, #btn_length_measurement{\n"
             "    background-color: rgb(200, 200, 200);\n"
-            "}\n"
+            "}"
             "\n"
-            "\n"
-            "#btn_res_file:hover, #btn_img_dir:hover, #btn_analyze:hover{\n"
+            "#btn_res_file:hover, #btn_img_dir:hover, #btn_nn_activation:hover,"
+            "#btn_pred_check:hover, #btn_rectify_match:hover, "
+            "#btn_check_match:hover, #btn_length_measurement:hover{\n"
             "  background-color: rgb(0, 203, 221);\n"
             "}\n"
             "\n"
-            "#btn_res_file:pressed, #btn_img_dir:pressed, #btn_analyze:pressed{\n"
+            "#btn_res_file:pressed, #btn_img_dir:pressed, "
+            "#btn_nn_activation:pressed, #btn_pred_check:pressed,"
+            "#btn_rectify_match:pressed, #btn_check_match:pressed, "
+            "#btn_length_measurement:pressed{\n"
             "    background-color: rgb(0, 160, 174);\n"
             "}")
-        
+                
         frame_data.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_data.setObjectName("frame_data")
         
         # layout for main data frame
-        self.layout_frame_data = QtWidgets.QVBoxLayout(frame_data)
+        self.layout_frame_data = QtWidgets.QGridLayout(frame_data)
         self.layout_frame_data.setObjectName("layout_frame_data")
+        self.layout_frame_data.setAlignment(QtCore.Qt.AlignCenter)
         
-        # frame to display the data selection options
-        self.frame_data_options = self.createFrameDataOptions(frame_data)
+        # scroll area containing the steps of the data pipeline
+        self.scrollArea = self.createScrollArea(frame_data)  
+
+        # add widgets to layout
+        self.layout_frame_data.addWidget(self.scrollArea, 0, 0, 1, 1)
+
+        return frame_data    
+    
+    def createFrameDataOptions(self, parent):
+        """ created frame that contains all elements to adapt the 
+        data selection; parent: scroll area"""
+        # frame for data options
+        frame_data_options = QtWidgets.QFrame(parent)
+        frame_data_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_data_options.setObjectName("frame_data_options")
+   
+        # layout for data options
+        self.layout_frame_data_options = QtWidgets.QHBoxLayout(frame_data_options)
+        self.layout_frame_data_options.setContentsMargins(0, 0, 0, 0)
+        self.layout_frame_data_options.setSpacing(0)
+        self.layout_frame_data_options.setObjectName("layout_frame_data_options")
         
-        # button to analye the images using the neural network
-        self.btn_analyze = QtWidgets.QPushButton(frame_data)
-        self.btn_analyze.setMinimumSize(QtCore.QSize(0, 40))
-        self.btn_analyze.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.btn_analyze.setObjectName("btn_analyze")      
+        # spacers
+        #spacerItem17 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)      
+        spacerItem20 = QtWidgets.QSpacerItem(70, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        #spacerItem22 = QtWidgets.QSpacerItem(50, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         
-        # frame to display the data table
-        self.frame_table = self.createFrameTable(frame_data)
+        # frame to offer data selection functionalities
+        self.frame_data_selection = self.createFrameDataSelection(frame_data_options)
+  
+        # frame to display information derived from data selection
+        self.frame_data_information = self.createFrameDataInformation(frame_data_options)
+   
+        # add widgets to layout
+        #self.layout_frame_data_options.addItem(spacerItem17)
+        self.layout_frame_data_options.addWidget(self.frame_data_selection)
+        self.layout_frame_data_options.addItem(spacerItem20)
+        self.layout_frame_data_options.addWidget(self.frame_data_information)
+        #self.layout_frame_data_options.addItem(spacerItem22)
+        
+        return frame_data_options     
+    
+    def createFrameProcessArrow(self, parent):
+        frame = QtWidgets.QFrame(parent)
+        frame.setObjectName(u"frame")
+        frame.setFrameShape(QtWidgets.QFrame.NoFrame)
+        
+        layout = QtWidgets.QHBoxLayout(frame)
+        layout.setSpacing(0)
+        layout.setObjectName(u"layout")
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        hspacer = QtWidgets.QSpacerItem(165, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        
+        label_arrow = QtWidgets.QLabel(frame)
+        label_arrow.setObjectName(u"label_arrow")
+        label_arrow.setMaximumSize(QtCore.QSize(40, 70))
+        label_arrow.setPixmap(QtGui.QPixmap(":/icons/icons/process_arrow_down.png"))
+        label_arrow.setScaledContents(True)
+        label_arrow.setAlignment(QtCore.Qt.AlignCenter)
+
+        layout.addItem(hspacer)
+        layout.addWidget(label_arrow)
+        layout.addItem(hspacer)
+        
+        return frame
+    
+    def createFrameBtnLabelNumber(self, parent, frame_name, btn_name, label_text_name, label_nr_name):
+        frame = QtWidgets.QFrame(parent)
+        frame.setObjectName(frame_name)
+        frame.setFrameShape(QtWidgets.QFrame.NoFrame)
+        
+        layout = QtWidgets.QHBoxLayout(frame)
+        layout.setSpacing(7)
+        layout.setObjectName(u"layout")
+        layout.setContentsMargins(11, 11, 11, 11)
+        
+        # button
+        btn = QtWidgets.QPushButton(frame)
+        btn.setObjectName(btn_name)
+        sizePolicy4 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(btn.sizePolicy().hasHeightForWidth())
+        btn.setSizePolicy(sizePolicy4)
+        btn.setMinimumSize(QtCore.QSize(0, 40))
+
+        # label
+        label_text = QtWidgets.QLabel(frame)
+        label_text.setObjectName(label_text_name)
+        
+        # label for number
+        label_number = QtWidgets.QLabel(frame)
+        label_number.setObjectName(label_nr_name)
         
         # add widgets to layout
-        self.layout_frame_data.addWidget(self.frame_data_options)
-        self.layout_frame_data.addWidget(self.btn_analyze)
-        self.layout_frame_data.addWidget(self.frame_table)    
+        layout.addWidget(btn)
+        layout.addWidget(label_text)
+        layout.addWidget(label_number)
         
-        return frame_data
-
-    def createFrameTable(self, frame_data):
-        """ creates the frame showing the data table """
-        # frame for displaying data table
-        frame_table = QtWidgets.QFrame(frame_data)
-        frame_table.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_table.setFrameShadow(QtWidgets.QFrame.Raised)
-        frame_table.setObjectName("frame_table")
-        
-        # layout
-        self.layout_frame_table = QtWidgets.QVBoxLayout(frame_table)
-        self.layout_frame_table.setContentsMargins(0, 0, 0, 0)
-        self.layout_frame_table.setSpacing(0)
-        self.layout_frame_table.setObjectName("layout_frame_table")
-        
-        # tab widget to switch between the original table and the summary
-        self.tabWidget_2 = QtWidgets.QTabWidget(frame_table)
-        self.tabWidget_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.tabWidget_2.setAutoFillBackground(False)
-        self.tabWidget_2.setStyleSheet(
-            "/*------------------------ tab widget -----------------------*/\n"
-            "QTabWidget{\n"
-            "    font: 10pt \"Century Gothic\";\n"
-            "}\n"
-            "\n"
-            "QTabWidget::pane { /* The tab widget frame */\n"
-            "       border:None;\n"
-            "}\n"
-            "\n"
-            "\n"
-            "\n"
-            "/* Style the tab using the tab sub-control. Note that\n"
-            "    it reads QTabBar _not_ QTabWidget */\n"
-            "\n"
-            "QTabBar::tab {\n"
-            "    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-            "                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,\n"
-            "                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);\n"
-            "    border: None;\n"
-            "    min-width: 10ex;\n"
-            "    padding: 5px;\n"
-            "    padding-bottom:5px;\n"
-            "}\n"
-            "\n"
-            "QTabBar::tab:selected, QTabBar::tab:hover {\n"
-            "    background: white;\n"
-            "}\n"
-            "\n"
-            "QTabBar::tab:selected {\n"
-            "    border-color: #9B9B9B;\n"
-            "    border-bottom-color: #C2C7CB; /* same as pane color */\n"
-            "}\n"
-            "\n"
-            "QTabBar::tab:!selected {\n"
-            "    margin-top:0px; /* make non-selected tabs look smaller */\n"
-            "}\n"
-            "")
-        self.tabWidget_2.setTabPosition(QtWidgets.QTabWidget.North)
-        self.tabWidget_2.setObjectName("tabWidget_2")
-        
-        # widget to show the original table
-        self.original = QtWidgets.QWidget(self)
-        self.original.setObjectName("original") # @todo do i need this widget here?? cant  i just set the layout on the tab? or the table view directly?
-        
-        # layout to place the original table in
-        self.layout_original_table = QtWidgets.QVBoxLayout(self.original)
-        self.layout_original_table.setContentsMargins(0, 0, 0, 0)
-        self.layout_original_table.setSpacing(0)
-        self.layout_original_table.setObjectName("layout_original_table")
-        
-        # table view to display the original table
-        self.tableView_original = QtWidgets.QTableView(self.original)
-        self.tableView_original.setObjectName("tableView_original")
-        self.layout_original_table.addWidget(self.tableView_original)
-
-        # widget to show the summary table
-        self.summary = QtWidgets.QWidget(self)  # comment see above @todo
-        self.summary.setObjectName("summary")
-        
-        # layout to place the summary table in
-        self.layout_summary_table = QtWidgets.QVBoxLayout(self.summary)
-        self.layout_summary_table.setContentsMargins(0, 0, 0, 0)
-        self.layout_summary_table.setSpacing(0)
-        self.layout_summary_table.setObjectName("layout_summary_table")
-        
-        # table view to display the summary table
-        self.tableView_summary = QtWidgets.QTableView(self.summary)
-        self.tableView_summary.setObjectName("tableView_summary")
-        self.layout_summary_table.addWidget(self.tableView_summary)
-                
-        # add tabs (original table and summary) to tab widget
-        self.tabWidget_2.addTab(self.original, "")
-        self.tabWidget_2.addTab(self.summary, "")
-        
-        # add tab widget to layout of table frame
-        self.layout_frame_table.addWidget(self.tabWidget_2)
-        
-        return frame_table
+        return frame, btn, label_text, label_number
     
-    def createFrameDataOptions(self, frame_data):
+    def createScrollArea(self, frame_data):
+        scrollArea = QtWidgets.QScrollArea(frame_data)
+        scrollArea.setObjectName(u"scrollArea_data_options")
+        scrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        scrollArea.setWidgetResizable(True)
+        
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1659, 1171))
+
+        self.gridLayout_scrollArea = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout_scrollArea.setObjectName(u"gridLayout_scrollArea")
+        self.gridLayout_scrollArea.setAlignment(QtCore.Qt.AlignCenter)
+        
+        # data selection row
+        self.label_data_selection = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_data_options = self.createFrameDataOptions(self.scrollAreaWidgetContents)
+        frame_process_arrow1 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+
+        # neural network activation row
+        self.label_nn_activation = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_nn_activation, self.btn_nn_activation, \
+        self.label_nn_activation_text, self.label_nn_activation_number \
+        = self.createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
+                                         "frame_nn_activation",
+                                          "btn_nn_activation", 
+                                          "label_nn_activation", 
+                                          "label_nn_activation_number")
+        frame_process_arrow2 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+        
+        # prediction check row
+        self.label_prediction_check = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_pred_check, self.btn_pred_check, \
+        self.label_pred_check_text, self.label_pred_check_number \
+        = self.createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
+                                         "frame_pred_check",
+                                          "btn_pred_check", 
+                                          "label_pred_check", 
+                                          "label_pred_check_number")
+        frame_process_arrow3 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+        
+        # rectify and match row
+        self.label_rectify_match = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_rectify_match, self.btn_rectify_match, \
+        self.label_rectify_match_text, self.label_rectify_match_number \
+        = self.createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
+                                         "frame_rectify_match",
+                                          "btn_rectify_match", 
+                                          "label_rectify_match", 
+                                          "label_rectify_match_number")
+        frame_process_arrow4 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+        
+        # check matching row
+        self.label_check_match = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_check_match, self.btn_check_match, \
+        self.label_check_match_text, self.label_check_match_number \
+        = self.createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
+                                         "frame_check_match", 
+                                          "btn_check_match", 
+                                          "label_check_match", 
+                                          "label_check_match_number")
+        frame_process_arrow5 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+        
+        # length measurement row
+        self.label_length_measurement = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.frame_length_measurement, self.btn_length_measurement, \
+        self.label_length_measurement_text, self.label_length_measurement_number \
+        = self.createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
+                                         "frame_length_measurement",
+                                          "btn_length_measurement", 
+                                          "label_length_measurement", 
+                                          "label_length_measurement_number")
+        
+        # add widgets to layout
+        self.gridLayout_scrollArea.addWidget(self.label_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_data_options, 0, 1, 1, 1)
+        self.gridLayout_scrollArea.addWidget(frame_process_arrow1, 1, 0, 1, 1)
+
+        self.gridLayout_scrollArea.addWidget(self.label_nn_activation, 2, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_nn_activation, 2, 1, 1, 1)
+        self.gridLayout_scrollArea.addWidget(frame_process_arrow2, 3, 0, 1, 1)
+        
+        self.gridLayout_scrollArea.addWidget(self.label_prediction_check, 4, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_pred_check, 4, 1, 1, 1)
+        self.gridLayout_scrollArea.addWidget(frame_process_arrow3, 5, 0, 1, 1)
+        
+        self.gridLayout_scrollArea.addWidget(self.label_rectify_match, 6, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_rectify_match, 6, 1, 1, 1)
+        self.gridLayout_scrollArea.addWidget(frame_process_arrow4, 7, 0, 1, 1)
+        
+        self.gridLayout_scrollArea.addWidget(self.label_check_match, 8, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_check_match, 8, 1, 1, 1)
+        self.gridLayout_scrollArea.addWidget(frame_process_arrow5, 9, 0, 1, 1)
+        
+        self.gridLayout_scrollArea.addWidget(self.label_length_measurement, 10, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridLayout_scrollArea.addWidget(self.frame_length_measurement, 10, 1, 1, 1)
+        
+        self.gridLayout_scrollArea.setColumnStretch(1, 5)
+        scrollArea.setWidget(self.scrollAreaWidgetContents)
+        
+        return scrollArea
+    
+    def createFrameDataOptions_2(self, frame_data):
         """ created frame that contains all elements to adapt the 
         data selection """
         # frame for data options
@@ -356,7 +455,6 @@ class PageData(QtWidgets.QWidget):
         data filter combobox) """
         # data selection frame
         frame_data_selection = QtWidgets.QFrame(frame_data_options)
-        frame_data_selection.setStyleSheet("")
         frame_data_selection.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_data_selection.setFrameShadow(QtWidgets.QFrame.Raised)
         frame_data_selection.setObjectName("frame_data_selection")
@@ -375,7 +473,7 @@ class PageData(QtWidgets.QWidget):
             "/* buttons in navigation bar*/\n"
             "QCalendarWidget QToolButton {\n"
             "      color: white;\n"
-            "    font: 12pt \"Century Gothic\";\n"
+            "      font: 12pt \"Century Gothic\";\n"
             "      background-color: transparent;    \n"
             "  }\n"
             "\n"
@@ -395,7 +493,7 @@ class PageData(QtWidgets.QWidget):
             "      color: white;\n"
             "      font: 10pt \"Century Gothic\";\n"
             "      background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgb(150, 150, 150), stop:1 rgb(200, 200, 200));\n"
-            "    border-radius: 3px;\n"
+            "      border-radius: 3px;\n"
             "}\n"
             "\n"
             "QCalendarWidget QMenu::item:selected {\n"
@@ -477,6 +575,7 @@ class PageData(QtWidgets.QWidget):
             "    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
             "}\n"
             "")
+        
         self.calendarWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.Germany))
         self.calendarWidget.setGridVisible(False)
         self.calendarWidget.setHorizontalHeaderFormat(QtWidgets.QCalendarWidget.ShortDayNames)
@@ -500,7 +599,7 @@ class PageData(QtWidgets.QWidget):
         
         # label displaying "date"
         self.label_date_text = QtWidgets.QLabel(self.frame_date)
-        self.label_date_text.setStyleSheet("")
+        #self.label_date_text.setStyleSheet("")
         self.label_date_text.setObjectName("label_date_text")
         
         # spacer
@@ -529,7 +628,7 @@ class PageData(QtWidgets.QWidget):
         
         # label to display the text "data filter"
         self.label_image_filter = QtWidgets.QLabel(self.frame_img_filter)
-        self.label_image_filter.setStyleSheet("")
+        #self.label_image_filter.setStyleSheet("")
         self.label_image_filter.setObjectName("label_image_filter")
                 
         # spacer
@@ -563,7 +662,6 @@ class PageData(QtWidgets.QWidget):
         # frame for data information
         frame_data_information = QtWidgets.QFrame(frame_data_options)
         frame_data_information.setEnabled(False)
-        frame_data_information.setStyleSheet("")
         frame_data_information.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_data_information.setObjectName("frame_data_information")
         
@@ -579,7 +677,6 @@ class PageData(QtWidgets.QWidget):
         
         # label to display text "number of images"
         self.label_num_imgs = QtWidgets.QLabel(frame_data_information)
-        self.label_num_imgs.setStyleSheet("")
         self.label_num_imgs.setObjectName("label_num_imgs")
         self.label_num_imgs.setMinimumSize(QtCore.QSize(0, 40))
         self.label_num_imgs.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -597,18 +694,16 @@ class PageData(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_img_dir.sizePolicy().hasHeightForWidth())
         self.btn_img_dir.setSizePolicy(sizePolicy)
-        self.btn_img_dir.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_img_dir.setMaximumSize(QtCore.QSize(70, 40))
+        self.btn_img_dir.setMinimumSize(QtCore.QSize(90, 40))
+        self.btn_img_dir.setMaximumSize(QtCore.QSize(90, 40))
         self.btn_img_dir.setObjectName("btn_img_dir")
         
         # label to display text "experiment id"
         self.label_exp_id = QtWidgets.QLabel(frame_data_information)
-        self.label_exp_id.setStyleSheet("")
         self.label_exp_id.setObjectName("label_exp_id")
 
         # label to display text "image directory"
         self.label_img_dir = QtWidgets.QLabel(frame_data_information)
-        self.label_img_dir.setStyleSheet("")
         self.label_img_dir.setObjectName("label_img_dir")
 
         # line edit to set the image prefix
@@ -629,8 +724,8 @@ class PageData(QtWidgets.QWidget):
                 
         # button to browse files for a result file
         self.btn_res_file = QtWidgets.QPushButton(frame_data_information)
-        self.btn_res_file.setMinimumSize(QtCore.QSize(70, 40))
-        self.btn_res_file.setMaximumSize(QtCore.QSize(70, 40))
+        self.btn_res_file.setMinimumSize(QtCore.QSize(90, 40))
+        self.btn_res_file.setMaximumSize(QtCore.QSize(90, 40))
         self.btn_res_file.setObjectName("btn_res_file")
         
         # line edit for the experiment id
@@ -641,7 +736,6 @@ class PageData(QtWidgets.QWidget):
         
         # label to display text "image prefix"
         self.label_img_prefix = QtWidgets.QLabel(frame_data_information)
-        self.label_img_prefix.setStyleSheet("")
         self.label_img_prefix.setObjectName("label_img_prefix")
         
         # spacer
@@ -667,7 +761,7 @@ class PageData(QtWidgets.QWidget):
     def init_ui(self):
         """ function to initialize the UI of data page """
         self.setObjectName("page_data")
-        
+
         # main layout
         self.layout_page_data = QtWidgets.QVBoxLayout(self)
         self.layout_page_data.setContentsMargins(0, 0, 0, 0)
@@ -703,8 +797,8 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
         self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)
   
-    def init_models(self):
-        self.tableView_original.setModel(self.models.model_animals)
+    # def init_models(self):
+    #     self.tableView_original.setModel(self.models.model_animals)
         
         
 # --- functions for saving and restoring options --------------------------- # 

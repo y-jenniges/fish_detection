@@ -3,44 +3,18 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import glob
 import pandas as pd
-import ntpath
+import os
 
 from test_graph import Animal
 from Models import AnimalGroup, AnimalSpecies, TableModel
 from Helpers import get_icon
 
-#IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
-#IMAGE_PREFIX = ""
+
 ANIMAL_LIST = []
-# ANIMAL_REMARKS = ["", "Not determined",  "Animal incomplete"]
-# IMAGE_REMARKS = []
-
-# class GroupItemModel(QtCore.QAbstractItemModel):
-#     def __init__(self, in_nodes):  
-#         QtCore.QAbstractItemModel.__init__(self)  
-#         self._root = CustomNode(None)  
-  
-#     def rowCount(self, in_index):  
-#         if in_index.isValid():  
-#             return in_index.internalPointer().childCount()  
-#         return self._root.childCount()  
-  
-#     def columnCount(self, in_index):  
-#         return 1  
-    
-#     def index(self):
-#         pass
-    
-#     def parent(self):
-#         pass
-    
-#     def data(self):
-#         pass
-
 
 
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
-    """ A widget to provide all information of the current animal. """
+    """ A widget to provide all information about the current animal. """
     def __init__ (self, models, parent = None):
         """
         Init function.
@@ -75,7 +49,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.setTabOrder(self.comboBox_species, self.comboBox_remark)
         self.setTabOrder(self.comboBox_remark, self.spinBox_length)
         
-
     def init_actions(self):
         """ Function to connect signals and slots. """
         # connecting signals and slots
@@ -502,8 +475,8 @@ class AnimalPainter():
         self.cur_animal.setGroup(group)
         
         # update drawing
-        self.cur_animal.head_item_visual.setPixmap(self.cur_animal.pixmap_head)
-        self.cur_animal.tail_item_visual.setPixmap(self.cur_animal.pixmap_tail)
+        self.cur_animal.head_item_visual.setPixmap(self.cur_animal._pixmap_head)
+        self.cur_animal.tail_item_visual.setPixmap(self.cur_animal._pixmap_tail)
         
         # redraw line and boundingbox visuals
         self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
@@ -589,11 +562,12 @@ class AnimalPainter():
         if animal != None:
             if animal.position_head != QtCore.QPoint(-1,-1):
                 # draw the head visual
-                animal.head_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_head)
-                animal.head_item_visual.setPos(animal.rect_head.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
-                animal.head_item_visual.ItemIsMovable = True
-                self.imageArea._scene.addItem(animal.head_item_visual)
-                animal.is_head_drawn = True
+                # animal.drawHead()
+                # animal.head_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_head)
+                # animal.head_item_visual.setPos(animal.rect_head.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
+                # animal.head_item_visual.ItemIsMovable = True
+                self.imageArea._scene.addItem(animal.createHeadVisual())
+                #animal.is_head_drawn = True
      
     def drawAnimalLine(self, animal):
         """
@@ -613,16 +587,16 @@ class AnimalPainter():
         if animal != None:
             if animal.position_tail != QtCore.QPoint(-1,-1):
                 # draw the tail visual
-                animal.tail_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_tail)
-                animal.tail_item_visual.setPos(animal.rect_tail.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
-                animal.tail_item_visual.ItemIsMovable = True
-                self.imageArea._scene.addItem(animal.tail_item_visual)
+                # animal.tail_item_visual = QtWidgets.QGraphicsPixmapItem(animal.pixmap_tail)
+                # animal.tail_item_visual.setPos(animal.rect_tail.center() - QtCore.QPoint(animal.pixmap_width/4, animal.pixmap_width/4))
+                # animal.tail_item_visual.ItemIsMovable = True
+                self.imageArea._scene.addItem(animal.createTailVisual())
                 
                 # draw line and boundingbox visuals
                 self.drawAnimalLine(animal)
                 animal.boundingBox_visual = self.imageArea._scene.addRect(animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
                 
-                animal.is_tail_drawn = True
+                #animal.is_tail_drawn = True
                 
     def removeHeadVisual(self, animal):
         self.imageArea._scene.removeItem(animal.head_item_visual)
@@ -983,7 +957,13 @@ class PhotoViewer(QtWidgets.QWidget):
 
         # list of image pathes and the current image index
         self.cur_image_index = 0
-        self.image_list = glob.glob(imageDirectory + imagePrefix + imageEnding)
+        images_with_prefix = glob.glob(imageDirectory + imagePrefix + imageEnding)
+        
+        self.image_list = []
+        if hasattr(self.parent().parent().parent(), 'page_data'):
+            date = self.parent().parent().parent().page_data.calendarWidget.selectedDate().toString("yyyy.MM.dd")
+            self.image_list = [x for x in images_with_prefix if date in x]
+            
         #self.res_file = None
         self.loadResFile()
 
@@ -992,17 +972,16 @@ class PhotoViewer(QtWidgets.QWidget):
         self.init_actions()
         
         # load initial image
-        #self.loadImage(self.image_list[self.cur_image_index])
-        #self.layout.invalidate()
-        #self.layout.activate()
+        if self.cur_image_index < len(self.image_list):
+            self.loadImage(self.image_list[self.cur_image_index])
 
     def loadResFile(self):
-        if ntpath.exists(self.res_file_path):
+        if os.path.isfile(self.res_file_path):
             substring = "_neuralNet_output"
             
             # load the neural network result file or the previsouly saved one
             if substring in self.res_file_path:
-                if ntpath.exists(self.res_file_path.replace(substring,"")):
+                if os.path.isfile(self.res_file_path.replace(substring,"")):
                     self.res_file_path = self.res_file_path.replace(substring,"")  
             else:
                 self.res_file_path = self.res_file_path
@@ -1016,17 +995,17 @@ class PhotoViewer(QtWidgets.QWidget):
             # add image remarks to model
             img_remarks = res_file["image_remarks"].unique()
             for remark in img_remarks:
-                self.models.add_image_remark(remark)
+                self.models.addImageRemark(remark)
             
             # add animal remarks to model
             animal_remarks = res_file["object_remarks"].unique()
             for remark in animal_remarks:
-                self.models.add_animal_remark(remark)               
+                self.models.addAnimalRemark(remark)               
             
             # add species to list
             species = res_file["species"].unique()
             for spec in species:
-                self.models.add_species(spec, self.parent().parent().parent().page_settings)
+                self.models.addSpecies(spec, self.parent().parent().parent().page_settings)
                                
     def setResFilePath(self, text):
         self.res_file_path = text
@@ -1035,10 +1014,6 @@ class PhotoViewer(QtWidgets.QWidget):
     def setImageDir(self, text):
         self.image_directory = text
         self.cur_image_index = 0
-        # if len(self.image_list) == 0:
-        #     self.loadImage(path=None)
-        # else:
-        #     self.loadImage(self.image_directory + self.image_list[self.cur_image_index])
         self.updateImageList()
         
     def setImagePrefix(self, text):
@@ -1054,7 +1029,10 @@ class PhotoViewer(QtWidgets.QWidget):
 
     def updateImageList(self):
         #self.cur_image_index = 0
-        self.image_list = glob.glob(self.image_directory + self.image_prefix + self.image_ending)
+        images_with_prefix = glob.glob(self.image_directory + self.image_prefix + self.image_ending)
+        if hasattr(self.parent().parent().parent(), 'page_data'):
+            date = self.parent().parent().parent().page_data.calendarWidget.selectedDate().toString("yyyy.MM.dd")
+            self.image_list = [x for x in images_with_prefix if date in x]
         
         if not self.image_list:
             self.loadImage(path=None)
@@ -1127,7 +1105,7 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # find current image in result file and draw all animals from it
         if self.models.model_animals.data is not None and path is not None:
-            cur_file_entries = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  ntpath.basename(path)[:-6]]
+            cur_file_entries = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  os.path.basename(path)[:-6]]
             self.imageArea.animal_painter.drawAnimalsFromList(cur_file_entries, self.image_ending)       
             if len(cur_file_entries) > 0: 
                 remark = str(cur_file_entries['image_remarks'].iloc[0])
@@ -1146,7 +1124,7 @@ class PhotoViewer(QtWidgets.QWidget):
     
     def on_next_image(self):
         # current file_id
-        cur_file_id = ntpath.basename(self.image_list[self.cur_image_index])[:-6]
+        cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
         
         # set current image to status "checked"
         cur_file_indices = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  cur_file_id].index
@@ -1165,7 +1143,7 @@ class PhotoViewer(QtWidgets.QWidget):
        
     def on_previous_image(self):
         # current file_id
-        cur_file_id = ntpath.basename(self.image_list[self.cur_image_index])[:-6]
+        cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
         
         # set current image to status "checked"
         cur_file_indices = self.models.model_animals.data[self.models.model_animals.data['file_id'] ==  cur_file_id].index
@@ -1248,38 +1226,10 @@ class PhotoViewer(QtWidgets.QWidget):
         layout_frame_left.addWidget(self.label_imgCount)
         
         
-        # --- image frame ------------------------------------------------------------------------------------------- # 
-        # # frame
-        # self.frame_image = QtWidgets.QFrame(self)
-        # # frame_image.setMinimumSize(QtCore.QSize(60, 0))
-        # # frame_image.setMaximumSize(QtCore.QSize(60, 16777215))
-        # self.frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
-        # self.frame_image.setObjectName("frame_image")
-    
-        # # layout
-        # self.layout_frame_image = QtWidgets.QGridLayout(self.frame_image)
-        # self.layout_frame_image.setContentsMargins(0, 0, 0, 0)
-        # self.layout_frame_image.setObjectName("layout_frame_image")
-
-
-
-        
+        # --- image area ---------------------------------------------------- # 
         self.imageArea = ImageArea(self.models, self)
-        # self.imageAreaR = ImageArea(self)
         
-        # self.label_dummy = QtWidgets.QLabel()
-        
-        # self.layout_frame_image.addWidget(self.imageArea, 0, 0, 1, 1)
-        # self.layout_frame_image.addWidget(self.imageAreaR, 1, 0, 1, 1)
-        # self.layout_frame_image.addWidget(self.label_dummy, 1, 1, 1, 1)
-
-
-        
-        # --- group and species frame ------------------------------------------------------------------------------------------- # 
-        # @todo idea:frame with 2 listwidgets below each other. one for the group, one for species. 
-        
-        
-        # --- right frame ------------------------------------------------------------------------------------------- # 
+        # --- right frame --------------------------------------------------- # 
         # frame
         frame_right = QtWidgets.QFrame(self)
         frame_right.setMinimumSize(QtCore.QSize(60, 0))
@@ -1288,12 +1238,17 @@ class PhotoViewer(QtWidgets.QWidget):
         frame_right.setObjectName("frame_right")
         
         # vertical spacers
-        spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        spacerItem10 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem9 = QtWidgets.QSpacerItem(20, 40, 
+                                            QtWidgets.QSizePolicy.Minimum, 
+                                            QtWidgets.QSizePolicy.Expanding)
+        spacerItem10 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         # button for previous image
         self.btn_next_image = QtWidgets.QPushButton(frame_right)      
-        self.btn_next_image.setIcon(get_icon(":/icons/icons/arrow_right_big.png"))
+        self.btn_next_image.setIcon(get_icon(
+            ":/icons/icons/arrow_right_big.png"))
         self.btn_next_image.setIconSize(QtCore.QSize(20, 40))
         self.btn_next_image.setObjectName("btn_next_image")
         
@@ -1316,7 +1271,7 @@ class PhotoViewer(QtWidgets.QWidget):
         layout_frame_right.addItem(spacerItem10)
         layout_frame_right.addWidget(self.btn_openImg)
         
-        # --- main widget ------------------------------------------------------------------------------------------- #      
+        # --- main widget --------------------------------------------------- #      
         # main layout
         self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)

@@ -1,4 +1,4 @@
-import ntpath
+import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Helpers import TopFrame, get_icon
 from test_new_zoom import PhotoViewer
@@ -92,8 +92,6 @@ class PageHome(QtWidgets.QWidget):
                 item.setTextAlignment(QtCore.Qt.AlignRight)
                 self.models.model_species.appendRow(item)
 
-                
-    
     def init_ui(self):
    
         # --- top bar  ------------------------------------------------------------------------------------------- #         
@@ -459,10 +457,6 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
         self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
 
-    # def exportToCsv(self):
-    #     res_file_path = self.parent().parent().page_data.lineEdit_res_file.text()
-    #     self.models.model_animals.exportToCsv(res_file_path)
-
     def setComboboxImageRemark(self, text):
         # if the remark is not in the combobox, add it. Else choose its index
         index = self.comboBox_imgRemark.findText(text) 
@@ -477,7 +471,7 @@ class PageHome(QtWidgets.QWidget):
         
         # get the current photo ID
         cur_image_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
-        file_id = ntpath.basename(cur_image_path)[:-6]
+        file_id = os.path.basename(cur_image_path)[:-6]
     
         # adapt the image remark in the data model
         cur_indices = self.models.model_animals.data[self.models.model_animals.data['file_id']==file_id].index
@@ -493,7 +487,6 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.displayLeftImage()
         
-    # @todo implement image switching
     def displayLeftImage(self):
         print("on left image")
         self.btn_imgSwitch.setText("L")

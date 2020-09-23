@@ -1,12 +1,14 @@
 import time
-import ntpath
+import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import Models
+from TableWindow import TableWindow
 import PageHome
 import PageSettings
 import PageAbout
-import PageHandbook
 import PageData
+#import PageHandbook
+
 
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
@@ -29,14 +31,11 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # translate UI and set starting tabs
         self.retranslateUi()
         self.stackedWidget.setCurrentIndex(0)
-        self.page_data.tabWidget_2.setCurrentIndex(0)
+        self.window_table.tabWidget.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
         # restore settings from previous session
         self.restorePreviousSettings()
-
-        #self.page_data.tableView_original.setModel(self.models.model_animals)
-        #self.page_home.photo_viewer.imageArea.animal_painter.models = self.models
 
         print(self.settings.fileName())
 
@@ -58,11 +57,15 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.saveCurrentValues(self.settings)
         
         # save image data
-        cur_file_id = ntpath.basename(self.page_home.photo_viewer.image_list[self.page_home.photo_viewer.cur_image_index])[:-6]
-        res_file_path = self.page_data.lineEdit_res_file.text()
-        self.models.model_animals.exportToCsv(res_file_path=res_file_path,
-                                              file_id=cur_file_id)
+        index = self.page_home.photo_viewer.cur_image_index
+        if index < len(self.page_home.photo_viewer.image_list):        
+            cur_file_id = os.path.basename(self.page_home.photo_viewer.image_list[index])[:-6]
+            res_file_path = self.page_data.lineEdit_res_file.text()
+            self.models.model_animals.exportToCsv(res_file_path=res_file_path,
+                                                  file_id=cur_file_id)
 
+        self.window_table.close()
+        
     def retranslateUi(self):
         """
         Function to retranslate the UI and set the inital texts.
@@ -77,6 +80,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # main window
         self.setWindowTitle(_translate("MainWindow", "MarOMarker"))
         
+        # table window
+        self.window_table.setWindowTitle(_translate("MainWindow", "MarOMarker - Data Table"))
+        self.window_table.btn_save_table.setText(_translate("MainWindow", "Save current table"))
+        self.window_table.tabWidget.setTabText(self.window_table.tabWidget.indexOf(self.window_table.original), _translate("MainWindow", "Current table"))
+        self.window_table.tabWidget.setTabText(self.window_table.tabWidget.indexOf(self.window_table.summary), _translate("MainWindow", "Summarized table"))
+     
         # home page
         self.page_home.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_home.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
@@ -105,11 +114,33 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.btn_res_file.setText(_translate("MainWindow", "Browse"))
         self.page_data.lineEdit_exp_id.setPlaceholderText(_translate("MainWindow", "ID of the experiment..."))
         self.page_data.label_img_prefix.setText(_translate("MainWindow", "Image Prefix"))
-        self.page_data.btn_analyze.setText(_translate("MainWindow", "Analyze images"))    
-        self.page_data.tabWidget_2.setTabText(self.page_data.tabWidget_2.indexOf(self.page_data.original), _translate("MainWindow", "Original table"))
-        self.page_data.tabWidget_2.setTabText(self.page_data.tabWidget_2.indexOf(self.page_data.summary), _translate("MainWindow", "Summarized table"))
+        self.page_data.label_data_selection.setText(_translate("MainWindow", "Select date"))
         
+        self.page_data.btn_nn_activation.setText(_translate("MainWindow", "Run neural network"))
+        self.page_data.label_nn_activation.setText(_translate("MainWindow", "Run neural network"))
+        self.page_data.label_nn_activation_text.setText(_translate("MainWindow", "   #Predicted images: "))
+        self.page_data.label_nn_activation_number.setText(_translate("MainWindow", "0"))
+        
+        self.page_data.btn_pred_check.setText(_translate("MainWindow", "Check predictions on Home screen (L)"))
+        self.page_data.label_prediction_check.setText(_translate("MainWindow", "Check predictions"))
+        self.page_data.label_pred_check_text.setText(_translate("MainWindow", "   #Checked images: "))
+        self.page_data.label_pred_check_number.setText(_translate("MainWindow", "0"))
+        
+        self.page_data.btn_rectify_match.setText(_translate("MainWindow", "Rectify and match"))
+        self.page_data.label_rectify_match.setText(_translate("MainWindow", "Run rectification and matching"))
+        self.page_data.label_rectify_match_text.setText(_translate("MainWindow", "   #Rectified images with matched animals: "))
+        self.page_data.label_rectify_match_number.setText(_translate("MainWindow", "0"))
+
+        self.page_data.btn_check_match.setText(_translate("MainWindow", "Check matching on Home screen (LR)"))
+        self.page_data.label_check_match.setText(_translate("MainWindow", "Check matching"))
+        self.page_data.label_check_match_text.setText(_translate("MainWindow", "   #Checked images: "))
+        self.page_data.label_check_match_number.setText(_translate("MainWindow", "0"))
        
+        self.page_data.btn_length_measurement.setText(_translate("MainWindow", "Calculate length"))
+        self.page_data.label_length_measurement.setText(_translate("MainWindow", "Run length measurement"))
+        self.page_data.label_length_measurement_text.setText(_translate("MainWindow", "   #Calculated images: "))
+        self.page_data.label_length_measurement_number.setText(_translate("MainWindow", "0"))
+        
         # texts for settings page
         self.page_settings.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_settings.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
@@ -139,9 +170,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
         
         # texts for the handbook page
-        self.page_handbook.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
-        self.page_handbook.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
-        self.page_handbook.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Handbook"))
+        # self.page_handbook.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
+        # self.page_handbook.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
+        # self.page_handbook.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Handbook"))
    
         # texts for the about page        
         self.page_about.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
@@ -170,8 +201,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         # some general properties
         self.setTabShape(QtWidgets.QTabWidget.Rounded)
-        #self.setDockOptions(QtWidgets.QMainWindow.AllowTabbedDocks|QtWidgets.QMainWindow.AnimatedDocks)
-
+        
         # create stacked widget
         self.stackedWidget = QtWidgets.QStackedWidget(self)
         self.stackedWidget.setLineWidth(0)
@@ -418,9 +448,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         print(f"settings init: {time.time() - self.start_time}")
         
         # handbook page
-        self.page_handbook = PageHandbook.PageHandbook(self)
-        self.stackedWidget.addWidget(self.page_handbook)
-        print(f"handbook init: {time.time() - self.start_time}")
+        #self.page_handbook = PageHandbook.PageHandbook(self)
+        #self.stackedWidget.addWidget(self.page_handbook)
+        #print(f"handbook init: {time.time() - self.start_time}")
         
         # about page
         self.page_about = PageAbout.PageAbout(self)
@@ -434,8 +464,10 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.statusbar.setBaseSize(QtCore.QSize(0, 10))
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)    
-      
-        
+     
+        # create table window
+        self.window_table = TableWindow(self.models, None)
+     
     def on_imageDirChanged(self, text):
         self.page_home.photo_viewer.setImageDir(text)
         
@@ -458,7 +490,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
         self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
         self.page_settings.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
-        self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
+        #self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
         self.page_about.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
         
         self.page_settings.userIdChanged.connect(self.updateUserIds)
@@ -473,7 +505,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_data.frame_controlBar.btn_menu)
         self.append_main_menu_to_button(self.page_settings.frame_control_bar.btn_menu)
         self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
-        self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
+        #self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
 
     def updateUserIds(self, value):       
         # update the userId in the top bar of the software (on every page)
@@ -481,19 +513,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.frame_topBar.label_user_id.setText(value)
         self.page_settings.frame_top_bar.label_user_id.setText(value)
         self.page_about.frame_top_bar.label_user_id.setText(value)
-        self.page_handbook.frame_topBar.label_user_id.setText(value) 
+        #self.page_handbook.frame_topBar.label_user_id.setText(value) 
         
         # also update the dummy userIds to preserve the symmetry of the bar
         self.page_home.frame_topBar.label_user_id_2.setText(value)
         self.page_data.frame_topBar.label_user_id_2.setText(value)
         self.page_settings.frame_top_bar.label_user_id_2.setText(value)
         self.page_about.frame_top_bar.label_user_id_2.setText(value)
-        self.page_handbook.frame_topBar.label_user_id_2.setText(value)
-
-
-        
-
-     
+        #self.page_handbook.frame_topBar.label_user_id_2.setText(value)
         
     # -------------------- navigation actions -------------------------------- #    
     def direct_to_user_settings(self):

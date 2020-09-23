@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/arrow_down_navi.png</file>
     <file>icons/process_arrow_down.png</file>
     <file>icons/process_arrow.png</file>
     <file>icons/glass_darkBlue.png</file>

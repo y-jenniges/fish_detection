@@ -1,4 +1,4 @@
-import ntpath
+import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from TabWidget import TabWidget
@@ -12,7 +12,7 @@ class TextImageItemWidget (QtWidgets.QWidget):
         # the title is the name of the image
         self.imagePath = imagePath
         if title is None: 
-            self.title = ntpath.basename(imagePath).split('.')[0]
+            self.title = os.path.basename(imagePath).split('.')[0]
         else:
             self.title = title
         
@@ -843,7 +843,7 @@ class PageSettings(QtWidgets.QWidget):
    
     def apply_configFile(self, path):
         # check if path is valid
-        if path != "" and ntpath.exists(path): 
+        if path != "" and os.path.isfile(path): 
             df = pd.read_csv(path)
         
             # check format of file
@@ -904,7 +904,7 @@ class PageSettings(QtWidgets.QWidget):
     
     def apply_nnPath(self, path):
         # check if path is valid
-        if path != "" and ntpath.exists(path):    
+        if path != "" and os.path.isfile(path):    
             self.lineEdit_nn.setText(path)
         
 # --- actions in species tab ------------------------------------------------ #

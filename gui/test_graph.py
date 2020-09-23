@@ -1,63 +1,61 @@
 #https://stackoverflow.com/questions/60571837/how-to-move-a-figurecreated-using-paintevent-by-simply-draging-it-in-pyqt5
-import random
-import sys
-import enum
-import sympy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import AnimalGroup, AnimalSpecies
 
-# dict contains all animals on that image
-animal_list = []
-IMAGE_DIRECTORY = "../data/maritime_dataset_25/training_data_animals/"
-# map to assign a color to an animal group
-animal_color_map = 1
-
-
-# class AnimalGroup(enum.Enum):
-#     FISH = 1,  
-#     CRUSTACEA = 2, 
-#     CHAETOGNATHA = 3, 
-#     JELLYFISH = 4, 
-#     UNIDENTIFIED = 5
-
-# class AnimalSpecies(enum.Enum):
-#     UNIDENTIFIED = 0
-
-# class AnimalSpeciesClass:
-#     def add_species():
-#         print("add species")
-    
-#     def remove_species():
-#         print("remove species")
-
-
-
-# class AnimalVisualRepresentation():
-#      def __init__(self):
-#          print("aha")
-
-
-
-
-# class RoundedRect(QtCore.QRectF):
-#     def __init__(self, pen=None, parent=None):
-#         super(RoundedRect, self).__init__(parent)
-
-              
-#     def paintEvent(self, event):
-#         # define painter
-#         painter = QtGui.QPainter(self)
-#         painter.setRenderHint(QtGui.QPainter.Antialiasing)
-#         painter.setPen(QtGui.QPen(QtGui.QColor(0,0,0,0), 2, QtCore.Qt.SolidLine)) 
-        
-#         painter.drawRoundedRect(self, 50, 50)   
-     
-       
-
 
 class Animal():
-    """ Class to represent an animal on an image. """
+    """ 
+    Class to represent an animal on an image. 
+    
+    Attributes
+    ----------
+    group: string
+        group of the animal
+    species: string
+        species of the animal
+    remark: string
+        remark to the animal
+    length: float
+        length of the animal 
+    row_index : int
+        row index of the represented animal in the data table
+    pixmap_width: int
+        width (=height) of the pixmaps for animal head and tail
+    original_pos_head: QPoint
+        position of the animal head on the original resolution image
+    original_pos_tail: QPoint
+        position of the animal tail on the original resolution image
+    position_head: QPoint
+        position of the animal head on the currently displayed size of the 
+        image
+    position_tail: QPoint
+        position of the animal tail on the currently displayed size of the 
+        image
+    is_head_drawn: bool
+        states if the head of the animal is drawn on the canvas
+    is_tail_drawn: bool
+        states if the tail of the animal is drawn on the canvas
+    boundingBoxOffset: [int, int]
+        distance between head/tail points and bounding box
+        
+    Methods
+    -------
+    createHeadVisual():
+    createTailVisual():
+    setManuallyCorrected(corrected=False):
+        if the user has adapted the animal, this variable has to be set to 
+        True (for statistical evaluation purposes of the neural network)
+    getColorsAccordingToGroup():
+        finds the color for the animal according to its group 
+    setPositionHead
+    setPositionTail
+    setGroup
+    setSpecies
+    setRemark
+    calculateBoundingBox
+    """
+    
     
     # the input position refers to the center of the visual!
     def __init__(self, models, row_index, position_head=QtCore.QPoint(-1,-1), 
@@ -88,15 +86,15 @@ class Animal():
             The remark to the animal. The default is "".
         """
         # data models
-        self.models = models
+        self._models = models
         
         # row in the table this animal corresponds to
         self.row_index = row_index
         
         # size of the head/tail visuals
         self.pixmap_width = 20
-        self.pixmap_head = None
-        self.pixmap_tail = None
+        self._pixmap_head = None
+        self._pixmap_tail = None
         
         # store the position on the original (i.e. not resized) image
         self.original_pos_head = QtCore.QPoint(position_head)
@@ -113,12 +111,16 @@ class Animal():
         self.length = None
         #self.height = None
       
-        # set the visual for the head, tail and line between them
-        self.pos_visual_head = position_head - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
-        self.pos_visual_tail = position_tail - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        # set the visual for the head, tail and line between them @todo pblic or private?
+        self.pos_visual_head = position_head - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2)
+        self.pos_visual_tail = position_tail - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2)
 
-        self.rect_head = QtCore.QRect(self.pos_visual_head, QtCore.QSize(self.pixmap_width, self.pixmap_width))
-        self.rect_tail = QtCore.QRect(self.pos_visual_tail, QtCore.QSize(self.pixmap_width, self.pixmap_width))       
+        self.rect_head = QtCore.QRect(self.pos_visual_head, QtCore.QSize(
+            self.pixmap_width, self.pixmap_width))
+        self.rect_tail = QtCore.QRect(self.pos_visual_tail, QtCore.QSize(
+            self.pixmap_width, self.pixmap_width))       
         self.line = QtCore.QLineF(self.position_head, self.position_tail)  
 
         # indicate if head/tail is already drawn
@@ -126,7 +128,7 @@ class Animal():
         self.is_tail_drawn = False           
 
         # set pixmaps for head/tail visuals
-        self.get_colors_according_to_group()
+        self.getColorsAccordingToGroup()
         
         # set the bounding box visual
         self.boundingBox = QtCore.QRectF()
@@ -142,100 +144,144 @@ class Animal():
         # indicate if this animal was manually corrected
         self.manually_corrected = False
      
+     
+    def createHeadVisual(self):
+        if self.position_head != QtCore.QPoint(-1,-1):
+            # create the head visual
+            self.head_item_visual = QtWidgets.QGraphicsPixmapItem( \
+                self._pixmap_head)
+            self.head_item_visual.setPos(self.rect_head.center() \
+                                         - QtCore.QPoint( \
+                                             self.pixmap_width/4, 
+                                             self.pixmap_width/4))
+            self.head_item_visual.ItemIsMovable = True
         
+            self.is_head_drawn = True
+        return self.head_item_visual
+     
+    def createTailVisual(self):
+        if self.position_tail != QtCore.QPoint(-1,-1):
+            # create the tail visual
+            self.tail_item_visual = QtWidgets.QGraphicsPixmapItem( \
+                self._pixmap_tail)
+            self.tail_item_visual.setPos(self.rect_tail.center() \
+                                         - QtCore.QPoint( \
+                                             self.pixmap_width/4, 
+                                             self.pixmap_width/4))
+            self.tail_item_visual.ItemIsMovable = True
+            
+            self.is_tail_drawn = True
+        return self.tail_item_visual
+    
     def setManuallyCorrected(self, corrected=False):
-        self.models.model_animals.data.loc[self.row_index, "manually_corrected"] = corrected
+        self._models.model_animals.data.loc[
+            self.row_index, "manually_corrected"] = corrected
                     
-    def get_colors_according_to_group(self):
+    def getColorsAccordingToGroup(self):
         """
         Function that finds the colour for the animal according to its group 
         and finds the pixmaps for head and tail accordingly.
         """
         self.color = ""
         
-        if self.group == AnimalGroup.UNIDENTIFIED or self.group == "Unidentified":
-            self.pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
-            self.pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
+        if self.group == AnimalGroup.UNIDENTIFIED \
+        or self.group == "Unidentified":
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
               
         elif self.group == AnimalGroup.FISH or self.group == "Fish":
-            self.pixmap_head = QtGui.QPixmap("animal_markings/o_blue.png")        
-            self.pixmap_tail = QtGui.QPixmap("animal_markings/x_blue.png")  
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_blue.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_blue.png")  
             self.color = QtGui.QColor(0, 112, 192)
             
         elif self.group == AnimalGroup.CRUSTACEA or self.group == "Crustacea":
-            self.pixmap_head = QtGui.QPixmap("animal_markings/o_red.png")        
-            self.pixmap_tail = QtGui.QPixmap("animal_markings/x_red.png") 
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_red.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_red.png") 
             self.color = QtGui.QColor(255, 0, 0)
             
-        elif self.group == AnimalGroup.CHAETOGNATHA or self.group == "Chaetognatha":
-            self.pixmap_head = QtGui.QPixmap("animal_markings/o_orange.png")        
-            self.pixmap_tail = QtGui.QPixmap("animal_markings/x_orange.png")  
+        elif self.group == AnimalGroup.CHAETOGNATHA \
+        or self.group == "Chaetognatha":
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_orange.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_orange.png")  
             self.color = QtGui.QColor(255, 192, 0)
             
         elif self.group == AnimalGroup.JELLYFISH or self.group == "Jellyfish":
-            self.pixmap_head = QtGui.QPixmap("animal_markings/o_black.png")        
-            self.pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_black.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
             self.color = QtGui.QColor(0, 0, 0)
      
         # scale pixmaps
-        self.pixmap_head = self.pixmap_head.scaled(QtCore.QSize(self.pixmap_width/2, self.pixmap_width/2))     
-        self.pixmap_tail = self.pixmap_tail.scaled(QtCore.QSize(self.pixmap_width/2, self.pixmap_width/2))
+        self._pixmap_head = self._pixmap_head.scaled(QtCore.QSize(
+            self.pixmap_width/2, self.pixmap_width/2))     
+        self._pixmap_tail = self._pixmap_tail.scaled(QtCore.QSize(
+            self.pixmap_width/2, self.pixmap_width/2))
         
     
     def setPositionHead(self, pos):
         self.position_head = pos
-        self.rect_head.moveTopLeft(pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2))
-        self.pos_visual_head = pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        self.rect_head.moveTopLeft(pos - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2))
+        self.pos_visual_head = pos - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2)
         
         self.line.setP1(pos)
         self.calculateBoundingBox() 
     
     def setPositionTail(self, pos):
         self.position_tail = pos
-        self.rect_tail.moveTopLeft(pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2))
-        self.pos_visual_tail = pos - QtCore.QPoint(self.pixmap_width/2, self.pixmap_width/2)
+        self.rect_tail.moveTopLeft(pos - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2))
+        self.pos_visual_tail = pos - QtCore.QPoint(
+            self.pixmap_width/2, self.pixmap_width/2)
         
         self.line.setP2(pos)
         self.calculateBoundingBox()
         
     def setGroup(self, group):
         self.group = group
-        self.get_colors_according_to_group()
+        self.getColorsAccordingToGroup()
         
         # adapt group in data model if there is an entry for this animal
-        if self.row_index in self.models.model_animals.data.index:
-            self.models.model_animals.data.loc[self.row_index, 'group'] = group
+        if self.row_index in self._models.model_animals.data.index:
+            self._models.model_animals.data.loc[
+                self.row_index, 'group'] = group
     
     def setSpecies(self, species):
         self.species = species
         
         # adapt species in data model if there is an entry for this animal
-        if self.row_index in self.models.model_animals.data.index:
-            self.models.model_animals.data.loc[self.row_index, 'species'] = species
+        if self.row_index in self._models.model_animals.data.index:
+            self._models.model_animals.data.loc[
+                self.row_index, 'species'] = species
     
     def setRemark(self, remark):
         self.remark = remark
         
         # adapt species in data model if there is an entry for this animal
-        if self.row_index in self.models.model_animals.data.index:
-            self.models.model_animals.data.loc[self.row_index, 'object_remarks'] = remark
-        
-    
-    def setRowIndex(self, index):
-        self.row_index = index
+        if self.row_index in self._models.model_animals.data.index:
+            self._models.model_animals.data.loc[
+                self.row_index, 'object_remarks'] = remark
     
     def calculateBoundingBox(self):
-        pos_x = min(self.position_tail.x(), self.position_head.x()) - self.boundingBoxOffset[0]/2 #abs((self.position_head.x() - self.position_tail.x())/2) + min(self.position_head.x(), self.position_tail.x())
-        pos_y = min(self.position_tail.y(), self.position_head.y()) - self.boundingBoxOffset[1]/2 #abs((self.position_head.y() - self.position_tail.y())/2) + min(self.position_head.y(), self.position_tail.y())
-        size_x = abs(self.position_head.x() - self.position_tail.x()) + self.boundingBoxOffset[0]
-        size_y = abs(self.position_head.y() - self.position_tail.y()) + self.boundingBoxOffset[1]
+        pos_x = min(self.position_tail.x(), self.position_head.x()) \
+            - self.boundingBoxOffset[0]/2 
+        pos_y = min(self.position_tail.y(), self.position_head.y()) \
+            - self.boundingBoxOffset[1]/2 
+        size_x = abs(self.position_head.x() - self.position_tail.x()) \
+            + self.boundingBoxOffset[0]
+        size_y = abs(self.position_head.y() - self.position_tail.y()) \
+            + self.boundingBoxOffset[1]
         
         # update the bounding box with the new parameters
         self.boundingBox.setTopLeft(QtCore.QPoint(pos_x, pos_y))
         self.boundingBox.setWidth(size_x)
         self.boundingBox.setHeight(size_y)
         
+
+
+
+
 
 class MeasurementWidget(QtWidgets.QWidget):
     """
