@@ -7,15 +7,15 @@ import time
 import json
 import os
 import pickle
-from tensorflow import random 
-#from tensorflow import set_random_seed
+#from tensorflow import random 
+from tensorflow import set_random_seed
 import numpy as np
 
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -30,7 +30,7 @@ bodyPart:
     'both'
 """
 # output directory
-out_path = f"../data/output/61/"
+out_path = f"../data/output/63/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -271,14 +271,15 @@ x = ourBlock (x, 'block_22')
 #x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 #out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
-out_vectors = layers.Conv2D (4, 1, padding='same', activation="linear", name = "vectors")(x)
+#out_vectors = layers.Conv2D (4, 1, padding='same', activation="linear", name = "vectors")(x)
 
 
 
 # modelH = keras.Model(inputs=input, outputs=x)
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
-modelH = keras.Model(inputs=input, outputs=[out_h, out_vectors])
-modelH.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
+#modelH = keras.Model(inputs=input, outputs=[out_h, out_vectors])
+modelH = keras.Model(inputs=input, outputs=out_h)
+modelH.compile(loss="categorical_crossentropy", optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
       keras.metrics.CategoricalCrossentropy(),
       #keras.metrics.TruePositives(),
       #keras.metrics.FalsePositives(),
@@ -287,8 +288,8 @@ modelH.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "
       #keras.metrics.CategoricalAccuracy(),
       keras.metrics.Precision(),
       keras.metrics.Recall(),
-      keras.metrics.AUC(),
-], "vectors": ["mae", "acc"], 
+      keras.metrics.AUC()]})
+#], "vectors": ["mae", "acc"], 
 # ], "connection": ["mae", "acc", 
 #       keras.metrics.BinaryCrossentropy(),
 #       keras.metrics.TruePositives(),
@@ -299,7 +300,7 @@ modelH.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "
 #       keras.metrics.Precision(),
 #       keras.metrics.Recall(),
 #       keras.metrics.AUC(),}
-})
+#})
 
 
 modelH.summary()

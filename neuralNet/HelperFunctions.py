@@ -339,41 +339,68 @@ def get_head_tail_vectors(entry, scale_factor=200.0):
     
     # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
-        # calculate slope and intercept of the line connecting head and tail of the animal
-        deltaY = entry["animals"][i]["position"][1] - entry["animals"][i+1]["position"][1]
-        deltaX = entry["animals"][i]["position"][0] - entry["animals"][i+1]["position"][0]
+        x_head = entry["animals"][i]["position"][0]
+        y_head = entry["animals"][i]["position"][1]
         
-        if deltaX == 0: 
-            m = 0
-        else:
-            m = deltaY/deltaX
-            
-        b = entry["animals"][i]["position"][1] - m*entry["animals"][i]["position"][0]
-        
-        # calculate the y-values of the line
-        low = min(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
-        high = max(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
-        #x = np.array(range(int(low), int(high+1)))
-        x = np.array(range(int(low), int(high)))
-        y = m*x + b       
+        x_tail = entry["animals"][i+1]["position"][0]
+        y_tail = entry["animals"][i+1]["position"][1]
+        # vector pointing from head to tail
+        head_dx = (x_tail - x_head)/scale_factor
+        head_dy = (y_tail - y_head)/scale_factor
 
-        # for every point on the line, add a vector from it to the tail
-        for j in range(len(x)-1):
-            if 0 <= x[j] < head_vectors.shape[1] and 0 <= y[j] < head_vectors.shape[0]:   
-               
-                # vector pointing from point on line to tail
-                head_dx = (entry["animals"][i+1]["position"][0] - x[j])/scale_factor
-                head_dy = (entry["animals"][i+1]["position"][1] - y[j])/scale_factor
+        # vector pointing from tail to head
+        tail_dx = -1*head_dx
+        tail_dy = -1*head_dy
         
-                # vector pointing from tail to head
-                tail_dx = -1*head_dx
-                tail_dy = -1*head_dy
-                
-                head_vectors[round(y[j]), round(x[j])] = np.array([head_dx, head_dy])
-                tail_vectors[round(y[len(x)-1-j]), round(x[len(x)-1-j])] = np.array([tail_dx, tail_dy])
+        # add head and tail vector to vector field
+        head_vectors[round(y_head), round(x_head)] = np.array([head_dx, head_dy])
+        tail_vectors[round(y_tail), round(x_tail)] = np.array([tail_dx, tail_dy])
                 
     return head_vectors, tail_vectors
 
+# def get_head_tail_vectors(entry, scale_factor=200.0):
+#     image = loadImage(entry['filename'])
+#     hm_y, hm_x = image.shape[0], image.shape[1]
+
+#     head_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+#     tail_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+    
+#     # iterate over all animal heads
+#     for i in range(0, len(entry["animals"]), 2):
+#         # calculate slope and intercept of the line connecting head and tail of the animal
+#         deltaY = entry["animals"][i]["position"][1] - entry["animals"][i+1]["position"][1]
+#         deltaX = entry["animals"][i]["position"][0] - entry["animals"][i+1]["position"][0]
+        
+#         if deltaX == 0: 
+#             m = 0
+#         else:
+#             m = deltaY/deltaX
+            
+#         b = entry["animals"][i]["position"][1] - m*entry["animals"][i]["position"][0]
+        
+#         # calculate the y-values of the line
+#         low = min(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
+#         high = max(entry["animals"][i]["position"][0], entry["animals"][i+1]["position"][0])
+#         #x = np.array(range(int(low), int(high+1)))
+#         x = np.array(range(int(low), int(high)))
+#         y = m*x + b       
+
+#         # for every point on the line, add a vector from it to the tail
+#         for j in range(len(x)-1):
+#             if 0 <= x[j] < head_vectors.shape[1] and 0 <= y[j] < head_vectors.shape[0]:   
+               
+#                 # vector pointing from point on line to tail
+#                 head_dx = (entry["animals"][i+1]["position"][0] - x[j])/scale_factor
+#                 head_dy = (entry["animals"][i+1]["position"][1] - y[j])/scale_factor
+        
+#                 # vector pointing from tail to head
+#                 tail_dx = -1*head_dx
+#                 tail_dy = -1*head_dy
+                
+#                 head_vectors[round(y[j]), round(x[j])] = np.array([head_dx, head_dy])
+#                 tail_vectors[round(y[len(x)-1-j]), round(x[len(x)-1-j])] = np.array([tail_dx, tail_dy])
+                
+#     return head_vectors, tail_vectors
 
 # def get_head_tail_vectors(entry, scale_factor=200.0):
 #     head_vector_list = []
