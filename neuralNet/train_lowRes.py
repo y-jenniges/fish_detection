@@ -9,7 +9,7 @@ import os
 import pickle
 import math
 import numpy as np
-#from tensorflow import random
+from tensorflow import random
 from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
@@ -32,7 +32,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/60/"
+out_path = f"../data/output/64/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -41,7 +41,7 @@ label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 val_labels = val_labels + test_labels
 
-# # only take first 5 labels
+# only take first 5 labels
 # train_labels = train_labels[:4]
 # test_labels = test_labels[:4]
 # val_labels = val_labels[:4]
@@ -49,7 +49,7 @@ val_labels = val_labels + test_labels
 # image path
 #data_root = "../data/maritime_dataset/"
 data_root = "../data/maritime_dataset_25/"
-imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), factor=1)
+imageShape = helpers.shapeOfFilename(os.path.join(data_root,"training_data_animals/0.jpg"), downsample_factor=1, image_factor=32)
 print(f"Image format {imageShape}.")
 
 

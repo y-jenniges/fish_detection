@@ -112,7 +112,7 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     return test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights
 
 # image helpers --------------------------------------------------------------------#
-def loadImage(fname, factor=64, equalize=False):
+def loadImage(fname, factor=64, pad=True, equalize=False):
     "Loads an image as a h*w*3 numpy array"
     # load image in PIL format (either first equalized or not)
     #img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
@@ -124,19 +124,22 @@ def loadImage(fname, factor=64, equalize=False):
     else:
         img = img_to_array(load_img(fname), dtype="uint8")
 
-    #print(f"image before {img.shape}")
-    rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
-    if rest_x != 0:
-        img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
-    if rest_y != 0:        
-        img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', constant_values=0)
-       
+    if pad:
+        #print(f"image before {img.shape}")
+        rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
+        if rest_x != 0:
+            img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', constant_values=0)
+        if rest_y != 0:        
+            img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', constant_values=0)
+    else:
+        img = img_to_array(load_img(fname), dtype="uint8")
+        
     return img
 
 # Load the first image an d get the shape of that: All images have the same size
-def shapeOfFilename(fname, factor=2):
+def shapeOfFilename(fname, downsample_factor=2, image_factor=64):
     "Returns the imageshape of fname (filename)."
-    imageShape = downsample(loadImage(fname),factor)
+    imageShape = downsample(loadImage(fname, image_factor),downsample_factor)
     return imageShape.shape
 
 # todo head and tail are switched!!
@@ -318,32 +321,86 @@ def show_image_with_vectors(image, vectors, vector_scale=200, filename=None):
         print(image.shape)
         plt.imshow(image)
     
-    # display non-zero vectors
-    for i in range(len(ui)):
-        plt.quiver(ui[1]*factor, ui[0]*factor, 
-                    vz*vector_scale, uz*vector_scale, 
-                    color=["r"], width=1/250, 
-                    angles='xy', scale_units='xy', scale=1)   
+    print(ui[0].shape, ui[1].shape)
+    print(vi[0].shape, vi[1].shape)
+    # print(uz.shape)
+    # print(vz.shape)
+    
+    if vz.shape == uz.shape:
+        # display non-zero vectors
+        for i in range(len(ui)):
+            plt.quiver(ui[1]*factor, ui[0]*factor, 
+                        vz*vector_scale, uz*vector_scale, 
+                        color=["r"], width=1/250, 
+                        angles='xy', scale_units='xy', scale=1)   
+    else:
+        print("vz and uz not equal shape")
         
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')
         
     plt.show()
+    
+def show_image_with_all_vectors(image, vectors, vector_scale=200, image_factor=32, filename=None):
+    # get directions of vectors 
+    u = vectors[:,:,1]
+    v = vectors[:,:,0]
 
-def get_head_tail_vectors(entry, scale_factor=200.0):
-    image = loadImage(entry['filename'])
-    hm_y, hm_x = image.shape[0], image.shape[1]
+    plt.imshow(image)
+    vector_scale = vector_scale*image_factor
+    #image_factor = 1
+    # display all vectors
+    #factor = image.shape[0]/vectors.shape[0] # factor to scale position of vectors
+    
+    for i in range(u.shape[0]):
+        for j in range(u.shape[1]):
+            plt.quiver(round(j*image_factor), round(i*image_factor), 
+                        v[i, j]*vector_scale, u[i, j]*vector_scale, 
+                        color=["r"], width=1/250, 
+                        angles='xy', scale_units='xy', scale=1)   
+        
+    if filename is not None:
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        
+    plt.show()    
 
-    head_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
-    tail_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
+
+# def project_vector_field_to_shape(vectors, image_shape):
+#     new_vectors = np.zeros((image_shape[0], image_shape[1], 2), dtype=np.float32)
+#     factor_x = round(image_shape[0]/vectors.shape[0])
+#     factor_y = round(image_shape[1]/vectors.shape[1])
+#     print(new_vectors.shape)
+    
+#     for i in range(vectors.shape[0]):
+#         for j in range(vectors.shape[1]):
+#             new_vectors[round(i*factor_x), round(j*factor_y)] = vectors[i, j]
+    
+#     return new_vectors
+
+def get_head_tail_vectors(entry, image_factor=1, scale_factor=200.0):
+    # factor: image scale
+    # scale_factor:veector scale
+    image = loadImage(entry["filename"], image_factor)
+    #image = loadImage(entry['filename'], image_factor, pad=False)
+    #image_pad = loadImage(entry['filename'], image_factor, pad=True)
+    
+    #image = img_to_array(load_img(entry["filename"]), dtype="uint8") # load unpadded image
+    #img_y, img_x = round(image.shape[0]/image_factor)+1, round(image.shape[1]/image_factor)+1
+    img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
+ 
+    head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
+    tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     
     # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
-        x_head = entry["animals"][i]["position"][0]
-        y_head = entry["animals"][i]["position"][1]
+        # head coordinates
+        x_head = round(entry["animals"][i]["position"][0]/image_factor)
+        y_head = round(entry["animals"][i]["position"][1]/image_factor)
         
-        x_tail = entry["animals"][i+1]["position"][0]
-        y_tail = entry["animals"][i+1]["position"][1]
+        # tail coordinates
+        x_tail = round(entry["animals"][i+1]["position"][0]/image_factor)
+        y_tail = round(entry["animals"][i+1]["position"][1]/image_factor)
+        
         # vector pointing from head to tail
         head_dx = (x_tail - x_head)/scale_factor
         head_dy = (y_tail - y_head)/scale_factor
@@ -355,7 +412,7 @@ def get_head_tail_vectors(entry, scale_factor=200.0):
         # add head and tail vector to vector field
         head_vectors[round(y_head), round(x_head)] = np.array([head_dx, head_dy])
         tail_vectors[round(y_tail), round(x_tail)] = np.array([tail_dx, tail_dy])
-                
+        
     return head_vectors, tail_vectors
 
 # def get_head_tail_vectors(entry, scale_factor=200.0):

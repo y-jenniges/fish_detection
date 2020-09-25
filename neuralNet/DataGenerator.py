@@ -42,8 +42,7 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
     hm_5_body = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="connection")
                   
-    # head and tail vectors
-    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
+
 
     
     #hm.showImageWithHeatmap()
@@ -66,8 +65,13 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_head.downsample(f)
     hm_5_tail.downsample(f)
     hm_5_body.downsample(f)
-    head_vectors = helpers.downsample(head_vectors, f)
-    tail_vectors = helpers.downsample(tail_vectors, f)
+    # head_vectors = helpers.downsampleVectorField(head_vectors, f)
+    # tail_vectors = helpers.downsampleVectorField(tail_vectors, f)
+    
+    
+    # head and tail vectors
+    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f)
+    
     
     # assemble connection head-tail heatmap 
     hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)
@@ -124,7 +128,7 @@ def prepareEntryLowResHeatmap (entry, hm_folder=None):
         
     
     # load image and make its range [-1,1] (suitable for mobilenet)
-    image = helpers.loadImage(entry['filename'])
+    image = helpers.loadImage(entry['filename'], 32)
     image = 2.*image/np.max(image) - 1
     #image = helpers.downsample(image, factor=2)
     
@@ -169,7 +173,7 @@ def prepareEntryHighResHeatmap (entry, hm_folder=None):
     #head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
     
     # load image and make its range [-1,1] (suitable for mobilenet)
-    image = helpers.loadImage(entry['filename'])#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
+    image = helpers.loadImage(entry['filename'], 32)#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     #image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
     #image = 2.*(image - np.min(image))/np.ptp(image)-1
     image = 2.*image/np.max(image) - 1

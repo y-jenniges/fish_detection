@@ -7,15 +7,15 @@ import time
 import json
 import os
 import pickle
-#from tensorflow import random 
-from tensorflow import set_random_seed
+from tensorflow import random 
+#from tensorflow import set_random_seed
 import numpy as np
 
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -40,9 +40,9 @@ label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 test_labels = test_labels+val_labels
 
-# train_labels_animals = train_labels_animals[:4]
-# test_labels = test_labels[:4]
-
+train_labels_animals = train_labels_animals[:4]
+test_labels = test_labels[:4]
+print(class_weights)
 # image path
 #data_root = "../data/maritime_dataset/"
 data_root = "../data/maritime_dataset_25/"
@@ -118,7 +118,7 @@ print("DataGenerators serialized")
 # For reference you can access the MobileNet.V2 source code at
 # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
-def ourBlock (x, basename, channels=12):
+def ourBlock (x, basename, channels=12, max_factor=4):
 #def ourBlock(x, basename, channels=Globals.channels):
     """Our own block of computation layers used several times in the network. It is similar to
     the block used in MobileNet.V2 but simplified. x is the layer to attach the block to,
@@ -129,7 +129,7 @@ def ourBlock (x, basename, channels=12):
     x = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name=basename+'_bottleneck_BN')(x)
     x = layers.ReLU(6., name=basename+'_bottleneck_relu')(x)
 
-    x = layers.Conv2D (4*channels, 1, padding='same', name = basename+"_conv")(x)
+    x = layers.Conv2D (max_factor*channels, 1, padding='same', name = basename+"_conv")(x)
     x = layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999, name=basename+'_BN')(x)
     x = layers.ReLU(6., name=basename+'_relu')(x)
 
@@ -200,7 +200,7 @@ modelL.summary()
 start_L  = time.time()
 
 # for training mobilenet too 
-history_L1 = modelL.fit_generator(generator=trainGenL, epochs=10, validation_data=testGenL, class_weight=class_weights)
+history_L1 = modelL.fit_generator(generator=trainGenL, epochs=1, validation_data=testGenL, class_weight=class_weights)
 #@todo make epochs 10 again
 
 # activate all layers for training
@@ -256,7 +256,7 @@ x = ourBlock (x, 'block_21')
 
 x = layers.UpSampling2D(interpolation='bilinear', name='block_22_upto2')(x)
 x = layers.Concatenate(name="block_22_concat")([x,modelL.get_layer("expanded_conv_project_BN").output])
-x = ourBlock (x, 'block_22')
+x = ourBlock (x, 'block_22')#, max_factor=2)
 
 #x = layers.UpSampling2D(interpolation='bilinear', name='block_23_upto1')(x)
 # # x = layers.Concatenate(name="block_23_concat")([x, input])
@@ -279,16 +279,16 @@ out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heat
 # modelH.compile(loss=Globals.loss, optimizer=Globals.optimizer, metrics=Globals.metrics)
 #modelH = keras.Model(inputs=input, outputs=[out_h, out_vectors])
 modelH = keras.Model(inputs=input, outputs=out_h)
-modelH.compile(loss="categorical_crossentropy", optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
+modelH.compile(loss="categorical_crossentropy", optimizer=opt, metrics = {"heatmap": ["mae", "acc"]})
+#      keras.metrics.CategoricalCrossentropy(),
       #keras.metrics.TruePositives(),
       #keras.metrics.FalsePositives(),
       #keras.metrics.TrueNegatives(),
       #keras.metrics.FalseNegatives(), 
       #keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC()]})
+#      keras.metrics.Precision(),
+#      keras.metrics.Recall(),
+#      keras.metrics.AUC()]})
 #], "vectors": ["mae", "acc"], 
 # ], "connection": ["mae", "acc", 
 #       keras.metrics.BinaryCrossentropy(),
@@ -327,7 +327,7 @@ modelH.summary()
 # #model.load_weights ("strawberry-L.h5"), #load a previous checkpoint
 # #for ctr in range(10):
 start_H = time.time()
-historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH, class_weight=class_weights)
+historyH = modelH.fit_generator(generator=trainGenH, epochs=Globals.epochs_H, validation_data=testGenH)#, class_weight=class_weights)
 end_H = time.time() - start_H
 # # print the time used for training
 # print(f"Training took {time.time() - start}")
