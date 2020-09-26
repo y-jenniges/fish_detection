@@ -320,7 +320,7 @@ def show_image_with_vectors(image, vectors, vector_scale=200, filename=None):
         #image = cv2.resize(image, (vectors[:,:,0].shape[1], vectors[:,:,0].shape[0]))
         print(image.shape)
         plt.imshow(image)
-    
+        print(factor)
     print(ui[0].shape, ui[1].shape)
     print(vi[0].shape, vi[1].shape)
     # print(uz.shape)
@@ -377,7 +377,7 @@ def show_image_with_all_vectors(image, vectors, vector_scale=200, image_factor=3
     
 #     return new_vectors
 
-def get_head_tail_vectors(entry, image_factor=1, scale_factor=200.0):
+def get_head_tail_vectors(entry, image_factor=32, scale_factor=200.0):
     # factor: image scale
     # scale_factor:veector scale
     image = loadImage(entry["filename"], image_factor)
@@ -386,20 +386,21 @@ def get_head_tail_vectors(entry, image_factor=1, scale_factor=200.0):
     
     #image = img_to_array(load_img(entry["filename"]), dtype="uint8") # load unpadded image
     #img_y, img_x = round(image.shape[0]/image_factor)+1, round(image.shape[1]/image_factor)+1
-    img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
- 
+    #img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
+    img_y, img_x = image.shape[0], image.shape[1]
+    
     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     
     # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
         # head coordinates
-        x_head = round(entry["animals"][i]["position"][0]/image_factor)
-        y_head = round(entry["animals"][i]["position"][1]/image_factor)
+        x_head = round(entry["animals"][i]["position"][0])
+        y_head = round(entry["animals"][i]["position"][1])
         
         # tail coordinates
-        x_tail = round(entry["animals"][i+1]["position"][0]/image_factor)
-        y_tail = round(entry["animals"][i+1]["position"][1]/image_factor)
+        x_tail = round(entry["animals"][i+1]["position"][0])
+        y_tail = round(entry["animals"][i+1]["position"][1])
         
         # vector pointing from head to tail
         head_dx = (x_tail - x_head)/scale_factor
@@ -620,10 +621,12 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
     plt.show()
 
 
-def showOverlappingHeatmaps(**heatmaps):
-    if heatmaps != None:
+def sumHeatmaps(heatmaps):
+    if heatmaps != None: 
+        #final_hm = np.zeros(shape=heatmaps[0].shape)    
+        final_hm = sum(heatmaps)
+        final_hm = np.clip(final_hm, 0, 1)
         
-        final_hm = np.zeros(shape=heatmaps[0].shape)    
-        final_hm = sum(heatmaps)/len(heatmaps)
-          
+        plt.imshow(final_hm[:,:,0], cmap="gray")
+        
         return final_hm

@@ -65,12 +65,14 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_head.downsample(f)
     hm_5_tail.downsample(f)
     hm_5_body.downsample(f)
-    # head_vectors = helpers.downsampleVectorField(head_vectors, f)
-    # tail_vectors = helpers.downsampleVectorField(tail_vectors, f)
-    
     
     # head and tail vectors
     head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f)
+    helpers.downsample(head_vectors, f)
+    helpers.downsample(tail_vectors, f)
+    
+    
+
     
     
     # assemble connection head-tail heatmap 
