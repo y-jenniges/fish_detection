@@ -9,7 +9,7 @@ import os
 import pickle
 import math
 import numpy as np
-from tensorflow import random
+#from tensorflow import random
 from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
@@ -17,6 +17,27 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
+from keras import backend as K
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+
+def weighted_mean_squared_error(y_true, y_pred):
+    """
+    MSE loss for heads and tail vector fields. All arrows that are not at 
+    the head or tail are ignored in this loss
+    """
+    head_weights = K.expand_dims(y_true[:,:,:,4], axis=3) # expand dimension
+    head_weights = K.repeat_elements(head_weights, 2, axis=3) # repeat factor
+
+    tail_weights = K.expand_dims(y_true[:,:,:,5], axis=3) # expand dimension
+    tail_weights = K.repeat_elements(tail_weights, 2, axis=3) # repeat factor
+
+    weighted_head_error = y_pred[:,:,:,0:2]*head_weights - y_true[:,:,:,0:2]
+    weigthed_tail_error = y_pred[:,:,:,2:4]*tail_weights - y_true[:,:,:,2:4]
+    error = K.concatenate([weighted_head_error, weigthed_tail_error], axis=2)
+    
+    return K.mean(K.square(error), axis=-1)
 
 """group: 
     0 - nothing, 
@@ -32,7 +53,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/64/"
+out_path = f"../data/output/67/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -144,7 +165,7 @@ x = ourBlock (x, "block_17")
 #x = layers.Conv2D (11, 1, padding='same', activation=Globals.activation_outLayer, name = "heatmap")(x)
 out_h = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 #out_connection = layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "connection")(x)
-out_vectors = layers.Conv2D (4, 1, padding='same', activation="linear", name = "vectors")(x)
+out_vectors = layers.Conv2D (6, 1, padding='same', activation="linear", name = "vectors")(x)
 
 # output layers
 
@@ -170,16 +191,16 @@ opt = keras.optimizers.Adam()
 #modelL = keras.Model(inputs=input, outputs=[out_h, out_connection])
 modelL = keras.Model(inputs=input, outputs=[out_h, out_vectors])
 #modelL.compile(loss=Globals.loss, optimizer=opt, metrics=Globals.metrics)
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
+modelL.compile(loss={"heatmap":"categorical_crossentropy", "vectors":weighted_mean_squared_error}, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
+      #keras.metrics.CategoricalCrossentropy(),
       #keras.metrics.TruePositives(),
       #keras.metrics.FalsePositives(),
       #keras.metrics.TrueNegatives(),
       #keras.metrics.FalseNegatives(), 
       #keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
+      # keras.metrics.Precision(),
+      # keras.metrics.Recall(),
+      # keras.metrics.AUC(),
 ], "vectors": ["mae", "acc"], 
 # ], "connection": ["mae", "acc", 
 #       keras.metrics.BinaryCrossentropy(),
@@ -215,16 +236,16 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Globals.loss, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
-      keras.metrics.CategoricalCrossentropy(),
+modelL.compile(loss={"heatmap":"categorical_crossentropy", "vectors":weighted_mean_squared_error}, optimizer=opt, metrics = {"heatmap": ["mae", "acc", 
+      #keras.metrics.CategoricalCrossentropy(),
       #keras.metrics.TruePositives(),
       #keras.metrics.FalsePositives(),
       #keras.metrics.TrueNegatives(),
       #keras.metrics.FalseNegatives(), 
       #keras.metrics.CategoricalAccuracy(),
-      keras.metrics.Precision(),
-      keras.metrics.Recall(),
-      keras.metrics.AUC(),
+      # keras.metrics.Precision(),
+      # keras.metrics.Recall(),
+      # keras.metrics.AUC(),
 ], "vectors": ["mae", "acc"]
 # , "connection": ["mae", "acc", 
 #       keras.metrics.BinaryCrossentropy(),

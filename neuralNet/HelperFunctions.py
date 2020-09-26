@@ -627,6 +627,6 @@ def sumHeatmaps(heatmaps):
         final_hm = sum(heatmaps)
         final_hm = np.clip(final_hm, 0, 1)
         
-        plt.imshow(final_hm[:,:,0], cmap="gray")
+        #plt.imshow(final_hm[:,:,0], cmap="gray")
         
         return final_hm

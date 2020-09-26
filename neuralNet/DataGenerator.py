@@ -68,16 +68,16 @@ def generateAllHeatmaps(entry, res='low'):
     
     # head and tail vectors
     head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f)
-    helpers.downsample(head_vectors, f)
-    helpers.downsample(tail_vectors, f)
+    head_vectors = helpers.downsample(head_vectors, f)
+    tail_vectors = helpers.downsample(tail_vectors, f)
     
-    
-
-    
+    # head and tail heatmaps
+    hm_heads = helpers.sumHeatmaps([hm_1_head.hm, hm_2_head.hm, hm_3_head.hm, hm_4_head.hm, hm_5_head.hm])
+    hm_tails = helpers.sumHeatmaps([hm_1_tail.hm, hm_2_tail.hm, hm_3_tail.hm, hm_4_tail.hm, hm_5_tail.hm])
     
     # assemble connection head-tail heatmap 
-    hm_body = (hm_1_body.hm + hm_2_body.hm + hm_3_body.hm + hm_4_body.hm + hm_5_body.hm)
-    hm_body = np.clip (hm_body, 0, 1, out=hm_body)
+    hm_body = helpers.sumHeatmaps([hm_1_body.hm, hm_2_body.hm, hm_3_body.hm, hm_4_body.hm, hm_5_body.hm])
+    #hm_body = np.clip (hm_body, 0, 1, out=hm_body)
     
 
     # image = helpers.loadImage(entry['filename'])
@@ -91,7 +91,7 @@ def generateAllHeatmaps(entry, res='low'):
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm + hm_body
+            hm_5_head.hm + hm_5_tail.hm #+ hm_body
     
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
     
@@ -104,7 +104,7 @@ def generateAllHeatmaps(entry, res='low'):
             hm_3_head.hm, hm_3_tail.hm,
             hm_4_head.hm, hm_4_tail.hm,
             hm_5_head.hm, hm_5_tail.hm,
-            ], [head_vectors, tail_vectors]
+            ], [head_vectors, tail_vectors, hm_heads, hm_tails]
             #hm_body
 
 def prepareEntryLowResHeatmap (entry, hm_folder=None):
