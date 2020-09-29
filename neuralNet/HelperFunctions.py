@@ -303,7 +303,7 @@ def downsample (T, factor=64):
   newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
   return T.reshape(newSh).mean(axis=(-4, -2))
 
-def show_image_with_vectors(image, vectors, vector_scale=200, filename=None):
+def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=None):
     # get directions of vectors 
     u = vectors[:,:,1]
     v = vectors[:,:,0]
@@ -318,11 +318,9 @@ def show_image_with_vectors(image, vectors, vector_scale=200, filename=None):
     if image is not None: 
         factor = image.shape[1]/vectors.shape[1]
         #image = cv2.resize(image, (vectors[:,:,0].shape[1], vectors[:,:,0].shape[0]))
-        print(image.shape)
+        #print(image.shape)
         plt.imshow(image)
-        print(factor)
-    print(ui[0].shape, ui[1].shape)
-    print(vi[0].shape, vi[1].shape)
+
     # print(uz.shape)
     # print(vz.shape)
     
@@ -363,8 +361,18 @@ def show_image_with_all_vectors(image, vectors, vector_scale=200, image_factor=3
         plt.savefig(filename, dpi=150, bbox_inches='tight')
         
     plt.show()    
-
-
+ 
+def show_image_with_vectors(image, vectors, vector_scale=200):
+    plt.imshow(image)
+    for i in range(vectors.shape[0]):
+        for j in range(vectors.shape[1]):
+            plt.quiver(j, i, 
+                        vectors[i, j,0]*vector_scale, vectors[i, j,1]*vector_scale, 
+                        color=["r"], width=1/250, 
+                        angles='xy', scale_units='xy', scale=1)   
+            
+    plt.show()
+    
 # def project_vector_field_to_shape(vectors, image_shape):
 #     new_vectors = np.zeros((image_shape[0], image_shape[1], 2), dtype=np.float32)
 #     factor_x = round(image_shape[0]/vectors.shape[0])
@@ -377,10 +385,10 @@ def show_image_with_all_vectors(image, vectors, vector_scale=200, image_factor=3
     
 #     return new_vectors
 
-def get_head_tail_vectors(entry, image_factor=32, scale_factor=200.0):
+def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample_factor=1):
     # factor: image scale
     # scale_factor:veector scale
-    image = loadImage(entry["filename"], image_factor)
+    image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
     #image = loadImage(entry['filename'], image_factor, pad=False)
     #image_pad = loadImage(entry['filename'], image_factor, pad=True)
     
@@ -395,24 +403,26 @@ def get_head_tail_vectors(entry, image_factor=32, scale_factor=200.0):
     # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
         # head coordinates
-        x_head = round(entry["animals"][i]["position"][0])
-        y_head = round(entry["animals"][i]["position"][1])
+        x_head = round(entry["animals"][i]["position"][0]/downsample_factor)
+        y_head = round(entry["animals"][i]["position"][1]/downsample_factor)
         
         # tail coordinates
-        x_tail = round(entry["animals"][i+1]["position"][0])
-        y_tail = round(entry["animals"][i+1]["position"][1])
+        x_tail = round(entry["animals"][i+1]["position"][0]/downsample_factor)
+        y_tail = round(entry["animals"][i+1]["position"][1]/downsample_factor)
+        
+        print(x_head)
         
         # vector pointing from head to tail
-        head_dx = (x_tail - x_head)/scale_factor
-        head_dy = (y_tail - y_head)/scale_factor
+        head_dx = (x_tail - x_head)/vector_scale
+        head_dy = (y_tail - y_head)/vector_scale
 
         # vector pointing from tail to head
         tail_dx = -1*head_dx
         tail_dy = -1*head_dy
         
         # add head and tail vector to vector field
-        head_vectors[round(y_head), round(x_head)] = np.array([head_dx, head_dy])
-        tail_vectors[round(y_tail), round(x_tail)] = np.array([tail_dx, tail_dy])
+        head_vectors[y_head, x_head] = np.array([head_dx, head_dy])
+        tail_vectors[y_tail, x_tail] = np.array([tail_dx, tail_dy])
         
     return head_vectors, tail_vectors
 
