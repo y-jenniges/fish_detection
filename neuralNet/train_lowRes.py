@@ -9,13 +9,13 @@ import os
 import pickle
 import math
 import numpy as np
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 from keras import backend as K
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ bodyPart:
 """
 
 # output directory
-out_path = f"../data/output/69/"
+out_path = f"../data/output/70/"
 
 # load annotation files
 #label_root = "../data/maritime_dataset/labels/"
@@ -121,7 +121,7 @@ print("DataGenerators serialized")
 # # For reference you can access the MobileNet.V2 source code at
 # # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
-def ourBlock (x, basename, channels=12):
+def ourBlock (x, basename, channels=15):
 #def ourBlock(x, basename, channels=Globals.channels):
     """Our own block of computation layers used several times in the network. It is similar to
     the block used in MobileNet.V2 but simplified. x is the layer to attach the block to,

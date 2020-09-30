@@ -385,72 +385,48 @@ def show_image_with_vectors(image, vectors, vector_scale=200):
     
 #     return new_vectors
 
-# def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample_factor=1):
-#     # factor: image scale
-#     # scale_factor:veector scale
-#     image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
-#     #image = loadImage(entry['filename'], image_factor, pad=False)
-#     #image_pad = loadImage(entry['filename'], image_factor, pad=True)
+def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0):
+    # factor: image scale
+    # scale_factor:veector scale
+    image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
+    #image = loadImage(entry['filename'], image_factor, pad=False)
+    #image_pad = loadImage(entry['filename'], image_factor, pad=True)
     
-#     #image = img_to_array(load_img(entry["filename"]), dtype="uint8") # load unpadded image
-#     #img_y, img_x = round(image.shape[0]/image_factor)+1, round(image.shape[1]/image_factor)+1
-#     #img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
-#     img_y, img_x = image.shape[0], image.shape[1]
-    
-#     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
-#     tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
-    
-#     # iterate over all animal heads
-#     for i in range(0, len(entry["animals"]), 2):
-#         # head coordinates
-#         x_head = round(entry["animals"][i]["position"][0]/downsample_factor)
-#         y_head = round(entry["animals"][i]["position"][1]/downsample_factor)
-        
-#         # tail coordinates
-#         x_tail = round(entry["animals"][i+1]["position"][0]/downsample_factor)
-#         y_tail = round(entry["animals"][i+1]["position"][1]/downsample_factor)
-        
-#         print(x_head)
-        
-#         # vector pointing from head to tail
-#         head_dx = (x_tail - x_head)/vector_scale
-#         head_dy = (y_tail - y_head)/vector_scale
-
-#         # vector pointing from tail to head
-#         tail_dx = -1*head_dx
-#         tail_dy = -1*head_dy
-        
-#         # add head and tail vector to vector field
-#         head_vectors[y_head, x_head] = np.array([head_dx, head_dy])
-#         tail_vectors[y_tail, x_tail] = np.array([tail_dx, tail_dy])
-        
-#     return head_vectors, tail_vectors
-
-def get_head_tail_vectors(entry, scale_factor=200.0):
-    image = loadImage(entry['filename'], 32)
+    #image = img_to_array(load_img(entry["filename"]), dtype="uint8") # load unpadded image
+    #img_y, img_x = round(image.shape[0]/image_factor)+1, round(image.shape[1]/image_factor)+1
+    #img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
     img_y, img_x = image.shape[0], image.shape[1]
-
+    
     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
-
+    
+    # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
+        # head coordinates
+        x_head = round(entry["animals"][i]["position"][0])
+        y_head = round(entry["animals"][i]["position"][1])
+        
+        # tail coordinates
+        x_tail = round(entry["animals"][i+1]["position"][0])
+        y_tail = round(entry["animals"][i+1]["position"][1])
+        
+        print(x_head)
+        
         # vector pointing from head to tail
-        head_dx = (entry["animals"][i+1]["position"][0] - entry["animals"][i]["position"][0])/scale_factor
-        head_dy = (entry["animals"][i+1]["position"][1] - entry["animals"][i]["position"][1])/scale_factor
+        head_dx = (x_tail - x_head)/vector_scale
+        head_dy = (y_tail - y_head)/vector_scale
 
         # vector pointing from tail to head
         tail_dx = -1*head_dx
         tail_dy = -1*head_dy
-
-        head_vectors[round(entry["animals"][i]["position"][1]), 
-                      round(entry["animals"][i]["position"][0])] \
-        = np.array([head_dx, head_dy])
-
-        tail_vectors[round(entry["animals"][i+1]["position"][1]), 
-                      round(entry["animals"][i+1]["position"][0])] \
-        = np.array([tail_dx, tail_dy])
-
+        
+        # add head and tail vector to vector field
+        head_vectors[y_head, x_head] = np.array([head_dx, head_dy])
+        tail_vectors[y_tail, x_tail] = np.array([tail_dx, tail_dy])
+        
     return head_vectors, tail_vectors
+
+
 
 # def get_head_tail_vectors(entry, scale_factor=200.0):
 #     image = loadImage(entry['filename'])

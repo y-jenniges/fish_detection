@@ -18,7 +18,6 @@ def dummyPrepareEntry (entry, hm_folder):
      to keras. At the moment the image is loaded and the output is just empty."""
     return (helpers.loadImage(entry['filename']), [])
     
-
 def generateAllHeatmaps(entry, res='low'):
    # hm_0 = HeatmapClass.Heatmap(entry, resolution=res, group=0, bodyPart="front")
     
@@ -67,7 +66,7 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_body.downsample(f)
     
     # head and tail vectors
-    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
+    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f)
     head_vectors = helpers.downsample(head_vectors, f)
     tail_vectors = helpers.downsample(tail_vectors, f)
     
