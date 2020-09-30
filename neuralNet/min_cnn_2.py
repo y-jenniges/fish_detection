@@ -18,66 +18,71 @@ import keras
 from keras.models import Sequential
 #from keras.layers import Dense, Dropout
 from keras import layers
-from tensorflow import random
+
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 
 # output directory
-out_path = "../data/output/48/"
+out_path = "../data/output/100/"
 
 label_root = "../data/maritime_dataset_25/labels/"
 
 label_path = "training_labels_animals.json"
 with open(os.path.join(label_root, label_path) , 'r') as f:
-    labels = json.load(f)
- 
-label_path = "test_labels.json"
-with open(os.path.join(label_root, label_path), 'r') as f:
-    test_labels = json.load(f)
-    
-labels = labels[:2]
- 
+    train_labels = json.load(f)
+
+label_path = "validation_labels.json"
+with open(os.path.join(label_root, label_path) , 'r') as f:
+    val_labels = json.load(f)
+  
+train_labels = train_labels[:2]
+val_labels = val_labels[:2]
 
 
-#num_classes = 2   
+
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-#jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-    
 
-test_ratio = 0.05
+train_labels = helpers.filter_labels_for_animal_group(train_labels, fish_id)
+val_labels = helpers.filter_labels_for_animal_group(val_labels, fish_id)
 
 
-# splitting data into test and train for every organism
-# FISH
-fish = helpers.filter_labels_for_animal_group(labels, fish_id)
-fish_test_length = math.ceil(test_ratio*len(fish))
-test_fish = fish[:fish_test_length]
-train_fish = fish[fish_test_length:]
+# test_ratio = 0.05
 
-# CRUSTACEA
-# crust = helpers.filter_labels_for_animal_group(labels, crust_id)
-# crust_test_length = math.ceil(test_ratio*len(crust))
-# test_crust = crust[:crust_test_length]
-# train_crust = crust[crust_test_length:]
 
-# JELLYFISH
-# jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
-# jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
-# test_jellyfish = jellyfish[:jellyfish_test_length]
-# train_jellyfish = jellyfish[jellyfish_test_length:]
+# # splitting data into test and train for every organism
+# # FISH
+# fish = helpers.filter_labels_for_animal_group(labels, fish_id)
+# fish_test_length = math.ceil(test_ratio*len(fish))
+# test_fish = fish[:fish_test_length]
+# train_fish = fish[fish_test_length:]
+
+# # CRUSTACEA
+# # crust = helpers.filter_labels_for_animal_group(labels, crust_id)
+# # crust_test_length = math.ceil(test_ratio*len(crust))
+# # test_crust = crust[:crust_test_length]
+# # train_crust = crust[crust_test_length:]
+
+# # JELLYFISH
+# # jellyfish = helpers.filter_labels_for_animal_group(labels, jellyfish_id)
+# # jellyfish_test_length = math.ceil(test_ratio*len(jellyfish))
+# # test_jellyfish = jellyfish[:jellyfish_test_length]
+# # train_jellyfish = jellyfish[jellyfish_test_length:]
 
 # sample image
-image_example = helpers.loadImage(fish[0]['filename'])
+image_example = helpers.loadImage(train_labels[0]['filename'], 32)
 plt.imshow(image_example)
 plt.show()
+print(f"Image shape {image_example.shape}")
 
-# create final test and train data
-test_labels = test_fish #+ test_crust
-train_labels = train_fish #+ train_crust
+# # create final test and train data
+# test_labels = test_fish #+ test_crust
+# train_labels = train_fish #+ train_crust
 
 def generateY(entry):
 
@@ -86,25 +91,25 @@ def generateY(entry):
     # hm = hm.hm
     
     # load image and make its range [-1,1] (suitable for mobilenet)
-    image = helpers.loadImage(entry['filename'])
+    image = helpers.loadImage(entry['filename'], 32)
     image = 2.*image/np.max(image) - 1
 
     heatmaps=[]
-    classifications=[]
+    #classifications=[]
     
       
     # idea here: fish head only
     hm = HeatmapClass.Heatmap(entry, resolution='low', group=1, bodyPart="front")
-    hm.downsample()
+    hm.downsample(32)
     
     heatmaps = hm.hm
     
         
-    return np.asarray(image), np.asarray(heatmaps), np.asarray(classifications)
+    return np.asarray(image), np.asarray(heatmaps)#, np.asarray(classifications)
 
 
 x_train = []
-x_test = []
+x_val = []
 
 heatmaps=[]
 classifications = []
@@ -120,17 +125,17 @@ y_train = np.asarray(heatmaps)
 
 heatmaps=[]
 classifications = []
-for entry in test_labels:
+for entry in val_labels:
     img, hms, cs = generateY(entry)
-    x_test.append(img)
+    x_val.append(img)
     heatmaps.append(hms)
     classifications.append(cs)
 
-y_test = np.asarray(heatmaps)
+y_val = np.asarray(heatmaps)
 #y_test = {"heatmap": heatmaps, "classification":classifications}
 
 x_train = np.asarray(x_train)
-x_test = np.asarray(x_test)
+x_val = np.asarray(x_val)
 
 
 
@@ -145,43 +150,43 @@ helpers.showImageWithHeatmap(x_train[0], y_train[0])
 model = Sequential()
 model.add(layers.Conv2D(filters=3, kernel_size=3, activation=None, use_bias=False, padding='same', input_shape=image_example.shape))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.MaxPooling2D())
 
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.MaxPooling2D())
 
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.MaxPooling2D())
 
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.MaxPooling2D())
 
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.MaxPooling2D())
 
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 model.add(layers.Conv2D (filters=8, kernel_size=3, strides=1, padding='same'))
 model.add(layers.BatchNormalization(axis=-1, epsilon=1e-3, momentum=0.999))
-model.add(layers.ReLU(6.))
+model.add(layers.ReLU())
 
 model.add(layers.Conv2D (1, 1, padding='same', activation="sigmoid", name = "heatmap"))
 
@@ -193,10 +198,10 @@ model.compile(loss='binary_crossentropy',
 model.summary()
 
 history = model.fit(x_train, y_train, 
-                    epochs=1, 
+                    epochs=50, 
                     batch_size=4, 
                     verbose=1, 
-                    validation_data=(x_test, y_test))
+                    validation_data=(x_val, y_val))
 
 
 
