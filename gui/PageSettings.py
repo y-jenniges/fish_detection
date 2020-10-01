@@ -2,59 +2,7 @@ import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from TabWidget import TabWidget
-from Helpers import TopFrame, MenuFrame, get_icon
-
-
-class TextImageItemWidget (QtWidgets.QWidget):
-    def __init__ (self, imagePath, title=None, parent = None):
-        super(TextImageItemWidget, self).__init__(parent)
-         
-        # the title is the name of the image
-        self.imagePath = imagePath
-        if title is None: 
-            self.title = os.path.basename(imagePath).split('.')[0]
-        else:
-            self.title = title
-        
-        # create the line edit to display the text
-        self.lineEdit_text = QtWidgets.QLineEdit(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_text.sizePolicy().hasHeightForWidth())
-        self.lineEdit_text.setSizePolicy(sizePolicy)
-        self.lineEdit_text.setMinimumSize(QtCore.QSize(400, 40))
-        self.lineEdit_text.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.lineEdit_text.setReadOnly(False)
-        self.setStyleSheet("background-color:transparent;")
-        self.lineEdit_text.setObjectName("lineEdit_text")
-        self.lineEdit_text.setText(self.title)
-        
-        # create the label to display the image      
-        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.imagePath))
-        self.label_image = QtWidgets.QLabel(self)
-        self.label_image.setPixmap(pixmap.scaled(QtCore.QSize(150,100), QtCore.Qt.KeepAspectRatio))      
-    
-        # a spacer between label and image
-        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-
-        # define the layout
-        horizontalLayout = QtWidgets.QHBoxLayout(self)
-        horizontalLayout.addWidget(self.lineEdit_text)
-        horizontalLayout.addItem(spacer)
-        horizontalLayout.addWidget(self.label_image)
-        
-        # connect the line edit to a slot
-        self.lineEdit_text.editingFinished.connect(self.on_lineEdit_changed)
-
-    def set_text(self, text):
-        self.lineEdit_text.setText(text)
-        self.title = text
-        
-    def on_lineEdit_changed(self):
-        self.focusNextChild() # change focus
-        self.title = self.lineEdit_text.text()
-        
+from Helpers import TopFrame, MenuFrame, getIcon, TextImageItemWidget
 
 class PageSettings(QtWidgets.QWidget):
     """ 
@@ -301,10 +249,10 @@ class PageSettings(QtWidgets.QWidget):
         self.tab_user = self.createTabUser() # tab for user settings
         
         # add tabs to tab widget
-        self.tabWidget.addTab(self.tab_camera, get_icon(":/icons/icons/camera.png"), "")
-        self.tabWidget.addTab(self.tab_neuralNet, get_icon(":/icons/icons/nn.png"), "")
-        self.tabWidget.addTab(self.tab_species, get_icon(":/icons/icons/fish.png"), "")
-        self.tabWidget.addTab(self.tab_user, get_icon(":/icons/icons/user_b.png"), "")
+        self.tabWidget.addTab(self.tab_camera, getIcon(":/icons/icons/camera.png"), "")
+        self.tabWidget.addTab(self.tab_neuralNet, getIcon(":/icons/icons/nn.png"), "")
+        self.tabWidget.addTab(self.tab_species, getIcon(":/icons/icons/fish.png"), "")
+        self.tabWidget.addTab(self.tab_user, getIcon(":/icons/icons/user_b.png"), "")
         
         # add tab widget to layout of main settings frame
         self.layout_settings_frame.addWidget(self.tabWidget)

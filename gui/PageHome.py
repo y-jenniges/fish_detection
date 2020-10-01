@@ -1,16 +1,13 @@
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Helpers import TopFrame, get_icon
-from test_new_zoom import PhotoViewer
+from Helpers import TopFrame, getIcon
+from PaintView import PhotoViewer
 
 
 class PageHome(QtWidgets.QWidget):
     """
     Class to create the home page of the software.
-    Args
-    ----------
-    widget_zoom
-        A widget that contains a slider for zooming into the photo.
+
     """
 
     def __init__(self, models, parent=None):        
@@ -32,12 +29,12 @@ class PageHome(QtWidgets.QWidget):
     def openZoomWidget(self):
         # show the zoom widget if it is not already visible
         if self.widget_zoom.isVisible():
-            self.btn_zoom.setIcon(get_icon(":/icons/icons/glass.png")) 
+            self.btn_zoom.setIcon(getIcon(":/icons/icons/glass.png")) 
             self.widget_zoom.hide()
             if self.slider_zoom.value() == 0:
                 self.photo_viewer.setArrowShortcutsActive(True)
         else:
-            self.btn_zoom.setIcon(get_icon(":/icons/icons/glass_darkBlue.png")) 
+            self.btn_zoom.setIcon(getIcon(":/icons/icons/glass_darkBlue.png")) 
             self.widget_zoom.show()
             self.placeZoomWidget()
             self.photo_viewer.setArrowShortcutsActive(False) # arrows are needed for controlling slider and navigating in zoomed-in photo
@@ -63,15 +60,15 @@ class PageHome(QtWidgets.QWidget):
     def updateAddRemoveIcons(self):
         # adapt icon of the add button
         if self.photo_viewer.imageArea.animal_painter.is_add_mode_active:
-            self.btn_add.setIcon(get_icon(":/icons/icons/plus_darkBlue.png"))
+            self.btn_add.setIcon(getIcon(":/icons/icons/plus_darkBlue.png"))
         else:
-            self.btn_add.setIcon(get_icon(":/icons/icons/plus.png"))
+            self.btn_add.setIcon(getIcon(":/icons/icons/plus.png"))
             
         # adapt icon of the renive button
         if self.photo_viewer.imageArea.animal_painter.is_remove_mode_active:
-            self.btn_delete.setIcon(get_icon(":/icons/icons/bin_open_darkBlue.png"))
+            self.btn_delete.setIcon(getIcon(":/icons/icons/bin_open_darkBlue.png"))
         else:
-            self.btn_delete.setIcon(get_icon(":/icons/icons/bin_closed.png"))        
+            self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))        
  
     def on_filter_clicked(self):
         print("Filters are not implemented yet.")

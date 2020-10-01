@@ -1,15 +1,68 @@
+import os
 from PyQt5 import QtCore, QtWidgets, QtGui
-from varname import nameof
+
 
     
 """
 Helper function to get an icon from a ressource path
 """       
-def get_icon(ressource_path):
+def getIcon(ressource_path):
     icon = QtGui.QIcon()
     icon.addPixmap(QtGui.QPixmap(ressource_path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
     
     return icon
+
+class TextImageItemWidget (QtWidgets.QWidget):
+    def __init__ (self, imagePath, title=None, parent = None):
+        super(TextImageItemWidget, self).__init__(parent)
+         
+        # the title is the name of the image
+        self.imagePath = imagePath
+        if title is None: 
+            self.title = os.path.basename(imagePath).split('.')[0]
+        else:
+            self.title = title
+        
+        # create the line edit to display the text
+        self.lineEdit_text = QtWidgets.QLineEdit(self)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_text.sizePolicy().hasHeightForWidth())
+        self.lineEdit_text.setSizePolicy(sizePolicy)
+        self.lineEdit_text.setMinimumSize(QtCore.QSize(400, 40))
+        self.lineEdit_text.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.lineEdit_text.setReadOnly(False)
+        self.setStyleSheet("background-color:transparent;")
+        self.lineEdit_text.setObjectName("lineEdit_text")
+        self.lineEdit_text.setText(self.title)
+        
+        # create the label to display the image      
+        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.imagePath))
+        self.label_image = QtWidgets.QLabel(self)
+        self.label_image.setPixmap(pixmap.scaled(QtCore.QSize(150,100), QtCore.Qt.KeepAspectRatio))      
+    
+        # a spacer between label and image
+        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+
+        # define the layout
+        horizontalLayout = QtWidgets.QHBoxLayout(self)
+        horizontalLayout.addWidget(self.lineEdit_text)
+        horizontalLayout.addItem(spacer)
+        horizontalLayout.addWidget(self.label_image)
+        
+        # connect the line edit to a slot
+        self.lineEdit_text.editingFinished.connect(self.on_lineEdit_changed)
+
+    def set_text(self, text):
+        self.lineEdit_text.setText(text)
+        self.title = text
+        
+    def on_lineEdit_changed(self):
+        self.focusNextChild() # change focus
+        self.title = self.lineEdit_text.text()
+        
+        
 
 """
 This class creates the blue frame which is at the top on every page. 
@@ -93,7 +146,7 @@ class TopFrame(QtWidgets.QFrame):
         self.btn_user.setMinimumSize(QtCore.QSize(25, 25))
         self.btn_user.setMaximumSize(QtCore.QSize(25, 25))
         self.btn_user.setText("")
-        self.btn_user.setIcon(get_icon(":/icons/icons/user_w.png"))
+        self.btn_user.setIcon(getIcon(":/icons/icons/user_w.png"))
         self.btn_user.setIconSize(QtCore.QSize(20, 20))
         self.btn_user.setObjectName("btn_user")
         horizontalLayout_34.addWidget(self.btn_user)
@@ -170,7 +223,7 @@ class MenuFrame(QtWidgets.QFrame):
         self.btn_menu.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_menu.setMaximumSize(QtCore.QSize(40, 40))
         self.btn_menu.setText("")
-        self.btn_menu.setIcon(get_icon(":/icons/icons/menu.png"))
+        self.btn_menu.setIcon(getIcon(":/icons/icons/menu.png"))
         self.btn_menu.setIconSize(QtCore.QSize(30, 30))
         self.btn_menu.setObjectName("btn_menu")
         horizontalLayout_31.addWidget(self.btn_menu)

@@ -10,7 +10,6 @@ import PageData
 #import PageHandbook
 
 
-
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
     """ Main window class for MarOMarker. """
     
@@ -545,7 +544,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
     def direct_to_about_page(self):
         #self.check_all_settings()
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(3)
         
         
     def append_main_menu_to_button(self, btn):
@@ -554,7 +553,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         menu.addAction('Home', self.direct_to_home_page)
         menu.addAction('Data', self.direct_to_data_page)
         menu.addAction('Settings', self.direct_to_settings_page)
-        menu.addAction('Handbook', self.direct_to_handbook_page)
+        #menu.addAction('Handbook', self.direct_to_handbook_page)
         menu.addAction('About', self.direct_to_about_page)
         
         # set the menu style

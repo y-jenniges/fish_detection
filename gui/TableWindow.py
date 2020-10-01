@@ -92,7 +92,6 @@ class TableWindow(QtWidgets.QMainWindow):
         # set the model of the table view
         self.tableView_original.setModel(self.models.model_animals)
         
-        # add widgets to layout
         self.layout_win_table.addWidget(self.btn_save_table)
         self.layout_win_table.addWidget(self.frame_table)
         
