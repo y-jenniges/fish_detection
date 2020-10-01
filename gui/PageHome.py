@@ -210,7 +210,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_filter.setSizePolicy(sizePolicy)
         self.btn_filter.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_filter.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_filter.setIcon(get_icon(":/icons/icons/filter.png"))
+        self.btn_filter.setIcon(getIcon(":/icons/icons/filter.png"))
         self.btn_filter.setIconSize(QtCore.QSize(30, 30))
         self.btn_filter.setObjectName("btn_filter")
         
@@ -241,7 +241,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_zoom.setSizePolicy(sizePolicy)
         self.btn_zoom.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_zoom.setMaximumSize(QtCore.QSize(40, 40))  
-        self.btn_zoom.setIcon(get_icon(":/icons/icons/glass.png"))       
+        self.btn_zoom.setIcon(getIcon(":/icons/icons/glass.png"))       
         self.btn_zoom.setIconSize(QtCore.QSize(30, 30))
         self.btn_zoom.setObjectName("btn_zoom")
         
@@ -254,7 +254,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_add.setSizePolicy(sizePolicy)
         self.btn_add.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_add.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_add.setIcon(get_icon(":/icons/icons/plus.png"))
+        self.btn_add.setIcon(getIcon(":/icons/icons/plus.png"))
         self.btn_add.setIconSize(QtCore.QSize(30, 30))
         self.btn_add.setObjectName("btn_add")
 
@@ -267,7 +267,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_previous.setSizePolicy(sizePolicy)
         self.btn_previous.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_previous.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_previous.setIcon(get_icon(":/icons/icons/arrow_left_small.png"))
+        self.btn_previous.setIcon(getIcon(":/icons/icons/arrow_left_small.png"))
         self.btn_previous.setIconSize(QtCore.QSize(30, 30))
         self.btn_previous.setObjectName("btn_previous")
         
@@ -293,7 +293,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_next.setSizePolicy(sizePolicy)
         self.btn_next.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_next.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_next.setIcon(get_icon(":/icons/icons/arrow_right_small.png"))
+        self.btn_next.setIcon(getIcon(":/icons/icons/arrow_right_small.png"))
         self.btn_next.setIconSize(QtCore.QSize(30, 30))
         self.btn_next.setObjectName("btn_next")
         
@@ -306,7 +306,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_delete.setSizePolicy(sizePolicy)
         self.btn_delete.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_delete.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_delete.setIcon(get_icon(":/icons/icons/bin_closed.png"))
+        self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))
         self.btn_delete.setIconSize(QtCore.QSize(30, 30))
         self.btn_delete.setObjectName("btn_delete")
         
@@ -319,7 +319,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_undo.setSizePolicy(sizePolicy)
         self.btn_undo.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_undo.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_undo.setIcon(get_icon(":/icons/icons/undo.png"))
+        self.btn_undo.setIcon(getIcon(":/icons/icons/undo.png"))
         self.btn_undo.setIconSize(QtCore.QSize(30, 30))
         self.btn_undo.setObjectName("btn_undo")
     
@@ -333,7 +333,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_menu.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_menu.setMaximumSize(QtCore.QSize(40, 40))
         self.btn_menu.setText("")
-        self.btn_menu.setIcon(get_icon(":/icons/icons/menu.png"))
+        self.btn_menu.setIcon(getIcon(":/icons/icons/menu.png"))
         self.btn_menu.setIconSize(QtCore.QSize(30, 30))
         self.btn_menu.setObjectName("btn_menu")      
 

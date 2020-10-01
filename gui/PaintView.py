@@ -7,7 +7,7 @@ import os
 
 from Animal import Animal, AnimalSpecificationsWidget
 from Models import AnimalGroup
-from Helpers import get_icon
+from Helpers import getIcon
 
 
 ANIMAL_LIST = []
@@ -308,7 +308,7 @@ class PhotoViewer(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(
             self.btn_previous_image.sizePolicy().hasHeightForWidth())
         self.btn_previous_image.setSizePolicy(sizePolicy)
-        self.btn_previous_image.setIcon(get_icon(":/icons/icons/arrow_left_big.png"))
+        self.btn_previous_image.setIcon(getIcon(":/icons/icons/arrow_left_big.png"))
         self.btn_previous_image.setIconSize(QtCore.QSize(20, 40))
         self.btn_previous_image.setCheckable(False)
         self.btn_previous_image.setFlat(False)
@@ -350,7 +350,7 @@ class PhotoViewer(QtWidgets.QWidget):
         
         # button for previous image
         self.btn_next_image = QtWidgets.QPushButton(frame_right)      
-        self.btn_next_image.setIcon(get_icon(
+        self.btn_next_image.setIcon(getIcon(
             ":/icons/icons/arrow_right_big.png"))
         self.btn_next_image.setIconSize(QtCore.QSize(20, 40))
         self.btn_next_image.setObjectName("btn_next_image")
@@ -359,7 +359,7 @@ class PhotoViewer(QtWidgets.QWidget):
         self.btn_openImg = QtWidgets.QPushButton(frame_right)
         self.btn_openImg.setMinimumSize(QtCore.QSize(40, 40))
         self.btn_openImg.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_openImg.setIcon(get_icon(":/icons/icons/open_image.png"))
+        self.btn_openImg.setIcon(getIcon(":/icons/icons/open_image.png"))
         self.btn_openImg.setIconSize(QtCore.QSize(30, 30))
         self.btn_openImg.setObjectName("btn_openImg")
         
