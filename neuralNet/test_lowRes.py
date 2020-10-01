@@ -13,7 +13,7 @@ import Globals
 import tensorflow as tf
 
 
-test_path = "../data/output/69/"
+test_path = "../data/output/101/"
 out_path = test_path #+ "output/"
 
 res = "-L"
@@ -59,7 +59,7 @@ modelL = tf.keras.models.load_model(os.path.join(test_path,model_path))
 # tf.keras.utils.plot_model(modelL)
 
 # load training history
-with open(os.path.join(test_path, b),'rb') as file:
+with open(os.path.join(test_path, a),'rb') as file:
     raw_data = file.read()
 history = pickle.loads(raw_data)
 
@@ -113,7 +113,7 @@ for k, v in tests.items():
     
     print(v)
     print(f"yhat shape {yHat[0].shape})")
-    print(f"yhat shape {yHat[1].shape})")
+    #print(f"yhat shape {yHat[1].shape})")
    # print(f"yhat has range {np.min(yHat), np.max(yHat)}")
     print(k)
     print()
@@ -124,14 +124,17 @@ for k, v in tests.items():
     
     # connection heatmap
     #helpers.showImageWithHeatmap(image, yHat[1][0, :, :, 0], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_connection_exag1.jpg")
-    helpers.show_image_with_non_zero_vectors(image, yHat[1][0, :, :, :2], 200*32, filename=f"{out_path}test{k}{res}_connection_heads.jpg")
-    helpers.show_image_with_non_zero_vectors(image, yHat[1][0, :, :, 2:], 200*32, filename=f"{out_path}test{k}{res}_connection_tails.jpg")
+    # helpers.show_image_with_non_zero_vectors(image, yHat[1][0, :, :, :2], 200*32, filename=f"{out_path}test{k}{res}_connection_heads.jpg")
+    # helpers.show_image_with_non_zero_vectors(image, yHat[1][0, :, :, 2:], 200*32, filename=f"{out_path}test{k}{res}_connection_tails.jpg")
     
     # #helpers.showImageWithAnnotation(entry)
-    # animal="fish"
-    # print(animal)
+    animal="fish"
+    print(animal)
     # helpers.showImageWithHeatmap(image, yHat[0][0, :, :, 1], gt=entry['animals'], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
     # helpers.showImageWithHeatmap(image, yHat[0][0, :, :, 2], gt=entry['animals'], exaggerate=1, group=1, bodyPart="back", filename=f"{out_path}test{k}{res}_{animal}_back_exag1.jpg")
+    
+    helpers.showImageWithHeatmap(image, yHat[0][:, :, 0], gt=entry['animals'], exaggerate=1, group=1, bodyPart="front", filename=f"{out_path}test{k}{res}_{animal}_front_exag1.jpg")
+
     
     # animal="crustacea"
     # print("crustacea")
@@ -220,16 +223,17 @@ for k, v in tests.items():
 # helpers.showImageWithHeatmap(np.asarray(out['image']), pred)
 # helpers.showImageWithHeatmap(np.asarray(out['image']), np.asarray(out['gt']))
 
-key = "heatmap_mae"
+key = "mae"
 
 print(f"key: {history[key]}")
 # plot mae history
 plt.plot(history[key])
 plt.plot(history[f'val_{key}'])
-plt.title(f'model{res} {key}')
-plt.ylabel(key)
+#plt.title(f'model{res} {key}')
+plt.title("Minimalistic Model Training- MAE")
+plt.ylabel(key.upper())
 plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper right')
+plt.legend(['train', 'validation'], loc='upper right')
 plt.savefig(out_path+f"{key}{res}2.png")
 plt.show()
 
@@ -237,9 +241,10 @@ print(f"Loss: {history['loss']}")
 # plot loss history
 plt.plot(history['loss'])
 plt.plot(history['val_loss'])
-plt.title(f'model{res} loss')
+#plt.title(f'model{res} loss')
+plt.title('Minimalistic Model Training - Loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper right')
+plt.legend(['train', 'validation'], loc='upper right')
 plt.savefig(out_path+f"loss{res}2.png")
 plt.show()
