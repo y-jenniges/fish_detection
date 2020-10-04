@@ -22,7 +22,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         # init data models
         self.models = Models()
-        
+
         # init UI and actions
         self.init_ui()
         self.init_actions()
@@ -40,10 +40,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
     def restorePreviousSettings(self):
         try:
+            self.models.restoreValues(self.settings)
             self.resize(self.settings.value("windowSize"))
             self.move(self.settings.value("windowPosition"))
             self.page_settings.restoreValues(self.settings)
             self.page_data.restoreValues(self.settings)
+        
         except:
             pass        
         
@@ -54,6 +56,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.settings.setValue("windowPosition", self.pos())
         self.page_settings.saveCurrentValues(self.settings)
         self.page_data.saveCurrentValues(self.settings)
+        self.models.saveCurrentValues(self.settings)
         
         # save image data
         index = self.page_home.photo_viewer.cur_image_index
@@ -291,8 +294,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 "QComboBox QAbstractItemView {\n"
 "    border: none;\n"
 "    selection-background-color: rgb(0, 203, 221);\n"
-"    background-color:white;\n"
-"}\n"
+"    background-color:white;\n}"
 "\n"
 "\n"
 "QComboBox {\n"

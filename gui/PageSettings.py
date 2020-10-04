@@ -3,6 +3,7 @@ import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from TabWidget import TabWidget
 from Helpers import TopFrame, MenuFrame, getIcon, TextImageItemWidget
+import Helpers
 
 class PageSettings(QtWidgets.QWidget):
     """ 
@@ -48,10 +49,10 @@ class PageSettings(QtWidgets.QWidget):
         self.models = models
 
         # init UI and actions on it
-        self._init_ui()
-        self._init_actions()
+        self._initUi()
+        self._initActions()
                 
-    def _init_ui(self):  
+    def _initUi(self):  
         """
         Function that initializes the UI components for the settings page.
         """             
@@ -600,7 +601,7 @@ class PageSettings(QtWidgets.QWidget):
         frame_species_options.setStyleSheet("")
         frame_species_options.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_species_options.setFrameShadow(QtWidgets.QFrame.Raised)
-        frame_species_options.setObjectName("frame_species_options") # @todo change name, wrong spelling
+        frame_species_options.setObjectName("frame_species_options")
         
         # layout of options frame
         layout_species_options = QtWidgets.QVBoxLayout(frame_species_options)
@@ -608,26 +609,15 @@ class PageSettings(QtWidgets.QWidget):
         layout_species_options.setSpacing(7)
         layout_species_options.setObjectName("layout_species_options")
         
-        # @todo replace by QtWidgets.QListView (so one can set rounded corners in styleSheet)
-        # list widget
-        self.list_species = QtWidgets.QListWidget(frame_species_options)
-        self.list_species.setIconSize(QtCore.QSize(150,100))
-        self.list_species.setSelectionMode(1)            # 1 = SingleSelection, 2 = MultiSelection, not necessary, default mode is singleSelection
-        self.list_species.setMinimumWidth(610)
-        self.list_species.setStyleSheet("QListWidget{border:none; border-radius:3px;}\n"
-                                       "QListWidget::item:hover { background: rgb(0, 203, 221, 50); }\n"
-                                       "QListWidget::item:selected { background: rgb(0, 203, 221, 100); }\n")
+        # list view       
+        self.listView_species = QtWidgets.QListView(frame_species_options)   
+        self.listView_species.setStyleSheet("QListView{background-color:white; border-radius:3px; border:none;}\n"
+                                "QListView::item:hover { background: rgb(0, 203, 221, 50); }\n"
+                                "QListView::item:selected { background: rgb(0, 203, 221, 100); color:black;}\n")
+        self.listView_species.setModel(self.models.model_species)
         
-#        self.model_species = QtGui.QStandardItemModel()
-        # self.delegate_species = TextImageItem(parent=self)
-        
-        # self.listView_species = QtWidgets.QListView(frame_species_options)   
-        # self.listView_species.setStyleSheet("QListView{background-color:white; border-radius:3px; border:none;}\n"
-        #                         "QListView::item:hover { background: rgb(0, 203, 221, 50); }\n"
-        #                         "QListView::item:selected { background: rgb(0, 203, 221, 100); color:black;}\n")
-        # self.listView_species.setModel(self.model_species)
-        # self.listView_species.setItemDelegate(self.delegate_species)
-        
+        self.delegate_species = Helpers.ListViewDelegate(None, self.listView_species)
+        self.listView_species.setItemDelegate(self.delegate_species)
         
         # add widgets to main layout
         layout.addWidget(frame_species_options, 0, 0, 1, 1)
@@ -663,8 +653,7 @@ class PageSettings(QtWidgets.QWidget):
         
         # --- content frame ------------------------------------------------- #
         # add widgets to species options frame
-#        layout_species_options.addWidget(self.listView_species)
-        layout_species_options.addWidget(self.list_species)
+        layout_species_options.addWidget(self.listView_species)
         layout_species_options.addWidget(frame_buttons)  
  
         return tab_species
@@ -757,7 +746,7 @@ class PageSettings(QtWidgets.QWidget):
         return tab_user
 
 
-    def _init_actions(self):
+    def _initActions(self):
         # camera tab      
         self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
         self.btn_load.clicked.connect(self.browse_config)
@@ -773,7 +762,7 @@ class PageSettings(QtWidgets.QWidget):
         
         # species tab
         self.btn_add_species.clicked.connect(self.browse_for_species_image)
-        self.btn_remove_species.clicked.connect(self.on_remove_item)  
+        self.btn_remove_species.clicked.connect(self.removeSpecies)  
         
         # user tab
         self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
@@ -858,68 +847,18 @@ class PageSettings(QtWidgets.QWidget):
 # --- actions in species tab ------------------------------------------------ #
     def browse_for_species_image(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
-        self.addCustomItem(filename[0])
+        self.addSpecies(filename[0])
           
-    def on_remove_item(self):
-        row = self.list_species.currentRow()
-        self.list_species.takeItem(row)
+    def removeSpecies(self):
+        row = self.listView_species.currentIndex().row()
+        self.models.removeSpecies(row)
         
-        self.on_species_changed()
-        
-    def addCustomItem(self, image_path, text=None, add_to_model=True):
-        customItem = TextImageItemWidget(image_path) # create custom item
+    def addSpecies(self, image_path, text=None):
+        # take text as title or the image name
+        if text is None:
+            text = os.path.basename(image_path).split('.')[0]
 
-        if text is not None: 
-            customItem.set_text(text) # set a custom text, else it will be the file name
-
-        item = QtWidgets.QListWidgetItem(self.list_species) # create item in list
-        item.setSizeHint(QtCore.QSize(200,110))
-
-        # add item to list
-        self.list_species.addItem(item)
-        self.list_species.setItemWidget(item, customItem)  
-        
-        if add_to_model:
-            self.on_species_changed()
-        
-        # for i in range(self.list_species.count()):
-        #     print(self.list_species.item(i))
-        
-        # a = QtGui.QStandardItem(image_path)
-        # if text is not None: 
-        #     a.set_text(text) # set a custom text, else it will be the file name
-            
-        #self.model_species.appendRow(a)
-        #self.model_species.appendRow(customItem)
-
-
-    # takes a list of dicts which has the keys "title" and "imagePath"        
-    def fillSpeciesList(self, list_input):
-        for entry in list_input:
-            self.addCustomItem(entry['imagePath'], entry['title'])
-    
-    def getTitlePathList(self):
-        items = []        
-        for i in range(self.list_species.count()):
-            item = self.list_species.item(i)
-            items.append({"title": self.list_species.itemWidget(item).title, "imagePath": self.list_species.itemWidget(item).imagePath})  
-        return items
-    
-    def on_species_changed(self):
-        # adapt data models
-        items_in_list_species = self.getTitlePathList()
-        
-        for i in range(len(items_in_list_species)):
-            existing_items = self.models.model_species.findItems(items_in_list_species[i]["title"])
-
-            # only append new item if it is not already in the list
-            if len(existing_items) == 0:
-                item = QtGui.QStandardItem(items_in_list_species[i]["title"])           
-                item.setTextAlignment(QtCore.Qt.AlignRight)
-                self.models.model_species.appendRow(item)
-
-        
-
+        self.models.addSpecies(text, image_path)
 
 # --- actions in user tab --------------------------------------------------- #  
     def user_id_changed(self):
@@ -930,12 +869,10 @@ class PageSettings(QtWidgets.QWidget):
     def saveCurrentValues(self, settings):       
         settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
         settings.setValue("nnPath", self.lineEdit_nn.text()) 
-        settings.setValue("speciesList", self.getTitlePathList())
         settings.setValue("userId", self.lineEdit_user_id.text())
-        
+
     def restoreValues(self, settings):
         self.apply_configFile(settings.value("cameraConfigPath"))
         self.apply_nnPath(settings.value("nnPath"))
-        self.fillSpeciesList(settings.value("speciesList"))
         self.lineEdit_user_id.setText(settings.value("userId"))
         

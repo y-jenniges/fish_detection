@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui
 
-
 # constants for initalizing data models
 IMAGE_REMARKS= ["", "Low turbidity", "Medium turbidity", "High turbidity", 
                 "Wrong illumination", "Without flashlight"]
@@ -64,6 +63,12 @@ class Models():
     addSpecies(species, page_settings):
         add a species to the species model and adapt the species list on the
         settings page
+    removeSpecies(row):
+        removes a row from the species model
+    saveCurrentValues(settings):
+        save some values in settings for restorage on program restart
+    restoreValues(settings):
+        restore the previously saved settings
     """
     
     def __init__ (self):  
@@ -78,12 +83,17 @@ class Models():
             item.setIcon(icon)
             self.model_group.appendRow(item)
             index += 1
-    
+
         # data model for the animal species
+        self._dict_species = [] # dict to map title and image path
         self.model_species = QtGui.QStandardItemModel()
         for species in AnimalSpecies:
+            icon = QtGui.QIcon()
             item = QtGui.QStandardItem(str(species.name.title()))
             item.setTextAlignment(QtCore.Qt.AlignRight)
+            item.setIcon(icon)
+            self._dict_species.append({"title": str(species.name.title()), 
+                                       "image_path": ""})
             self.model_species.appendRow(item)
         
         # data model for animal remarks
@@ -139,7 +149,7 @@ class Models():
                 item.setTextAlignment(QtCore.Qt.AlignRight)
                 self.model_animal_remarks.appendRow(item)
 
-    def addSpecies(self, species, page_settings):
+    def addSpecies(self, species, image_path=""):
         """
         Add a species to the species model.
 
@@ -147,17 +157,75 @@ class Models():
         ----------
         species : string
             species to add
+        image_path: string
+            path to the image showing the species. Default is ""
         """
         if species is not None and str(species) != "nan":
             same_species = self.model_species.findItems(str(species))
             
-            # add the remark if it is not already in the model
-            if len(same_species) == 0:        
-                item = QtGui.QStandardItem(str(species.title()))
+            # add species if it is not already in the model
+            if len(same_species) == 0:     
+                title = str(species)
+                item = QtGui.QStandardItem(title)
                 item.setTextAlignment(QtCore.Qt.AlignRight)
+                icon = QtGui.QIcon(image_path)
+                item.setIcon(icon)
+                self._dict_species.append({"title": title, 
+                                           "image_path": image_path})
                 self.model_species.appendRow(item)
+            else:
+                # if there are multiple entries with same title, 
+                # add the one wich has an image
+                if same_species[0].icon() is None and image_path is not None:
+                    self.removeSpecies(self.model_species.indexFromIcon(
+                        same_species[0]))
+                    self.addSpecies(species, image_path)
+                    
                 
-                page_settings.addCustomItem("", species)
+    def removeSpecies(self, row):
+        """
+        Removes a row from the species model.
+
+        Parameters
+        ----------
+        row : int
+            row to remove
+        """
+        title = self.model_species.item(row).text()
+
+        # update dictionary and model
+        self._dict_species = [i for i in self._dict_species 
+                              if not (i['title'] == title)] 
+        self.model_species.removeRow(row)
+                
+# --- functions for saving and restoring options ---------------------------- # 
+    def saveCurrentValues(self, settings):
+        """
+        Save current values, i.e. the species dictionary mapping species names
+        to their image paths.
+
+        Parameters
+        ----------
+        settings : QSettings
+            settings variable to store the values in
+        """
+        settings.setValue("dictSpecies", self._dict_species)       
+
+    def restoreValues(self, settings):
+        """
+        Restore saved values, i.e. the species dictionary mapping species names
+        to their image paths.
+
+        Parameters
+        ----------
+        settings : QSettings
+            settings variable to restore the values from
+        """
+        species = settings.value("dictSpecies")
+        if species is not None:
+            self._dict_species = species
+            for i in self._dict_species:
+                self.addSpecies(i["title"], i["image_path"])
     
     
 class TableModel(QtCore.QAbstractTableModel): 

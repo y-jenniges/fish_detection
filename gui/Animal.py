@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import AnimalGroup, AnimalSpecies
-
+import Helpers
 
 class Animal():
     """ 
@@ -302,9 +302,9 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.length = 0
         self.models = models
         
-        self.init_ui()
-        self.init_actions()
-        self.init_models()
+        self._initUi()
+        self._initActions()
+        self._initModels()
        
         # setting visuals to initial values and hiding widget
         self.updateVisuals()
@@ -315,7 +315,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.setTabOrder(self.comboBox_species, self.comboBox_remark)
         self.setTabOrder(self.comboBox_remark, self.spinBox_length)
         
-    def init_actions(self):
+    def _initActions(self):
         """ Function to connect signals and slots. """
         # connecting signals and slots
         self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
@@ -325,7 +325,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_remark.lineEdit().editingFinished.connect(self.on_remark_combobox_edited)
         self.comboBox_remark.lineEdit().returnPressed.connect(self.on_remark_combobox_return_pressed)
         
-    def init_models(self):
+    def _initModels(self):
         """ Function to set the data models on class widgets. """
         self.comboBox_group.setModel(self.models.model_group)
         self.comboBox_species.setModel(self.models.model_species)
@@ -487,7 +487,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.spinBox_length.setValue(0)
 
     
-    def init_ui(self):
+    def _initUi(self):
         self.setObjectName("animal_specs_widget")
         self.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:white;} ")
            
@@ -515,8 +515,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_group.lineEdit().setReadOnly(True)
         self.comboBox_group.lineEdit().setAlignment(QtCore.Qt.AlignRight)
         self.comboBox_group.setObjectName("comboBox_group")         
-        self.comboBox_group.setIconSize(QtCore.QSize(15, 15))
-
+        self.comboBox_group.setIconSize(QtCore.QSize(20, 20))
+        
         # combobox for animal species
         self.comboBox_species = QtWidgets.QComboBox(self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -524,12 +524,16 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBox_species.sizePolicy().hasHeightForWidth())
         self.comboBox_species.setSizePolicy(sizePolicy)
+        self.comboBox_species.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
         self.comboBox_species.setMinimumSize(QtCore.QSize(0, 40))
         self.comboBox_species.setMaximumSize(QtCore.QSize(16777215, 40))
         self.comboBox_species.setEditable(True)
         self.comboBox_species.lineEdit().setReadOnly(True)
         self.comboBox_species.lineEdit().setAlignment(QtCore.Qt.AlignRight)
         self.comboBox_species.setObjectName("comboBox_species")
+        
+        combo_delegate = Helpers.ComboboxDelegate(None, self.comboBox_species)
+        self.comboBox_species.setItemDelegate(combo_delegate)
         
         # combobox for animal remark
         self.comboBox_remark = QtWidgets.QComboBox(self)

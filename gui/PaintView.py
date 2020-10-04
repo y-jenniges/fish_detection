@@ -49,8 +49,8 @@ class PhotoViewer(QtWidgets.QWidget):
         self.loadResFile()
 
         # initalize gui and actions
-        self.init_ui()
-        self.init_actions()
+        self._initUi()
+        self._initActions()
         
         # load initial image
         if self.cur_image_index < len(self.image_list):
@@ -86,8 +86,7 @@ class PhotoViewer(QtWidgets.QWidget):
             # add species to list
             species = res_file["species"].unique()
             for spec in species:
-                self.models.addSpecies(spec, self.parent().parent().parent().\
-                                       page_settings)
+                self.models.addSpecies(spec, "")
                                
     def setResFilePath(self, text):
         self.res_file_path = text
@@ -215,23 +214,24 @@ class PhotoViewer(QtWidgets.QWidget):
     
     def on_next_image(self):
         # current file_id
-        cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
-        
-        # set current image to status "checked"
-        cur_file_indices = self.models.model_animals.data[
-            self.models.model_animals.data['file_id'] ==  cur_file_id].index
-        for idx in cur_file_indices:
-            self.models.model_animals.data.loc[idx, "status"] = "checked"
-        
-        # if there is a next image, load it
-        if self.cur_image_index < len(self.image_list) - 1:
-            # get the new image and load it
-            path = self.image_list[self.cur_image_index+1]
-            self.cur_image_index = self.cur_image_index + 1        
-            self.loadImage(path)
-        
-        # update the previous image in the csv file
-        self.exportToCsv(cur_file_id)
+        if self.cur_image_index < len(self.image_list):
+            cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
+            
+            # set current image to status "checked"
+            cur_file_indices = self.models.model_animals.data[
+                self.models.model_animals.data['file_id'] ==  cur_file_id].index
+            for idx in cur_file_indices:
+                self.models.model_animals.data.loc[idx, "status"] = "checked"
+            
+            # if there is a next image, load it
+            if self.cur_image_index < len(self.image_list) - 1:
+                # get the new image and load it
+                path = self.image_list[self.cur_image_index+1]
+                self.cur_image_index = self.cur_image_index + 1        
+                self.loadImage(path)
+            
+            # update the previous image in the csv file
+            self.exportToCsv(cur_file_id)
        
     def on_previous_image(self):
         # current file_id
@@ -258,7 +258,7 @@ class PhotoViewer(QtWidgets.QWidget):
         cur_image = self.cur_image_index
         self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
 
-    def init_actions(self):
+    def _initActions(self):
         # connect buttons
         self.btn_previous_image.clicked.connect(self.on_previous_image)
         self.btn_next_image.clicked.connect(self.on_next_image)
@@ -277,7 +277,7 @@ class PhotoViewer(QtWidgets.QWidget):
         self.shortcut_next_image.setEnabled(are_active)
               
         
-    def init_ui(self):
+    def _initUi(self):
         # --- left frame ---------------------------------------------------- # 
         # frame
         frame_left = QtWidgets.QFrame(self)
@@ -535,24 +535,27 @@ class AnimalPainter():
     
     
     def setAnimalRemark(self, remark):
-        self.cur_animal.setRemark(remark)
+        if self.cur_animal is not None:
+            self.cur_animal.setRemark(remark)
     
     def setAnimalSpecies(self, species):
-        self.cur_animal.setSpecies(species)
+        if self.cur_animal is not None:
+            self.cur_animal.setSpecies(species)
 
     def setAnimalGroup(self, group):
-        self.cur_animal.setGroup(group)
-        
-        # update drawing
-        self.cur_animal.head_item_visual.setPixmap(self.cur_animal._pixmap_head)
-        self.cur_animal.tail_item_visual.setPixmap(self.cur_animal._pixmap_tail)
-        
-        # redraw line and boundingbox visuals
-        self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
-        self.drawAnimalLine(self.cur_animal)
-        
-        self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
-        self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+        if self.cur_animal is not None:
+            self.cur_animal.setGroup(group) 
+            
+            # update drawing
+            self.cur_animal.head_item_visual.setPixmap(self.cur_animal._pixmap_head)
+            self.cur_animal.tail_item_visual.setPixmap(self.cur_animal._pixmap_tail)
+            
+            # redraw line and boundingbox visuals
+            self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
+            self.drawAnimalLine(self.cur_animal)
+            
+            self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
+            self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
      
 
     def removeAll(self):

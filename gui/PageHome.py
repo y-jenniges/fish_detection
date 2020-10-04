@@ -87,6 +87,8 @@ class PageHome(QtWidgets.QWidget):
             if len(existing_items) == 0:
                 item = QtGui.QStandardItem(list_species[i]["title"])           
                 item.setTextAlignment(QtCore.Qt.AlignRight)
+                # icon = QtGui.QIcon(list_species[i]["imagePath"])
+                # item.setIcon(icon)
                 self.models.model_species.appendRow(item)
 
     def init_ui(self):

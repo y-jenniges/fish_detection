@@ -12,6 +12,151 @@ def getIcon(ressource_path):
     
     return icon
 
+class ListViewDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, parent, listview):
+        QtWidgets.QItemDelegate.__init__(self, parent)
+        self.listview = listview
+        self.item_height = 150
+
+    def paint(self, painter, option, index):
+        if index:
+            icon_height = self.item_height - 20
+            model = self.listview.model()
+            
+            # get icon and text of current entry
+            item = model.itemFromIndex(index)
+            data = index.model().data(index, QtCore.Qt.UserRole)
+
+            icon = item.icon()
+            text = item.text()
+
+            if text != "Unidentified":
+                painter.save()
+                
+                # set background color
+                painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+                if option.state & QtWidgets.QStyle.State_Selected:
+                    painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 203, 221)))
+                elif option.state & QtWidgets.QStyle.State_MouseOver:
+                    painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 203, 221, 60)))
+                else:
+                    painter.setBrush(QtGui.QBrush(QtCore.Qt.white))
+                painter.drawRect(option.rect)
+                
+                # rect for icon and text
+                rect = option.rect
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0, 0)))
+                #painter.setRenderHint(QtGui.QPainter.Antialiasing)
+                middle = (rect.bottom() - rect.top()) / 2
+                
+                # icon position is slightly offset from borders of rect
+                pos_icon = QtCore.QPoint(rect.left()+10, rect.top())
+                
+                # adjust the rect, such that text is drawn vertically centered 
+                rect.adjust(0, middle-10, -10, 0)
+                painter.drawRect(rect)
+    
+                # set pen and font
+                pen = QtGui.QPen()
+                pen.setColor(QtCore.Qt.black)
+                painter.setPen(pen)
+                painter.setFont(QtGui.QFont("Century Gothic", 12))
+               
+                # draw icon (as pixmap) and text
+                painter.drawText(rect, QtCore.Qt.AlignRight, text)
+                
+                pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # keep resolution large
+                pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), QtCore.Qt.KeepAspectRatioByExpanding)
+                offset = (self.item_height - pixmap.height())/2
+                painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
+                
+                painter.restore()
+
+        else:
+            QtGui.QItemDelegate.paint(self, painter, option, index)
+
+        painter.restore()
+    
+    def sizeHint(self, option, index):
+        s = QtWidgets.QStyledItemDelegate.sizeHint(self, option, index)
+        
+        if index.data() == "Unidentified":
+            s.setHeight(0)
+        else:
+            s.setHeight(self.item_height)
+        return s
+
+class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, parent, combobox):
+        QtWidgets.QItemDelegate.__init__(self, parent)
+        self.combobox = combobox
+        self.item_height = 150
+
+    def paint(self, painter, option, index):
+        if index:
+            icon_height = self.item_height - 20
+            model = self.combobox.model()
+            
+            # get icon and text of current entry
+            item = model.itemFromIndex(index)
+            data = index.model().data(index, QtCore.Qt.UserRole)
+
+            icon = item.icon()
+            text = item.text()
+
+            painter.save()
+            
+            # set background color
+            painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+            if option.state & QtWidgets.QStyle.State_Selected:
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 203, 221)))
+            elif option.state & QtWidgets.QStyle.State_MouseOver:
+                painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 203, 221, 60)))
+            else:
+                painter.setBrush(QtGui.QBrush(QtCore.Qt.white))
+            painter.drawRect(option.rect)
+            
+            painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0, 0)))
+            
+            # rect for icon and text
+            rect = option.rect
+            middle = (rect.bottom() - rect.top()) / 2
+            
+            # icon position is slightly offset from borders of rect
+            pos_icon = QtCore.QPoint(rect.left()+5, rect.top())
+            
+            # adjust the rect, such that text is drawn vertically centered 
+            rect.adjust(0, middle-10, -10, 0)
+            painter.drawRect(rect)
+
+            # set pen and font
+            pen = QtGui.QPen()
+            pen.setColor(QtCore.Qt.black)
+            painter.setPen(pen)
+            painter.setFont(QtGui.QFont("Century Gothic", 10))
+           
+            # draw icon (as pixmap) and text
+            painter.drawText(rect, QtCore.Qt.AlignRight, "  " + text)
+            
+            pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # keep resolution large
+            #pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), QtCore.Qt.KeepAspectRatioByExpanding)
+            #pixmap = icon.pixmap(QtCore.QSize(200, 200))
+            pixmap = pixmap.scaled(QtCore.QSize(140, 140), QtCore.Qt.KeepAspectRatio)
+            offset = (self.item_height - pixmap.height())/2
+            painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
+            
+            painter.restore()
+
+        else:
+            QtGui.QItemDelegate.paint(self, painter, option, index)
+
+        painter.restore()
+    
+    def sizeHint(self, option, index):
+        s = QtWidgets.QStyledItemDelegate.sizeHint(self, option, index)
+        s.setHeight(self.item_height)
+        return s
+        
 class TextImageItemWidget (QtWidgets.QWidget):
     def __init__ (self, imagePath, title=None, parent = None):
         super(TextImageItemWidget, self).__init__(parent)
