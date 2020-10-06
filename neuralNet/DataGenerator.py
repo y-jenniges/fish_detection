@@ -13,6 +13,7 @@ OPTION = "fish_heads"
 # "all_animals"
 # "body_segmentation"
 # "vector_fields" 
+# "vector_fields_weighted"
 
 def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -69,11 +70,14 @@ def generateAllHeatmaps(entry, res='low'):
     tail_vectors = helpers.downsample(tail_vectors, f)
     
     # head and tail heatmaps
-    hm_heads = helpers.sumHeatmaps([hm_1_head.hm, hm_2_head.hm, hm_3_head.hm, hm_4_head.hm, hm_5_head.hm])
-    hm_tails = helpers.sumHeatmaps([hm_1_tail.hm, hm_2_tail.hm, hm_3_tail.hm, hm_4_tail.hm, hm_5_tail.hm])
+    hm_heads = helpers.sumHeatmaps([hm_1_head.hm, hm_2_head.hm, hm_3_head.hm, 
+                                    hm_4_head.hm, hm_5_head.hm])
+    hm_tails = helpers.sumHeatmaps([hm_1_tail.hm, hm_2_tail.hm, hm_3_tail.hm, 
+                                    hm_4_tail.hm, hm_5_tail.hm])
     
-    # assemble connection head-tail heatmap 
-    hm_body = helpers.sumHeatmaps([hm_1_body.hm, hm_2_body.hm, hm_3_body.hm, hm_4_body.hm, hm_5_body.hm])
+    # assemble body heatmap by adding all separate body heatmaps
+    hm_body = helpers.sumHeatmaps([hm_1_body.hm, hm_2_body.hm, 
+                                   hm_3_body.hm, hm_4_body.hm, hm_5_body.hm])
     
     # nothing heatmap
     hm_y, hm_x = hm_1_head.hm.shape[0], hm_1_head.hm.shape[1]
@@ -82,18 +86,43 @@ def generateAllHeatmaps(entry, res='low'):
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm + hm_body
+            hm_5_head.hm + hm_5_tail.hm #+ hm_body @todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
     
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
-    return [hm_0, 
+    if OPTION == "all_animals":
+        return [hm_0, 
             hm_1_head.hm, hm_1_tail.hm, 
             hm_2_head.hm, hm_2_tail.hm,
             hm_3_head.hm, hm_3_tail.hm,
             hm_4_head.hm, hm_4_tail.hm,
-            hm_5_head.hm, hm_5_tail.hm,
-            ], [head_vectors, tail_vectors]#, hm_heads, hm_tails]
-            #hm_body
+            hm_5_head.hm, hm_5_tail.hm]
+    elif OPTION == "body_segmentation":
+        return [hm_0, 
+                hm_1_head.hm, hm_1_tail.hm, 
+                hm_2_head.hm, hm_2_tail.hm,
+                hm_3_head.hm, hm_3_tail.hm,
+                hm_4_head.hm, hm_4_tail.hm,
+                hm_5_head.hm, hm_5_tail.hm,
+                ], hm_body
+    elif OPTION == "vector_fields":
+        return [hm_0, 
+                hm_1_head.hm, hm_1_tail.hm, 
+                hm_2_head.hm, hm_2_tail.hm,
+                hm_3_head.hm, hm_3_tail.hm,
+                hm_4_head.hm, hm_4_tail.hm,
+                hm_5_head.hm, hm_5_tail.hm,
+                ], [head_vectors, tail_vectors]
+    elif OPTION == "vector_fields_weighted":
+        return [hm_0, 
+                hm_1_head.hm, hm_1_tail.hm, 
+                hm_2_head.hm, hm_2_tail.hm,
+                hm_3_head.hm, hm_3_tail.hm,
+                hm_4_head.hm, hm_4_tail.hm,
+                hm_5_head.hm, hm_5_tail.hm,
+                ], [head_vectors, tail_vectors, hm_heads, hm_tails]
+    else:
+        return
 
 def generateFishHeadHeatmaps(entry, res="low"):
     # generate heatmap
@@ -125,7 +154,8 @@ def prepareEntryHeatmap (entry, res="low"):
     
     elif OPTION == "all_animals":
         heatmaps = generateAllHeatmaps(entry, res=res) # @todo adapt
-        return 
+        heatmaps = np.concatenate(heatmaps, axis=2) # concat heatmaps
+        return np.asarray(image), np.asarray(heatmaps)
         
     elif OPTION == "body_segmentation":
         heatmaps, hm_body = generateAllHeatmaps(entry, res=res)# @todo adapt
@@ -134,7 +164,7 @@ def prepareEntryHeatmap (entry, res="low"):
         
         return np.asarray(image), np.asarray(heatmaps), np.asarray(hm_body)
     
-    elif OPTION == "vector_fields":
+    elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
         heatmaps, vectors = generateAllHeatmaps(entry, res=res)# @todo adapt
 
         # concatenate heatmaps, vectors
@@ -142,7 +172,6 @@ def prepareEntryHeatmap (entry, res="low"):
         vectors = np.concatenate(vectors, axis=2)
         
         return np.asarray(image), np.asarray(heatmaps), np.asarray(vectors)
-    
     else:
         print("Error: unknown option in data generator in prepareEntry!")
         return 
@@ -294,7 +323,7 @@ class DataGenerator(keras.utils.Sequence):
         
         elif OPTION == "all_animals":
             heatmaps = np.array([e[1] for e in batch])
-            return X, heatmaps # @todo adapt
+            return X, heatmaps 
             
         elif OPTION == "body_segmentation":
             heatmaps = np.array([e[1] for e in batch])
