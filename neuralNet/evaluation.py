@@ -6,6 +6,13 @@ import keras
 import HelperFunctions as helpers
 import HeatmapClass
 import DataGenerator as dg
+#from tensorflow import random
+from tensorflow import set_random_seed
+
+# fix random seeds of numpy and tensorflow for reproducability
+np.random.seed(0)
+#random.set_seed(2)
+set_random_seed(2)
 
 BATCH_SIZE = 4
 
