@@ -1,3 +1,6 @@
+"""
+Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 2019
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import HelperFunctions as helpers
@@ -8,14 +11,14 @@ import Globals
 
 # This class stores a heatmap and performs the calculations
 class Heatmap():
-    def __init__(self, entry, resolution='low', group = 1, bodyPart = 'front'):
+    def __init__(self, entry, resolution="low", group = 1, bodyPart = "front"):
         
         assert bodyPart == "front" or bodyPart == "back" or bodyPart == "both" or bodyPart=="connection" #or bodyPart=="vectors"
         assert group in range(Globals.NUM_GROUPS)
         
-        self.imagePath = entry['filename']
+        self.imagePath = entry["filename"]
         self.image = helpers.loadImage(self.imagePath, 32)
-        self.gt = entry['animals']
+        self.gt = entry["animals"]
         self.group = group
         self.bodyPart = bodyPart
             
@@ -31,30 +34,6 @@ class Heatmap():
             self.annotationToVectorField()
         else:
             self.annotationToHeatmap()
-
-    # def annotationToVectorField(self, scale_factor=200):
-    #     hm_y, hm_x = self.image.shape[0], self.image.shape[1]
-    #     head_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
-    #     tail_vectors = np.zeros((hm_y, hm_x, 2), dtype=np.float32)
-        
-    #     for i in range(0, len(self.gt["animals"]), 2):
-    #         # vector pointing from head to tail
-    #         head_dx = (self.gt["animals"][i+1]["position"][0] - self.gt["animals"][i]["position"][0])/scale_factor
-    #         head_dy = (self.gt["animals"][i+1]["position"][1] - self.gt["animals"][i]["position"][1])/scale_factor
-            
-    #         # vector pointing from tail to head
-    #         tail_dx = -1*head_dx
-    #         tail_dy = -1*head_dy
-            
-    #         head_vectors[round(self.gt["animals"][i]["position"][1]), 
-    #                      round(self.gt["animals"][i]["position"][0])] \
-    #         = np.array([head_dx, head_dy])
-            
-    #         tail_vectors[round(self.gt["animals"][i+1]["position"][1]), 
-    #                      round(self.gt["animals"][i+1]["position"][0])] \
-    #         = np.array([tail_dx, tail_dy])
-        
-    #     return head_vectors, tail_vectors
 
     def annotationToConnectionHm(self):
         """ Converts a list of heads and tails, which are 2D coordinates, 
@@ -85,7 +64,7 @@ class Heatmap():
                 tails.append([animal['position'][0], animal['position'][1]])
         
         # iterate over animals        
-        for i in range(len(heads)):      
+        for i in range(len(heads)):    
             # calculate slope and intercept of the line connecting head and tail of the animal
             deltaY = heads[i][1] - tails[i][1]
             deltaX = heads[i][0] - tails[i][0]
@@ -98,13 +77,16 @@ class Heatmap():
             b = heads[i][1] - m*heads[i][0]
             
             # calculate the y-values of the line
-            x = np.array(range(int(heads[i][0]), int(tails[i][0]+1)))
+            xmax = max(int(heads[i][0]), int(tails[i][0]+1))
+            xmin = min(int(heads[i][0]), int(tails[i][0]+1))
+            
+            x = np.array(range(xmin, xmax))
             y = m*x + b
 
             # for every point on the line, add a gaussian to the heatmap
             for j in range(len(x)-1):
                 if 0 <= x[j] < self.hm.shape[1] and 0 <= y[j] < self.hm.shape[0]: 
-                    self.addToHeatmap (self.gaussian, x[j]-self.gaussian.shape[1]//2, y[j]-self.gaussian.shape[0]//2)
+                    self.addToHeatmap(self.gaussian, x[j]-self.gaussian.shape[1]//2, y[j]-self.gaussian.shape[0]//2)
           
         # clip the heatmap to range [0, 1]
         np.clip (self.hm, 0, 1, out=self.hm)
@@ -139,93 +121,6 @@ class Heatmap():
                     self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
                 
         np.clip (self.hm, 0, 1, out=self.hm)
-     
-    # def annotationToLowResHeatmap (self):   
-    #     self.annotationToHm()
-        
-    # def annotationToHighResHeatmap (self):   
-    #     self.annotationToHm()
-        
-    # def annotationToLowResHeatmap (self):
-    #     """Converts a list of points (each a dict with 'x' and 'y' component) into 
-    #      a heatmap with 1/32 of image resolution. A 1 is bilinearly distributed
-    #      among the 4 heatmap pixels close to the annotated strawberry. This means,
-    #      if the annotated strawberry is in the center of a heatmap pixel, this
-    #      pixel gets increased by 1, if it is on the border between two pixel
-    #      both get increased by 0.5 ,if it is on the corner between four pixel
-    #      each gets increased by 0.25."""
-    #     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
-    #     bodyPart: 'front' or 'back'"""
-
-    #     #print("annotation to low res hm")
-
-    #     hm_y, hm_x = self.image.shape[0]//32, self.image.shape[1]//32
-    #     self.hm = np.zeros ((hm_y, hm_x, 1), dtype=np.float32)
-         
-    #     group_array = np.zeros(Globals.channels)
-    #     if self.bodyPart=='front':
-    #         group_array[self.group*2-1] = 1 
-    #     elif self.bodyPart=='back':
-    #         group_array[self.group*2] = 1 
-    #     else:
-    #         print("annotationToLowResHeatmap: invalid bodyPart")
-   
-        
-    #     for animal in self.gt:
-    #         # only receive animals from group that is currently active in class
-    #         if np.array_equal(animal['group'], group_array):
-    #             #print(animal['group'])
-    #             x, y = [animal['position'][0], animal['position'][1]]
-    #             #print(x)
-    #             hmx, alphaX = helpers.interpolate ((x-16)/32) # increase hmx by alpha, and hmx+1 by 1-alpha
-    #             hmy, alphaY = helpers.interpolate ((y-16)/32) # increase hmy by alpha, and hmy+1 by 1-alpha
-    
-
-    #             if 0 <= hmx < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
-    #                 self.hm[hmy, hmx, 0] += alphaX*alphaY
-    
-    #             if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy < self.hm.shape[0]: 
-    #                 self.hm[hmy, hmx + 1, 0] += (1-alphaX)*alphaY
-    
-    #             if 0 <= hmx < self.hm.shape[1] and 0 <= hmy + 1 < self.hm.shape[0]: 
-    #                 self.hm[hmy + 1, hmx, 0] += alphaX*(1-alphaY)
-    
-    #             if 0 <= hmx + 1 < self.hm.shape[1] and 0 <= hmy+ + 1 < self.hm.shape[0]: 
-    #                 self.hm[hmy + 1, hmx + 1, 0] += (1-alphaX)*(1-alphaY)
-       
-    #     np.clip (self.hm, 0, 1, out=self.hm)
-        #return self.hm
-    
-   
-    # def annotationToHighResHeatmap (self):
-    #     """Converts a list of points (each a dict with 'x' and 'y' component) into 
-    #      a heatmap with original image resolution using myGaussian. For every 
-    #      strawberry, the Gaussian myGaussian (peak 1) centered at the 
-    #      annotated strawberry point is added."""
-    #     """group: 0 - nothing, 1 - fish, 2 - crustacea, 3- chaetognatha, 4 - unidentified_object, 5 - jellyfish
-    #     bodyPart: 'front' or 'back'"""
-
-    #     self.hm = np.zeros ((self.image.shape[0], self.image.shape[1], 1), dtype=np.float32)
-    #     self.gaussian = helpers.gaussian(8,50)
-
-    #     group_array = np.zeros(Globals.channels)
-    #     if self.bodyPart=='front':
-    #         group_array[self.group*2-1] = 1 
-    #     elif self.bodyPart=='back':
-    #         group_array[self.group*2] = 1 
-    #     elif self.bodyPart=='both':
-    #         print("annotation to high res heatmap: invalid bodyPart")
-            
-    #     for animal in self.gt:
-    #         if np.array_equal(animal['group'], group_array):
-    #             x = animal['position'][0]
-    #             y = animal['position'][1]
-    
-    #             if 0<=x <self.hm.shape[1] and 0<=y<self.hm.shape[0]: 
-    #                 self.addToHeatmap (self.gaussian, x-self.gaussian.shape[1]//2, y-self.gaussian.shape[0]//2)
-    
-    #     np.clip (self.hm, 0, 1, out=self.hm)    
-  
 
     def addToHeatmap (self, block, x, y):
         """Adds block to hm[y:y+block.shape[0],x:x+block.shape[1]] and 
@@ -298,9 +193,8 @@ class Heatmap():
             hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
             hmResized = np.clip (hmResized*2, 0, 1)
             
-            # todo adapt abdunkel factor
             if img.dtype =="uint8":
-                img = img + (128*exaggerate*hmResized).astype(np.uint8)
+                img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
             else:
                 img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
         plt.imshow(img)
