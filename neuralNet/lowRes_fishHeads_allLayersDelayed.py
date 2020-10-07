@@ -168,5 +168,8 @@ modelL.save(f"{out_path}model-L")
 with open(f"{out_path}trainHistory-L1.pickle", 'wb') as file:
     pickle.dump(history_1.history, file)
     
+with open(f"{out_path}trainHistory-L2.pickle", 'wb') as file:
+    pickle.dump(history_2.history, file)
+    
 modelL.save_weights(f"{out_path}weights-L.h5") # saves weights
 
