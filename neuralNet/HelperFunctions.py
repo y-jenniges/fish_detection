@@ -348,28 +348,22 @@ def show_image_with_vectors(image, vectors, vector_scale=200):
             
     plt.show()
     
-# def project_vector_field_to_shape(vectors, image_shape):
-#     new_vectors = np.zeros((image_shape[0], image_shape[1], 2), dtype=np.float32)
-#     factor_x = round(image_shape[0]/vectors.shape[0])
-#     factor_y = round(image_shape[1]/vectors.shape[1])
+# def downsample_vector_field(vectors, factor=32):
+#     new_vectors = np.zeros((vectors.shape[0]//32, vectors.shape[1]//32, 2), dtype=np.float32)
+#     #factor_x = round(image_shape[0]/vectors.shape[0])
+#     #factor_y = round(image_shape[1]/vectors.shape[1])
 #     print(new_vectors.shape)
     
 #     for i in range(vectors.shape[0]):
 #         for j in range(vectors.shape[1]):
-#             new_vectors[round(i*factor_x), round(j*factor_y)] = vectors[i, j]
+#             new_vectors[round(i*factor), round(j*factor)] = vectors[i, j]
     
 #     return new_vectors
 
-def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0):
+def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample_factor=1):
     # factor: image scale
     # scale_factor:veector scale
-    image = loadImage(entry["filename"], image_factor)
-    #image = loadImage(entry['filename'], image_factor, pad=False)
-    #image_pad = loadImage(entry['filename'], image_factor, pad=True)
-    
-    #image = img_to_array(load_img(entry["filename"]), dtype="uint8") # load unpadded image
-    #img_y, img_x = round(image.shape[0]/image_factor)+1, round(image.shape[1]/image_factor)+1
-    #img_y, img_x = round(image.shape[0]/image_factor), round(image.shape[1]/image_factor)
+    image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
     img_y, img_x = image.shape[0], image.shape[1]
     
     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
@@ -378,14 +372,12 @@ def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0):
     # iterate over all animal heads
     for i in range(0, len(entry["animals"]), 2):
         # head coordinates
-        x_head = round(entry["animals"][i]["position"][0])
-        y_head = round(entry["animals"][i]["position"][1])
+        x_head = round(entry["animals"][i]["position"][0]/downsample_factor)
+        y_head = round(entry["animals"][i]["position"][1]/downsample_factor)
         
         # tail coordinates
-        x_tail = round(entry["animals"][i+1]["position"][0])
-        y_tail = round(entry["animals"][i+1]["position"][1])
-        
-        print(x_head)
+        x_tail = round(entry["animals"][i+1]["position"][0]/downsample_factor)
+        y_tail = round(entry["animals"][i+1]["position"][1]/downsample_factor)
         
         # vector pointing from head to tail
         head_dx = (x_tail - x_head)/vector_scale

@@ -71,5 +71,5 @@ print("test loss, test acc:", results)
 # x_test = np.asarray(x_test)
 
 # print("Evaluate on test data")
-# results = model.evaluate(x_test, y_test, batch_size=4, verbose=1)
+# results = model.evaluate(x_test, y_test, batch_size=BATCH_SIZE, verbose=1)
 # print("test loss, test mae:", results)

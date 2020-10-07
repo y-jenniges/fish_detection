@@ -9,7 +9,8 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "fish_heads"
+OPTION = "vector_fields" 
+# "fish_heads"
 # "all_animals"
 # "body_segmentation"
 # "vector_fields" 
@@ -65,9 +66,9 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_body.downsample(f)
     
     # head and tail vectors
-    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f)
-    head_vectors = helpers.downsample(head_vectors, f)
-    tail_vectors = helpers.downsample(tail_vectors, f)
+    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f, 200, f)
+    # head_vectors = np.array(helpers.downsample(head_vectors, f))
+    # tail_vectors = np.array(helpers.downsample(tail_vectors, f))    
     
     # head and tail heatmaps
     hm_heads = helpers.sumHeatmaps([hm_1_head.hm, hm_2_head.hm, hm_3_head.hm, 
@@ -165,7 +166,7 @@ def prepareEntryHeatmap (entry, res="low"):
         return np.asarray(image), np.asarray(heatmaps), np.asarray(hm_body)
     
     elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
-        heatmaps, vectors = generateAllHeatmaps(entry, res=res)# @todo adapt
+        heatmaps, vectors = generateAllHeatmaps(entry, res=res)
 
         # concatenate heatmaps, vectors
         heatmaps = np.concatenate(heatmaps, axis=2)
@@ -243,12 +244,20 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     #print(y['classification'].shape)
    #print(f"len of y: {len(y)} and shape of y[0]: {y[0].shape}")
     
-    #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['vectors'] has shape {y['vectors'].shape}")
+    
     
     #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['connection'] has shape {y['connection'].shape}")
     #print(f"classification is {y['classification']}")
     print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
-    print(f"Y has shape {y.shape}")
+    
+    if OPTION == "fish_heads" or OPTION == "all_animals":
+        print(f"Y has shape {y.shape}")
+    elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
+        print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['vectors'] has shape {y['vectors'].shape}")
+    elif OPTION == "body_segmentation":
+        print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['segmentation'] has shape {y['segmentation'].shape}")
+
+    
 
     # todo how to i know the resolution
     #if showHeatmaps:
