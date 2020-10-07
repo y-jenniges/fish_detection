@@ -7,15 +7,15 @@ import pickle
 import numpy as np
 import keras
 from keras import layers
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 import DataGenerator as dg
 import HelperFunctions as helpers
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 
 """group: 
@@ -46,9 +46,6 @@ fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 train_labels = helpers.filter_labels_for_animal_group(train_labels, fish_id)
 val_labels = helpers.filter_labels_for_animal_group(val_labels, fish_id)
-
-train_labels= train_labels[:4]
-val_labels = val_labels[:4]
 
 # image path
 data_root = "../data/maritime_dataset_25/"
