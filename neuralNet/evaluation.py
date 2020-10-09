@@ -35,11 +35,12 @@ model = keras.models.load_model(os.path.join(test_path,model_path))
 
 testGen = dg.DataGenerator (dataset=test_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
-                            batch_size=BATCH_SIZE)
+                            batch_size=BATCH_SIZE,
+                            shuffle=False)
 
 # evaluate on test data
 print("Evaluate on test data")
-results = model.evaluate_generator(testGen, len(test_labels)//BATCH_SIZE)
+results = model.evaluate_generator(testGen)#)#, len(test_labels)//BATCH_SIZE)
 print("test loss, test acc:", results)
 
 # # minimalistic CNN
