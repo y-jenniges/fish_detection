@@ -26,7 +26,21 @@ path = "test_labels.json"
 with open(os.path.join(label_root, path), 'r') as f:
     test_labels = json.load(f)
     
-test_labels = helpers.filter_labels_for_animal_group(test_labels)
+
+fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+fish_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
+
+crust_id = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+crust_labels = helpers.filter_labels_for_animal_group(test_labels, crust_id)
+
+chaetognatha_id = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+chaeto_labels = helpers.filter_labels_for_animal_group(test_labels, chaetognatha_id)
+
+unidentified_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]  
+unidentified_labels = helpers.filter_labels_for_animal_group(test_labels, unidentified_id)
+
+jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish_id)
 
 #test_labels[:4]
     
