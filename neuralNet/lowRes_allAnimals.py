@@ -12,13 +12,13 @@ import os
 import pickle
 import math
 import numpy as np
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -34,22 +34,26 @@ bodyPart:
 """
 # constants
 BATCH_SIZE = 2
-EPOCHS_1 = 10
-EPOCHS_2 = 50
+EPOCHS_1 = 1
+EPOCHS_2 = 1
 USE_CLASSWEIGHTS = True
 
 # output directory
-out_path = "../data/output/601/"
+out_path = "../data/output/700/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
+#train_labels = train_labels[:4]
+#val_labels = val_labels[:4]
+
 # disable classweights if desired
 if not USE_CLASSWEIGHTS: 
     class_weights = {0: 1, 1:1, 2:1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10:1}
+sample_weight = np.array(list(class_weights.values()))
 
-print(f"class weights {class_weights}")
+print(f"class weights {sample_weight}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -61,17 +65,22 @@ trainGenL = dg.DataGenerator (dataset=train_labels,
                               no_animal_dataset=train_labels_no_animals,
                               no_animal_ratio=0,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
-                              batch_size=BATCH_SIZE)
+                              batch_size=BATCH_SIZE, 
+                              weights=sample_weight)
 
 valGenL = dg.DataGenerator (dataset=val_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
-                            batch_size=BATCH_SIZE)
+                            batch_size=BATCH_SIZE, 
+                            weights=sample_weight)
 
 print("DataGenerators initialized")
 
 # show entries of generators
 dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
 dg.showEntryOfGenerator (valGenL, 0, False)
+
+
+
 
 
 # # Now construct the low-res net and store it into the variable model
@@ -142,7 +151,8 @@ start  = time.time()
 history_1 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_1, 
                                  validation_data=valGenL, 
-                                 class_weight=class_weights
+                                 #sample_weight=sample_weight,
+                                 #class_weight=class_weights
                                  )
 
 # activate all layers for training
@@ -157,7 +167,8 @@ modelL.compile(loss="categorical_crossentropy",
 history_2 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_2, 
                                  validation_data=valGenL, 
-                                 class_weight=class_weights
+                                 #sample_weight=sample_weight,
+                                 #class_weight=class_weights
                                  )
 
 # print the time used for training

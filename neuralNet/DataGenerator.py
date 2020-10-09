@@ -9,7 +9,7 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "vector_fields_weighted" 
+OPTION = "vector_fields" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -268,7 +268,7 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
+    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True, weights=None):
         #print("DataGenerator: init")
         'Initialization'
         
@@ -279,6 +279,7 @@ class DataGenerator(keras.utils.Sequence):
         self.prepareEntry = prepareEntry
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.weights = weights
                        
         self.no_animal_size = (int)(batch_size*no_animal_ratio)     
         self.animal_size = batch_size - self.no_animal_size
@@ -318,7 +319,7 @@ class DataGenerator(keras.utils.Sequence):
         
         elif OPTION == "all_animals":
             heatmaps = np.array([e[1] for e in batch])
-            return X, heatmaps 
+            return X, heatmaps, self.weights
             
         elif OPTION == "body_segmentation":
             heatmaps = np.array([e[1] for e in batch])
@@ -328,7 +329,7 @@ class DataGenerator(keras.utils.Sequence):
         elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
             heatmaps = np.array([e[1] for e in batch])
             vectors = np.array([e[2] for e in batch])
-            return X, {"heatmap": heatmaps, "vectors": vectors}
+            return X, {"heatmap": heatmaps, "vectors": vectors} #, {"heatmap": self.weights, "vectors": np.array([1,1,1,1])} would that work?
         
         else:
             print("Error: unknown option in data generator, get_item!")
