@@ -33,20 +33,23 @@ bodyPart:
     'both'
 """
 # constants
-BATCH_SIZE = 4
+BATCH_SIZE = 2
 EPOCHS_1 = 10
 EPOCHS_2 = 50
-USE_CLASSWEIGHTS = False
+USE_CLASSWEIGHTS = True
 
 # output directory
-out_path = "../data/output/600/"
+out_path = "../data/output/601/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
 # disable classweights if desired
-if not USE_CLASSWEIGHTS: class_weights = None
+if not USE_CLASSWEIGHTS: 
+    class_weights = {0: 1, 1:1, 2:1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10:1}
+
+print(f"class weights {class_weights}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -139,7 +142,8 @@ start  = time.time()
 history_1 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_1, 
                                  validation_data=valGenL, 
-                                 class_weight=class_weights)
+                                 class_weight=class_weights
+                                 )
 
 # activate all layers for training
 for l in modelL.layers:
@@ -153,7 +157,8 @@ modelL.compile(loss="categorical_crossentropy",
 history_2 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_2, 
                                  validation_data=valGenL, 
-                                 class_weight=class_weights)
+                                 class_weight=class_weights
+                                 )
 
 # print the time used for training
 print(f"Training took {time.time() - start}")
