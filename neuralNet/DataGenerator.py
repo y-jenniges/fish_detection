@@ -9,7 +9,7 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "vector_fields" 
+OPTION = "vector_fields_weighted" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -233,21 +233,7 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     # print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
     #print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(y):.3f}..{np.max(y):.3f}] and entropy [{eLo:.7f}..{eHi:.7f}]")
     
-    # print(type(y))
-    # print("laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    
-    # print(y[0]['classification'].shape)
-    # print(y[1]['classification'].shape)
-    # print(y[2]['classification'].shape)
-    # print(y[3]['classification'].shape)
-    #print(y['heatmap'].shape)
-    #print(y['classification'].shape)
-   #print(f"len of y: {len(y)} and shape of y[0]: {y[0].shape}")
-    
-    
-    
-    #print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['connection'] has shape {y['connection'].shape}")
-    #print(f"classification is {y['classification']}")
+
     print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
     
     if OPTION == "fish_heads" or OPTION == "all_animals":
@@ -339,31 +325,14 @@ class DataGenerator(keras.utils.Sequence):
             hm_body = np.array([e[2] for e in batch])
             return X, {"heatmap": heatmaps, "connection": hm_body}# @todo adapt
         
-        elif OPTION == "vector_fields":
+        elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
             heatmaps = np.array([e[1] for e in batch])
             vectors = np.array([e[2] for e in batch])
-            return X, {"heatmap": heatmaps, "vectors": vectors}# @todo adapt
+            return X, {"heatmap": heatmaps, "vectors": vectors}
         
         else:
             print("Error: unknown option in data generator, get_item!")
             return 
-        # X = np.array([e[0] for e in batch])
-        # heatmaps = np.array([e[1] for e in batch])
-        # #hm_body = np.array([e[2] for e in batch])
-        # vectors = np.array([e[2] for e in batch])
-        
-        # #classification = np.array([e[2] for e in batch])
-        # #y = {'heatmap': np.array([e[1] for e in batch]), 'classification': np.array([e[2] for e in batch])}
-        
-        # #print(f"y[heatmap] shape {np.array(y['heatmap']).shape}")
-
-        # #print(f"heatmaps shape {np.asarray(heatmaps).shape}")
-        # #print(f"heatmaps[0] shape {np.asarray(heatmaps[0]).shape}")
-
-        # return X, {"heatmap":heatmaps, "vectors": vectors}
-        # #return X, {"heatmap":heatmaps, "connection":hm_body}#heatmaps#{"heatmap": heatmaps, "classification": classification}
-        # #return X, [heatmaps, classification]
-        # #return X, heatmaps
         
     def get_ground_truth (self, index):
         #print("DataGenerator: get_ground_truth")
@@ -377,8 +346,9 @@ class DataGenerator(keras.utils.Sequence):
     def on_epoch_end(self):
         #print("DataGenerator: on_epoch_end")
         'Updates indexes after each epoch'
-        random.shuffle(self.dataset)
-        random.shuffle(self.no_animal_dataset)
+        if self.shuffle:
+            random.shuffle(self.dataset)
+            random.shuffle(self.no_animal_dataset)
 
 		
 	
