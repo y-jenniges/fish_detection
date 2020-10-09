@@ -54,7 +54,7 @@ testGen = dg.DataGenerator (dataset=test_labels,
 
 # evaluate on test data
 print("Evaluate on test data")
-results = model.evaluate_generator(testGen)#)#, len(test_labels)//BATCH_SIZE)
+results = model.evaluate_generator(testGen, verbose=1)#)#, len(test_labels)//BATCH_SIZE)
 print("test loss, test acc:", results)
 
 # # minimalistic CNN
