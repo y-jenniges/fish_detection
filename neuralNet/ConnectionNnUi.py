@@ -75,18 +75,31 @@ def findCoordinates(heatmap):
     thr = applyThresholdToHm(heatmap, 50)
     coordinates = nonMaxSuppression(thr, 20)
     
-    # remove coordinates whose x and y are closer than 5px
+    # remove coordinates whose x and y are closer than 10px
     df = pd.DataFrame(coordinates)
     df = df.sort_values(0, ignore_index=True)
     
-    final_coords = []
-    final_coords.append(df.iloc[0])  
-    for i in range(1, len(df)):
-        if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 5 \
-        or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 5:
-             final_coords.append(df.iloc[i])  
-             
-    final_coords = pd.DataFrame(final_coords).to_numpy()
+    # final_coords = []
+    # final_coords.append(df.iloc[0])  
+
+    # for i in range(1, len(df)):
+    #     if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 10 \
+    #     or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 10:
+    #          final_coords.append(df.iloc[i])  
+    
+    final_coords = df.copy() 
+    
+    for i in range(len(df)):
+        for j in range(i, len(df)):
+            if abs(df.iloc[i][0] - df.iloc[j][0]) < 10 \
+            and abs(df.iloc[i][1] - df.iloc[j][1]) < 10 \
+            and i != j and j in final_coords.index:
+                print(i,j)
+                final_coords.drop(j, inplace=True)  
+                
+    final_coords = pd.DataFrame(final_coords).drop_duplicates()
+    
+    final_coords = final_coords.to_numpy()
     
     return final_coords
 
@@ -175,22 +188,47 @@ gt_tails = np.array([np.array(animal["position"]) for animal in gt["animals"] if
 
 
 matches = []
+
+heads = gt_heads.copy()
 tails = gt_tails.copy()
-for head in coordinates:
+
+ht_distances = []
+# calculate distance from every head to every tail
+for head in heads:
     if len(tails) > 0:
-        head_point = np.array([head[1], head[0]])
-        tail = findTail(head_point, tails)
-        #tails = np.array([x for x in tails if not np.array_equal(x, tail)])
-        print(tails)
-        matches.append([head_point, tail])
+        deltay = abs(np.array(tails)[:,0] - head[1])
+        deltax = abs(np.array(tails)[:,1] - head[0])
     
+        weighted_delta = weightedDistanceSquared(deltay, deltax)
+
+        ht_distances.append(weighted_delta)
+        
+argmin_list = [np.argmin(x) for x in ht_distances]
+
+# check if there are duplicates
+if len(argmin_list) != len(set(argmin_list)):
+    # find duplicates
+    
+    #here:8
+    i = 8
+    i = 0, 1, 3, 4, 5, 6
+    ht_distances[i]
+
+
 matches = np.array(matches)
 
-# # plot all matches
-# plt.imshow(heads, cmap=plt.cm.gray)
-# #plt.autoscale(False)
-# plt.scatter(matches[:,:,0], matches[:,:,1])
-# plt.show()
+
+# matches = []
+# tails = gt_tails.copy()
+# for head in coordinates:
+#     if len(tails) > 0:
+#         head_point = np.array([head[1], head[0]])
+#         tail = findTail(head_point, tails)
+#         #tails = np.array([x for x in tails if not np.array_equal(x, tail)])
+#         print(tails)
+#         matches.append([head_point, tail])
+    
+# matches = np.array(matches)
 
 
 # show groundtruth
