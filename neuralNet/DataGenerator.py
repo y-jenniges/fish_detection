@@ -9,7 +9,7 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "vector_fields" 
+OPTION = "all_animals" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -225,6 +225,7 @@ def prepareEntryHighResHeatmap (entry):
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch, prints dataformat statistics and 
     shows the first entry both as image X and annotation y."""    
+
     X, y = dataGen[i]
     
     # eLo = helpers.entropy(y)
@@ -268,7 +269,7 @@ class DataGenerator(keras.utils.Sequence):
     a tensor.
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
-    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True, weights=None):
+    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
         #print("DataGenerator: init")
         'Initialization'
         
@@ -279,7 +280,6 @@ class DataGenerator(keras.utils.Sequence):
         self.prepareEntry = prepareEntry
         self.batch_size = batch_size
         self.shuffle = shuffle
-        self.weights = weights
                        
         self.no_animal_size = (int)(batch_size*no_animal_ratio)     
         self.animal_size = batch_size - self.no_animal_size
@@ -312,6 +312,7 @@ class DataGenerator(keras.utils.Sequence):
         
         X = np.array([e[0] for e in batch])
         
+        
         # get y depending on option
         if OPTION == "fish_heads":
             heatmaps = np.array([e[1] for e in batch])
@@ -319,7 +320,7 @@ class DataGenerator(keras.utils.Sequence):
         
         elif OPTION == "all_animals":
             heatmaps = np.array([e[1] for e in batch])
-            return X, heatmaps, self.weights
+            return X, heatmaps
             
         elif OPTION == "body_segmentation":
             heatmaps = np.array([e[1] for e in batch])

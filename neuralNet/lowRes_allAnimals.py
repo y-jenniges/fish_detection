@@ -6,19 +6,20 @@ import HelperFunctions as helpers
 import Globals
 import keras
 from keras import layers
+from keras import backend as K
 import time
 import json
 import os
 import pickle
 import math
 import numpy as np
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -34,26 +35,58 @@ bodyPart:
 """
 # constants
 BATCH_SIZE = 2
-EPOCHS_1 = 1
-EPOCHS_2 = 1
+EPOCHS_1 = 10
+EPOCHS_2 = 50
 USE_CLASSWEIGHTS = True
 
 # output directory
 out_path = "../data/output/700/"
 
+
+def weighted_categorical_crossentropy(weights):
+    """
+    A weighted version of keras.objectives.categorical_crossentropy
+    
+    Variables:
+        weights: numpy array of shape (C,) where C is the number of classes
+    
+    Usage:
+        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the normal weights, class 3 10x.
+        loss = weighted_categorical_crossentropy(weights)
+        model.compile(loss=loss,optimizer='adam')
+    Taken from:
+        https://gist.github.com/wassname/ce364fddfc8a025bfab4348cf5de852d
+    """
+    
+    weights = K.variable(weights)
+        
+    def loss(y_true, y_pred):
+        # scale predictions so that the class probas of each sample sum to 1
+        y_pred /= K.sum(y_pred, axis=-1, keepdims=True)
+        # clip to prevent NaN's and Inf's
+        y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
+        # calc
+        loss = y_true * K.log(y_pred) * weights
+        loss = -K.sum(loss, -1)
+        return loss
+    
+    return loss
+
+
+
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
-#train_labels = train_labels[:4]
-#val_labels = val_labels[:4]
+train_labels = train_labels[:4]
+val_labels = val_labels[:4]
 
 # disable classweights if desired
 if not USE_CLASSWEIGHTS: 
     class_weights = {0: 1, 1:1, 2:1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10:1}
-sample_weight = np.array(list(class_weights.values()))
+weights = np.array(list(class_weights.values()))
 
-print(f"class weights {sample_weight}")
+print(f"class weights {weights}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -66,12 +99,12 @@ trainGenL = dg.DataGenerator (dataset=train_labels,
                               no_animal_ratio=0,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
                               batch_size=BATCH_SIZE, 
-                              weights=sample_weight)
+                              )
 
 valGenL = dg.DataGenerator (dataset=val_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
                             batch_size=BATCH_SIZE, 
-                            weights=sample_weight)
+                            )
 
 print("DataGenerators initialized")
 
@@ -138,9 +171,10 @@ x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap"
 
 # define and compile model
 modelL = keras.Model(inputs=input, outputs=x)
-modelL.compile(loss="categorical_crossentropy", 
+modelL.compile(loss=weighted_categorical_crossentropy(weights), 
                optimizer=keras.optimizers.Adam(), 
-               metrics=["mae", "acc"])
+               metrics=["mae", "acc"], 
+               )
 
 modelL.summary()
 
@@ -151,8 +185,6 @@ start  = time.time()
 history_1 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_1, 
                                  validation_data=valGenL, 
-                                 #sample_weight=sample_weight,
-                                 #class_weight=class_weights
                                  )
 
 # activate all layers for training
@@ -160,15 +192,14 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss="categorical_crossentropy", 
+modelL.compile(loss=weighted_categorical_crossentropy(weights), 
                optimizer=keras.optimizers.Adam(), 
-               metrics=["mae", "acc"])
+               metrics=["mae", "acc"], 
+               )
 
 history_2 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_2, 
                                  validation_data=valGenL, 
-                                 #sample_weight=sample_weight,
-                                 #class_weight=class_weights
                                  )
 
 # print the time used for training
