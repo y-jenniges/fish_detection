@@ -8,6 +8,7 @@ import HeatmapClass
 import DataGenerator as dg
 #from tensorflow import random
 from tensorflow import set_random_seed
+from keras import backend as K
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
@@ -18,6 +19,36 @@ BATCH_SIZE = 4
 
 test_path = "../data/output/200/"
 model_path = "model-L"
+
+
+def weighted_categorical_crossentropy(weights):
+    """
+    A weighted version of keras.objectives.categorical_crossentropy
+    
+    Variables:
+        weights: numpy array of shape (C,) where C is the number of classes
+    
+    Usage:
+        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the normal weights, class 3 10x.
+        loss = weighted_categorical_crossentropy(weights)
+        model.compile(loss=loss,optimizer='adam')
+    Taken from:
+        https://gist.github.com/wassname/ce364fddfc8a025bfab4348cf5de852d
+    """
+    
+    weights = K.variable(weights)
+        
+    def loss(y_true, y_pred):
+        # scale predictions so that the class probas of each sample sum to 1
+        y_pred /= K.sum(y_pred, axis=-1, keepdims=True)
+        # clip to prevent NaN's and Inf's
+        y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
+        # calc
+        loss = y_true * K.log(y_pred) * weights
+        loss = -K.sum(loss, -1)
+        return loss
+    
+    return loss
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
@@ -45,7 +76,8 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
 #test_labels[:4]
     
 # load model
-model = keras.models.load_model(os.path.join(test_path,model_path))
+#model = keras.models.load_model(os.path.join(test_path,model_path))
+model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"weighted_categorical_crossentropy": weighted_categorical_crossentropy})
 
 testGen = dg.DataGenerator (dataset=test_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
