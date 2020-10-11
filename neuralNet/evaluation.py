@@ -6,18 +6,18 @@ import keras
 import HelperFunctions as helpers
 import HeatmapClass
 import DataGenerator as dg
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 from keras import backend as K
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 
-test_path = "../data/output/200/"
+test_path = "../data/output/700/"
 model_path = "model-L"
 
 
@@ -57,6 +57,8 @@ path = "test_labels.json"
 with open(os.path.join(label_root, path), 'r') as f:
     test_labels = json.load(f)
     
+test, train, train_no, val, cv = helpers.loadAndSplitLabels(label_root)
+weights = np.array(list(cv.values()))
 
 fish_id = [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 fish_labels = helpers.filter_labels_for_animal_group(test_labels, fish_id)
@@ -77,7 +79,9 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
     
 # load model
 #model = keras.models.load_model(os.path.join(test_path,model_path))
-model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"weighted_categorical_crossentropy": weighted_categorical_crossentropy})
+model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"loss": weighted_categorical_crossentropy(weights)})
+
+
 
 testGen = dg.DataGenerator (dataset=test_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
