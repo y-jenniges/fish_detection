@@ -2,6 +2,7 @@
 Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 
 University Bremen, 2019
 """
+import Losses
 import DataGenerator as dg
 import HelperFunctions as helpers
 import keras
@@ -125,7 +126,7 @@ x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap"
 
 # define and compile model
 modelL = keras.Model(inputs=input, outputs=x)
-modelL.compile(loss="categorical_crossentropy", 
+modelL.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"], 
                )
@@ -146,7 +147,7 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss="categorical_crossentropy", 
+modelL.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"], 
                )

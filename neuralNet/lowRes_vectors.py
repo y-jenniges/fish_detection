@@ -1,16 +1,15 @@
 """
-Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 2019
+Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 
+University Bremen, 2019
 """
+import Losses
 import DataGenerator as dg
 import HelperFunctions as helpers
-import Globals
 import keras
 from keras import layers
 import time
-import json
 import os
 import pickle
-import math
 import numpy as np
 from tensorflow import random
 #from tensorflow import set_random_seed
@@ -36,20 +35,16 @@ bodyPart:
 BATCH_SIZE = 2
 EPOCHS_1 = 10
 EPOCHS_2 = 50
-USE_CLASSWEIGHTS = False # set to True if class weights are desired
 
 # output directory
-out_path = "../data/output/75/"
+out_path = "../data/output/1100/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
-# disable classweights if desired
-if not USE_CLASSWEIGHTS: 
-    class_weights = {0: 1, 1:1, 2:1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10:1}
-sample_weight = np.array(list(class_weights.values()))
-print(f"sample weights {sample_weight}")
+weights = np.array(list(class_weights.values()))
+print(f"sample weights {weights}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -62,12 +57,12 @@ trainGenL = dg.DataGenerator (dataset=train_labels,
                               no_animal_ratio=0,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
                               batch_size=BATCH_SIZE,
-                              weights=sample_weight)
+                              )
 
 valGenL = dg.DataGenerator (dataset=val_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
                             batch_size=BATCH_SIZE,
-                            weights=sample_weight)
+                            )
 
 print("DataGenerators initialized")
 
@@ -138,7 +133,8 @@ out_v = layers.Conv2D(4, 1, padding='same', activation="linear", name = "vectors
 
 # define and compile model
 modelL = keras.Model(inputs=input, outputs=[out_h, out_v])
-modelL.compile(loss={"heatmap": "categorical_crossentropy", "vectors": "mse"}, 
+modelL.compile(loss={"heatmap": Losses.weighted_categorical_crossentropy(weights), 
+                     "vectors": "mse"}, 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"])
 
@@ -151,7 +147,6 @@ start  = time.time()
 history_1 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_1, 
                                  validation_data=valGenL, 
-                                 #class_weight=class_weights
                                  )
 
 # activate all layers for training
@@ -159,14 +154,14 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss={"heatmap": "categorical_crossentropy", "vectors": "mse"}, 
+modelL.compile(loss={"heatmap": Losses.weighted_categorical_crossentropy(weights), 
+                     "vectors": "mse"}, 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"])
 
 history_2 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_2, 
                                  validation_data=valGenL, 
-                                 #class_weight=class_weights
                                  )
 
 # print the time used for training

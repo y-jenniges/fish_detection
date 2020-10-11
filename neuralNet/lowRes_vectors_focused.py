@@ -2,6 +2,7 @@
 Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 
 University Bremen, 2019
 """
+import Losses
 import DataGenerator as dg
 import HelperFunctions as helpers
 import keras
@@ -10,13 +11,13 @@ import time
 import os
 import pickle
 import numpy as np
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
 """group: 
     0 - nothing, 
@@ -36,15 +37,14 @@ EPOCHS_1 = 10
 EPOCHS_2 = 50
 
 # output directory
-out_path = "../data/output/700/"
+out_path = "../data/output/1200/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
 weights = np.array(list(class_weights.values()))
-
-print(f"class weights {weights}")
+print(f"sample weights {weights}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -56,12 +56,12 @@ trainGenL = dg.DataGenerator (dataset=train_labels,
                               no_animal_dataset=train_labels_no_animals,
                               no_animal_ratio=0,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
-                              batch_size=BATCH_SIZE, 
+                              batch_size=BATCH_SIZE,
                               )
 
 valGenL = dg.DataGenerator (dataset=val_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
-                            batch_size=BATCH_SIZE, 
+                            batch_size=BATCH_SIZE,
                             )
 
 print("DataGenerators initialized")
@@ -69,6 +69,7 @@ print("DataGenerators initialized")
 # show entries of generators
 dg.showEntryOfGenerator (trainGenL, 0, showHeatmaps=False)
 dg.showEntryOfGenerator (valGenL, 0, False)
+
 
 # # Now construct the low-res net and store it into the variable model
 # # Loading of MobileNet.V2 will give a warning "`input_shape` is undefined or non-square, or `rows` is not in [96, 128, 160, 192, 224]. Weights for input shape (224, 224) will be loaded as the default."
@@ -80,7 +81,7 @@ dg.showEntryOfGenerator (valGenL, 0, False)
 # # For reference you can access the MobileNet.V2 source code at
 # # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
-def ourBlock (x, basename, channels=11):
+def ourBlock (x, basename, channels=15):
 #def ourBlock(x, basename, channels=Globals.channels):
     """Our own block of computation layers used several times in the network. It is similar to
     the block used in MobileNet.V2 but simplified. x is the layer to attach the block to,
@@ -107,7 +108,11 @@ def ourBlock (x, basename, channels=11):
 alpha = 1.0
 input = keras.layers.Input(shape=imageShape)
 
-backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, input_tensor=input, include_top=False, weights='imagenet', pooling=None)
+backbone = keras.applications.mobilenet_v2.MobileNetV2(alpha=alpha, 
+                                                       input_tensor=input, 
+                                                       include_top=False, 
+                                                       weights='imagenet', 
+                                                       pooling=None)
 
 # freeze backbone
 for l in backbone.layers:
@@ -120,15 +125,18 @@ x = backbone.get_layer("block_16_project_BN").output
 # computational block á la MobileNet.V2
 x = ourBlock (x, "block_17")
 
-# final output layer with softmax, because heatmap is within 0..1
-x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
+# final heatmap output layer with softmax, because heatmap is within 0..1
+out_h = layers.Conv2D(11, 1, padding='same', activation="softmax", name = "heatmap")(x)
+
+# vector output layer
+out_v = layers.Conv2D(4, 1, padding='same', activation="linear", name = "vectors")(x)
 
 # define and compile model
-modelL = keras.Model(inputs=input, outputs=x)
-modelL.compile(loss="categorical_crossentropy", 
+modelL = keras.Model(inputs=input, outputs=[out_h, out_v])
+modelL.compile(loss={"heatmap": Losses.weighted_categorical_crossentropy(weights), 
+                     "vectors": Losses.weighted_mean_squared_error}, 
                optimizer=keras.optimizers.Adam(), 
-               metrics=["mae", "acc"], 
-               )
+               metrics=["mae", "acc"])
 
 modelL.summary()
 
@@ -146,10 +154,10 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss="categorical_crossentropy", 
+modelL.compile(loss={"heatmap": Losses.weighted_categorical_crossentropy(weights), 
+                     "vectors": Losses.weighted_mean_squared_error}, 
                optimizer=keras.optimizers.Adam(), 
-               metrics=["mae", "acc"], 
-               )
+               metrics=["mae", "acc"])
 
 history_2 = modelL.fit_generator(generator=trainGenL, 
                                  epochs=EPOCHS_2, 
@@ -167,6 +175,6 @@ modelL.save_weights(f"{out_path}weights-L.h5") # saves weights
 
 with open(f"{out_path}trainHistory-L1.pickle", 'wb') as file:
     pickle.dump(history_1.history, file)
-    
+
 with open(f"{out_path}trainHistory-L2.pickle", 'wb') as file:
-    pickle.dump(history_2.history, file)  
+    pickle.dump(history_2.history, file)
