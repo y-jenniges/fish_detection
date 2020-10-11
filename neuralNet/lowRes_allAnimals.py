@@ -2,16 +2,16 @@
 Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 
 University Bremen, 2019
 """
-import DataGenerator as dg
-import HelperFunctions as helpers
-import keras
-from keras import layers
 import time
 import os
 import pickle
 import numpy as np
+import keras
+from keras import layers
 #from tensorflow import random
 from tensorflow import set_random_seed
+import DataGenerator as dg
+import HelperFunctions as helpers
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
