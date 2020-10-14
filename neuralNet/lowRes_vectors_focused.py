@@ -8,16 +8,16 @@ import pickle
 import numpy as np
 import keras
 from keras import layers
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 import Losses
 import DataGenerator as dg
 import HelperFunctions as helpers
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 """group: 
     0 - nothing, 
