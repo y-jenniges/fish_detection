@@ -66,7 +66,7 @@ def generateAllHeatmaps(entry, res='low'):
     hm_5_body.downsample(f)
     
     # head and tail vectors
-    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, f, 200, f)
+    head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, 32, 200, f)
     # head_vectors = np.array(helpers.downsample(head_vectors, f))
     # tail_vectors = np.array(helpers.downsample(tail_vectors, f))    
     
