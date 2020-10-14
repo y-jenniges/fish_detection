@@ -117,19 +117,19 @@ def shapeOfFilename(fname, downsample_factor=2, image_factor=64):
     imageShape = downsample(loadImage(fname, image_factor),downsample_factor)
     return imageShape.shape
 
-# todo head and tail are switched!!
-def showImageWithAnnotation(entry):
-    "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
-    image = loadImage(entry['filename'])
-    plt.imshow(image)
-    x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
-    y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
+# # todo head and tail are switched!!
+# def showImageWithAnnotation(entry):
+#     "Shows image with filename entry[0] and annotated crosses entry[1] (list of dict with 'x', 'y')"
+#     image = loadImage(entry['filename'])
+#     plt.imshow(image)
+#     x_front = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2==0]   # the even group entries encode the front of an animal
+#     y_front = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2==0]   
     
-    x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
-    y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
-    plt.scatter (x_front, y_front, marker="o", c="w")
-    plt.scatter (x_back, y_back, marker="x", c="b")
-    plt.show()
+#     x_back = [animal["position"][0] for animal in entry['animals'] if animal['group'].index(1)%2!=0]    # the odd group entries encode the back of an animal
+#     y_back = [animal["position"][1] for animal in entry['animals'] if animal['group'].index(1)%2!=0]
+#     plt.scatter (x_front, y_front, marker="o", c="w")
+#     plt.scatter (x_back, y_back, marker="x", c="b")
+#     plt.show()
 
 def entropy(x):
     '''Returns the average entropy of the probability distributions in x. The last axis of x
@@ -298,6 +298,7 @@ def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=
 
     # print(uz.shape)
     # print(vz.shape)
+    plt.axis("off")
     
     if vz.shape == uz.shape:
         # display non-zero vectors
@@ -311,7 +312,7 @@ def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=
         
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')
-        
+    
     plt.show()
     
 def show_image_with_all_vectors(image, vectors, vector_scale=200, image_factor=32, filename=None):
@@ -365,6 +366,7 @@ def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample
     # scale_factor:veector scale
     image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
     img_y, img_x = image.shape[0], image.shape[1]
+    print(image.shape)
     
     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
@@ -387,6 +389,9 @@ def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample
         tail_dx = -1*head_dx
         tail_dy = -1*head_dy
         
+        print(y_head, x_head)
+        print(y_tail, x_tail)
+        print()
         # add head and tail vector to vector field
         head_vectors[y_head, x_head] = np.array([head_dx, head_dy])
         tail_vectors[y_tail, x_tail] = np.array([tail_dx, tail_dy])
@@ -501,7 +506,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         else:
             img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)
-    
+    #plt.axis("off")
     
     if gt is not None:            
         group_array = np.zeros(Globals.channels)

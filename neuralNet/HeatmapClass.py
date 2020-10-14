@@ -198,7 +198,7 @@ class Heatmap():
             else:
                 img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
         plt.imshow(img)
-        
+        #plt.axis("off")
         
         #print(f"body part is {self.bodyPart}")
         if self.gt is not None:    
