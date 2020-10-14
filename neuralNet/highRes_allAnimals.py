@@ -33,12 +33,12 @@ bodyPart:
 """
 # constants
 BATCH_SIZE = 2
-EPOCHS_1 = 10
-EPOCHS_2 = 50
-EPOCHS_3 = 20
+EPOCHS_1 = 1
+EPOCHS_2 = 1
+EPOCHS_3 = 1
 
 # output directory
-out_path = "../data/output/900/"
+out_path = "../data/output/800/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
@@ -46,6 +46,8 @@ test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = 
 
 weights = np.array(list(class_weights.values()))
 
+train_labels = train_labels[:2]
+val_labels = val_labels[:2]
 
 print(f"class weights {weights}")
 
@@ -141,7 +143,7 @@ x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap"
 
 # define and compile model
 modelL = keras.Model(inputs=input, outputs=x)
-modelL.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
+modelL.compile(loss="categorical_crossentropy", 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"], 
                )
@@ -162,7 +164,7 @@ for l in modelL.layers:
     l.trainable = True
     
 # compile and fit model again
-modelL.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
+modelL.compile(loss="categorical_crossentropy", 
                optimizer=keras.optimizers.Adam(), 
                metrics=["mae", "acc"], 
                )
@@ -207,7 +209,7 @@ x = ourBlock (x, 'block_22')
 x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 
 modelH = keras.Model(inputs=input, outputs=x)
-modelH.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
+modelH.compile(loss="categorical_crossentropy", 
                optimizer=keras.optimizers.Adam(), 
                metrics = {"heatmap": ["mae", "acc"]})
 
