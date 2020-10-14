@@ -9,6 +9,9 @@ import tensorflow as tf
 from skimage.feature import peak_local_max
 from skimage.transform import resize
 import matplotlib.cm as cm
+import HelperFunctions as helpers
+#from scipy.spatial.distance import cdist
+from scipy.optimize import linear_sum_assignment
 
 def loadNn(path):
     if os.path.isfile(path):
@@ -16,7 +19,7 @@ def loadNn(path):
     else:
         return None
 
-def loadImage(fname, factor=64):
+def loadImage(fname, factor=32, rescale_range=True):
     "Loads an image as a h*w*3 numpy array in [-1, 1]"
 
     img = img_to_array(load_img(fname), dtype="uint8")
@@ -27,7 +30,6 @@ def loadImage(fname, factor=64):
     if img.shape[0] > 2500:
         img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
 
-    print(f"image before {img.shape}")
     rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
     if rest_x != 0:
         img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
@@ -36,9 +38,10 @@ def loadImage(fname, factor=64):
         img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
                      constant_values=0)
        
-    # image needs to be in [-1,1]
-    img = np.asarray(img)
-    img = 2.*img/np.max(img) - 1
+    if rescale_range:
+        # image needs to be in [-1,1]
+        img = np.asarray(img)
+        img = 2.*img/np.max(img) - 1
     print(f"image after {img.shape}")
     return img
 
@@ -79,14 +82,7 @@ def findCoordinates(heatmap):
     df = pd.DataFrame(coordinates)
     df = df.sort_values(0, ignore_index=True)
     
-    # final_coords = []
-    # final_coords.append(df.iloc[0])  
 
-    # for i in range(1, len(df)):
-    #     if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 10 \
-    #     or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 10:
-    #          final_coords.append(df.iloc[i])  
-    
     final_coords = df.copy() 
     
     for i in range(len(df)):
@@ -97,14 +93,42 @@ def findCoordinates(heatmap):
                 print(i,j)
                 final_coords.drop(j, inplace=True)  
                 
+    # drop duplicates
     final_coords = pd.DataFrame(final_coords).drop_duplicates()
+    
+    # switch x and y
+    final_coords = final_coords.reindex(columns=[1,0])
     
     final_coords = final_coords.to_numpy()
     
     return final_coords
 
-def matchHeadsAndTails():
-    pass
+def weightedEuclidean(x, y):
+    a = 0.54 # put more weight on x-error
+    b = 0.46 
+    return np.sqrt(a*x*x + b*y*y)
+
+
+def findHeadTailMatches(heads, tails):
+    ht_distances = []
+    
+    # calculate distance from every head to every tail
+    for i in range(len(heads)):
+        if len(tails) > 0:
+            head = heads[i]
+            deltay = abs(np.array(tails)[:,0] - head[0])
+            deltax = abs(np.array(tails)[:,1] - head[1])
+        
+            weighted_delta = weightedEuclidean(deltax, deltay)
+            ht_distances.append(weighted_delta)
+            
+    # calculate matches minimizing the total distance
+    ht_distances = np.array(ht_distances)
+    _, assignment = linear_sum_assignment(ht_distances)
+    
+    matches = np.array([(heads[i], tails[assignment[i]]) for i in range(len(heads))])
+    return matches 
+    #return np.array(assignment)
 
 def exportAnimalsToCsv():
     pass
@@ -118,12 +142,14 @@ model = loadNn(model_path)
 
 
 img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
-img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
+#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
 img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
 #imgPath = "G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_01.00.49_L.jpg"
 
 print("load image")
 image = loadImage(img_path, factor=32)
+img = loadImage(img_path, factor=32, rescale_range=False)
+    
 
 print("model loaded. predicting...")
 prediction = applyNnToImage(model, image)
@@ -135,47 +161,16 @@ heads = prediction[0,:,:,0]*255
 heads = heads.astype('uint8')
 
 # get coordinates
-coordinates = findCoordinates(heads)
+head_coordinates = findCoordinates(heads)
 
 # show prediction heatmap and coordinates
 plt.imshow(heads, cmap=plt.cm.gray)
 plt.autoscale(False)
-plt.plot(coordinates[:, 1], coordinates[:, 0], 'r.')
+plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
 plt.show()
 
-# print("load model for connections...")
-# image_c = loadImage(img_path, factor=64)
-# model_c = loadNn("../data/output/59/model-L")
-# prediction_c = applyNnToImage(model_c, image_c)
-
-# # load head and tail vector fields and amplify them
-# head_vector_field = prediction_c[1][0, :, :, :2]
-# tail_vector_field = prediction_c[1][0, :, :, 2:]
-
-def findTail(head, tails):
-    # tails needs to be numpy array
-    
-    # calculate y distances 
-    deltay = abs(np.array(tails)[:,0] - head[0])
-    deltax = abs(np.array(tails)[:,1] - head[1])
-    
-    weighted_delta = weightedDistanceSquared(deltay, deltax)
-    
-    min_index = np.argmin(weighted_delta)
-
-    return np.array(tails[min_index])
-    
-def weightedDistanceSquared(x, y):
-    a = 1
-    b = 2 #more distance in y direction is double as bad as in x-driection
-    return a*x*x + b*y*y
 
 # get gt
-import HelperFunctions as helpers
-import itertools
-
-#helpers.show_image_with_vectors(image_c, head_vector_field, 10000)
-
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
@@ -186,234 +181,86 @@ gt_heads = np.array([np.array(animal["position"]) for animal in gt["animals"] if
 gt_tails = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_tails)])
 
 
-
-matches = []
-
-heads = gt_heads.copy()
-tails = gt_tails.copy()
-
-ht_distances = []
-# calculate distance from every head to every tail
-for head in heads:
-    if len(tails) > 0:
-        deltay = abs(np.array(tails)[:,0] - head[1])
-        deltax = abs(np.array(tails)[:,1] - head[0])
-    
-        weighted_delta = weightedDistanceSquared(deltay, deltax)
-
-        ht_distances.append(weighted_delta)
-        
-argmin_list = [np.argmin(x) for x in ht_distances]
-
-# check if there are duplicates
-if len(argmin_list) != len(set(argmin_list)):
-    # find duplicates
-    
-    #here:8
-    i = 8
-    i = 0, 1, 3, 4, 5, 6
-    ht_distances[i]
-
-
-matches = np.array(matches)
-
-
-# matches = []
-# tails = gt_tails.copy()
-# for head in coordinates:
-#     if len(tails) > 0:
-#         head_point = np.array([head[1], head[0]])
-#         tail = findTail(head_point, tails)
-#         #tails = np.array([x for x in tails if not np.array_equal(x, tail)])
-#         print(tails)
-#         matches.append([head_point, tail])
-    
-# matches = np.array(matches)
-
+#matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+matches = findHeadTailMatches(gt_heads, gt_tails)
 
 # show groundtruth
-helpers.showImageWithHeatmap(image, None, gt["animals"], 1, "both")
+helpers.showImageWithHeatmap(img, None, gt["animals"], 1, "both")
 
 
 # plot each match with a different colour
 colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
 plt.imshow(heads, cmap=plt.cm.gray)
+plt.imshow(img)
 for i in range(matches.shape[0]):
     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+    plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
 plt.show()
 
-# #@todo only go untip 400 px in original format? recursion
-# def find_similar_neighbours(vector_pos, vector_orient, neighbour_indices, tail_projections, vector_field):   
-#     #max deviation of 30% from original orientation
-#     max_deviation = 15
+
+
+# import math
+# labels = train_labels_animals + val_labels + test_labels
+
+# # calculate how often the matching by findHeadTailMatch was correct
+# neg_scores_list = []
+# pos_scores_list = []
+# problem_entries = []
+# for entry in labels:
+#     heads = []
+#     tails = []
+#     for i in range(0, len(entry["animals"]), 2):
+#         heads.append(entry["animals"][i]["position"])
+#         tails.append(entry["animals"][i+1]["position"])
     
+#     if len(heads) > 0 and len(tails) > 0:
+#         matches = findHeadTailMatches(heads, tails)
+        
+#         gt = np.array(range(len(matches)))
+        
+#         scores = np.equal(matches, gt)
+#         pos_score = np.count_nonzero(scores == True)
+#         neg_score = np.count_nonzero(scores == False)
+        
+#         neg_scores_list.append(neg_score)
+#         pos_scores_list.append(pos_score)
+        
+#         if neg_score != 0:
+#             problem_entries.append(entry)
+
+
+# # plot problematic entries
+# for entry in problem_entries[:5]:
+#     heads = []
+#     tails = []
+#     image = loadImage(entry["filename"], 32, False)
+#     plt.imshow(image)
+#     colors = cm.rainbow(np.linspace(0, 1, len(entry["animals"])))
+#     for i in range(0, len(entry["animals"]), 2):
+#         head = entry["animals"][i]["position"]
+#         tail = entry["animals"][i+1]["position"]
+#         plt.scatter(head[0], head[1], color=colors[i])
+#         plt.scatter(tail[0], tail[1], color=colors[i])
+#         plt.plot([head[0], tail[0]], [head[1], tail[1]], color=colors[i])
+#     plt.show()
     
-#     # check if there is a tail somewhere @todo or head (depends on iteration)
-#     print(f"vector position {vector_pos}")
-#     if vector_pos.tolist() in tail_projections.tolist():
-#         print(f"Found a matching tail at position (on vector field grid): {vector_pos}")
-#         return vector_pos
-#     else:
-#         if neighbour_indices is not None and len(neighbour_indices) > 0:
-#             new_vec_pos = np.array(neighbour_indices[0], dtype=np.int64)
-#             new_vec_ori = np.array(vector_field[new_vec_pos[0], new_vec_pos[1], :])
-#             print(f"new_vec_pos and ori {new_vec_pos, new_vec_ori}")
-                        
-#             # determine neighbour range
-#             x_start = new_vec_pos[0]-1 if new_vec_pos[0]-1 >= 0 else 0
-#             x_end = new_vec_pos[0]+2 if new_vec_pos[0]+2 <=  vector_field.shape[0] else vector_field.shape[0]
-            
-#             y_start = new_vec_pos[1]-1 if new_vec_pos[1]-1 >= 0 else 0
-#             y_end = new_vec_pos[1]+2 if new_vec_pos[1]+2 <=  vector_field.shape[1] else vector_field.shape[1]
-            
-#             x = range(x_start, x_end)
-#             y = range(y_start, y_end)
-#             new_neighbours = []
-#             for i in x:
-#                 for j in y:
-#                     if i != new_vec_pos[0] or j != new_vec_pos[1]:
-#                         new_neighbours.append([i,j])
-            
-#             print(new_neighbours)
-#             # do not check neighbours that have already been checked
-#             new_neighbours = [x for x in new_neighbours if x not in neighbour_indices]
-#             #new_neighbours = new_neighbours[new_neighbours != neighbour_indices][0]
-            
-#             print("new neighbours")
-#             print(new_neighbours)
-            
-#             deviation = new_vec_ori*max_deviation
-            
-#             # filter the new neighbours for only those with similar orientation
-#             final_neighbours = []
-#             for n in new_neighbours:
-#                 orientation = np.array(vector_field[n[0], n[1], :])
-                
-#                 lower_thresh_x = new_vec_ori[0] - deviation[0] if new_vec_ori[0] > 0 else new_vec_ori[0] + deviation[0]
-#                 upper_thresh_x = new_vec_ori[0] + deviation[0] if new_vec_ori[0] > 0 else new_vec_ori[0] - deviation[0]
-#                 lower_thresh_y = new_vec_ori[1] - deviation[1] if new_vec_ori[1] > 0 else new_vec_ori[1] + deviation[1]
-#                 upper_thresh_y = new_vec_ori[1] + deviation[1] if new_vec_ori[1] > 0 else new_vec_ori[1] - deviation[1]
-                
-#                 if lower_thresh_x <= orientation[0] <= upper_thresh_x \
-#                 and lower_thresh_y <= orientation[1] <= upper_thresh_y:
-#                     final_neighbours.append(n)
-                    
-#             print("final neighbours")
-#             print(final_neighbours)
-            
-#             tail_pos_projection = find_similar_neighbours(new_vec_pos, 
-#                                                           new_vec_ori, 
-#                                                           final_neighbours, 
-#                                                           tail_projections, 
-#                                                           vector_field)
+
+# calculate angle between head and tail
+# angles = []
+# count = 0
+# for entry in labels:
+#     for i in range(0, len(entry["animals"]), 2):
+#         deltay = entry["animals"][i]["position"][1]-entry["animals"][i+1]["position"][1]
+#         deltax = entry["animals"][i]["position"][0]-entry["animals"][i+1]["position"][0]
         
-#             return tail_pos_projection
-#         return None
+#         if deltax == 0:
+#             angle = 0
+#             print("deltax is 0")
+#         else:
+#             angle = math.degrees(math.atan(deltay/deltax))
+#         angles.append(angle)
+        
+#     print(count)
+#     count += 1
+# print(sum(np.abs(angles))/len(np.abs(angles))) 
     
-# # get shorter list (we are only looking for complete animals)
-# if len(heads) <= len(tails):
-#     factor = head_vector_field.shape[1]/image.shape[1]
-#     tail_projections = np.around(np.array(tails)*factor).astype(np.int64)
-    
-#     for i in range(len(heads)):
-#         # find position and orientation of nearest vector      
-#         head_projection= np.around(np.array(heads[i])*factor).astype(np.int64) # on smaller grid image
-        
-#         nearest_vec_pos = head_projection.copy().astype(np.int64)
-#         nearest_vec_ori = head_vector_field[head_projection[0], head_projection[1], :]
-        
-#         #grid = head_vector_field[:,:,1]
-#         x = range(nearest_vec_pos[0]-1, nearest_vec_pos[0]+2)
-#         y = range(nearest_vec_pos[1]-1, nearest_vec_pos[1]+2)
-#         neighbours = []
-#         for i in x:
-#             for j in y:
-#                 if i != nearest_vec_pos[0] or j != nearest_vec_pos[1]:
-#                     neighbours.append([i,j])
-                
-#         print(neighbours)
-    
-#         # find similar vectors (in position and orientation)
-#         # tail_pos_projection = find_similar_neighbours(nearest_vec_pos, 
-#         #                                               nearest_vec_ori, 
-#         #                                               neighbours, tail_projections, 
-#         #                                               head_vector_field)
-        
-#         # find tail position in original coordinates
-        
-# else:
-#     for i in range(len(tails)):
-#         pass
-
-# import numpy as np
-# import scipy
-# import scipy.ndimage as ndimage
-# import scipy.ndimage.filters as filters
-# import matplotlib.pyplot as plt
-
-# #fname = '/tmp/slice0000.png'
-# neighborhood_size = 5
-# threshold = 1500
-
-# #data = scipy.misc.imread(fname)
-# data = image
-
-# data_max = filters.maximum_filter(data, neighborhood_size)
-# maxima = (data == data_max)
-# data_min = filters.minimum_filter(data, neighborhood_size)
-# diff = ((data_max - data_min) > threshold)
-# maxima[diff == 0] = 0
-
-# labeled, num_objects = ndimage.label(maxima)
-# slices = ndimage.find_objects(labeled)
-# x, y = [], []
-# for dy,dx in slices:
-#     x_center = (dx.start + dx.stop - 1)/2
-#     x.append(x_center)
-#     y_center = (dy.start + dy.stop - 1)/2    
-#     y.append(y_center)
-
-# plt.imshow(data)
-# #plt.savefig('/tmp/data.png', bbox_inches = 'tight')
-
-# plt.autoscale(False)
-# plt.plot(x,y, 'ro')
-# #plt.savefig('/tmp/result.png', bbox_inches = 'tight')
-
-
-
-
-# pred_fish_head = prediction[0, :, :]#, 0]
-# #pred_fish_head = pred_fish_head[:, :, np.newaxis]
-# # convert hm range [0,1] to [0,255]
-# pred_fish_head = pred_fish_head*255.0
-# #plt.imshow(pred_fish_head)
-
-# #pred_fish_head = resizeHm(image, pred_fish_head)
-
-# image_thr = applyThresholdToHm(pred_fish_head)
-# coordinates = nonMaxSuppression(image_thr, 10)
-
-# plt.imshow(pred_fish_head, cmap=plt.cm.gray)
-# plt.autoscale(False)
-# plt.plot(coordinates[:, 1], coordinates[:, 0], 'r.')
-
-
-# # coordinates on non-rectified images
-# # default for status: not checked
-# # default for manually corrected: no
-# columns = ["file_id", "object_remarks", 
-#            "group", "species", 
-#            "LX1", "LY1",
-#            "LX2", "LY2", 
-#            "LX3", "LY3", 
-#            "LX4", "LY4", 
-#            "RX1", "RY1",
-#            "RX2", "RY2", 
-#            "RX3", "RY3", 
-#            "RX4", "RY4", 
-#            "length", "height", "image_remark",
-#            "status", "manually_corrected"
-#             ]
-
-# # send an "image written" event to the main thread
