@@ -812,6 +812,8 @@ class PageData(QtWidgets.QWidget):
     #     self.tableView_original.setModel(self.models.model_animals)
     
     def onNnActivated(self):
+        # if neural netowkr is not None
+        
         # create a thread for the neural network 
         
         # start image prections

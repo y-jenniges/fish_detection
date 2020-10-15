@@ -900,10 +900,20 @@ class PageSettings(QtWidgets.QWidget):
                 model = tf.keras.models.load_model(path, custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
                 return model 
             except:
+                # block signal (we do not want to call nn_path_changed) 
+                # and set empty text in line edit
+                self.lineEdit_nn.blockSignals(True)
+                self.lineEdit_nn.setText("")
+                self.lineEdit_nn.blockSignals(False)
+                
                 print("Entered neural network is not valid.")
-                # @todo error message
-                return None
-            
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.setText("Loading Error")
+                msg.setInformativeText(f"The neural network from {path} is not a valid model.")
+                msg.setWindowTitle("Error")
+                msg.exec_()  
+                return None    
         else:
             return None
 
