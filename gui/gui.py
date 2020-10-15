@@ -11,9 +11,19 @@ import PageData
 
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
-    """ Main window class for MarOMarker. """
+    """ 
+    Main window class for MarOMarker. 
+    Remark: The stylesheets are partly taken and adapted from QT stylesheet 
+    examples accessible at https://doc.qt.io/qt-5/stylesheet-examples.html
+    (last access 15.10.2020)
+    """
     
     def __init__(self):
+        """
+        Init function of main window. It initializes UI, actions, data models
+        and provides a variable (settings) for saving values for the next 
+        session.
+        """
         QtWidgets.QMainWindow.__init__(self)
         self.start_time = time.time()
                 
@@ -24,8 +34,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.models = Models()
 
         # init UI and actions
-        self.init_ui()
-        self.init_actions()
+        self._initUi()
+        self._initActions()
 
         # translate UI and set starting tabs
         self.retranslateUi()
@@ -33,12 +43,15 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.window_table.tabWidget.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
-        # restore settings from previous session
-        self.restorePreviousSettings()
+        # restore values from previous session
+        self.restorePreviousValues()
 
         print(self.settings.fileName())
 
-    def restorePreviousSettings(self):
+    def restorePreviousValues(self):
+        """
+        Tries to restore values from previous session (saved on closeEvent)
+        """
         try:
             self.models.restoreValues(self.settings)
             self.resize(self.settings.value("windowSize"))
@@ -51,6 +64,16 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
     # save some values and options when closing the program
     def closeEvent(self, event):
+        """
+        Saving some values when closing the program, like window size and 
+        position, settings, secific model information. It also saves the 
+        current image and updates the CSV table.
+
+        Parameters
+        ----------
+        event : QEvent
+            The event called when closing the program.
+        """
         print("close event")
         self.settings.setValue("windowSize", self.size())
         self.settings.setValue("windowPosition", self.pos())
@@ -58,44 +81,41 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.saveCurrentValues(self.settings)
         self.models.saveCurrentValues(self.settings)
         
-        # save image data
+        # save image data, update CSV output file
         index = self.page_home.photo_viewer.cur_image_index
         if index < len(self.page_home.photo_viewer.image_list):        
-            cur_file_id = os.path.basename(self.page_home.photo_viewer.image_list[index])[:-6]
+            cur_file_id = os.path.basename(
+                self.page_home.photo_viewer.image_list[index])[:-6]
             res_file_path = self.page_data.lineEdit_res_file.text()
             self.models.model_animals.exportToCsv(res_file_path=res_file_path,
                                                   file_id=cur_file_id)
 
+        # close table window
         self.window_table.close()
         
     def retranslateUi(self):
         """
         Function to retranslate the UI and set the inital texts.
-        
-        Args:
-            
-        Returns:
-            
         """
         _translate = QtCore.QCoreApplication.translate
         
         # main window
         self.setWindowTitle(_translate("MainWindow", "MarOMarker"))
         
-        # table window
+        # texts for table window
         self.window_table.setWindowTitle(_translate("MainWindow", "MarOMarker - Data Table"))
         self.window_table.btn_save_table.setText(_translate("MainWindow", "Save current table"))
         self.window_table.tabWidget.setTabText(self.window_table.tabWidget.indexOf(self.window_table.original), _translate("MainWindow", "Current table"))
         self.window_table.tabWidget.setTabText(self.window_table.tabWidget.indexOf(self.window_table.summary), _translate("MainWindow", "Summarized table"))
      
-        # home page
+        # texts for home page
         self.page_home.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_home.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
         self.page_home.btn_imgSwitch.setText(_translate("MainWindow", "L"))
         self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))    
         self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
         
-        # data page
+        # texts for data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_data.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))   
         self.page_data.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Data"))        
@@ -180,20 +200,27 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_about.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_about.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
         self.page_about.frame_control_bar.label_settings_3.setText(_translate("MainWindow", "About MarOMarker"))
-        self.page_about.label_about_text.setText(_translate("MainWindow", "This software (MarOMarker) was developed in the scope of the Master\'s thesis <em>Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN</em> by Yvonne Jenniges. The thesis was a cooperation between the University of Bremen, the Alfred Wegener Institute and the Fraunhofer IFAM.\n"
-"<br>\n"
-"<br>\n"
-"<br>\n"
-"Yvonne Jenniges <br>\n"
-"yvonne.jenniges@gmx.de <br>\n"
-"<br>\n"
-"Supervisors <br>\n"
-"Prof. Dr.-Ing. Udo Frese <br>\n"
-"Prof. Dr. Philipp Fischer<br>\n"
-"<br>\n"
-"September 2020"))
+        self.page_about.label_about_text.setText(
+            _translate("MainWindow", "This software (MarOMarker) was developed " + \
+                       "in the scope of the Master\'s thesis <em>Semiautomatic " + \
+                       "Detection and Measurement of Marine Life on Underwater " + \
+                       "Stereoscopic Photographs Using a CNN</em> by " +\
+                       "Yvonne Jenniges. The thesis was a cooperation between " +\
+                       "the University of Bremen, the Alfred Wegener Institute " +\
+                       "and the Fraunhofer IFAM.\n"
+                       "<br>\n"
+                       "<br>\n"
+                       "<br>\n"
+                       "Yvonne Jenniges <br>\n"
+                       "yvonne.jenniges@gmx.de <br>\n"
+                       "<br>\n"
+                       "Supervisors <br>\n"
+                       "Prof. Dr.-Ing. Udo Frese <br>\n"
+                       "Prof. Dr. Philipp Fischer<br>\n"
+                       "<br>\n"
+                       "September 2020"))
  
-    def init_ui(self):
+    def _initUi(self):
         """
         Function to initialize the UI.
         """
@@ -208,229 +235,190 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget = QtWidgets.QStackedWidget(self)
         self.stackedWidget.setLineWidth(0)
         self.stackedWidget.setObjectName("stackedWidget")
-        self.stackedWidget.setStyleSheet("#frame_controlBar{background-color:rgb(200, 200, 200); }\n"
-"#frame_controlBar_data{background-color:rgb(200, 200, 200); }\n"
-"#frame_control_bar_settings{background-color:rgb(200, 200, 200); }\n"
-"#frame_control_bar_handbook{background-color:rgb(200, 200, 200); }\n"
-"#frame_control_bar_about{background-color:rgb(200, 200, 200); }\n"
-"\n"
-"QPushButton{\n"
-"background-color:transparent;\n"
-"outline:none;\n"
-"border: none; \n"
-"border-width: 0px;\n"
-"border-radius: 3px;\n"
-"\n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"  background-color: rgb(0, 203, 221);\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"background-color: rgb(0, 160, 174);\n"
-"}\n"
-"\n"
-"/*\n"
-"#btn_menu{\n"
-"background-color:transparent;\n"
-"outline:none;\n"
-"border: none; \n"
-"}\n"
-"#btn_menu:hover {\n"
-"     background-color: rgb(0, 203, 221);\n"
-"}\n"
-"\n"
-"#btn_menu:pressed {\n"
-"background-color: rgb(0, 160, 174);\n"
-"}\n"
-"*/\n"
-"\n"
-"#btn_imgSwitch{\n"
-"    font: bold 14pt \"Century Gothic\";\n"
-"    color:black;\n"
-"    border-radius: 3px;\n"
-"    border: none; \n"
-"    background-color:rgb(150, 150, 150);\n"
-"    outline:none;\n"
-"}\n"
-"\n"
-"#btn_imgSwitch:hover{\n"
-"background-color: rgb(0, 203, 221);\n"
-"}\n"
-"#btn_imgSwitch:pressed{\n"
-"background-color:  rgb(0, 160, 174);\n"
-"}\n"
-"\n"
-"\n"
-"#btn_user:hover,\n"
-"#btn_user_data:hover,\n"
-"#btn_user_settings:hover,\n"
-"#btn_user_handbook:hover,\n"
-"#btn_user_about:hover{\n"
-"background-color:  rgb(0, 160, 174);\n"
-"}\n"
-"\n"
-"#btn_user:pressed, \n"
-"#btn_user_data:pressed, \n"
-"#btn_user_settings:pressed,\n"
-"#btn_user_handbook:pressed,\n"
-"#btn_user_about:pressed{\n"
-"background-color: rgb(0,100,108);\n"
-"\n"
-"}\n"
-"\n"
-"\n"
-"/*\n"
-"#comboBox_menu{\n"
-"    border: 1px solid gray;\n"
-"    border-radius: 3px;\n"
-"    padding: 1px 18px 1px 10px;\n"
-"    background-color:white;\n"
-"    border:none;\n"
-"}\n"
-"*/\n"
-"\n"
-"QComboBox QAbstractItemView {\n"
-"    border: none;\n"
-"    selection-background-color: rgb(0, 203, 221);\n"
-"    background-color:white;\n}"
-"\n"
-"\n"
-"QComboBox {\n"
-"    border-radius: 3px;\n"
-"    padding: 1px 18px 1px 10px;\n"
-"    background-color:white;\n"
-"    border:none;\n"
-"    font: 12pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"/* QComboBox gets the \"on\" state when the popup is open */\n"
-"QComboBox:!editable:on, QComboBox::drop-down:editable:on {\n"
-"    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"                                 stop: 0 rgb(200, 200, 200), stop: 0.8 rgb(255, 255, 255));\n"
-"}\n"
-"\n"
-"QComboBox:on { /* shift the text when the popup opens */\n"
-"    padding-top: 3px;\n"
-"    padding-left: 4px;\n"
-"}\n"
-"\n"
-"QComboBox::drop-down {\n"
-"    subcontrol-origin: padding;\n"
-"    subcontrol-position: top right;\n"
-"    width: 40px;\n"
-"\n"
-"    border-left-width: 1px;\n"
-"    border-left-color: none;\n"
-"    border-left-style: solid; /* just a single line */\n"
-"    border-top-right-radius: 3px; /* same radius as the QComboBox */\n"
-"    border-bottom-right-radius: 3px;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"    image: url(:/icons/icons/arrow_down.png);\n"
-"    padding-right:8px;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow:on { /* shift the arrow when popup is open */\n"
-"    top: 1px;\n"
-"    left: 1px;\n"
-"}\n"
-"\n"
-"\n"
-"\n"
-"#comboBox_menu, #comboBox_menu_2, #comboBox_menu_3, #comboBox_menu_4{\n"
-"    padding: 1px 1px 1px 1px;\n"
-"    background-color:transparent;\n"
-"    border:none;\n"
-"    border-radius: 0px;\n"
-"    color:transparent;\n"
-"    image: url(:/icons/icons/menu.png);\n"
-"}\n"
-"\n"
-"#comboBox_menu:on, #comboBox_menu_2:on, #comboBox_menu_3:on, #comboBox_menu_4:on{\n"
-"    padding-top: 3px;\n"
-"    padding-left: 4px;\n"
-"}\n"
-"\n"
-"QComboBox#comboBox_menu::down-arrow {image: none;}\n"
-"QComboBox#comboBox_menu_2::down-arrow {image: none;}\n"
-"QComboBox#comboBox_menu_3::down-arrow {image: none;}\n"
-"QComboBox#comboBox_menu_4::down-arrow {image: none;}\n"
-"\n"
-"QLabel{\n"
-"    color:white;\n"
-"    font: 12pt \"Century Gothic\"\n"
-"}\n"
-"\n"
-"\n"
-"#label_settings, #label_data{\n"
-"    color:black;\n"
-"    font: bold 14pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"#label_imgCount{\n"
-"    color:black;\n"
-"    font: 10pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"#frame_homeBar,\n"
-"#frame_dataBar,\n"
-"#frame_settings_bar,\n"
-"#frame_handbook_bar,\n"
-"#frame_about_bar\n"
-"{background-color: rgb(0, 203, 221);}\n"
-"/*-------------------------- double spin boxes ------------------------*/\n"
-"\n"
-"QDoubleSpinBox {\n"
-"    padding-right: 15; /* make room for the arrows */\n"
-"    /*border-image: url(:/images/frame.png) 4;*/\n"
-"    border-radius: 3px;\n"
-"	selection-background-color:rgb(0, 203, 221);\n"
-"	font:12pt \"Century Gothic\";\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button {\n"
-"    subcontrol-origin: border;\n"
-"    subcontrol-position: top right; /* position at the top right corner */\n"
-"\n"
-"    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */\n"
-"    border-image: url(:/icons/icons/arrow_up.png) 1;\n"
-"    border-width: 1px;\n"
-"	margin:2px;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button:hover {\n"
-"    border-image: url(:/icons/icons/arro"
-                        "w_up_blue.png) 1;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::up-button:pressed {\n"
-"    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::down-button {\n"
-"    subcontrol-origin: border;\n"
-"    subcontrol-position: bottom right; /* position at bottom right corner */\n"
-"\n"
-"    width: 16px;\n"
-"    border-image: url(:/icons/icons/arrow_down.png) 1;\n"
-"    border-width: 1px;\n"
-"    border-top-width: 0;\n"
-"	 margin:2px;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::down-button:hover {\n"
-"    border-image: url(:/icons/icons/arrow_down_blue.png) 1;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox::down-button:pressed {\n"
-"    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
-"}\n"
-"")
-        
-        
+        self.stackedWidget.setStyleSheet(
+            "/* --- Control bars ---------------------------------------- */\n"
+            "#frame_controlBar{background-color:rgb(200, 200, 200); }\n"
+            "#frame_controlBar_data{background-color:rgb(200, 200, 200);}\n"
+            "#frame_control_bar_settings{background-color:rgb(200, 200, 200);}\n"
+            "#frame_control_bar_handbook{background-color:rgb(200, 200, 200);}\n"
+            "#frame_control_bar_about{background-color:rgb(200, 200, 200); }\n"
+            "\n"
+            "/* --- Buttons --------------------------------------------- */\n"
+            "QPushButton{\n"
+            "    background-color:transparent;\n"
+            "    outline:none;\n"
+            "    border: none; \n"
+            "    border-width: 0px;\n"
+            "    border-radius: 3px;\n"
+            "}\n"
+            "QPushButton:hover {\n"
+            "    background-color: rgb(0, 203, 221);\n"
+            "}\n"
+            "QPushButton:pressed {\n"
+            "    background-color: rgb(0, 160, 174);\n"
+            "}\n"
+            "\n"
+            "#btn_imgSwitch{\n"
+            "    font: bold 14pt \"Century Gothic\";\n"
+            "    color:black;\n"
+            "    border-radius: 3px;\n"
+            "    border: none; \n"
+            "    background-color: rgb(150, 150, 150);\n"
+            "    outline:none;\n"
+            "}\n"
+            "#btn_imgSwitch:hover{\n"
+            "    background-color: rgb(0, 203, 221);\n"
+            "}\n"
+            "#btn_imgSwitch:pressed{\n"
+            "    background-color: rgb(0, 160, 174);\n"
+            "}\n"
+            "#btn_user:hover,\n"
+            "#btn_user_data:hover,\n"
+            "#btn_user_settings:hover,\n"
+            "#btn_user_handbook:hover,\n"
+            "#btn_user_about:hover{\n"
+            "    background-color: rgb(0, 160, 174);\n"
+            "}\n"
+            "#btn_user:pressed, \n"
+            "#btn_user_data:pressed, \n"
+            "#btn_user_settings:pressed,\n"
+            "#btn_user_handbook:pressed,\n"
+            "#btn_user_about:pressed{\n"
+            "    background-color: rgb(0,100,108);\n"
+            "}\n"
+            "/* --- Comboboxes ------------------------------------------ */\n"
+            "QComboBox QAbstractItemView {\n"
+            "    border: none;\n"
+            "    selection-background-color: rgb(0, 203, 221);\n"
+            "    background-color:white;"
+            "\n}"
+            "QComboBox {\n"
+            "    border-radius: 3px;\n"
+            "    padding: 1px 18px 1px 10px;\n"
+            "    background-color: white;\n"
+            "    border:none;\n"
+            "    font: 12pt \"Century Gothic\";\n"
+            "}\n"
+            "QComboBox:!editable:on, QComboBox::drop-down:editable:on {\n"
+            "    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+            "     stop: 0 rgb(200, 200, 200), stop: 0.8 rgb(255, 255, 255));\n"
+            "}\n"
+            "/* shift text when popup opens */ \n"
+            "QComboBox:on { \n"
+            "    padding-top: 3px;\n"
+            "    padding-left: 4px;\n"
+            "}\n"
+            "QComboBox::drop-down {\n"
+            "    subcontrol-origin: padding;\n"
+            "    subcontrol-position: top right;\n"
+            "    width: 40px;\n"
+            "    border-left-width: 1px; \n"
+            "    border-left-color: none; \n"
+            "    border-left-style: solid; \n"
+            "    border-top-right-radius: 3px; \n"
+            "    border-bottom-right-radius: 3px;\n"
+            "}\n"
+            "QComboBox::down-arrow {\n"
+            "    image: url(:/icons/icons/arrow_down.png);\n"
+            "    padding-right:8px;\n"
+            "}\n"
+            "/* shift arrow when popup opens */ \n"
+            "QComboBox::down-arrow:on { \n"
+            "    top: 1px;\n"
+            "    left: 1px;\n"
+            "}\n"
+            "#comboBox_menu, "
+            "#comboBox_menu_2, "
+            "#comboBox_menu_3, "
+            "#comboBox_menu_4{\n"
+            "    padding: 1px 1px 1px 1px;\n"
+            "    background-color:transparent;\n"
+            "    border:none;\n"
+            "    border-radius: 0px;\n"
+            "    color:transparent;\n"
+            "    image: url(:/icons/icons/menu.png);\n"
+            "}\n"
+            "#comboBox_menu:on, "
+            "#comboBox_menu_2:on, "
+            "#comboBox_menu_3:on, "
+            "#comboBox_menu_4:on{ \n"
+            "    padding-top: 3px;\n"
+            "    padding-left: 4px;\n"
+            "}\n"
+            "QComboBox#comboBox_menu::down-arrow {image: none;}\n"
+            "QComboBox#comboBox_menu_2::down-arrow {image: none;}\n"
+            "QComboBox#comboBox_menu_3::down-arrow {image: none;}\n"
+            "QComboBox#comboBox_menu_4::down-arrow {image: none;}\n"
+            "\n"
+            "/*--- Labels -----------------------------------------------*/\n"
+            "QLabel{\n"
+            "    color:white;\n"
+            "    font: 12pt \"Century Gothic\"\n"
+            "}\n"
+            "#label_settings, #label_data{\n"
+            "    color:black;\n"
+            "    font: bold 14pt \"Century Gothic\";\n"
+            "}\n"
+            "#label_imgCount{\n"
+            "    color:black;\n"
+            "    font: 10pt \"Century Gothic\";\n"
+            "}\n"
+            "/*--- Menu bars --------------------------------------------*/\n"
+            "#frame_homeBar,\n"
+            "#frame_dataBar,\n"
+            "#frame_settings_bar,\n"
+            "#frame_handbook_bar,\n"
+            "#frame_about_bar{\n"
+            "    background-color: rgb(0, 203, 221);"
+            "}\n"
+            "/*--- Double spin boxes ------------------------------------*/\n"
+            "\n"
+            "QDoubleSpinBox {\n"
+            "    padding-right: 15; /* make room for the arrows */\n"
+            "    /*border-image: url(:/images/frame.png) 4;*/\n"
+            "    border-radius: 3px;\n"
+            "	selection-background-color:rgb(0, 203, 221);\n"
+            "	font:12pt \"Century Gothic\";\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button {\n"
+            "    subcontrol-origin: border;\n"
+            "    subcontrol-position: top right; \n"
+            "    width: 16px; \n"
+            "    border-image: url(:/icons/icons/arrow_up.png) 1;\n"
+            "    border-width: 1px;\n"
+            "	margin:2px;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button:hover {\n"
+            "    border-image: url(:/icons/icons/arro"
+                                    "w_up_blue.png) 1;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::up-button:pressed {\n"
+            "    border-image: url(:/icons/icons/arrow_up_darkblue.png) 1;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::down-button {\n"
+            "    subcontrol-origin: border;\n"
+            "    subcontrol-position: bottom right; /* position at bottom right corner */\n"
+            "\n"
+            "    width: 16px;\n"
+            "    border-image: url(:/icons/icons/arrow_down.png) 1;\n"
+            "    border-width: 1px;\n"
+            "    border-top-width: 0;\n"
+            "	 margin:2px;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::down-button:hover {\n"
+            "    border-image: url(:/icons/icons/arrow_down_blue.png) 1;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox::down-button:pressed {\n"
+            "    border-image:url(:/icons/icons/arrow_down_darkblue.png) 1;\n"
+            "}\n"
+            "")
+             
         print(f"gui init: {time.time() - self.start_time}")
         
         # home page
@@ -469,37 +457,37 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # create table window
         self.window_table = TableWindow(self.models, None)
      
-    def on_imageDirChanged(self, text):
+    def onImageDirChanged(self, text):
+        """ Called when the image directory on the data page was changed. """
         self.page_home.photo_viewer.setImageDir(text)
         
-    def on_imagePrefixChanged(self, text):
+    def onImagePrefixChanged(self, text):
+        """ Called when the image prefix on the data page was changed. """
         self.page_home.photo_viewer.setImagePrefix(text)
         
-    def on_imageEndingChanged(self, text):
-        self.page_home.photo_viewer.setImageEnding(text)
+    # def onImageEndingChanged(self, text): #(where used?)
+    #     self.page_home.photo_viewer.setImageEnding(text)
         
-    def on_resFileChanged(self, text):
+    def onResFileChanged(self, text):
+        """ Called when the result file location on the data page was changed. """
         self.page_home.photo_viewer.setResFilePath(text)
-        
-    # def on_speciesListChanged(self, list_species):
-    #     self.page_home.update_species_list(list_species)
-
-        
-    def init_actions(self):
-        """ function to initialize actions """
+           
+    def _initActions(self):
+        """ 
+        Function to initialize actions.
+        """
         # connect user button in top bars
-        self.page_home.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)  
-        self.page_data.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)      
-        self.page_settings.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
-        #self.page_handbook.frame_topBar.btn_user.clicked.connect(self.direct_to_user_settings)
-        self.page_about.frame_top_bar.btn_user.clicked.connect(self.direct_to_user_settings)
+        self.page_home.frame_topBar.btn_user.clicked.connect(self.directToUserSettings)  
+        self.page_data.frame_topBar.btn_user.clicked.connect(self.directToUserSettings)      
+        self.page_settings.frame_top_bar.btn_user.clicked.connect(self.directToUserSettings)
+        #self.page_handbook.frame_topBar.btn_user.clicked.connect(self.directToUserSettings)
+        self.page_about.frame_top_bar.btn_user.clicked.connect(self.directToUserSettings)
         
+        # connect custom signals
         self.page_settings.userIdChanged.connect(self.updateUserIds)
-        self.page_data.imageDirChanged.connect(self.on_imageDirChanged)
-        self.page_data.imagePrefixChanged.connect(self.on_imagePrefixChanged)
-        self.page_data.resultFilePathChanged.connect(self.on_resFileChanged)
-        #self.page_home.imageEndingChanged.connect(lambda: self.page)
-       # self.page_settings.speciesListChanged.connect(self.on_speciesListChanged)
+        self.page_data.imageDirChanged.connect(self.onImageDirChanged)
+        self.page_data.imagePrefixChanged.connect(self.onImagePrefixChanged)
+        self.page_data.resultFilePathChanged.connect(self.onResFileChanged)
     
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)
@@ -508,7 +496,15 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
         #self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
 
-    def updateUserIds(self, value):       
+    def updateUserIds(self, value):    
+        """
+        Function to update user ID in top bar of all pages.
+
+        Parameters
+        ----------
+        value : string
+            New user ID.
+        """
         # update the userId in the top bar of the software (on every page)
         self.page_home.frame_topBar.label_user_id.setText(value)
         self.page_data.frame_topBar.label_user_id.setText(value)
@@ -524,50 +520,60 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         #self.page_handbook.frame_topBar.label_user_id_2.setText(value)
         
     # -------------------- navigation actions -------------------------------- #    
-    def direct_to_user_settings(self):
-        self.direct_to_settings_page()
+    def directToUserSettings(self):
+        """ Directs to user section of settings page. """
+        self.directToSettingsPage()
         self.page_settings.tabWidget.setCurrentIndex(3)
         
-    def direct_to_home_page(self):  
-        #self.check_all_settings()
+    def directToHomePage(self): 
+        """ Directs to home page. """
         self.stackedWidget.setCurrentIndex(0)
 
-    def direct_to_data_page(self):
-        #self.check_all_settings()
+    def directToDataPage(self):
+        """ Directs to data page. """
         self.stackedWidget.setCurrentIndex(1)
     
-    def direct_to_settings_page(self):
-        #self.check_all_settings()
+    def directToSettingsPage(self):
+        """ Directs to settings page. """
         self.stackedWidget.setCurrentIndex(2)
         
-    def direct_to_handbook_page(self):
-        #self.check_all_settings()
+    def directToHandbookPage(self):
+        """ Directs to handbook page. """
         self.stackedWidget.setCurrentIndex(3)
         
-    def direct_to_about_page(self):
-        #self.check_all_settings()
+    def directToABoutPage(self):
+        """ Directs to about page. """
         self.stackedWidget.setCurrentIndex(3)
-        
         
     def append_main_menu_to_button(self, btn):
+        """
+        Appends the menu to a given button. 
+
+        Parameters
+        ----------
+        btn : QPushButton
+            Button to append the menu to.
+        """
         # create the main menu
         menu = QtWidgets.QMenu()
-        menu.addAction('Home', self.direct_to_home_page)
-        menu.addAction('Data', self.direct_to_data_page)
-        menu.addAction('Settings', self.direct_to_settings_page)
-        #menu.addAction('Handbook', self.direct_to_handbook_page)
-        menu.addAction('About', self.direct_to_about_page)
+        menu.addAction('Home', self.directToHomePage)
+        menu.addAction('Data', self.directToDataPage)
+        menu.addAction('Settings', self.directToSettingsPage)
+        #menu.addAction('Handbook', self.directToHandbookPage)
+        menu.addAction('About', self.directToABoutPage)
         
         # set the menu style
-        menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); border-radius: 3px; font:12pt 'Century Gothic'}\n"
-                   "QMenu::item {background-color: transparent;}\n"
-                   "QMenu::item:selected {background-color: rgb(0, 203, 221);}")
+        menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); "
+                           "border-radius: 3px; font:12pt 'Century Gothic'}\n"
+                           "QMenu::item {background-color: transparent;}\n"
+                           "QMenu::item:selected {background-color: rgb(0, 203, 221);}")
         
         # attach menu to button
         btn.setMenu(menu)
         
         # hide the right arrow of the menu
-        btn.setStyleSheet( btn.styleSheet() + "QPushButton::menu-indicator {image: none;}");
+        btn.setStyleSheet(btn.styleSheet() + 
+                          "QPushButton::menu-indicator {image: none;}");
 
 
 import ressources_rc

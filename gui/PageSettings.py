@@ -1,9 +1,11 @@
 import os
+import numpy as np
 import pandas as pd
+import tensorflow as tf
 from PyQt5 import QtCore, QtGui, QtWidgets
 from TabWidget import TabWidget
-from Helpers import TopFrame, MenuFrame, getIcon, TextImageItemWidget
 import Helpers
+import Losses
 
 class PageSettings(QtWidgets.QWidget):
     """ 
@@ -47,6 +49,9 @@ class PageSettings(QtWidgets.QWidget):
 
         # data models
         self.models = models
+        
+        # neural network
+        self.nn_model = None
 
         # init UI and actions on it
         self._initUi()
@@ -219,10 +224,10 @@ class PageSettings(QtWidgets.QWidget):
         self.layout_page_settings.setObjectName("layout_page_settings")
         
         # top bar (the blue one on every page)
-        self.frame_top_bar = TopFrame(":/icons/icons/settings.png", "frame_settings_bar", self)   
+        self.frame_top_bar = Helpers.TopFrame(":/icons/icons/settings.png", "frame_settings_bar", self)   
         
         # menu bar on about page
-        self.frame_control_bar = MenuFrame("Settings", "frame_control_bar_settings", self)
+        self.frame_control_bar = Helpers.MenuFrame("Settings", "frame_control_bar_settings", self)
   
         # --- main frame for the settings ----------------------------------- #
         self.frame_settings = QtWidgets.QFrame(self)
@@ -250,10 +255,10 @@ class PageSettings(QtWidgets.QWidget):
         self.tab_user = self.createTabUser() # tab for user settings
         
         # add tabs to tab widget
-        self.tabWidget.addTab(self.tab_camera, getIcon(":/icons/icons/camera.png"), "")
-        self.tabWidget.addTab(self.tab_neuralNet, getIcon(":/icons/icons/nn.png"), "")
-        self.tabWidget.addTab(self.tab_species, getIcon(":/icons/icons/fish.png"), "")
-        self.tabWidget.addTab(self.tab_user, getIcon(":/icons/icons/user_b.png"), "")
+        self.tabWidget.addTab(self.tab_camera, Helpers.getIcon(":/icons/icons/camera.png"), "")
+        self.tabWidget.addTab(self.tab_neuralNet, Helpers.getIcon(":/icons/icons/nn.png"), "")
+        self.tabWidget.addTab(self.tab_species, Helpers.getIcon(":/icons/icons/fish.png"), "")
+        self.tabWidget.addTab(self.tab_user, Helpers.getIcon(":/icons/icons/user_b.png"), "")
         
         # add tab widget to layout of main settings frame
         self.layout_settings_frame.addWidget(self.tabWidget)
@@ -274,8 +279,12 @@ class PageSettings(QtWidgets.QWidget):
         layout.setObjectName("layout")
         
         # spacers
-        spacerItem34 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        spacerItem35 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem34 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
+        spacerItem35 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         
         # --- frame for camera options -------------------------------------- #
@@ -292,7 +301,9 @@ class PageSettings(QtWidgets.QWidget):
         layout_camera_options.setObjectName("layout_camera_options")
         
         # vertical spacer
-        spacerItem32 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem32 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         
         # --- frame for camera config file ---------------------------------- #
@@ -309,10 +320,12 @@ class PageSettings(QtWidgets.QWidget):
         
         # line edit for config path
         self.lineEdit_config_path = QtWidgets.QLineEdit(frame_config)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_config_path.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.lineEdit_config_path.sizePolicy().hasHeightForWidth())
         self.lineEdit_config_path.setSizePolicy(sizePolicy)
         self.lineEdit_config_path.setMinimumSize(QtCore.QSize(400, 40))
         self.lineEdit_config_path.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -354,27 +367,34 @@ class PageSettings(QtWidgets.QWidget):
         self.label_offset.setObjectName("label_offset")
         
         # horizontal spacer
-        spacerItem29 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem29 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
              
         # spin box for the offset
         self.spinBox_offset = QtWidgets.QDoubleSpinBox(frame_offset)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spinBox_offset.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.spinBox_offset.sizePolicy().hasHeightForWidth())
         self.spinBox_offset.setSizePolicy(sizePolicy)
         self.spinBox_offset.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_offset.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_offset.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.spinBox_offset.setAlignment(
+            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.spinBox_offset.setMaximum(9999.99)
         self.spinBox_offset.setObjectName("spinBox_offset")
         
         # label to display the unit of the offset
         self.label_unit_offset = QtWidgets.QLabel(frame_offset)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_unit_offset.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.label_unit_offset.sizePolicy().hasHeightForWidth())
         self.label_unit_offset.setSizePolicy(sizePolicy)
         self.label_unit_offset.setMinimumSize(QtCore.QSize(50, 0))
         self.label_unit_offset.setMaximumSize(QtCore.QSize(50, 16777215))
@@ -404,18 +424,23 @@ class PageSettings(QtWidgets.QWidget):
         self.label_distance_cameras.setObjectName("label_distance_cameras")
               
         # horizontal spacer
-        spacerItem30 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem30 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         
         # spin box for the distance between the cameras
         self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(frame_distance_cameras)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spinBox_distance_cameras.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.spinBox_distance_cameras.sizePolicy().hasHeightForWidth())
         self.spinBox_distance_cameras.setSizePolicy(sizePolicy)
         self.spinBox_distance_cameras.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_distance_cameras.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.spinBox_distance_cameras.setAlignment(
+            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.spinBox_distance_cameras.setMaximum(9999.99)
         self.spinBox_distance_cameras.setObjectName("spinBox_distance_cameras")
         
@@ -450,27 +475,34 @@ class PageSettings(QtWidgets.QWidget):
         self.label_distance_chip_lense.setObjectName("label_distance_chip_lense")
  
         # horizontal spacer
-        spacerItem31 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem31 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
 
         # spin box for the distance between chip and lense
         self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(frame_distance_chip_lense)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.spinBox_distance_chip_lense.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.spinBox_distance_chip_lense.sizePolicy().hasHeightForWidth())
         self.spinBox_distance_chip_lense.setSizePolicy(sizePolicy)
         self.spinBox_distance_chip_lense.setMinimumSize(QtCore.QSize(200, 40))
         self.spinBox_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_distance_chip_lense.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.spinBox_distance_chip_lense.setAlignment(
+            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.spinBox_distance_chip_lense.setMaximum(99999.99)
         self.spinBox_distance_chip_lense.setObjectName("spinBox_distance_chip_lense")
         
         # label to display the unit of the distance between chip and lense
         self.label_unit_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_unit_chip_lense.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.label_unit_chip_lense.sizePolicy().hasHeightForWidth())
         self.label_unit_chip_lense.setSizePolicy(sizePolicy)
         self.label_unit_chip_lense.setMinimumSize(QtCore.QSize(50, 0))
         self.label_unit_chip_lense.setMaximumSize(QtCore.QSize(50, 16777215))
@@ -506,8 +538,12 @@ class PageSettings(QtWidgets.QWidget):
         layout.setObjectName("layout")
         
         # spacers
-        spacerItem39 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        spacerItem40 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem39 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
+        spacerItem40 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         
         # --- frame for nn options ------------------------------------------ #
@@ -523,7 +559,9 @@ class PageSettings(QtWidgets.QWidget):
         layout_nn_options.setObjectName("layout_nn_options")
         
         # vertical spacer
-        spacerItem37 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem37 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         
         # --- frame for nn path options ------------------------------------- #
@@ -544,11 +582,14 @@ class PageSettings(QtWidgets.QWidget):
         self.label_nn.setObjectName("label_nn")
 
         # horizontal spacer
-        spacerItem36 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem36 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         
         # line edit for nn path
         self.lineEdit_nn = QtWidgets.QLineEdit(frame_nn_path_options)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit_nn.sizePolicy().hasHeightForWidth())
@@ -594,14 +635,16 @@ class PageSettings(QtWidgets.QWidget):
         layout.setObjectName("layout")
         
         # horizontal spacer
-        spacerItem43 = QtWidgets.QSpacerItem(600, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)     
+        spacerItem43 = QtWidgets.QSpacerItem(600, 20, 
+                                             QtWidgets.QSizePolicy.MinimumExpanding, 
+                                             QtWidgets.QSizePolicy.Minimum)     
             
         # --- frame for species options ------------------------------------- #
         frame_species_options = QtWidgets.QFrame(tab_species)
         frame_species_options.setStyleSheet("")
         frame_species_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_species_options.setFrameShadow(QtWidgets.QFrame.Raised)
         frame_species_options.setObjectName("frame_species_options")
+        #frame_species_options.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.MinimumExpanding)
         
         # layout of options frame
         layout_species_options = QtWidgets.QVBoxLayout(frame_species_options)
@@ -615,13 +658,14 @@ class PageSettings(QtWidgets.QWidget):
                                 "QListView::item:hover { background: rgb(0, 203, 221, 50); }\n"
                                 "QListView::item:selected { background: rgb(0, 203, 221, 100); color:black;}\n")
         self.listView_species.setModel(self.models.model_species)
+        self.listView_species.setWordWrap(True)
         
         self.delegate_species = Helpers.ListViewDelegate(None, self.listView_species)
         self.listView_species.setItemDelegate(self.delegate_species)
         
         # add widgets to main layout
         layout.addWidget(frame_species_options, 0, 0, 1, 1)
-        layout.addItem(spacerItem43, 0, 1, 1, 1)      
+        layout.addItem(spacerItem43, 0, 1, 1, 1)  
         
         # --- frame for buttons --------------------------------------------- #
         # frame 
@@ -668,8 +712,12 @@ class PageSettings(QtWidgets.QWidget):
         gridLayout.setObjectName("gridLayout")
         
         # spacers
-        spacerItem48 = QtWidgets.QSpacerItem(609, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        spacerItem49 = QtWidgets.QSpacerItem(20, 334, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem48 = QtWidgets.QSpacerItem(609, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
+        spacerItem49 = QtWidgets.QSpacerItem(20, 334, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
         
         # --- frame for user options ---------------------------------------- #
         # frame for the user options
@@ -684,7 +732,9 @@ class PageSettings(QtWidgets.QWidget):
         layout_user_options.setObjectName("layout_user_options")       
         
         # vertical spacer
-        spacerItem46 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem46 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
 
         
         # --- frame for user id options ------------------------------------- #
@@ -705,14 +755,18 @@ class PageSettings(QtWidgets.QWidget):
         self.label_user_id.setObjectName("label_user_id")
         
         # horizontal spacer
-        spacerItem45 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem45 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
                 
         # line edit for the user id
         self.lineEdit_user_id = QtWidgets.QLineEdit(frame_user_id)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_user_id.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.lineEdit_user_id.sizePolicy().hasHeightForWidth())
         self.lineEdit_user_id.setSizePolicy(sizePolicy)
         self.lineEdit_user_id.setMinimumSize(QtCore.QSize(0, 40))
         self.lineEdit_user_id.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -758,7 +812,6 @@ class PageSettings(QtWidgets.QWidget):
         # neural net tab
         self.btn_browse_nn.clicked.connect(self.browse_for_nn)
         self.lineEdit_nn.textChanged.connect(self.nn_path_changed) #@todo kann man das überhaupt anpassen?
-        self.lineEdit_nn.returnPressed.connect(lambda: self.focusNextChild())
         
         # species tab
         self.btn_add_species.clicked.connect(self.browse_for_species_image)
@@ -811,7 +864,9 @@ class PageSettings(QtWidgets.QWidget):
         
     def check_config_format(self, df_config):
         # check if the necessary columns are present in the dataframe
-        if "y-offset" in df_config.columns and "camera-distance" in df_config.columns and "chip-distance" in df_config.columns:
+        if "y-offset" in df_config.columns \
+        and "camera-distance" in df_config.columns \
+        and "chip-distance" in df_config.columns:
             return True
         else:
             return False
@@ -831,15 +886,32 @@ class PageSettings(QtWidgets.QWidget):
         
         
 # --- actions in nn tab ----------------------------------------------------- #   
-    def nn_path_changed(self):
-        pass
+    def nn_path_changed(self, model_path):
+        weights = np.array([ 1,  1.04084507,  1.04084507,  1,  1,
+        8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
+       12.52542373])
+
+        print("load model...")
+        self.nn_model = self.loadNn(model_path, weights)
+        
+    def loadNn(self, path, weights=None):
+        if os.path.isfile(path):
+            try:
+                model = tf.keras.models.load_model(path, custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
+                return model 
+            except:
+                print("Entered neural network is not valid.")
+                # @todo error message
+                return None
+            
+        else:
+            return None
+
         
     def browse_for_nn(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
-        self.apply_nnPath(filename[0])
-        # @todo!! make use of NN
-    
-    def apply_nnPath(self, path):
+        path = filename[0]
+        
         # check if path is valid
         if path != "" and os.path.isfile(path):    
             self.lineEdit_nn.setText(path)
@@ -873,6 +945,6 @@ class PageSettings(QtWidgets.QWidget):
 
     def restoreValues(self, settings):
         self.apply_configFile(settings.value("cameraConfigPath"))
-        self.apply_nnPath(settings.value("nnPath"))
+        self.lineEdit_nn.setText(settings.value("nnPath"))
         self.lineEdit_user_id.setText(settings.value("userId"))
         

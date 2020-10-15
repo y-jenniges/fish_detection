@@ -22,14 +22,14 @@ class PageData(QtWidgets.QWidget):
         self.models = models
         
         # init UI, actions
-        self.init_ui()
-        self.init_actions()
+        self._initUi()
+        self._initActions()
         #self.init_models()
         
-        self.calenderSelectionChanged()
+        self.onCalenderSelectionChanged()
         
 
-    def on_img_dir_edit_changed(self, text=None, updateVisuals=True):
+    def onImageDirEditChanged(self, text=None, updateVisuals=True):
         """ Function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
         if not os.path.isdir(text): # check if directory exists
@@ -39,7 +39,7 @@ class PageData(QtWidgets.QWidget):
         self.updateNumImages()
         self.imageDirChanged.emit(self.lineEdit_img_dir.text())
      
-    def on_res_file_edit_changed(self):
+    def onResFileEditChanged(self):
         """ Function to handle when the user changes the res_file line edit """
         # check if entered result file exists 
         # (else replace it by an empty string)
@@ -51,17 +51,17 @@ class PageData(QtWidgets.QWidget):
             
         self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
         
-    def on_prefix_edit_changed(self):
-        """ function to handle when the user changes the image prefix line edit """
+    def onPrefixEditChanged(self):
+        """ Function to handle when the user changes the image prefix line edit """
         self.imagePrefixChanged.emit(self.lineEdit_img_prefix.text())
         self.updateNumImages()    
     
-    def on_exp_id_edit_changed(self):
-        """ function to handle when the user changes the experiment id line edit """
+    def onExpIdEditChanged(self):
+        """ Function to handle when the user changes the experiment id line edit """
         self.experimentIdChanged.emit(self.lineEdit_exp_id.text())
         
     def updateNumImages(self):
-        """ function to check how many images are in the current 
+        """ Function to check how many images are in the current 
         IMAGE_DIRECTORY with the current prefix for the current date and 
         updates the display of this count """
         date = self.calendarWidget.selectedDate().toString("yyyy.MM.dd")
@@ -72,24 +72,24 @@ class PageData(QtWidgets.QWidget):
         
         self.label_num_imgs_text.setText(num_images)   
         
-    def browseResultFile(self):
-        """ function that opens a dialog for the user to select a result file 
+    def onBrowseResultFile(self):
+        """ Function that opens a dialog for the user to select a result file 
         in csv format """
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv; *.xlsx")
         self.lineEdit_res_file.setText(filename[0])
         self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
       
-    def browseImageDir(self):
-        """ function that opens a dialog for the user to select a directory 
+    def onBrowseImageDir(self):
+        """ Function that opens a dialog for the user to select a directory 
         where the images are """
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
         if len(filename) > 0: 
             if os.path.isdir(filename):
                 self.lineEdit_img_dir.setText(filename + "/")
-                self.on_img_dir_edit_changed(filename+"/")
+                self.onImageDirEditChanged(filename+"/")
 
     def updateImageDir(self):
-        """ function to update the image directory according to the input 
+        """ Function to update the image directory according to the input 
         from the calender widget """
         date = self.calendarWidget.selectedDate().toString("yyyy-MM")
         directory = IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
@@ -102,7 +102,7 @@ class PageData(QtWidgets.QWidget):
             self.lineEdit_img_dir.setText("")
         else:
             self.lineEdit_img_dir.setText(directory)
-            self.on_img_dir_edit_changed(directory)
+            self.onImageDirEditChanged(directory)
         
         # update the number of images
         self.updateNumImages() 
@@ -111,19 +111,19 @@ class PageData(QtWidgets.QWidget):
         new_exp_id = "Spitzbergen " \
             + str(self.calendarWidget.selectedDate().year())     
         self.lineEdit_exp_id.setText(new_exp_id) 
-        self.on_exp_id_edit_changed()
+        self.onExpIdEditChanged()
         
         # adapt result file path
         self.lineEdit_res_file.setText(directory
                                        +"result_"
                                        +str(date.rsplit("-",1)[0])
                                        +"neuralNet.csv")
-        self.on_res_file_edit_changed() # has to be called manually since the 
+        self.onResFileEditChanged() # has to be called manually since the 
         # lineEdit is only connected with "editingFinished" slot
         
         
-    def calenderSelectionChanged(self):
-        """ function to handle a change of the calender widget selection """
+    def onCalenderSelectionChanged(self):
+        """ Function to handle a change of the calender widget selection """
         # set the date label
         self.label_date.setText(self.calendarWidget.selectedDate() \
                                 .toString("dd.MM.yyyy")) 
@@ -133,7 +133,7 @@ class PageData(QtWidgets.QWidget):
         
  
     def createFrameData(self):
-        """ creates the data page UI """
+        """ Creates the data page UI """
         # data frame
         frame_data = QtWidgets.QFrame(self)
         frame_data.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
@@ -416,7 +416,7 @@ class PageData(QtWidgets.QWidget):
         return scrollArea
     
     def createFrameDataOptions_2(self, frame_data):
-        """ created frame that contains all elements to adapt the 
+        """ Created frame that contains all elements to adapt the 
         data selection """
         # frame for data options
         frame_data_options = QtWidgets.QFrame(frame_data)
@@ -451,7 +451,7 @@ class PageData(QtWidgets.QWidget):
         return frame_data_options
     
     def createFrameDataSelection(self, frame_data_options):   
-        """ creates frame with the main data selection options (calendar and 
+        """ Creates frame with the main data selection options (calendar and 
         data filter combobox) """
         # data selection frame
         frame_data_selection = QtWidgets.QFrame(frame_data_options)
@@ -576,10 +576,14 @@ class PageData(QtWidgets.QWidget):
             "}\n"
             "")
         
-        self.calendarWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.Germany))
+        # adapt calendar widget settings
+        self.calendarWidget.setLocale(QtCore.QLocale(
+            QtCore.QLocale.English, QtCore.QLocale.Germany))
         self.calendarWidget.setGridVisible(False)
-        self.calendarWidget.setHorizontalHeaderFormat(QtWidgets.QCalendarWidget.ShortDayNames)
-        self.calendarWidget.setVerticalHeaderFormat(QtWidgets.QCalendarWidget.NoVerticalHeader)
+        self.calendarWidget.setHorizontalHeaderFormat(
+            QtWidgets.QCalendarWidget.ShortDayNames)
+        self.calendarWidget.setVerticalHeaderFormat(
+            QtWidgets.QCalendarWidget.NoVerticalHeader)
         self.calendarWidget.setNavigationBarVisible(True)
         self.calendarWidget.setDateEditEnabled(True)
         self.calendarWidget.setObjectName("calendarWidget")        
@@ -603,7 +607,9 @@ class PageData(QtWidgets.QWidget):
         self.label_date_text.setObjectName("label_date_text")
         
         # spacer
-        spacerItem18 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem18 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         
         # label displaying the date selected in the calendar
         self.label_date = QtWidgets.QLabel(self.frame_date)
@@ -632,7 +638,9 @@ class PageData(QtWidgets.QWidget):
         self.label_image_filter.setObjectName("label_image_filter")
                 
         # spacer
-        spacerItem19 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem19 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         
         # combo box to select a data filter
         self.comboBox_image_filter = QtWidgets.QComboBox(self.frame_img_filter)
@@ -657,7 +665,7 @@ class PageData(QtWidgets.QWidget):
         return frame_data_selection
         
     def createFrameDataInformation(self, frame_data_options):
-        """ creates frame that shows image directory, result file path, 
+        """ Creates frame that shows image directory, result file path, 
         image prefix and experiment ID """
         # frame for data information
         frame_data_information = QtWidgets.QFrame(frame_data_options)
@@ -689,10 +697,12 @@ class PageData(QtWidgets.QWidget):
                 
         # button to browse for image directories
         self.btn_img_dir = QtWidgets.QPushButton(frame_data_information)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_img_dir.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.btn_img_dir.sizePolicy().hasHeightForWidth())
         self.btn_img_dir.setSizePolicy(sizePolicy)
         self.btn_img_dir.setMinimumSize(QtCore.QSize(90, 40))
         self.btn_img_dir.setMaximumSize(QtCore.QSize(90, 40))
@@ -719,7 +729,8 @@ class PageData(QtWidgets.QWidget):
         # label to display the number of images in the current directory
         self.label_num_imgs_text = QtWidgets.QLabel(frame_data_information)
         self.label_num_imgs_text.setStyleSheet("padding-left: 10px;")
-        self.label_num_imgs_text.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.label_num_imgs_text.setAlignment(
+            QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_num_imgs_text.setObjectName("label_num_imgs_text")
                 
         # button to browse files for a result file
@@ -738,9 +749,6 @@ class PageData(QtWidgets.QWidget):
         self.label_img_prefix = QtWidgets.QLabel(frame_data_information)
         self.label_img_prefix.setObjectName("label_img_prefix")
         
-        # spacer
-        #spacerItem21 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-
         # --- add widgets to data information frame ------------------------ #
         self.gridLayout_5.addWidget(self.lineEdit_res_file, 2, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_num_imgs, 5, 0, 1, 1)
@@ -754,12 +762,11 @@ class PageData(QtWidgets.QWidget):
         self.gridLayout_5.addWidget(self.btn_res_file, 2, 2, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_exp_id, 4, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_img_prefix, 3, 0, 1, 1)
-        #self.gridLayout_5.addItem(spacerItem21, 6, 1, 1, 1)
         
         return frame_data_information
     
-    def init_ui(self):
-        """ function to initialize the UI of data page """
+    def _initUi(self):
+        """ Initializes the UI of data page """
         self.setObjectName("page_data")
 
         # main layout
@@ -784,26 +791,66 @@ class PageData(QtWidgets.QWidget):
         self.layout_page_data.addWidget(self.frame_controlBar)
         self.layout_page_data.addWidget(self.frame_data)
     
-    def init_actions(self):
+    def _initActions(self):
         """ function to initialize the actions on data page """
-        self.calendarWidget.selectionChanged.connect(self.calenderSelectionChanged)
+        self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
         
-        self.btn_img_dir.clicked.connect(self.browseImageDir)
-        self.btn_res_file.clicked.connect(self.browseResultFile)
+        self.btn_img_dir.clicked.connect(self.onBrowseImageDir)
+        self.btn_res_file.clicked.connect(self.onBrowseResultFile)
+        self.btn_nn_activation.clicked.connect(self.onNnActivated)
+        self.btn_pred_check.clicked.connect(self.onCheckPredictions)
+        self.btn_rectify_match.clicked.connect(self.onRectifyMatch)
+        self.btn_check_match.clicked.connect(self.onCheckMatch)
+        self.btn_length_measurement.clicked.connect(self.onCalcLength)
         
-        self.lineEdit_img_dir.editingFinished.connect(self.on_img_dir_edit_changed)
-        
-        self.lineEdit_res_file.editingFinished.connect(self.on_res_file_edit_changed)
-        self.lineEdit_img_prefix.editingFinished.connect(self.on_prefix_edit_changed)
-        self.lineEdit_exp_id.editingFinished.connect(self.on_exp_id_edit_changed)
+        self.lineEdit_img_dir.editingFinished.connect(self.onImageDirEditChanged)
+        self.lineEdit_res_file.editingFinished.connect(self.onResFileEditChanged)
+        self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
+        self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
   
     # def init_models(self):
     #     self.tableView_original.setModel(self.models.model_animals)
+    
+    def onNnActivated(self):
+        # create a thread for the neural network 
         
+        # start image prections
         
+        # updae label displaying number of predicted images
+        
+        # @todo load NN somewhere
+        pass
+    
+    def onCheckPredictions(self):
+        # if there is at least one predicted image, navigate to home screen
+        
+        self.parent().parent().directToHomePage()
+    
+    def onRectifyMatch(self):
+        # create a thread
+        
+        # perform rectifications and matchings
+        pass
+        
+    def onCheckMatch(self):
+        """ 
+        Directs to LR screen (showing left and right images) if  at least one
+        match is already calculated. 
+        """
+        # check matching on LR screen
+        print("Not implemented yet.")
+    
+    def onCalcLength(self):
+        # calculate animal length
+        
+        # update animal
+        
+        # update specs windget of animal?
+        pass
+    
 # --- functions for saving and restoring options --------------------------- # 
     def saveCurrentValues(self, settings):     
-        """ saves current settings on data page fornext program start """
+        """ Saves current settings on data page for next program start """
         settings.setValue("date", self.calendarWidget.selectedDate())       
         settings.setValue("dataFilter", self.comboBox_image_filter.currentIndex())
         settings.setValue("imgDir", self.lineEdit_img_dir.text())       
@@ -812,7 +859,7 @@ class PageData(QtWidgets.QWidget):
         settings.setValue("experimentId", self.lineEdit_exp_id.text())
         
     def restoreValues(self, settings):
-        """ restores settings of page data from last program start """
+        """ Restores settings of page data from last program start """
         self.calendarWidget.setSelectedDate(settings.value("date"))
         self.comboBox_image_filter.setCurrentIndex(settings.value("dataFilter"))
         self.lineEdit_img_dir.setText(settings.value("imgDir"))
@@ -822,8 +869,8 @@ class PageData(QtWidgets.QWidget):
         
         # do not update the visuals when setting the image directory, 
         # that would override the restored settings of the other fields
-        self.on_img_dir_edit_changed(updateVisuals=False)
-        self.on_res_file_edit_changed()
-        self.on_prefix_edit_changed()
-        self.on_exp_id_edit_changed()
+        self.onImageDirEditChanged(updateVisuals=False)
+        self.onResFileEditChanged()
+        self.onPrefixEditChanged()
+        self.onExpIdEditChanged()
         
