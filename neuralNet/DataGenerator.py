@@ -9,7 +9,7 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "all_animals" 
+OPTION = "body_segmentation" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -87,7 +87,7 @@ def generateAllHeatmaps(entry, res='low'):
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm #+ hm_body @todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
+            hm_5_head.hm + hm_5_tail.hm + hm_body #@todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
     
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
@@ -154,12 +154,12 @@ def prepareEntryHeatmap (entry, res="low"):
         return np.asarray(image), np.asarray(heatmap)
     
     elif OPTION == "all_animals":
-        heatmaps = generateAllHeatmaps(entry, res=res) # @todo adapt
+        heatmaps = generateAllHeatmaps(entry, res=res) 
         heatmaps = np.concatenate(heatmaps, axis=2) # concat heatmaps
         return np.asarray(image), np.asarray(heatmaps)
         
     elif OPTION == "body_segmentation":
-        heatmaps, hm_body = generateAllHeatmaps(entry, res=res)# @todo adapt
+        heatmaps, hm_body = generateAllHeatmaps(entry, res=res)
          # concatenate heatmaps
         heatmaps = np.concatenate(heatmaps, axis=2)
         
