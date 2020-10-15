@@ -12,7 +12,7 @@ class PageData(QtWidgets.QWidget):
     """ Class to create the data page of the software """
     # define custom signals
     imageDirChanged = QtCore.pyqtSignal(str)
-    resultFilePathChanged = QtCore.pyqtSignal(str)
+    outputDirectoryChanged = QtCore.pyqtSignal(str)
     imagePrefixChanged = QtCore.pyqtSignal(str)
     experimentIdChanged = QtCore.pyqtSignal(str)
     
@@ -32,6 +32,7 @@ class PageData(QtWidgets.QWidget):
     def onImageDirEditChanged(self, text=None, updateVisuals=True):
         """ Function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
+        print(text)
         if not os.path.isdir(text): # check if directory exists
             self.lineEdit_img_dir.setText("")
             print("The entered img dir is not a valid path.") 
@@ -39,17 +40,39 @@ class PageData(QtWidgets.QWidget):
         self.updateNumImages()
         self.imageDirChanged.emit(self.lineEdit_img_dir.text())
      
-    def onResFileEditChanged(self):
-        """ Function to handle when the user changes the res_file line edit """
-        # check if entered result file exists 
-        # (else replace it by an empty string)
-        if os.path.isfile(self.lineEdit_res_file.text()):
-            pass
-        else: 
-            self.lineEdit_res_file.setText("")
-            print("The enered res file is not a valid path.") 
-            
-        self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
+    def onOutDirChanged(self):
+        """ Function to handle when the user changes the output dir line edit """
+        # # check if entered result file exists 
+        # # (else replace it by an empty string)
+        # if os.path.isfile(self.lineEdit_output_dir.text()):
+        #     pass
+        # else: 
+        #     self.lineEdit_output_dir.setText("")
+        #     print("The enered res file is not a valid path.") 
+        
+        print("on out dir changed")
+        # current output directory
+        out_dir = self.lineEdit_output_dir.text()
+        
+        if not os.path.isdir(out_dir): # check if directory exists
+            self.lineEdit_output_dir.setText("")
+            print("The entered output dir is not a valid path.") 
+        else:
+            # if result file does not exist yet, create one
+            main_window = self.parent().parent()
+            print(self.parent().parent())
+            if main_window is not None:
+                res_file = main_window.getResultFileName()
+                path = os.path.join(out_dir, res_file)
+                
+                print(path)
+                if not os.path.isfile(path):
+                    print("creating out file")
+                    self.models.model_animals.exportToCsv(out_dir, res_file)
+                else:
+                    self.models.model_animals.loadFile(path)
+        
+        self.outputDirectoryChanged.emit(self.lineEdit_output_dir.text())
         
     def onPrefixEditChanged(self):
         """ Function to handle when the user changes the image prefix line edit """
@@ -72,28 +95,41 @@ class PageData(QtWidgets.QWidget):
         
         self.label_num_imgs_text.setText(num_images)   
         
-    def onBrowseResultFile(self):
-        """ Function that opens a dialog for the user to select a result file 
-        in csv format """
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv; *.xlsx")
-        self.lineEdit_res_file.setText(filename[0])
-        self.resultFilePathChanged.emit(self.lineEdit_res_file.text())
+    def onBrowseOutDir(self):
+        """ Function that opens a dialog for the user to select an output
+        directory. """
+        
+        filename = QtWidgets.QFileDialog.getExistingDirectory(
+            self, self.tr("Select Output Directory"), "", 
+            QtWidgets.QFileDialog.ShowDirsOnly)
+        
+        print(f"PageData: onBrowseOutDir {filename}")
+        
+        if len(filename) > 0: 
+            if os.path.isdir(filename):
+                self.lineEdit_output_dir.setText(filename + "/")
+                self.onImageDirEditChanged(filename + "/")
+                
+        self.onOutDirChanged()
       
     def onBrowseImageDir(self):
         """ Function that opens a dialog for the user to select a directory 
         where the images are """
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Open Directory"), "", QtWidgets.QFileDialog.ShowDirsOnly)
+        filename = QtWidgets.QFileDialog.getExistingDirectory(
+            self, self.tr("Open Image Directory"), "", 
+            QtWidgets.QFileDialog.ShowDirsOnly)
+        
         if len(filename) > 0: 
             if os.path.isdir(filename):
                 self.lineEdit_img_dir.setText(filename + "/")
-                self.onImageDirEditChanged(filename+"/")
+                self.onImageDirEditChanged(filename + "/")
 
     def updateImageDir(self):
         """ Function to update the image directory according to the input 
         from the calender widget """
-        date = self.calendarWidget.selectedDate().toString("yyyy-MM")
-        directory = IMAGE_DIRECTORY_ROOT + date + "/Time-normized images/"
-        
+        date = self.calendarWidget.selectedDate().toString("yyyy_MM")
+        directory = IMAGE_DIRECTORY_ROOT + date + "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
+        print(directory)
         # enable frame to manipulate data properties
         self.frame_data_information.setEnabled(True) # @todo always enabled
         
@@ -113,12 +149,9 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_exp_id.setText(new_exp_id) 
         self.onExpIdEditChanged()
         
-        # adapt result file path
-        self.lineEdit_res_file.setText(directory
-                                       +"result_"
-                                       +str(date.rsplit("-",1)[0])
-                                       +"neuralNet.csv")
-        self.onResFileEditChanged() # has to be called manually since the 
+        # adapt out dir path
+        #self.lineEdit_output_dir.setText(directory)
+        #self.onOutDirChanged() # has to be called manually since the 
         # lineEdit is only connected with "editingFinished" slot
         
         
@@ -185,18 +218,18 @@ class PageData(QtWidgets.QWidget):
             "    padding:10;"
             "}\n"
             "\n"
-            "#btn_res_file, #btn_img_dir, #btn_nn_activation, #btn_pred_check,"
+            "#btn_out_dir, #btn_img_dir, #btn_nn_activation, #btn_pred_check,"
             "#btn_rectify_match, #btn_check_match, #btn_length_measurement{\n"
             "    background-color: rgb(200, 200, 200);\n"
             "}"
             "\n"
-            "#btn_res_file:hover, #btn_img_dir:hover, #btn_nn_activation:hover,"
+            "#btn_out_dir:hover, #btn_img_dir:hover, #btn_nn_activation:hover,"
             "#btn_pred_check:hover, #btn_rectify_match:hover, "
             "#btn_check_match:hover, #btn_length_measurement:hover{\n"
             "  background-color: rgb(0, 203, 221);\n"
             "}\n"
             "\n"
-            "#btn_res_file:pressed, #btn_img_dir:pressed, "
+            "#btn_out_dir:pressed, #btn_img_dir:pressed, "
             "#btn_nn_activation:pressed, #btn_pred_check:pressed,"
             "#btn_rectify_match:pressed, #btn_check_match:pressed, "
             "#btn_length_measurement:pressed{\n"
@@ -678,10 +711,10 @@ class PageData(QtWidgets.QWidget):
         self.gridLayout_5.setObjectName("gridLayout_5")
         
         # line edit for the result file path
-        self.lineEdit_res_file = QtWidgets.QLineEdit(frame_data_information)
-        self.lineEdit_res_file.setMinimumSize(QtCore.QSize(150, 40))
-        self.lineEdit_res_file.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.lineEdit_res_file.setObjectName("lineEdit_res_file")
+        self.lineEdit_output_dir = QtWidgets.QLineEdit(frame_data_information)
+        self.lineEdit_output_dir.setMinimumSize(QtCore.QSize(150, 40))
+        self.lineEdit_output_dir.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.lineEdit_output_dir.setObjectName("lineEdit_output_dir")
         
         # label to display text "number of images"
         self.label_num_imgs = QtWidgets.QLabel(frame_data_information)
@@ -723,8 +756,8 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_img_prefix.setObjectName("lineEdit_img_prefix")
         
         # label to display the text "result file"
-        self.label_res_file = QtWidgets.QLabel(frame_data_information)
-        self.label_res_file.setObjectName("label_res_file")
+        self.label_out_dir = QtWidgets.QLabel(frame_data_information)
+        self.label_out_dir.setObjectName("label_out_dir")
         
         # label to display the number of images in the current directory
         self.label_num_imgs_text = QtWidgets.QLabel(frame_data_information)
@@ -734,10 +767,10 @@ class PageData(QtWidgets.QWidget):
         self.label_num_imgs_text.setObjectName("label_num_imgs_text")
                 
         # button to browse files for a result file
-        self.btn_res_file = QtWidgets.QPushButton(frame_data_information)
-        self.btn_res_file.setMinimumSize(QtCore.QSize(90, 40))
-        self.btn_res_file.setMaximumSize(QtCore.QSize(90, 40))
-        self.btn_res_file.setObjectName("btn_res_file")
+        self.btn_out_dir = QtWidgets.QPushButton(frame_data_information)
+        self.btn_out_dir.setMinimumSize(QtCore.QSize(90, 40))
+        self.btn_out_dir.setMaximumSize(QtCore.QSize(90, 40))
+        self.btn_out_dir.setObjectName("btn_out_dir")
         
         # line edit for the experiment id
         self.lineEdit_exp_id = QtWidgets.QLineEdit(frame_data_information)
@@ -750,16 +783,16 @@ class PageData(QtWidgets.QWidget):
         self.label_img_prefix.setObjectName("label_img_prefix")
         
         # --- add widgets to data information frame ------------------------ #
-        self.gridLayout_5.addWidget(self.lineEdit_res_file, 2, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_output_dir, 2, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_num_imgs, 5, 0, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_img_dir, 1, 1, 1, 1)
         self.gridLayout_5.addWidget(self.btn_img_dir, 1, 2, 1, 1)
         self.gridLayout_5.addWidget(self.label_exp_id, 4, 0, 1, 1)
         self.gridLayout_5.addWidget(self.label_img_dir, 1, 0, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_img_prefix, 3, 1, 1, 1)
-        self.gridLayout_5.addWidget(self.label_res_file, 2, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.label_out_dir, 2, 0, 1, 1)
         self.gridLayout_5.addWidget(self.label_num_imgs_text, 5, 1, 1, 1)
-        self.gridLayout_5.addWidget(self.btn_res_file, 2, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.btn_out_dir, 2, 2, 1, 1)
         self.gridLayout_5.addWidget(self.lineEdit_exp_id, 4, 1, 1, 1)
         self.gridLayout_5.addWidget(self.label_img_prefix, 3, 0, 1, 1)
         
@@ -796,7 +829,7 @@ class PageData(QtWidgets.QWidget):
         self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
         
         self.btn_img_dir.clicked.connect(self.onBrowseImageDir)
-        self.btn_res_file.clicked.connect(self.onBrowseResultFile)
+        self.btn_out_dir.clicked.connect(self.onBrowseOutDir)
         self.btn_nn_activation.clicked.connect(self.onNnActivated)
         self.btn_pred_check.clicked.connect(self.onCheckPredictions)
         self.btn_rectify_match.clicked.connect(self.onRectifyMatch)
@@ -804,7 +837,7 @@ class PageData(QtWidgets.QWidget):
         self.btn_length_measurement.clicked.connect(self.onCalcLength)
         
         self.lineEdit_img_dir.editingFinished.connect(self.onImageDirEditChanged)
-        self.lineEdit_res_file.editingFinished.connect(self.onResFileEditChanged)
+        self.lineEdit_output_dir.editingFinished.connect(self.onOutDirChanged)
         self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
         self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
   
@@ -856,7 +889,7 @@ class PageData(QtWidgets.QWidget):
         settings.setValue("date", self.calendarWidget.selectedDate())       
         settings.setValue("dataFilter", self.comboBox_image_filter.currentIndex())
         settings.setValue("imgDir", self.lineEdit_img_dir.text())       
-        settings.setValue("resultFile", self.lineEdit_res_file.text())
+        settings.setValue("resultFile", self.lineEdit_output_dir.text())
         settings.setValue("imgPrefix", self.lineEdit_img_prefix.text())
         settings.setValue("experimentId", self.lineEdit_exp_id.text())
         
@@ -865,14 +898,14 @@ class PageData(QtWidgets.QWidget):
         self.calendarWidget.setSelectedDate(settings.value("date"))
         self.comboBox_image_filter.setCurrentIndex(settings.value("dataFilter"))
         self.lineEdit_img_dir.setText(settings.value("imgDir"))
-        self.lineEdit_res_file.setText(settings.value("resultFile"))
+        self.lineEdit_output_dir.setText(settings.value("resultFile"))
         self.lineEdit_img_prefix.setText(settings.value("imgPrefix"))
         self.lineEdit_exp_id.setText(settings.value("experimentId"))
         
         # do not update the visuals when setting the image directory, 
         # that would override the restored settings of the other fields
         self.onImageDirEditChanged(updateVisuals=False)
-        self.onResFileEditChanged()
+        self.onOutDirChanged()
         self.onPrefixEditChanged()
         self.onExpIdEditChanged()
         

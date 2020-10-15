@@ -12,6 +12,14 @@ def getIcon(ressource_path):
     
     return icon
 
+def displayErrorMsg(text, information, windowTitle):
+    msg = QtWidgets.QMessageBox()
+    msg.setIcon(QtWidgets.QMessageBox.Critical)
+    msg.setText(text)
+    msg.setInformativeText(information)
+    msg.setWindowTitle(windowTitle)
+    msg.exec_()
+
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent, listview):
         QtWidgets.QItemDelegate.__init__(self, parent)

@@ -2,6 +2,7 @@ import enum
 import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui
+from Helpers import displayErrorMsg
 
 # constants for initalizing data models
 IMAGE_REMARKS= ["", "Low turbidity", "Medium turbidity", "High turbidity", 
@@ -260,7 +261,7 @@ class TableModel(QtCore.QAbstractTableModel):
         removes count rows from the table starting with the given row
     sort(column, order=AscendingOrder):
         sorts the data by column in the given order
-    exportToCsv(res_file_path, file_id=None, out_file_path=None):
+    exportToCsv(output_dir, file_id=None, out_file_path=None):
         exports the data to a CSV file
     """
     
@@ -465,51 +466,79 @@ class TableModel(QtCore.QAbstractTableModel):
         asc = True if order==QtCore.Qt.AscendingOrder else False
         self.data = self.data.sort_values(by=[column], ascending=asc)
         
-    def exportToCsv(self, res_file_path, file_id=None, out_file_path=None):
+    def exportToCsv(self, output_dir, filename, file_id=None):
         """
-        Exports the data table to a CSV file specified by out_file_path. If 
-        the path is None, the res_file_path is taken and adapted to serve as 
-        outfile. If the outfile already exists, only the current image is 
-        updated in the file.        
+        Exports the data table to a CSV file in the specified output directory. 
+        If the outfile already exists, only the current image is 
+        updated in the file. If the result file does not exists and/or the 
+        model data is None, create new file/empty dataframe.
 
         Parameters
         ----------
-        res_file_path : string
-            path to the result file
+        output_dir : string
+            path to the output directory
+        filename : string
+            name of the output file.
         file_id : string, optional
             ID of the current image. The default is None.
-        out_file_path : string, optional
-            path to the file to write the data to. The default is None.
         """
-        # get path for the output file
-        if out_file_path is None:
-            # remove 'neuralNetwork_output' from filename
-            path = res_file_path.replace("_neuralNet_output", "")
-        else:
-            path = out_file_path
+        # create the output file path
+        path = os.path.join(output_dir, filename)
         
         # if the path exists and a file_id is given, only replace the current
         # image data
         if os.path.isfile(path) and file_id is not None:
             current_output = pd.read_csv(path, sep=",")
             
-            # drop old rows of current image
-            current_output.drop(current_output[
+            if self.data is not None:
+                # drop old rows of current image
+                current_output.drop(current_output[
                 current_output["file_id"] == file_id].index, inplace=True)
             
-            # insert new rows of current image
-            current_output = current_output.append(
-                self.data[self.data["file_id"] == file_id])
+                # insert new rows of current image
+                current_output = current_output.append(
+                    self.data[self.data["file_id"] == file_id])
             
-            # sort according to file_id
-            current_output.sort_values(
-                by="file_id", ignore_index=True, inplace=True)
+                # sort according to file_id
+                current_output.sort_values(
+                    by="file_id", ignore_index=True, inplace=True)
             
-            # save the new CSV file
-            current_output.to_csv(path, sep=",", index=False)
+                # save the new CSV file
+                current_output.to_csv(path, sep=",", index=False)
+            else:
+                columns = []
+                self.data = pd.DataFrame(columns=columns)
         else:
+            # if there is no data, create empty dataframe
+            if self.data is None:
+                self.data = pd.DataFrame(columns=self.getColumns())
+            
             # write a completely new file
             self.data.to_csv(path, sep=",", index=False)
+    
+    def getColumns(self):
+        return ["file_id", "object_remarks", "group", "species", 
+                "LX1", "LY1", "LX2", "LY2", "LX3", "LY3", "LX4", "LY4", 
+                "RX1", "RY1", "RX2", "RY2", "RX3", "RY3", "RX4", "RY4",
+                "length", "height", "image_remarks", "status",
+                "manually_corrected", "experiment_id", "user_id"]
+    
+    def loadFile(self, path):
+        if os.path.isfile(path):
+            data = pd.read_csv(path, sep=",")
+            if (data.columns == self.getColumns()).all():
+                self.update(data)
+            else:
+                print("TableModel: Cannot load file due to incorrect columns.")
+                
+    def isEmpty(self):
+        if self.data is None:
+            displayErrorMsg("No output directory or file", 
+                            "Please select an output directory on data page.", 
+                            "Error")
+            return True
+        else:
+            return False
     
     def _create_row(self, animal, image_path, image_remark, experiment_id, 
                     user_id): 

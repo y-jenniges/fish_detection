@@ -39,7 +39,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         # translate UI and set starting tabs
         self.retranslateUi()
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         self.window_table.tabWidget.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
@@ -86,8 +86,10 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         if index < len(self.page_home.photo_viewer.image_list):        
             cur_file_id = os.path.basename(
                 self.page_home.photo_viewer.image_list[index])[:-6]
-            res_file_path = self.page_data.lineEdit_res_file.text()
-            self.models.model_animals.exportToCsv(res_file_path=res_file_path,
+            output_dir = self.page_data.lineEdit_output_dir.text()
+            res_file_name = self.getResultFileName()
+            self.models.model_animals.exportToCsv(output_dir=output_dir,
+                                                  filename=res_file_name,
                                                   file_id=cur_file_id)
 
         # close table window
@@ -124,18 +126,18 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.comboBox_image_filter.setItemText(0, _translate("MainWindow", "Not checked"))
         self.page_data.comboBox_image_filter.setItemText(1, _translate("MainWindow", "Species undetermined"))
         self.page_data.comboBox_image_filter.setItemText(2, _translate("MainWindow", "All"))
-        self.page_data.lineEdit_res_file.setPlaceholderText(_translate("MainWindow", "Path of result file..."))
-        self.page_data.label_num_imgs.setText(_translate("MainWindow", "Numer of images"))
+        self.page_data.lineEdit_output_dir.setPlaceholderText(_translate("MainWindow", "Path to output directory..."))
+        self.page_data.label_num_imgs.setText(_translate("MainWindow", "#Images (left+right)"))
         self.page_data.lineEdit_img_dir.setPlaceholderText(_translate("MainWindow", "Directory to left and right images..."))
         self.page_data.btn_img_dir.setText(_translate("MainWindow", "Browse"))
         self.page_data.label_exp_id.setText(_translate("MainWindow", "Experiment ID"))
         self.page_data.label_img_dir.setText(_translate("MainWindow", "Image directory"))
         self.page_data.lineEdit_img_prefix.setPlaceholderText(_translate("MainWindow", "Prefix to select images..."))
-        self.page_data.label_res_file.setText(_translate("MainWindow", "Result file"))
+        self.page_data.label_out_dir.setText(_translate("MainWindow", "Output directory"))
         self.page_data.label_num_imgs_text.setText(_translate("MainWindow", "0"))
-        self.page_data.btn_res_file.setText(_translate("MainWindow", "Browse"))
+        self.page_data.btn_out_dir.setText(_translate("MainWindow", "Browse"))
         self.page_data.lineEdit_exp_id.setPlaceholderText(_translate("MainWindow", "ID of the experiment..."))
-        self.page_data.label_img_prefix.setText(_translate("MainWindow", "Image Prefix"))
+        self.page_data.label_img_prefix.setText(_translate("MainWindow", "Image prefix"))
         self.page_data.label_data_selection.setText(_translate("MainWindow", "Select date"))
         
         self.page_data.btn_nn_activation.setText(_translate("MainWindow", "Run neural network"))
@@ -468,9 +470,34 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
     # def onImageEndingChanged(self, text): #(where used?)
     #     self.page_home.photo_viewer.setImageEnding(text)
         
-    def onResFileChanged(self, text):
-        """ Called when the result file location on the data page was changed. """
-        self.page_home.photo_viewer.setResFilePath(text)
+    def onOutDirChanged(self, text):
+        """ Called when the output directory on the data page was changed. """
+        self.page_home.photo_viewer.setOutDir(text)
+        
+    def getResultFileName(self, isInProgress=True):
+        """
+        Defines the convention for the result file name. It is 
+        results_yyyy_MM_STATE.csv, where _STATE is empty if the image editing 
+        is finished or "inProgress".
+
+        Parameters
+        ----------
+        isInProgress : bool, optional
+            indicates if the image editing is finished or not. The default is True.
+
+        Returns
+        -------
+        name : string
+            name of the result file.
+
+        """
+        if hasattr(self, 'page_data'):
+            month = self.page_data.calendarWidget.selectedDate().toString("yyyy_MM")
+            state = "" if not isInProgress else "inProgress"
+            name = "results_" + month + "_" +  state + ".csv"
+            return name
+        else:
+            return None
            
     def _initActions(self):
         """ 
@@ -487,7 +514,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.userIdChanged.connect(self.updateUserIds)
         self.page_data.imageDirChanged.connect(self.onImageDirChanged)
         self.page_data.imagePrefixChanged.connect(self.onImagePrefixChanged)
-        self.page_data.resultFilePathChanged.connect(self.onResFileChanged)
+        self.page_data.outputDirectoryChanged.connect(self.onOutDirChanged)
     
         # connect menu buttons
         self.append_main_menu_to_button(self.page_home.btn_menu)

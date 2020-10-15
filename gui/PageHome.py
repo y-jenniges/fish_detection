@@ -93,29 +93,34 @@ class PageHome(QtWidgets.QWidget):
 
     def init_ui(self):
    
-        # --- top bar  ------------------------------------------------------------------------------------------- #         
+        # --- top bar  ----------------------------------------------------- #         
         # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/home_w.png", "frame_homeBar", self)     
+        self.frame_topBar = TopFrame(":/icons/icons/home_w.png", 
+                                     "frame_homeBar", self)     
         
         
-        # --- control bar  ------------------------------------------------------------------------------------------- #         
+        # --- control bar  ------------------------------------------------- #         
         # create the cotrol bar containing the menu
         #self.frame_controlBar = MenuFrame("Home", "frame_controlBar_home")  
        
         
         # main frame
         self.frame_controlBar = self.createHomeControlBar()
-        self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding) 
+        self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                            QtWidgets.QSizePolicy.Expanding) 
         
-        # --- photo viewer  ------------------------------------------------------------------------------------------- #        
-        self.photo_viewer = PhotoViewer(self.models, imageDirectory="", imagePrefix="", resFilePath="", imageEnding="*_L.jpg", parent=self)
+        # --- photo viewer  ------------------------------------------------ #        
+        self.photo_viewer = PhotoViewer(self.models, imageDirectory="", 
+                                        imagePrefix="", outputDir="", 
+                                        imageEnding="*_L.jpg", parent=self)
         self.photo_viewer.setObjectName("photo_viewer")
         
         
-        # --- main widget ------------------------------------------------------------------------------------------- #  
+        # --- main widget -------------------------------------------------- #  
         # set main widget properties
         #self.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.setStyleSheet("#btn_leftImg:hover, #btn_rightImg:hover{background-color:transparent;}")
+        self.setStyleSheet("#btn_leftImg:hover, "
+                           "#btn_rightImg:hover{background-color:transparent;}")
         self.setObjectName("page_home")
         
         # main layout
@@ -130,7 +135,7 @@ class PageHome(QtWidgets.QWidget):
         self.layout.addWidget(self.photo_viewer)
         
         
-        # --- zoom widget  ------------------------------------------------------------------------------------------- # 
+        # --- zoom widget  ------------------------------------------------- # 
         # create the zoom slider widget
         self.widget_zoom = QtWidgets.QWidget(self)
         self.widget_zoom.setFixedSize(QtCore.QSize(200, 50))

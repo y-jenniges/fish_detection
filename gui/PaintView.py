@@ -7,7 +7,7 @@ import os
 
 from Animal import Animal, AnimalSpecificationsWidget
 from Models import AnimalGroup
-from Helpers import getIcon
+from Helpers import getIcon, displayErrorMsg
 
 
 ANIMAL_LIST = []
@@ -20,7 +20,7 @@ class PhotoViewer(QtWidgets.QWidget):
     """    
     newImageLoaded = QtCore.pyqtSignal(str)
     
-    def __init__(self, models, imageDirectory, imagePrefix, resFilePath="", 
+    def __init__(self, models, imageDirectory, imagePrefix, outputDir="", 
                  imageEnding="*_L.jpg", parent=None):
         super(PhotoViewer, self).__init__(parent)
 
@@ -31,7 +31,7 @@ class PhotoViewer(QtWidgets.QWidget):
         self.image_directory = imageDirectory
         self.image_prefix = imagePrefix
         self.image_ending = imageEnding
-        self.res_file_path = resFilePath
+        self.output_dir = outputDir
 
         # list of image pathes and the current image index
         self.cur_image_index = 0
@@ -57,39 +57,37 @@ class PhotoViewer(QtWidgets.QWidget):
             self.loadImage(self.image_list[self.cur_image_index])
 
     def loadResFile(self):
-        if os.path.isfile(self.res_file_path):
-            substring = "_neuralNet_output"
-            
-            # load the neural network result file or the previsouly saved one
-            if substring in self.res_file_path:
-                if os.path.isfile(self.res_file_path.replace(substring,"")):
-                    self.res_file_path = self.res_file_path.replace(substring,"")  
-            else:
-                self.res_file_path = self.res_file_path
-            
-            # load the result file
-            res_file = pd.read_csv(self.res_file_path, sep=",")
-            
-            # set data on animal model
-            self.models.model_animals.update(res_file) 
-      
-            # add image remarks to model
-            img_remarks = res_file["image_remarks"].unique()
-            for remark in img_remarks:
-                self.models.addImageRemark(remark)
-            
-            # add animal remarks to model
-            animal_remarks = res_file["object_remarks"].unique()
-            for remark in animal_remarks:
-                self.models.addAnimalRemark(remark)               
-            
-            # add species to list
-            species = res_file["species"].unique()
-            for spec in species:
-                self.models.addSpecies(spec, "")
+        main_window = self.parent().parent().parent()
+        if main_window is not None:
+            res_file_name = main_window.getResultFileName()
+        
+            if res_file_name is not None:
+                path = os.path.join(self.output_dir, res_file_name)
+                
+                if os.path.isfile(path):
+                    # load the result file
+                    res_file = pd.read_csv(path, sep=",")
+                    
+                    # set data on animal model
+                    self.models.model_animals.update(res_file) 
+              
+                    # add image remarks to model
+                    img_remarks = res_file["image_remarks"].unique()
+                    for remark in img_remarks:
+                        self.models.addImageRemark(remark)
+                    
+                    # add animal remarks to model
+                    animal_remarks = res_file["object_remarks"].unique()
+                    for remark in animal_remarks:
+                        self.models.addAnimalRemark(remark)               
+                    
+                    # add species to list in model
+                    species = res_file["species"].unique()
+                    for spec in species:
+                        self.models.addSpecies(spec, "")
                                
-    def setResFilePath(self, text):
-        self.res_file_path = text
+    def setOutDir(self, text):
+        self.output_dir = text
         self.loadResFile()
     
     def setImageDir(self, text):
@@ -208,13 +206,46 @@ class PhotoViewer(QtWidgets.QWidget):
     
     
     def exportToCsv(self, file_id):
-        res_file_path = self.parent().parent().parent().\
-            page_data.lineEdit_res_file.text()
-        self.models.model_animals.exportToCsv(res_file_path, file_id)
+        main_window = self.parent().parent().parent()
+        output_dir = main_window.page_data.lineEdit_output_dir.text()
+        res_file_name = main_window.getResultFileName()
+        self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id)
+    
+    # def isResFileExisting(self):
+    #     main_window = self.parent().parent().parent()
+    #     output_dir = main_window.page_data.lineEdit_output_dir.text()
+    #     res_file_name = main_window.getResultFileName()
+    #     if os.path.isfile(os.path.join(output_dir, res_file_name)):
+    #         return True
+    #     else:
+    #         displayErrorMsg("No output directory or file", "Please select an output directory on data page.", "Error")
+    #         return False
     
     def on_next_image(self):
-        # current file_id
-        if self.cur_image_index < len(self.image_list):
+        if not self.models.model_animals.isEmpty(): 
+            if self.cur_image_index < len(self.image_list):
+                cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
+                
+                # set current image to status "checked"
+                cur_file_indices = self.models.model_animals.data[
+                    self.models.model_animals.data['file_id'] ==  cur_file_id].index
+                
+                for idx in cur_file_indices:
+                    self.models.model_animals.data.loc[idx, "status"] = "checked"
+                
+                # if there is a next image, load it
+                if self.cur_image_index < len(self.image_list) - 1:
+                    # get the new image and load it
+                    path = self.image_list[self.cur_image_index+1]
+                    self.cur_image_index = self.cur_image_index + 1        
+                    self.loadImage(path)
+                
+                # update the previous image in the csv file
+                self.exportToCsv(cur_file_id)
+    
+    def on_previous_image(self):
+        if not self.models.model_animals.isEmpty(): 
+            # current file_id
             cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
             
             # set current image to status "checked"
@@ -222,35 +253,15 @@ class PhotoViewer(QtWidgets.QWidget):
                 self.models.model_animals.data['file_id'] ==  cur_file_id].index
             for idx in cur_file_indices:
                 self.models.model_animals.data.loc[idx, "status"] = "checked"
-            
-            # if there is a next image, load it
-            if self.cur_image_index < len(self.image_list) - 1:
-                # get the new image and load it
-                path = self.image_list[self.cur_image_index+1]
-                self.cur_image_index = self.cur_image_index + 1        
-                self.loadImage(path)
+                
+            # if there is a previous image, load it
+            if self.cur_image_index > 0:
+                path = self.image_list[self.cur_image_index-1]
+                self.cur_image_index = self.cur_image_index - 1
+                self.loadImage(path) 
             
             # update the previous image in the csv file
             self.exportToCsv(cur_file_id)
-       
-    def on_previous_image(self):
-        # current file_id
-        cur_file_id = os.path.basename(self.image_list[self.cur_image_index])[:-6]
-        
-        # set current image to status "checked"
-        cur_file_indices = self.models.model_animals.data[
-            self.models.model_animals.data['file_id'] ==  cur_file_id].index
-        for idx in cur_file_indices:
-            self.models.model_animals.data.loc[idx, "status"] = "checked"
-            
-        # if there is a previous image, load it
-        if self.cur_image_index > 0:
-            path = self.image_list[self.cur_image_index-1]
-            self.cur_image_index = self.cur_image_index - 1
-            self.loadImage(path) 
-        
-        # update the previous image in the csv file
-        self.exportToCsv(cur_file_id)
 
 
     def updateImageCountVisual(self):
@@ -728,7 +739,7 @@ class AnimalPainter():
                 self.is_remove_mode_active = True
                 
             else:
-                self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")           
+                displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")           
         else:
             self.is_add_mode_active = False
             self.is_remove_mode_active = True          
@@ -740,18 +751,10 @@ class AnimalPainter():
                 if (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn) or (not self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
                     self.is_add_mode_active = False
                 else:
-                    self.displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
+                    displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
-
-    def displayErrorMsg(self, text, information, windowTitle):
-        msg = QtWidgets.QMessageBox()
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
-        msg.setText(text)
-        msg.setInformativeText(information)
-        msg.setWindowTitle(windowTitle)
-        msg.exec_()
 
     def mousePressEvent(self, event):
         # convert event position to scene corrdinates
