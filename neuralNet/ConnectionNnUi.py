@@ -12,10 +12,18 @@ import matplotlib.cm as cm
 import HelperFunctions as helpers
 #from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
+import Losses
 
-def loadNn(path):
+
+GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 3: "Chaetognatha", 4: "Unidentified", 5: "Jellyfish"}
+
+
+def loadNn(path, weights=None):
     if os.path.isfile(path):
-        return tf.keras.models.load_model(path)
+        model = tf.keras.models.load_model(path, custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
+        #model = tf.keras.models.load_model(path)
+        return model
+    
     else:
         return None
 
@@ -74,9 +82,11 @@ def resizeHm(img, hm):
     #     img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     #plt.imshow(hmResized)
 
-def findCoordinates(heatmap):
-    thr = applyThresholdToHm(heatmap, 50)
-    coordinates = nonMaxSuppression(thr, 20)
+def findCoordinates(heatmap, threshold=50, radius=20):
+    thr = applyThresholdToHm(heatmap, threshold)
+    plt.imshow(thr)
+    plt.show()
+    coordinates = nonMaxSuppression(thr, radius)
     
     # remove coordinates whose x and y are closer than 10px
     df = pd.DataFrame(coordinates)
@@ -90,7 +100,7 @@ def findCoordinates(heatmap):
             if abs(df.iloc[i][0] - df.iloc[j][0]) < 10 \
             and abs(df.iloc[i][1] - df.iloc[j][1]) < 10 \
             and i != j and j in final_coords.index:
-                print(i,j)
+                #print(i,j)
                 final_coords.drop(j, inplace=True)  
                 
     # drop duplicates
@@ -124,27 +134,48 @@ def findHeadTailMatches(heads, tails):
             
     # calculate matches minimizing the total distance
     ht_distances = np.array(ht_distances)
-    _, assignment = linear_sum_assignment(ht_distances)
-    
-    matches = np.array([(heads[i], tails[assignment[i]]) for i in range(len(heads))])
+    matches = np.array([])
+    if ht_distances.size != 0:
+        _, assignment = linear_sum_assignment(ht_distances)
+        
+        matches = np.array([(heads[i], tails[assignment[i]]) for i in range(len(heads))])
     return matches 
     #return np.array(assignment)
+
+def scaleMatchCoordinates(matches, input_res, output_res):
+    xfactor = output_res[0]/input_res[0]
+    yfactor = output_res[1]/input_res[1]
+    
+    scaled_matches = []
+    for m in matches:
+        m = [[m[0][0]*xfactor, m[0][1]*yfactor], # scale head
+             [m[1][0]*xfactor, m[1][1]*yfactor]] # scale tail
+        scaled_matches.append(m)
+    
+    return np.array(scaled_matches)
 
 def exportAnimalsToCsv():
     pass
 
-model_path = "../data/output/36/model-H"
+model_path = "../data/output/901/model-H"
 #modelPath = "../data/output/59/model-L"
 #modelPath = "../data/output/48/model-L" # trained on all animals, coordiantes dont work
 
+weights = np.array([ 1.        ,  1.04084507,  1.04084507,  1.        ,  1.        ,
+        8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
+       12.52542373])
+
 print("load model...")
-model = loadNn(model_path)
+model = loadNn(model_path, weights)
 
 
-img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
+#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
-img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
-#imgPath = "G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_01.00.49_L.jpg"
+#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
+#img_path = "G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_01.00.49_L.jpg"
+img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/826.jpg" #jellyfish
+#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/575.jpg" #jellyfish
+#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/309.jpg" #crust
 
 print("load image")
 image = loadImage(img_path, factor=32)
@@ -156,46 +187,91 @@ prediction = applyNnToImage(model, image)
 
 print("prediction done")
 
-#heads = prediction[0][0,:,:,0]*255
-heads = prediction[0,:,:,0]*255
-heads = heads.astype('uint8')
 
-# get coordinates
-head_coordinates = findCoordinates(heads)
+# iterate over the groups
+df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
+for i in range(1, prediction.shape[3], 2):
+    print(i)
+    
+    heads = prediction[0,:,:,i]*255
+    heads = heads.astype('uint8')
+    
+    tails = prediction[0,:,:,i+1]*255
+    tails = tails.astype('uint8')
 
-# show prediction heatmap and coordinates
-plt.imshow(heads, cmap=plt.cm.gray)
-plt.autoscale(False)
-plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
-plt.show()
+    # get coordinates
+    print("get head coordinates")
+    head_coordinates = findCoordinates(heads, 110, 5) # thresh for fish:100, jellyfish:10?
+    print("get tail coordinates")
+    tail_coordinates = findCoordinates(tails, 110, 5)
+    
+    print("find head tail matches")
+    # find head-tail matches
+    matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+
+    # scale matches to image resolution
+    matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
+    
+    group = GROUP_DICT[np.ceil(i/2)]
+    
+    #file_id = Rectified_TN_Exif_Remos1_2015.08.02_00.00.49
+    
+    # show prediction heatmap and coordinates
+    plt.imshow(heads, cmap=plt.cm.gray)
+    plt.autoscale(False)
+    plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
+    plt.show()
+    
+    plt.imshow(tails, cmap=plt.cm.gray)
+    plt.autoscale(False)
+    plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
+    plt.show()
+
+    # plot each match with a different colour
+    colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
+    plt.imshow(heads, cmap=plt.cm.gray)
+    plt.imshow(img)
+    for i in range(matches.shape[0]):
+        plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+        plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
+    plt.show()
 
 
-# get gt
-label_root = "../data/maritime_dataset_25/labels/"
-test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
-
-fish_heads = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-fish_tails = np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-gt = [entry for entry in test_labels if entry["filename"] == img_path][0]
-gt_heads = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_heads)])
-gt_tails = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_tails)])
+    # append predicted animals from the current group
+    for m in matches:
+        animal = {"group": group, 
+                  "LX1": m[0][0], "LY1": m[0][1], # head
+                  "LX2": m[1][0], "LY2": m[1][1]} # tail
+        df = df.append(animal, ignore_index=True)
+    
 
 
-#matches = findHeadTailMatches(head_coordinates, tail_coordinates)
-matches = findHeadTailMatches(gt_heads, gt_tails)
+# # get gt
+# label_root = "../data/maritime_dataset_25/labels/"
+# test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
-# show groundtruth
-helpers.showImageWithHeatmap(img, None, gt["animals"], 1, "both")
+# fish_heads = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+# fish_tails = np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+# gt = [entry for entry in test_labels if entry["filename"] == img_path][0]
+# gt_heads = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_heads)])
+# gt_tails = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_tails)])
 
 
-# plot each match with a different colour
-colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
-plt.imshow(heads, cmap=plt.cm.gray)
-plt.imshow(img)
-for i in range(matches.shape[0]):
-    plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
-    plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
-plt.show()
+# #matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+# matches = findHeadTailMatches(gt_heads, gt_tails)
+
+# # show groundtruth
+# helpers.showImageWithHeatmap(img, None, gt["animals"], 1, "both")
+
+
+# # plot each match with a different colour
+# colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
+# plt.imshow(heads, cmap=plt.cm.gray)
+# plt.imshow(img)
+# for i in range(matches.shape[0]):
+#     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+#     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
+# plt.show()
 
 
 
