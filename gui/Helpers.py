@@ -1,5 +1,13 @@
 import os
+import cv2
+import numpy as np
+import pandas as pd
 import tensorflow as tf
+import matplotlib.pyplot as plt
+from skimage.transform import resize
+from scipy.optimize import linear_sum_assignment
+from skimage.feature import peak_local_max
+from keras.preprocessing.image import load_img, img_to_array
 from PyQt5 import QtCore, QtWidgets, QtGui
 import Losses
 
@@ -407,7 +415,6 @@ def loadImage(fname, factor=32, rescale_range=True):
         # image needs to be in [-1,1]
         img = np.asarray(img)
         img = 2.*img/np.max(img) - 1
-    print(f"image after {img.shape}")
     return img
 
 def applyNnToImage(model, image):
@@ -441,8 +448,8 @@ def resizeHm(img, hm):
 
 def findCoordinates(heatmap, threshold=50, radius=20):
     thr = applyThresholdToHm(heatmap, threshold)
-    plt.imshow(thr)
-    plt.show()
+    #plt.imshow(thr)
+    #plt.show()
     coordinates = nonMaxSuppression(thr, radius)
     
     # remove coordinates whose x and y are closer than 10px
@@ -493,11 +500,9 @@ def findHeadTailMatches(heads, tails):
     ht_distances = np.array(ht_distances)
     matches = np.array([])
     if ht_distances.size != 0:
-        _, assignment = linear_sum_assignment(ht_distances)
-        
-        matches = np.array([(heads[i], tails[assignment[i]]) for i in range(len(heads))])
+        head_assignment, tail_assignment = linear_sum_assignment(ht_distances)
+        matches = np.array([(heads[head_assignment[i]], tails[tail_assignment[i]]) for i in range(len(tail_assignment))])
     return matches 
-    #return np.array(assignment)
 
 def scaleMatchCoordinates(matches, input_res, output_res):
     xfactor = output_res[0]/input_res[0]

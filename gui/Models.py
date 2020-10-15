@@ -116,7 +116,8 @@ class Models():
         
         # prediction model
         self.model_predicter = Predicter()
-        
+            
+    
     def addImageRemark(self, remark):
         """
         Add a remark to the image remark model.
@@ -430,6 +431,48 @@ class TableModel(QtCore.QAbstractTableModel):
             new_row = self._create_row(animals[i], image_path, image_remark, 
                                        experiment_id, user_id)
             self.data = self.data.append(new_row)    
+        self.endInsertRows()
+
+        # sort data        
+        self.sort("file_id")
+        return True
+
+    def insertDfRows(self, row, count, df, image_path, image_remark, 
+                   experiment_id, user_id, parent=QtCore.QModelIndex()):
+        """
+        Inserts count rows into the dataframe before the given row. The rows
+        are filled using the image path, remarks, experiment ID, user ID 
+        and with the data from a dataframe.
+
+        Parameters
+        ----------
+        row : int
+            insert new rows before this one
+        count : int
+            number of rows to be inserted
+        df : DataFrame
+            animal information to be stored in the CSV file
+        image_path : string
+            path to the current image
+        image_remark : string
+            remark for the current image
+        experiment_id : string
+            ID of the experiment the current image belongs to
+        user_id : string
+            ID of the currently working user
+        parent : TYPE, optional
+            DESCRIPTION. The default is QtCore.QModelIndex().
+
+        Returns
+        -------
+        bool
+            returns True when rows are inserted
+        """
+        self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
+        for i in range(count):
+            # check if columns are a subset of desired columns
+            if df.columns.isin(self.data.columns).all():
+                self.data = self.data.append(df.iloc[i])    
         self.endInsertRows()
 
         # sort data        

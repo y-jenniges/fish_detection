@@ -112,9 +112,10 @@ class TableWindow(QtWidgets.QMainWindow):
         filename = dialog.getSaveFileName(self, 'Save Table', filter="*.csv")
         
         # export to CSV
-        self.models.model_animals.exportToCsv(res_file_path="", 
-                                              file_id=None, 
-                                              out_file_path=filename[0])
+        self.models.model_animals.exportToCsv(output_dir="", 
+                                              filename=filename[0],
+                                              file_id=None
+                                              )
 
     def _createFrameTable(self, parent):
         """

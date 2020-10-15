@@ -10,7 +10,7 @@ from Models import AnimalGroup
 from Helpers import getIcon, displayErrorMsg
 
 
-ANIMAL_LIST = []
+#ANIMAL_LIST = []
 
        
 class PhotoViewer(QtWidgets.QWidget):
@@ -45,16 +45,16 @@ class PhotoViewer(QtWidgets.QWidget):
             
             self.image_list = [x for x in images_with_prefix if date in x]
             
-        #self.res_file = None
+        # load result file if one already exists
         self.loadResFile()
 
         # initalize gui and actions
         self._initUi()
         self._initActions()
         
-        # load initial image
-        if self.cur_image_index < len(self.image_list):
-            self.loadImage(self.image_list[self.cur_image_index])
+        # # load initial image
+        # if self.cur_image_index < len(self.image_list):
+        #     self.loadImage(self.image_list[self.cur_image_index])
 
     def loadResFile(self):
         main_window = self.parent().parent().parent()
@@ -118,7 +118,6 @@ class PhotoViewer(QtWidgets.QWidget):
         if not self.image_list:
             self.loadImage(path=None)
         else:
-            
             self.loadImage(self.image_list[self.cur_image_index])
 
     def resizeEvent(self, event):
@@ -132,22 +131,24 @@ class PhotoViewer(QtWidgets.QWidget):
             self.imageArea.setPhoto(photo)
             self.updateImageCountVisual()
         
-        # remove animals
-        self.imageArea.animal_painter.removeAll()
+        self.imageArea.animal_painter.resize()
+        # # remove animals
+        # self.imageArea.animal_painter.removeAll()
         
-        # redraw animals
-        for animal in ANIMAL_LIST:
-            # update positions
-            #print(animal.position_head)
-            self.imageArea.animal_painter.updateAnimalPosition(animal)#, self.imageArea.img_width, self.imageArea.img_height)
+        # # redraw animals
+        # for animal in self.animal_list:
+        # #for animal in ANIMAL_LIST:
+        #     # update positions
+        #     #print(animal.position_head)
+        #     self.imageArea.animal_painter.updateAnimalPosition(animal)#, self.imageArea.img_width, self.imageArea.img_height)
         
-            # redraw animals
-            self.imageArea.animal_painter.drawAnimalHead(animal)
-            self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
+        #     # redraw animals
+        #     self.imageArea.animal_painter.drawAnimalHead(animal)
+        #     self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
             
-            #print(animal.position_head)
+        #     #print(animal.position_head)
         
-        self.imageArea.animal_painter.updateBoundingBoxes()
+        # self.imageArea.animal_painter.updateBoundingBoxes()
 
         # self.imageArea.img_width = self.imageArea.width()
         # self.imageArea.img_height = self.imageArea.height()     
@@ -185,7 +186,9 @@ class PhotoViewer(QtWidgets.QWidget):
         self.imageArea.animal_painter.removeAll()
         
         # update animal list
-        ANIMAL_LIST.clear()
+        #ANIMAL_LIST.clear()
+        self.imageArea.animal_painter.animal_list.clear()
+        #self.animal_list.clear()
         
         # find current image in result file and draw all animals from it
         if self.models.model_animals.data is not None and path is not None:
@@ -524,6 +527,9 @@ class AnimalPainter():
         # data models
         self.models = models
         
+        # list with all animals on the current image
+        self.animal_list = []
+        
         # dragging offset when moving the markings for head and/or tail
         self.drag_position_head = QtCore.QPoint()
         self.drag_position_tail = QtCore.QPoint()
@@ -568,9 +574,27 @@ class AnimalPainter():
             self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
             self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
      
+    def resize(self):
+        # remove animals
+        self.removeAll()
+        
+        # redraw animals
+        for animal in self.animal_list:
+            # update positions
+            #print(animal.position_head)
+            self.imageArea.animal_painter.updateAnimalPosition(animal)#, self.imageArea.img_width, self.imageArea.img_height)
+        
+            # redraw animals
+            self.imageArea.animal_painter.drawAnimalHead(animal)
+            self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
+            
+            #print(animal.position_head)
+        
+        self.imageArea.animal_painter.updateBoundingBoxes()
 
     def removeAll(self):
-        for animal in ANIMAL_LIST:
+        #for animal in ANIMAL_LIST:
+        for animal in self.animal_list:
             self.removeHeadVisual(animal)
             self.removeTailVisual(animal)
             self.removeLineVisual(animal)
@@ -619,12 +643,14 @@ class AnimalPainter():
      
     def updateBoundingBoxes(self):
         # remove bounding of other animals
-        for animal in ANIMAL_LIST:
+        #for animal in ANIMAL_LIST:
+        for animal in self.animal_list:
             self.imageArea._scene.removeItem(animal.boundingBox_visual)
             animal.boundingBox_visual = None
 
         # draw the current animal bounding box
-        if self.cur_animal is not None and self.cur_animal in ANIMAL_LIST:
+        #if self.cur_animal is not None and self.cur_animal in ANIMAL_LIST:
+        if self.cur_animal is not None and self.cur_animal in self.animal_list:
             self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
             self.widget_animal_specs.setAnimal(self.cur_animal)
@@ -699,34 +725,34 @@ class AnimalPainter():
       
     def on_next_animal(self):
         # if no animal ist selected, then select first one
-        if self.cur_animal is None and len(ANIMAL_LIST) >0:
-            self.cur_animal = ANIMAL_LIST[0]          
+        if self.cur_animal is None and len(self.animal_list) >0:
+            self.cur_animal = self.animal_list[0]          
             
         # only switch animals if the current one is in the list (and not None)
-        if self.cur_animal in ANIMAL_LIST:
-            index = ANIMAL_LIST.index(self.cur_animal)
+        if self.cur_animal in self.animal_list:
+            index = self.animal_list.index(self.cur_animal)
     
             # only go to next animal if there is another one
-            if index < len(ANIMAL_LIST)-1:
-                self.cur_animal = ANIMAL_LIST[index+1]
+            if index < len(self.animal_list)-1:
+                self.cur_animal = self.animal_list[index+1]
                 self.updateBoundingBoxes()
             else:
                 # else, go to first image
-                self.cur_animal = ANIMAL_LIST[0]
+                self.cur_animal = self.animal_list[0]
                 self.updateBoundingBoxes()
                    
     def on_previous_animal(self):
         # only switch animals if the current one is in the list (and not None)
-        if self.cur_animal in ANIMAL_LIST:
-            index = ANIMAL_LIST.index(self.cur_animal)
+        if self.cur_animal in self.animal_list:
+            index = self.animal_list.index(self.cur_animal)
             
             # only go to previous animal, if there is one
             if index > 0:
-                self.cur_animal = ANIMAL_LIST[index-1]
+                self.cur_animal = self.animal_list[index-1]
                 self.updateBoundingBoxes() 
             else:
                 # else, go to last image
-                self.cur_animal = ANIMAL_LIST[len(ANIMAL_LIST)-1]
+                self.cur_animal = self.animal_list[len(self.animal_list)-1]
                 self.updateBoundingBoxes()                 
 
     def on_remove_animal(self):
@@ -772,18 +798,18 @@ class AnimalPainter():
          
         if(self.is_remove_mode_active):
             # remove mode
-            for animal in ANIMAL_LIST:
+            for animal in self.animal_list:
                 if(animal.boundingBox.contains(pos)):
                     # get index of animal in list
-                    index = ANIMAL_LIST.index(animal)
+                    index = self.animal_list.index(animal)
                          
                     # if the current animal is to be removed, find a new current animal
                     if(animal == self.cur_animal):
                         # if the index is not the last one, set the next animal as current animal
-                        if index != len(ANIMAL_LIST)-1:
-                            self.cur_animal = ANIMAL_LIST[index+1]
-                        elif index == len(ANIMAL_LIST)-1 and len(ANIMAL_LIST)>1:
-                            self.cur_animal = ANIMAL_LIST[index-1]
+                        if index != len(self.animal_list)-1:
+                            self.cur_animal = self.animal_list[index+1]
+                        elif index == len(self.animal_list)-1 and len(self.animal_list)>1:
+                            self.cur_animal = self.animal_list[index-1]
                         else:
                             self.cur_animal = None
                     
@@ -797,7 +823,7 @@ class AnimalPainter():
                     pos = self.models.model_animals.data.index.get_loc(animal.row_index)
                     self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())
 
-                    ANIMAL_LIST.remove(animal) 
+                    self.animal_list.remove(animal) 
                      
                     
                     break
@@ -807,7 +833,7 @@ class AnimalPainter():
         # if the user clicks on no organism, there is no current animal
         elif(not self.is_remove_mode_active and not self.is_add_mode_active):
             is_click_on_animal = False 
-            for animal in ANIMAL_LIST:
+            for animal in self.animal_list:
                 if(animal.boundingBox.contains(pos)):
                     self.cur_animal = animal
                     is_click_on_animal = True
@@ -832,7 +858,7 @@ class AnimalPainter():
                     self.drawAnimalTailLineBoundingBox(self.cur_animal)
                     
                     # add animal to list
-                    ANIMAL_LIST.append(self.cur_animal)
+                    self.animal_list.append(self.cur_animal)
                     
                     cur_image_path = self.imageArea.parent().image_list[self.imageArea.parent().cur_image_index]
                     image_remark = self.imageArea.parent().parent().comboBox_imgRemark.currentText()
@@ -1006,7 +1032,7 @@ class AnimalPainter():
                 self.drawAnimalTailLineBoundingBox(self.cur_animal)
                 
                 # append animal to list
-                ANIMAL_LIST.append(self.cur_animal)   
+                self.animal_list.append(self.cur_animal)   
                 
                 # update bounding boxes
                 self.imageArea.animal_painter.updateBoundingBoxes()      

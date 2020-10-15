@@ -846,15 +846,49 @@ class PageData(QtWidgets.QWidget):
     
     def onNnActivated(self):
         # if neural netowk is not None
-        
-        # create a thread for the neural network 
-        
-        # start image prections
-        
-        # updae label displaying number of predicted images
-        
-        # @todo load NN somewhere
-        pass
+        if self.models.model_predicter is not None:
+            
+            # create a thread for the neural network 
+            
+            # get image path list from photo viewer
+            img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+            img_path = img_list[0]
+            
+            print(img_list)
+            #img_list = ["G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_00.00.49_L.jpg"]
+            #img_list = ["G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"]
+            for path in img_list:
+                # start image prections
+                df = self.models.model_predicter.predictImage(path)
+                print(df)
+                
+                row = len(self.models.model_animals.data)
+                count = len(df)
+                exp_id = self.lineEdit_exp_id.text()
+                user_id = self.frame_topBar.label_user_id.text()
+                
+                print(row, count, exp_id, user_id)
+                
+                # insert data into model
+                self.models.model_animals.insertDfRows(row=row, 
+                                                       count=count, 
+                                                       df=df,
+                                                       image_path=path, 
+                                                       image_remark="", 
+                                                       experiment_id=exp_id, 
+                                                       user_id=user_id)
+                
+                # generate animals and draw them
+                # for i in range(len(df)):
+                    
+                # models, row_index, position_head=QtCore.QPoint(-1,-1), 
+                #  position_tail=QtCore.QPoint(-1,-1), 
+                #  group=AnimalGroup.UNIDENTIFIED, 
+                #  species=AnimalSpecies.UNIDENTIFIED, remark=""):
+
+            # update label displaying number of predicted images
+            
+
     
     def onCheckPredictions(self):
         # if there is at least one predicted image, navigate to home screen
