@@ -366,7 +366,7 @@ def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample
     # scale_factor:veector scale
     image = downsample(loadImage(entry["filename"], image_factor), downsample_factor)
     img_y, img_x = image.shape[0], image.shape[1]
-    print(image.shape)
+    #print(image.shape)
     
     head_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
     tail_vectors = np.zeros((img_y, img_x, 2), dtype=np.float32)
@@ -389,9 +389,9 @@ def get_head_tail_vectors(entry, image_factor=32, vector_scale=200.0, downsample
         tail_dx = -1*head_dx
         tail_dy = -1*head_dy
         
-        print(y_head, x_head)
-        print(y_tail, x_tail)
-        print()
+        # print(y_head, x_head)
+        # print(y_tail, x_tail)
+        # print()
         # add head and tail vector to vector field
         head_vectors[y_head, x_head] = np.array([head_dx, head_dy])
         tail_vectors[y_tail, x_tail] = np.array([tail_dx, tail_dy])
