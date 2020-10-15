@@ -887,37 +887,15 @@ class PageSettings(QtWidgets.QWidget):
         
 # --- actions in nn tab ----------------------------------------------------- #   
     def nn_path_changed(self, model_path):
-        weights = np.array([ 1,  1.04084507,  1.04084507,  1,  1,
-        8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
-       12.52542373])
-
         print("load model...")
-        self.nn_model = self.loadNn(model_path, weights)
-        
-    def loadNn(self, path, weights=None):
-        if os.path.isfile(path):
-            try:
-                model = tf.keras.models.load_model(path, custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
-                return model 
-            except:
-                # block signal (we do not want to call nn_path_changed) 
-                # and set empty text in line edit
-                self.lineEdit_nn.blockSignals(True)
-                self.lineEdit_nn.setText("")
-                self.lineEdit_nn.blockSignals(False)
+        if not self.models.model_predicter.loadNeuralNet(model_path):
+            # if loading of neural net was not successfull,
+            	# block signal (we do not want to call nn_path_changed again) 
+            # and set empty text in line edit
+            self.lineEdit_nn.blockSignals(True)
+            self.lineEdit_nn.setText("")
+            self.lineEdit_nn.blockSignals(False)
                 
-                print("Entered neural network is not valid.")
-                msg = QtWidgets.QMessageBox()
-                msg.setIcon(QtWidgets.QMessageBox.Critical)
-                msg.setText("Loading Error")
-                msg.setInformativeText(f"The neural network from {path} is not a valid model.")
-                msg.setWindowTitle("Error")
-                msg.exec_()  
-                return None    
-        else:
-            return None
-
-        
     def browse_for_nn(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
         path = filename[0]

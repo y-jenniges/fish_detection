@@ -1,8 +1,10 @@
 import enum
 import os
+import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-from Helpers import displayErrorMsg
+import Helpers
+from Predicter import Predicter
 
 # constants for initalizing data models
 IMAGE_REMARKS= ["", "Low turbidity", "Medium turbidity", "High turbidity", 
@@ -16,12 +18,10 @@ GROUP_ICON_LIST = [":/animal_markings/animal_markings/square_blue.png",
                    ":/animal_markings/animal_markings/square_black.png", 
                    ":/animal_markings/animal_markings/square_gray.png"]
 
-
 class AnimalGroup(enum.Enum):
     """ 
     Enum for possible animal groups.
-    """
-    
+    """   
     FISH = 1,  
     CRUSTACEA = 2, 
     CHAETOGNATHA = 3, 
@@ -113,6 +113,9 @@ class Models():
             
         # data model for all animal information
         self.model_animals = TableModel(None)
+        
+        # prediction model
+        self.model_predicter = Predicter()
         
     def addImageRemark(self, remark):
         """
@@ -533,7 +536,7 @@ class TableModel(QtCore.QAbstractTableModel):
                 
     def isEmpty(self):
         if self.data is None:
-            displayErrorMsg("No output directory or file", 
+            Helpers.displayErrorMsg("No output directory or file", 
                             "Please select an output directory on data page.", 
                             "Error")
             return True
