@@ -209,7 +209,7 @@ x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap"
 modelH = keras.Model(inputs=input, outputs=x)
 modelH.compile(loss=Losses.weighted_categorical_crossentropy(weights), 
                optimizer=keras.optimizers.Adam(), 
-               metrics = {"heatmap": ["mae", "acc"]})
+               metrics = ["mae", "acc"])
 
 modelH.summary()
 

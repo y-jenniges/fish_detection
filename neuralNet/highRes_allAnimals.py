@@ -33,21 +33,17 @@ bodyPart:
 """
 # constants
 BATCH_SIZE = 2
-EPOCHS_1 = 1
-EPOCHS_2 = 1
-EPOCHS_3 = 1
+EPOCHS_1 = 10
+EPOCHS_2 = 100
+EPOCHS_3 = 20
 
 # output directory
-out_path = "../data/output/800/"
+out_path = "../data/output/801/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
-
 weights = np.array(list(class_weights.values()))
-
-train_labels = train_labels[:2]
-val_labels = val_labels[:2]
 
 print(f"class weights {weights}")
 
@@ -211,7 +207,7 @@ x = layers.Conv2D (11, 1, padding='same', activation="softmax", name = "heatmap"
 modelH = keras.Model(inputs=input, outputs=x)
 modelH.compile(loss="categorical_crossentropy", 
                optimizer=keras.optimizers.Adam(), 
-               metrics = {"heatmap": ["mae", "acc"]})
+               metrics = ["mae", "acc"])
 
 modelH.summary()
 
