@@ -161,29 +161,33 @@ class StereoCorrespondence():
         
         self.map_L1, self.map_L2 = cv2.initUndistortRectifyMap(self.c_L, self.d_L, self.R1, self.P1, img_size, m1type=cv2.CV_32FC2)
         self.map_R1, self.map_R2 = cv2.initUndistortRectifyMap(self.c_R, self.d_R, self.R2, self.P2, img_size, m1type=cv2.CV_32FC2)
-
+       
+    def distort(self, point, lr="L"):
+        """ redistort undistorted point """
+        x = np.int64(point[0])
+        y = np.int64(point[1])
         
-    def calculateUnrectifiedCoordinates(self, merged_objects):      
-        pts_L_H = np.array([[x[1],x[2]] for x in merged_objects])
-        pts_L_B = np.array([[x[3],x[4]] for x in merged_objects])
-        pts_R_H = np.array([[x[5],x[6]] for x in merged_objects])
-        pts_R_B = np.array([[x[7],x[8]] for x in merged_objects])
+        distorted_x = -1
+        distorted_y = -1
         
-        print(self.P1[:3,:3])
-        ptsOut = cv2.undistortPoints(pts_L_H[0], self.P1[:3,:3], None)
-        ptsTemp = cv2.convertPointsToHomogeneous(ptsOut);
-        rtemp = ttemp = np.array([0,0,0], dtype='float32')
-        output = cv2.projectPoints(ptsTemp, rtemp, ttemp, self.c_L, self.d_L, ptsOut);
-        print(output)
-        #pts_rectified_L_H = cv2.undistortPoints(pts_L_H, self.c_L, self.d_L, R=self.inv_R1, P=self.inv_P1)
-        #pts_rectified_L_B = cv2.undistortPoints(pts_L_H, self.c_L, self.d_L, R=self.inv_R1, P=self.inv_P1)
+        if lr == "L":
+            distorted_x = self.map_L1[y, x, 0]
+            distorted_y = self.map_L1[y, x, 1]
+        elif lr == "R":
+            distorted_x = self.map_R1[y, x, 0]
+            distorted_y = self.map_R1[y, x, 1]            
         
-        # pts_rectified_R_H = cv2.undistortPoints(pts_R_H, self.c_L, self.d_L, R=self.inv_R2, P=self.inv_P2)
-        # pts_rectified_R_B = cv2.undistortPoints(pts_R_B, self.c_L, self.d_L, R=self.inv_R2, P=self.inv_P2)
+        return [distorted_x, distorted_y]
+    
+    def undistortPoint(self, point, lr="L"):
+        """ undistort point """
+        rectified = [0,0]
+        if lr == "L":
+            rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
+        elif lr == "R":
+            rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_R, self.d_R, R=self.R2, P=self.P2)
         
-        merged_objects_distorted = []
-        
-        return merged_objects_distorted
+        return rectified
     
     def templateMatching(self, template, img, position, epiline_thresh, template_radius):
         """template matching near the epiline"""

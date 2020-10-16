@@ -959,14 +959,12 @@ class PageData(QtWidgets.QWidget):
                 # add right coordinates to data model
                 for i in range(len(cur_entries.index)):
                     idx = cur_entries.index[i]
-                    self.models.model_animals.data.loc[idx, "RX1"] = merged_objects[i][5]
-                    self.models.model_animals.data.loc[idx, "RY1"] = merged_objects[i][6]
-                    self.models.model_animals.data.loc[idx, "RX2"] = merged_objects[i][7]
-                    self.models.model_animals.data.loc[idx, "RY2"] = merged_objects[i][8]
-        
-        # create a thread @todo
-        # @todo does the matcher return rectified coordinates? then derectify them!
-               
+                    # the matcher returns rectified coordinates,
+                    # they have to be calculated back and just then add them to data model 
+                    self.models.model_animals.data.loc[idx, "RX1"] = self.matcher.distort(merged_objects[i][5], "R")
+                    self.models.model_animals.data.loc[idx, "RY1"] = self.matcher.distort(merged_objects[i][6], "R")
+                    self.models.model_animals.data.loc[idx, "RX2"] = self.matcher.distort(merged_objects[i][7], "R")
+                    self.models.model_animals.data.loc[idx, "RY2"] = self.matcher.distort(merged_objects[i][8], "R")            
         
     def onCheckMatch(self):
         """ 
@@ -979,6 +977,9 @@ class PageData(QtWidgets.QWidget):
     def onCalcLength(self):
         """ Gets current image list from photo viewer and calculates the 
         length of animals whose coordinates are valid. """
+        
+        # @todo this function requires images and coordinates to be rectified!!
+        
         # get list of images to process (images of the current day)            
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             
@@ -995,14 +996,15 @@ class PageData(QtWidgets.QWidget):
                 and cur_entries.iloc[i]["RX2"] > 0 and cur_entries.iloc[i]["RY2"] > 0:
                     animals_left = []
                         
-                    animal = [0, cur_entries.iloc[i]["LY1"], 
-                              cur_entries.iloc[i]["LX1"], 
-                              cur_entries.iloc[i]["LY2"], 
-                              cur_entries.iloc[i]["LX2"],
-                              cur_entries.iloc[i]["RY1"], 
-                              cur_entries.iloc[i]["RX1"], 
-                              cur_entries.iloc[i]["RY2"], 
-                              cur_entries.iloc[i]["RX2"]]
+                    animal = [0, 
+                              self.matcher.undistort(cur_entries.iloc[i]["LY1"], "L"), 
+                              self.matcher.undistort(cur_entries.iloc[i]["LX1"], "L"),
+                              self.matcher.undistort(cur_entries.iloc[i]["LY2"], "L"),
+                              self.matcher.undistort(cur_entries.iloc[i]["LX2"], "L"),
+                              self.matcher.undistort(cur_entries.iloc[i]["RY1"], "R"),
+                              self.matcher.undistort(cur_entries.iloc[i]["RX1"], "R"),
+                              self.matcher.undistort(cur_entries.iloc[i]["RY2"], "R"),
+                              self.matcher.undistort(cur_entries.iloc[i]["RX2"], "R")]
                     animals.append(animal)     
                     
                     # calculate animal length
