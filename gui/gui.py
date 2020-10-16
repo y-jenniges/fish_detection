@@ -93,7 +93,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
                                                   file_id=cur_file_id)
 
         # close table window
-        self.window_table.close()
+        if self.window_table is not None:
+            self.window_table.close()
         
     def retranslateUi(self):
         """
@@ -147,8 +148,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         self.page_data.btn_pred_check.setText(_translate("MainWindow", "Check predictions on Home screen (L)"))
         self.page_data.label_prediction_check.setText(_translate("MainWindow", "Check predictions"))
-        self.page_data.label_pred_check_text.setText(_translate("MainWindow", "   #Checked images: "))
-        self.page_data.label_pred_check_number.setText(_translate("MainWindow", "0"))
+        self.page_data.label_pred_check_text.setText(_translate("MainWindow", ""))#"   #Checked images: "))
+        self.page_data.label_pred_check_number.setText(_translate("MainWindow", ""))#"0"))
         
         self.page_data.btn_rectify_match.setText(_translate("MainWindow", "Rectify and match"))
         self.page_data.label_rectify_match.setText(_translate("MainWindow", "Run rectification and matching"))
@@ -157,8 +158,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         self.page_data.btn_check_match.setText(_translate("MainWindow", "Check matching on Home screen (LR)"))
         self.page_data.label_check_match.setText(_translate("MainWindow", "Check matching"))
-        self.page_data.label_check_match_text.setText(_translate("MainWindow", "   #Checked images: "))
-        self.page_data.label_check_match_number.setText(_translate("MainWindow", "0"))
+        self.page_data.label_check_match_text.setText(_translate("MainWindow", ""))#"   #Checked images: "))
+        self.page_data.label_check_match_number.setText(_translate("MainWindow", ""))#"0"))
        
         self.page_data.btn_length_measurement.setText(_translate("MainWindow", "Calculate length"))
         self.page_data.label_length_measurement.setText(_translate("MainWindow", "Run length measurement"))

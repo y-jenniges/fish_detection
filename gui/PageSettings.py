@@ -888,7 +888,7 @@ class PageSettings(QtWidgets.QWidget):
 # --- actions in nn tab ----------------------------------------------------- #   
     def nn_path_changed(self, model_path):
         print("load model...")
-        if not self.models.model_predicter.loadNeuralNet(model_path):
+        if not self.parent().parent().page_data.predicter.loadNeuralNet(model_path):
             # if loading of neural net was not successfull,
             	# block signal (we do not want to call nn_path_changed again) 
             # and set empty text in line edit

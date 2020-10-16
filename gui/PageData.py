@@ -1,12 +1,19 @@
 import os
+import json
 import glob
 from PyQt5 import QtCore, QtWidgets, QtGui
 from Helpers import TopFrame, MenuFrame
+import PostProcessing as pp
+from Predicter import Predicter
+from DistanceMeasurer import DistanceMeasurer
 
 
 # IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
 IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
 IMAGE_DIRECTORY_ROOT = "G:/Universität/UniBremen/Semester4/Data/moreTestData/"
+
+IMAGE_SIZE = (4272, 2848)
+#IMAGE_SIZE = (2848, 4272)
 
 class PageData(QtWidgets.QWidget): 
     """ Class to create the data page of the software """
@@ -24,7 +31,33 @@ class PageData(QtWidgets.QWidget):
         # init UI, actions
         self._initUi()
         self._initActions()
-        #self.init_models()
+        
+        # create object to predict images
+        self.predicter = Predicter()
+        
+        # camera configuration @todo needs to be set to file used in settings and adaptable by the parameters that are set there
+        config_path = "config.json"
+
+        # read camera config
+        self.camera_config = {}
+        with open(config_path, 'r') as f:
+            self.camera_config = json.load(f)
+        
+        # instantiate a matcher to find matching animals on left and right image
+        self.matcher = pp.StereoCorrespondence(self.camera_config['mtx_L'], 
+                                              self.camera_config['dist_L'],
+                                              self.camera_config['mtx_R'], 
+                                              self.camera_config['dist_R'],
+                                              self.camera_config['R'], 
+                                              self.camera_config['T'], IMAGE_SIZE)
+        
+        # instantiate a distance-measurer to determine length of animals
+        self.distance_measurer = DistanceMeasurer(self.camera_config['mtx_L'], 
+                                                 self.camera_config['dist_L'],
+                                                 self.camera_config['mtx_R'], 
+                                                 self.camera_config['dist_R'],
+                                                 self.camera_config['R'], 
+                                                 self.camera_config['T'], IMAGE_SIZE)
         
         self.onCalenderSelectionChanged()
         
@@ -41,16 +74,8 @@ class PageData(QtWidgets.QWidget):
         self.imageDirChanged.emit(self.lineEdit_img_dir.text())
      
     def onOutDirChanged(self):
-        """ Function to handle when the user changes the output dir line edit """
-        # # check if entered result file exists 
-        # # (else replace it by an empty string)
-        # if os.path.isfile(self.lineEdit_output_dir.text()):
-        #     pass
-        # else: 
-        #     self.lineEdit_output_dir.setText("")
-        #     print("The enered res file is not a valid path.") 
-        
-        print("on out dir changed")
+        """ Function to handle when the user changes the output dir line edit.
+        It makes sure that a result file exists and creates one otherwise. """
         # current output directory
         out_dir = self.lineEdit_output_dir.text()
         
@@ -162,8 +187,7 @@ class PageData(QtWidgets.QWidget):
                                 .toString("dd.MM.yyyy")) 
         
         # adapt image directory
-        self.updateImageDir()
-        
+        self.updateImageDir()       
  
     def createFrameData(self):
         """ Creates the data page UI """
@@ -341,6 +365,8 @@ class PageData(QtWidgets.QWidget):
         
         # add widgets to layout
         layout.addWidget(btn)
+        
+        
         layout.addWidget(label_text)
         layout.addWidget(label_number)
         
@@ -408,6 +434,8 @@ class PageData(QtWidgets.QWidget):
                                           "label_check_match", 
                                           "label_check_match_number")
         frame_process_arrow5 = self.createFrameProcessArrow(self.scrollAreaWidgetContents)
+        
+        self.frame_check_match.setEnabled(False) # @todo functionality needs to be implemented
         
         # length measurement row
         self.label_length_measurement = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -825,7 +853,7 @@ class PageData(QtWidgets.QWidget):
         self.layout_page_data.addWidget(self.frame_data)
     
     def _initActions(self):
-        """ function to initialize the actions on data page """
+        """ Function to initialize the actions on data page """
         self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
         
         self.btn_img_dir.clicked.connect(self.onBrowseImageDir)
@@ -840,66 +868,105 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_output_dir.editingFinished.connect(self.onOutDirChanged)
         self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
         self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
-  
-    # def init_models(self):
-    #     self.tableView_original.setModel(self.models.model_animals)
     
     def onNnActivated(self):
+        """
+        Deals with handling the activation of the "run neural network" button.
+        It gets the current image list from the photo viewer that it applies 
+        the neural network to. It appends the new data to the data model.
+        """
         # if neural netowk is not None
-        if self.models.model_predicter is not None:
+        if self.predicter is not None:
             
-            # create a thread for the neural network 
+            # create a thread for the neural network  @todo
             
             # get image path list from photo viewer
             img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-            img_path = img_list[0]
             
-            print(img_list)
-            #img_list = ["G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_00.00.49_L.jpg"]
-            #img_list = ["G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"]
             for path in img_list:
-                # start image prections
-                df = self.models.model_predicter.predictImage(path)
-                print(df)
+                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
                 
-                row = len(self.models.model_animals.data)
-                count = len(df)
-                exp_id = self.lineEdit_exp_id.text()
-                user_id = self.frame_topBar.label_user_id.text()
-                
-                print(row, count, exp_id, user_id)
-                
-                # insert data into model
-                self.models.model_animals.insertDfRows(row=row, 
-                                                       count=count, 
-                                                       df=df,
-                                                       image_path=path, 
-                                                       image_remark="", 
-                                                       experiment_id=exp_id, 
-                                                       user_id=user_id)
-                
-                # generate animals and draw them
-                # for i in range(len(df)):
+                # predict only images that are not yet in the result file
+                if not file_id in self.models.model_animals.data["file_id"].values:
+
+                    # get experiment and user ID
+                    exp_id = self.lineEdit_exp_id.text()
+                    user_id = self.frame_topBar.label_user_id.text()
                     
-                # models, row_index, position_head=QtCore.QPoint(-1,-1), 
-                #  position_tail=QtCore.QPoint(-1,-1), 
-                #  group=AnimalGroup.UNIDENTIFIED, 
-                #  species=AnimalSpecies.UNIDENTIFIED, remark=""):
-
-            # update label displaying number of predicted images
-            
-
+                    # start image prections
+                    df = self.predicter.predictImage(path, file_id, exp_id, user_id)
+                    
+                    row = len(self.models.model_animals.data)
+                    count = len(df)
+                    
+                    # insert data into model
+                    self.models.model_animals.insertDfRows(row=row, 
+                                                           count=count, 
+                                                           df=df,
+                                                           image_path=path, 
+                                                           image_remark="", 
+                                                           experiment_id=exp_id, 
+                                                           user_id=user_id)
+    
+                    # update label displaying number of predicted images
+                    num_imgs = int(self.label_nn_activation_number.text()) + 1
+                    self.label_nn_activation_number.setText(str(num_imgs))
     
     def onCheckPredictions(self):
-        # if there is at least one predicted image, navigate to home screen
-        
+        """ Handles the click on 'Check predictions on home screen' button by
+        navigating to the home screen. """ 
+        # navigate to home screen
         self.parent().parent().directToHomePage()
     
     def onRectifyMatch(self):
-        # create a thread
+        """
+        Gets current image list from photo viewer, rectifies them and
+        determines the positions of the respective animal on the right image
+        using block matching. 
+        """
+        # get list of images to process (images of the current day)            
+        img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+            
+        # iterate over left images, rectify and match   
+        for path in img_list:
+            right_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L") + "_R.jpg"
+            
+            # only continue if right image exists
+            if os.path.isfile(right_image):
+                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
+                
+                # get animals on current image
+                cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
+                
+                animals_left = []
+                for i in range(len(cur_entries)):      
+                    animal = [0, cur_entries.iloc[i]["LY1"], 
+                              cur_entries.iloc[i]["LX1"], 
+                              cur_entries.iloc[i]["LY2"], 
+                              cur_entries.iloc[i]["LX2"]]
+                    animals_left.append(animal)                
+                
+                # rectify and match images
+                merged_objects = pp.rectifyAndMatch(self.matcher, 
+                                                    self.camera_config, 
+                                                    path, 
+                                                    right_image, 
+                                                    animals_left)
+                
+                print(merged_objects)
+                print()
+                
+                # add right coordinates to data model
+                for i in range(len(cur_entries.index)):
+                    idx = cur_entries.index[i]
+                    self.models.model_animals.data.loc[idx, "RX1"] = merged_objects[i][5]
+                    self.models.model_animals.data.loc[idx, "RY1"] = merged_objects[i][6]
+                    self.models.model_animals.data.loc[idx, "RX2"] = merged_objects[i][7]
+                    self.models.model_animals.data.loc[idx, "RY2"] = merged_objects[i][8]
         
-        # perform rectifications and matchings
-        pass
+        # create a thread @todo
+        # @todo does the matcher return rectified coordinates? then derectify them!
+               
         
     def onCheckMatch(self):
         """ 
@@ -910,13 +977,43 @@ class PageData(QtWidgets.QWidget):
         print("Not implemented yet.")
     
     def onCalcLength(self):
-        # calculate animal length
+        """ Gets current image list from photo viewer and calculates the 
+        length of animals whose coordinates are valid. """
+        # get list of images to process (images of the current day)            
+        img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+            
+        # iterate over images and measure length
+        for path in img_list:                
+            # get animals on current image
+            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
+            cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
+            
+            animals = []
+            for i in range(len(cur_entries)):
+                # measure length only if there are valid coordinates for right image
+                if cur_entries.iloc[i]["RX1"] > 0 and cur_entries.iloc[i]["RY1"] > 0 \
+                and cur_entries.iloc[i]["RX2"] > 0 and cur_entries.iloc[i]["RY2"] > 0:
+                    animals_left = []
+                        
+                    animal = [0, cur_entries.iloc[i]["LY1"], 
+                              cur_entries.iloc[i]["LX1"], 
+                              cur_entries.iloc[i]["LY2"], 
+                              cur_entries.iloc[i]["LX2"],
+                              cur_entries.iloc[i]["RY1"], 
+                              cur_entries.iloc[i]["RX1"], 
+                              cur_entries.iloc[i]["RY2"], 
+                              cur_entries.iloc[i]["RX2"]]
+                    animals.append(animal)     
+                    
+                    # calculate animal length
+                    distances = pp.measureLength(self.distance_measurer, 
+                                              self.camera_config, 
+                                              [animal])
         
-        # update animal
-        
-        # update specs windget of animal?
-        pass
-    
+                    # add length measurements to model
+                    idx = cur_entries.index[i]
+                    self.models.model_animals.data.loc[idx, "length"] = distances[0]
+
 # --- functions for saving and restoring options --------------------------- # 
     def saveCurrentValues(self, settings):     
         """ Saves current settings on data page for next program start """

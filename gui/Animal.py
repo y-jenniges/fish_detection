@@ -559,6 +559,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.spinBox_length.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.spinBox_length.setMaximum(99909.99)
         self.spinBox_length.setObjectName("spinBox_length")
+        self.spinBox_length.setEnabled(False)
         
         # self.spinBox_heigth = QtWidgets.QDoubleSpinBox(self)
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)

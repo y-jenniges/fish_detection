@@ -51,9 +51,9 @@ class Predicter():
                                     "Error") 
             return False
         
-    def predictImage(self, img_path):
+    def predictImage(self, img_path, file_id, experiment_id="", user_id=""):
         # create dataframe to store predictions
-        df = pd.DataFrame(columns=["file_id", "group", "LX1", "LY1", "LX2", "LY2"])
+        df = pd.DataFrame(columns=["file_id", "object_remarks", "group", "species", "LX1", "LY1", "LX2", "LY2"])
         
         if self.neural_network is not None:            
             # load image
@@ -82,8 +82,8 @@ class Predicter():
                 matches = Helpers.scaleMatchCoordinates(matches, heads.shape, IMAGE_SHAPE)
                 
                 group = GROUP_DICT[np.ceil(i/2)]
-                file_id = os.path.basename(img_path)[:-4].strip("_L")
-                
+                species = "Unidentified"
+
                 # # show prediction heatmap and coordinates
                 # plt.imshow(heads, cmap=plt.cm.gray)
                 # plt.autoscale(False)
@@ -105,19 +105,48 @@ class Predicter():
                 # plt.show()
                 
                 for m in matches:
-                    animal = {"file_id": file_id,
+                    animal = {"file_id": file_id, 
+                              "object_remarks": "", 
                               "group": group, 
-                              "LX1": m[0][0], "LY1": m[0][1], # head
-                              "LX2": m[1][0], "LY2": m[1][1]} # tail
-                    df = df.append(animal, ignore_index=True)       
-                    
+                              "species": species,
+                              "LX1": m[0][0],
+                              "LY1": m[0][1],
+                              "LX2": m[1][0],
+                              "LY2": m[1][1],
+                              "LX3": -1, 
+                              "LY3": -1,
+                              "LX4": -1,
+                              "LY4": -1,
+                              "RX1": -1,
+                              "RY1": -1,
+                              "RX2": -1,
+                              "RY2": -1,
+                              "RX3": -1, 
+                              "RY3": -1,
+                              "RX4": -1,
+                              "RY4": -1,
+                              "length": -1,
+                              "height": -1,
+                              "image_remarks": "",
+                              "status": "not checked",
+                              "manually_corrected": "False",
+                              "experiment_id": experiment_id,
+                              "user_id": user_id}
+                    df = df.append(animal, ignore_index=True)   # @todo potentiall index ignoring could be problematic               
         else:
-            Helpers.displayErrorMsg("Missing Neural Network", "Please specify a neural network on settings page.", "Error")
+            Helpers.displayErrorMsg(
+                "Missing Neural Network", 
+                "Please specify a neural network on settings page.", 
+                "Error")
             
         return df
         
     def predictImageList(self, image_pathes):
-        df = pd.DataFrame(columns=["file_id", "group", "LX1", "LY1", "LX2", "LY2"]) 
+        df = pd.DataFrame(columns=["file_id", "object_remarks", "group", "species", 
+                "LX1", "LY1", "LX2", "LY2", "LX3", "LY3", "LX4", "LY4", 
+                "RX1", "RY1", "RX2", "RY2", "RX3", "RY3", "RX4", "RY4",
+                "length", "height", "image_remarks", "status",
+                "manually_corrected", "experiment_id", "user_id"]) 
         for path in image_pathes:
             df.append(self.predictImage(path))
         

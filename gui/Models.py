@@ -113,10 +113,6 @@ class Models():
             
         # data model for all animal information
         self.model_animals = TableModel(None)
-        
-        # prediction model
-        self.model_predicter = Predicter()
-            
     
     def addImageRemark(self, remark):
         """
@@ -472,7 +468,7 @@ class TableModel(QtCore.QAbstractTableModel):
         for i in range(count):
             # check if columns are a subset of desired columns
             if df.columns.isin(self.data.columns).all():
-                self.data = self.data.append(df.iloc[i])    
+                self.data = self.data.append(df.iloc[i], ignore_index=True)    
         self.endInsertRows()
 
         # sort data        

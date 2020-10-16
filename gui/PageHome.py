@@ -17,9 +17,9 @@ class PageHome(QtWidgets.QWidget):
         self.models = models
         
         # init UI and actions
-        self.init_ui()
-        self.init_actions()
-        self.init_models()
+        self._initUi()
+        self._initActions()
+        self._initModels()
        
         # slider parameters
         self.slider_max = self.photo_viewer.imageArea.width()*10
@@ -91,7 +91,7 @@ class PageHome(QtWidgets.QWidget):
                 # item.setIcon(icon)
                 self.models.model_species.appendRow(item)
 
-    def init_ui(self):
+    def _initUi(self):
    
         # --- top bar  ----------------------------------------------------- #         
         # create the blue top bar
@@ -434,7 +434,7 @@ class PageHome(QtWidgets.QWidget):
         
         return frame_controlBar
         
-    def init_actions(self):
+    def _initActions(self):
         # connecting signals and slots
         self.btn_add.clicked.connect(self.on_add_clicked)
         self.btn_delete.clicked.connect(self.on_remove_clicked)
@@ -443,8 +443,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_zoom.clicked.connect(self.openZoomWidget)
         self.btn_imgSwitch.clicked.connect(self.switchImageMode)
         self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
-        self.photo_viewer.newImageLoaded.connect(self.setComboboxImageRemark)
-        #self.photo_viewer.newImageLoaded.connect(self.exportToCsv)
+        self.photo_viewer.newImageLoaded.connect(self.onNewImage)
         self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
         self.btn_filter.clicked.connect(self.on_filter_clicked)
         
@@ -457,7 +456,7 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
         
-    def init_models(self):
+    def _initModels(self):
         self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
         self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
 
@@ -481,6 +480,10 @@ class PageHome(QtWidgets.QWidget):
         cur_indices = self.models.model_animals.data[self.models.model_animals.data['file_id']==file_id].index
         for idx in cur_indices:
             self.models.model_animals.data.loc[idx, 'image_remarks'] = text
+    
+    def onNewImage(self, remark):
+        # adapt image remark combobox
+        self.setComboboxImageRemark(remark)
     
     def switchImageMode(self):
         cur_mode = self.btn_imgSwitch.text()
