@@ -1,8 +1,9 @@
 import os
 import json
 import glob
+import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-from Helpers import TopFrame, MenuFrame
+from Helpers import TopFrame, MenuFrame, displayErrorMsg
 import PostProcessing as pp
 from Predicter import Predicter
 from DistanceMeasurer import DistanceMeasurer
@@ -85,16 +86,15 @@ class PageData(QtWidgets.QWidget):
         else:
             # if result file does not exist yet, create one
             main_window = self.parent().parent()
-            print(self.parent().parent())
             if main_window is not None:
                 res_file = main_window.getResultFileName()
                 path = os.path.join(out_dir, res_file)
                 
-                print(path)
                 if not os.path.isfile(path):
-                    print("creating out file")
+                    print(f"creating out file {path}")
                     self.models.model_animals.exportToCsv(out_dir, res_file)
                 else:
+                    print(f"load out file {path}")
                     self.models.model_animals.loadFile(path)
         
         self.outputDirectoryChanged.emit(self.lineEdit_output_dir.text())
@@ -153,7 +153,7 @@ class PageData(QtWidgets.QWidget):
         """ Function to update the image directory according to the input 
         from the calender widget """
         date = self.calendarWidget.selectedDate().toString("yyyy_MM")
-        directory = IMAGE_DIRECTORY_ROOT + date + "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
+        directory = IMAGE_DIRECTORY_ROOT + date + "/" #+ "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
         print(directory)
         # enable frame to manipulate data properties
         self.frame_data_information.setEnabled(True) # @todo always enabled
@@ -876,10 +876,10 @@ class PageData(QtWidgets.QWidget):
         the neural network to. It appends the new data to the data model.
         """
         # if neural netowk is not None
-        if self.predicter is not None:
+        if self.predicter.neural_network is not None:
             
             # create a thread for the neural network  @todo
-            
+            print("activated, net not none")
             # get image path list from photo viewer
             img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             
@@ -887,30 +887,35 @@ class PageData(QtWidgets.QWidget):
                 file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
                 
                 # predict only images that are not yet in the result file
-                if not file_id in self.models.model_animals.data["file_id"].values:
+                #if not file_id in self.models.model_animals.data["file_id"].values:
 
-                    # get experiment and user ID
-                    exp_id = self.lineEdit_exp_id.text()
-                    user_id = self.frame_topBar.label_user_id.text()
-                    
-                    # start image prections
-                    df = self.predicter.predictImage(path, file_id, exp_id, user_id)
-                    
-                    row = len(self.models.model_animals.data)
-                    count = len(df)
-                    
-                    # insert data into model
-                    self.models.model_animals.insertDfRows(row=row, 
-                                                           count=count, 
-                                                           df=df,
-                                                           image_path=path, 
-                                                           image_remark="", 
-                                                           experiment_id=exp_id, 
-                                                           user_id=user_id)
-    
-                    # update label displaying number of predicted images
-                    num_imgs = int(self.label_nn_activation_number.text()) + 1
-                    self.label_nn_activation_number.setText(str(num_imgs))
+                # get experiment and user ID
+                exp_id = self.lineEdit_exp_id.text()
+                user_id = self.frame_topBar.label_user_id.text()
+                
+                # start image prections
+                df = self.predicter.predictImage(path, file_id, exp_id, user_id)
+                
+                row = len(self.models.model_animals.data)
+                count = len(df)
+                
+                # insert data into model
+                self.models.model_animals.insertDfRows(row=row, 
+                                                       count=count, 
+                                                       df=df,
+                                                       image_path=path, 
+                                                       image_remark="", 
+                                                       experiment_id=exp_id, 
+                                                       user_id=user_id)
+
+                # update label displaying number of predicted images
+                num_imgs = int(self.label_nn_activation_number.text()) + 1
+                self.label_nn_activation_number.setText(str(num_imgs))
+        else:
+            displayErrorMsg(
+                "Missing Neural Network", 
+                "Please specify a neural network on settings page.", 
+                "Error")
     
     def onCheckPredictions(self):
         """ Handles the click on 'Check predictions on home screen' button by
@@ -929,11 +934,15 @@ class PageData(QtWidgets.QWidget):
             
         # iterate over left images, rectify and match   
         for path in img_list:
-            right_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L") + "_R.jpg"
+            right_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_L") + "_R.jpg"
+            left_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R") + "_L.jpg"
+            print(right_image)
+            print(left_image)
+            print()
             
-            # only continue if right image exists
-            if os.path.isfile(right_image):
-                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
+            # only continue if both images exists
+            if os.path.isfile(right_image) and os.path.isfile(left_image):
+                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
                 
                 # get animals on current image
                 cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
@@ -961,10 +970,21 @@ class PageData(QtWidgets.QWidget):
                     idx = cur_entries.index[i]
                     # the matcher returns rectified coordinates,
                     # they have to be calculated back and just then add them to data model 
-                    self.models.model_animals.data.loc[idx, "RX1"] = self.matcher.distort(merged_objects[i][5], "R")
-                    self.models.model_animals.data.loc[idx, "RY1"] = self.matcher.distort(merged_objects[i][6], "R")
-                    self.models.model_animals.data.loc[idx, "RX2"] = self.matcher.distort(merged_objects[i][7], "R")
-                    self.models.model_animals.data.loc[idx, "RY2"] = self.matcher.distort(merged_objects[i][8], "R")            
+                    head = self.matcher.distortPoint([merged_objects[i][6], merged_objects[i][5]], "R")
+                    tail = self.matcher.distortPoint([merged_objects[i][8], merged_objects[i][7]], "R")
+                    
+                    if (np.array(head) < 0).any() or (np.array(tail) < 0).any():
+                        head = [-1,-1]
+                        tail = [-1,-1]
+                        
+                    self.models.model_animals.data.loc[idx, "RX1"] = head[1]
+                    self.models.model_animals.data.loc[idx, "RY1"] = head[0]
+                    self.models.model_animals.data.loc[idx, "RX2"] = tail[1]
+                    self.models.model_animals.data.loc[idx, "RY2"] = tail[0]     
+            
+                # update label displaying number of rectified and matched images
+                num_imgs = int(self.label_rectify_match_number.text()) + 1
+                self.label_rectify_match_number.setText(str(num_imgs))
         
     def onCheckMatch(self):
         """ 
@@ -996,15 +1016,14 @@ class PageData(QtWidgets.QWidget):
                 and cur_entries.iloc[i]["RX2"] > 0 and cur_entries.iloc[i]["RY2"] > 0:
                     animals_left = []
                         
+                    # undistort points
+                    head_L = self.matcher.undistortPoint([cur_entries.iloc[i]["LY1"], cur_entries.iloc[i]["LX1"]], "L")
+                    tail_L = self.matcher.undistortPoint([cur_entries.iloc[i]["LY2"], cur_entries.iloc[i]["LX2"]], "L")
+                    head_R = self.matcher.undistortPoint([cur_entries.iloc[i]["RY1"], cur_entries.iloc[i]["RX1"]], "R")
+                    tail_R = self.matcher.undistortPoint([cur_entries.iloc[i]["RY2"], cur_entries.iloc[i]["RX2"]], "R")
                     animal = [0, 
-                              self.matcher.undistort(cur_entries.iloc[i]["LY1"], "L"), 
-                              self.matcher.undistort(cur_entries.iloc[i]["LX1"], "L"),
-                              self.matcher.undistort(cur_entries.iloc[i]["LY2"], "L"),
-                              self.matcher.undistort(cur_entries.iloc[i]["LX2"], "L"),
-                              self.matcher.undistort(cur_entries.iloc[i]["RY1"], "R"),
-                              self.matcher.undistort(cur_entries.iloc[i]["RX1"], "R"),
-                              self.matcher.undistort(cur_entries.iloc[i]["RY2"], "R"),
-                              self.matcher.undistort(cur_entries.iloc[i]["RX2"], "R")]
+                              head_L[0], head_L[1], tail_L[0], tail_L[1],
+                              head_R[0], head_R[1], tail_R[0], tail_R[1]]
                     animals.append(animal)     
                     
                     # calculate animal length
@@ -1012,9 +1031,23 @@ class PageData(QtWidgets.QWidget):
                                               self.camera_config, 
                                               [animal])
         
+                    print(f"distances {distances}")
+                    
                     # add length measurements to model
                     idx = cur_entries.index[i]
                     self.models.model_animals.data.loc[idx, "length"] = distances[0]
+                    print(idx)
+                    
+                    # update animal length
+                    for animal in self.parent().parent().page_home.photo_viewer.imageArea.animal_painter.animal_list:
+                        print(animal.row_index)
+                        if animal.row_index == idx:
+                            print("length set on animal")
+                            animal.setLength(distances[0])
+                
+            # update label displaying number of rectified and matched images
+            num_imgs = int(self.label_length_measurement_number.text()) + 1
+            self.label_length_measurement_number.setText(str(num_imgs))
 
 # --- functions for saving and restoring options --------------------------- # 
     def saveCurrentValues(self, settings):     

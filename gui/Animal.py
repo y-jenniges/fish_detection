@@ -61,7 +61,7 @@ class Animal():
     def __init__(self, models, row_index, position_head=QtCore.QPoint(-1,-1), 
                  position_tail=QtCore.QPoint(-1,-1), 
                  group=AnimalGroup.UNIDENTIFIED, 
-                 species=AnimalSpecies.UNIDENTIFIED, remark=""):
+                 species=AnimalSpecies.UNIDENTIFIED, remark="", length=-1):
         """
         Init function.
 
@@ -108,7 +108,7 @@ class Animal():
         self.group = group
         self.species = species
         self.remark = remark
-        self.length = None
+        self.length = length if length > 0 else 0
         #self.height = None
       
         # set the visual for the head, tail and line between them @todo pblic or private?
@@ -174,6 +174,14 @@ class Animal():
         return self.tail_item_visual
     
     def setManuallyCorrected(self, corrected=False):
+        """
+        Sets the manually-corrected parameter of animal.
+
+        Parameters
+        ----------
+        corrected : bool, optional
+            New value. The default is False.
+        """
         self._models.model_animals.data.loc[
             self.row_index, "manually_corrected"] = corrected
                     
@@ -185,31 +193,42 @@ class Animal():
         self.color = ""
         
         if self.group == AnimalGroup.UNIDENTIFIED \
-        or self.group == "Unidentified":
+        or self.group == "Unidentified" \
+        or self.group == "AnimalGroup.UNIDENTIFIED":
             self._pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
             self._pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
               
-        elif self.group == AnimalGroup.FISH or self.group == "Fish":
+        elif self.group == AnimalGroup.FISH or self.group == "Fish" \
+        or self.group == "AnimalGroup.FISH":
             self._pixmap_head = QtGui.QPixmap("animal_markings/o_blue.png")        
             self._pixmap_tail = QtGui.QPixmap("animal_markings/x_blue.png")  
             self.color = QtGui.QColor(0, 112, 192)
             
-        elif self.group == AnimalGroup.CRUSTACEA or self.group == "Crustacea":
+        elif self.group == AnimalGroup.CRUSTACEA or self.group == "Crustacea" \
+        or self.group == "AnimalGroup.CRUSTACEA":
             self._pixmap_head = QtGui.QPixmap("animal_markings/o_red.png")        
             self._pixmap_tail = QtGui.QPixmap("animal_markings/x_red.png") 
             self.color = QtGui.QColor(255, 0, 0)
             
         elif self.group == AnimalGroup.CHAETOGNATHA \
-        or self.group == "Chaetognatha":
+        or self.group == "Chaetognatha" \
+        or self.group == "AnimalGroup.CHAETOGNATHA":
             self._pixmap_head = QtGui.QPixmap("animal_markings/o_orange.png")        
             self._pixmap_tail = QtGui.QPixmap("animal_markings/x_orange.png")  
             self.color = QtGui.QColor(255, 192, 0)
             
-        elif self.group == AnimalGroup.JELLYFISH or self.group == "Jellyfish":
+        elif self.group == AnimalGroup.JELLYFISH or self.group == "Jellyfish" \
+        or self.group == "AnimalGroup.JELLYFISH":
             self._pixmap_head = QtGui.QPixmap("animal_markings/o_black.png")        
             self._pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
             self.color = QtGui.QColor(0, 0, 0)
+            
+        else:
+            print("Animal: Unknown animal group! Using unidentified colour.")
+            self._pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
+            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
+            self.color = QtGui.QColor(217, 217, 217)
      
         # scale pixmaps
         self._pixmap_head = self._pixmap_head.scaled(QtCore.QSize(
@@ -277,6 +296,9 @@ class Animal():
         self.boundingBox.setTopLeft(QtCore.QPoint(pos_x, pos_y))
         self.boundingBox.setWidth(size_x)
         self.boundingBox.setHeight(size_y)
+        
+    def setLength(self, length):
+        self.length = float(length)
 
 
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
@@ -475,11 +497,10 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.models.model_animal_remarks.appendRow(item)
             self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
             #self.model_remarks.appendRow(item)
-            
-  
-        
+
         # set length spinbox
-        if self.length: 
+        print(f"animals specs: set length to {self.length}")
+        if self.length is not None and self.length != -1: 
             self.spinBox_length.blockSignals(True)
             self.spinBox_length.setValue(self.length) 
             self.spinBox_length.blockSignals(False)

@@ -133,7 +133,6 @@ class PhotoViewer(QtWidgets.QWidget):
         self.imageArea.animal_painter.redraw()
 
     def loadImage(self, path):
-        print(f"load image {path}")
         if path:
             image = QtGui.QImage(path)
             photo = QtGui.QPixmap().fromImage(image).scaled(QtCore.QSize(
@@ -507,8 +506,7 @@ class AnimalPainter():
     
     def setAnimalRemark(self, remark):
         if self.cur_animal is not None:
-            self.cur_animal.setRemark(remark)
-            
+            self.cur_animal.setRemark(remark)          
     
     def setAnimalSpecies(self, species):
         if self.cur_animal is not None:
@@ -544,7 +542,6 @@ class AnimalPainter():
             self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
                     
         self.imageArea.animal_painter.updateBoundingBoxes()
-
     
     def removeAll(self):
         """ Removes visuals of all animals. """
@@ -808,6 +805,7 @@ class AnimalPainter():
                     # remove animal from list and data model if on left image
                     if self.image_ending == "*_L.jpg":
                         pos = self.models.model_animals.data.index.get_loc(animal.row_index)
+                        print(pos)
                         self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())
                     elif self.image_ending == "*_R.jpg":
                         # if animal is on right image, just modify entry
@@ -901,7 +899,7 @@ class AnimalPainter():
         pos = self.imageArea.mapToScene(event.pos()).toPoint()
         
         # if there is a head to draw and if the drag_position is within the widget, move the head
-        if not self.drag_position_head.isNull() and self.imageArea.rect().contains(pos):         
+        if not self.drag_position_head.isNull() and self.imageArea.rect().contains(pos) and self.cur_animal is not None:         
             self.cur_animal.setPositionHead(pos - self.drag_position_head)
             # remove head on old position and draw it on the new position
             self.removeHeadVisual(self.cur_animal)
@@ -1050,6 +1048,8 @@ class AnimalPainter():
                 animal_remark = str(animal_list["object_remarks"].iloc[i])
                 if not animal_remark: animal_remark = ""       
         
+                length = float(animal_list["length"].iloc[i])
+                
                 # create a new animal
                 self.cur_animal = Animal(self.models,
                                          row_index=animal_list.index[i],
@@ -1057,7 +1057,8 @@ class AnimalPainter():
                                          position_tail=pos_t,
                                          group=str(animal_list["group"].iloc[i]),
                                          species=str(animal_list["species"].iloc[i]),
-                                         remark=animal_remark)
+                                         remark=animal_remark,
+                                         length=length)
                 
                 # set the position in the original image     
                 self.cur_animal.original_pos_head = original_pos_h

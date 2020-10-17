@@ -162,7 +162,7 @@ class StereoCorrespondence():
         self.map_L1, self.map_L2 = cv2.initUndistortRectifyMap(self.c_L, self.d_L, self.R1, self.P1, img_size, m1type=cv2.CV_32FC2)
         self.map_R1, self.map_R2 = cv2.initUndistortRectifyMap(self.c_R, self.d_R, self.R2, self.P2, img_size, m1type=cv2.CV_32FC2)
        
-    def distort(self, point, lr="L"):
+    def distortPoint(self, point, lr="L"):
         """ redistort undistorted point """
         x = np.int64(point[0])
         y = np.int64(point[1])
@@ -186,8 +186,8 @@ class StereoCorrespondence():
             rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
         elif lr == "R":
             rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_R, self.d_R, R=self.R2, P=self.P2)
-        
-        return rectified
+        print(rectified)
+        return rectified[0][0]
     
     def templateMatching(self, template, img, position, epiline_thresh, template_radius):
         """template matching near the epiline"""

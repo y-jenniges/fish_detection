@@ -58,7 +58,7 @@ class Predicter():
         if self.neural_network is not None:            
             # load image
             image = Helpers.loadImage(img_path, factor=32)
-            # img = Helpers.loadImage(img_path, factor=32, rescale_range=False)
+            img = Helpers.loadImage(img_path, factor=32, rescale_range=False)
     
             # predict image
             prediction = Helpers.applyNnToImage(self.neural_network, image)
@@ -77,12 +77,6 @@ class Predicter():
                 
                 # find head-tail matches
                 matches = Helpers.findHeadTailMatches(head_coordinates, tail_coordinates)
-            
-                # scale matches to image resolution
-                matches = Helpers.scaleMatchCoordinates(matches, heads.shape, IMAGE_SHAPE)
-                
-                group = GROUP_DICT[np.ceil(i/2)]
-                species = "Unidentified"
 
                 # # show prediction heatmap and coordinates
                 # plt.imshow(heads, cmap=plt.cm.gray)
@@ -103,6 +97,12 @@ class Predicter():
                 #     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
                 #     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
                 # plt.show()
+                
+                # scale matches to image resolution
+                matches = Helpers.scaleMatchCoordinates(matches, heads.shape, IMAGE_SHAPE)
+                
+                group = GROUP_DICT[np.ceil(i/2)]
+                species = "Unidentified"
                 
                 for m in matches:
                     animal = {"file_id": file_id, 

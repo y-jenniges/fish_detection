@@ -7,7 +7,6 @@ from PaintView import PhotoViewer
 class PageHome(QtWidgets.QWidget):
     """
     Class to create the home page of the software.
-
     """
 
     def __init__(self, models, parent=None):        
@@ -90,6 +89,11 @@ class PageHome(QtWidgets.QWidget):
                 # icon = QtGui.QIcon(list_species[i]["imagePath"])
                 # item.setIcon(icon)
                 self.models.model_species.appendRow(item)
+
+    def showEvent(self, event):
+        print("homw show event")
+        # redraw animals when opening the page
+        self.photo_viewer.imageArea.animal_painter.redraw()
 
     def _initUi(self):
    
