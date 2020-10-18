@@ -7,6 +7,7 @@ import PageHome
 import PageSettings
 import PageAbout
 import PageData
+from WelcomeWindow import WelcomeWindow
 #import PageHandbook
 
 
@@ -48,6 +49,27 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         print(self.settings.fileName())
 
+    def showWelcome(self):
+        """ Creates and shows the welcome screen. A user ID and camera config
+        path have to be entered here before continuing. """
+        # disable all other windows
+        self.setEnabled(False)
+        
+        # create welcome window
+        self.welcome_window = WelcomeWindow(self)
+        
+        # center welcome window on screen 
+        qtRectangle = self.welcome_window.frameGeometry()
+        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.welcome_window.move(qtRectangle.topLeft())
+        
+        # put window to front
+        self.welcome_window.raise_()
+        self.welcome_window.activateWindow()
+  
+        self.welcome_window.show()
+
     def restorePreviousValues(self):
         """
         Tries to restore values from previous session (saved on closeEvent)
@@ -56,11 +78,16 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
             self.models.restoreValues(self.settings)
             self.resize(self.settings.value("windowSize"))
             self.move(self.settings.value("windowPosition"))
+            self.window_table.resize(self.settings.value("tableWindowSize"))
+            self.window_table.move(self.settings.value("tableWindowPosition"))
+            
             self.page_settings.restoreValues(self.settings)
             self.page_data.restoreValues(self.settings)
         
         except:
-            pass        
+            # check if any key exists, if not, show welcome screen
+            if not self.settings.contains("windowSize"):
+                self.showWelcome()
         
     # save some values and options when closing the program
     def closeEvent(self, event):
@@ -77,9 +104,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         print("close event")
         self.settings.setValue("windowSize", self.size())
         self.settings.setValue("windowPosition", self.pos())
+        self.settings.setValue("tableWindowSize", self.window_table.size())
+        self.settings.setValue("tableWindowPosition", self.window_table.pos())
+        
         self.page_settings.saveCurrentValues(self.settings)
         self.page_data.saveCurrentValues(self.settings)
         self.models.saveCurrentValues(self.settings)
+        
+        #self.settings.setValue("welcomed", True)
         
         # save image data, update CSV output file
         index = self.page_home.photo_viewer.cur_image_index
@@ -95,6 +127,10 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # close table window
         if self.window_table is not None:
             self.window_table.close()
+        
+        # close welcome window
+        if self.window_welcome is not None:
+            self.window_welcome.close()
         
     def retranslateUi(self):
         """
@@ -459,6 +495,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
      
         # create table window
         self.window_table = TableWindow(self.models, None)
+        
+        # create welcome window
+        self.window_welcome = None
      
     def onImageDirChanged(self, text):
         """ Called when the image directory on the data page was changed. """
@@ -518,11 +557,11 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.outputDirectoryChanged.connect(self.onOutDirChanged)
     
         # connect menu buttons
-        self.append_main_menu_to_button(self.page_home.btn_menu)
-        self.append_main_menu_to_button(self.page_data.frame_controlBar.btn_menu)
-        self.append_main_menu_to_button(self.page_settings.frame_control_bar.btn_menu)
-        self.append_main_menu_to_button(self.page_about.frame_control_bar.btn_menu)
-        #self.append_main_menu_to_button(self.page_handbook.frame_controlBar.btn_menu)
+        self.appendMainMenuToButton(self.page_home.btn_menu)
+        self.appendMainMenuToButton(self.page_data.frame_controlBar.btn_menu)
+        self.appendMainMenuToButton(self.page_settings.frame_control_bar.btn_menu)
+        self.appendMainMenuToButton(self.page_about.frame_control_bar.btn_menu)
+        #self.appendMainMenuToButton(self.page_handbook.frame_controlBar.btn_menu)
 
     def updateUserIds(self, value):    
         """
@@ -573,7 +612,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """ Directs to about page. """
         self.stackedWidget.setCurrentIndex(3)
         
-    def append_main_menu_to_button(self, btn):
+    def appendMainMenuToButton(self, btn):
         """
         Appends the menu to a given button. 
 

@@ -850,9 +850,7 @@ class PageSettings(QtWidgets.QWidget):
                 
                 # display the path to the file in the respective lineEdit
                 self.lineEdit_config_path.setText(path)
-                
-                # set old value for config path
-                self.lineEdit_config_path_oldValue = self.lineEdit_config_path.text()
+            
             else:
                 msg = QtWidgets.QMessageBox()
                 msg.setIcon(QtWidgets.QMessageBox.Critical)

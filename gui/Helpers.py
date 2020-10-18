@@ -439,12 +439,7 @@ def resizeHm(img, hm):
     hmResized = np.clip (hmResized*2, 0, 1)
     hmResized = hmResized[:, :, np.newaxis]
         
-    # print(f"hmresized shape {hmResized.shape}")
-    # if img.dtype =="uint8":
-    #     img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
-    # else:
-    #     img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
-    #plt.imshow(hmResized)
+    return hmResized
 
 def findCoordinates(heatmap, threshold=50, radius=20):
     thr = applyThresholdToHm(heatmap, threshold)

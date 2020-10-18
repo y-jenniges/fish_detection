@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+
 class TableWindow(QtWidgets.QMainWindow):
     """
     MainWindow class to display the current data table and to offer the 
