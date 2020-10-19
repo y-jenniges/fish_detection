@@ -488,6 +488,7 @@ class TableModel(QtCore.QAbstractTableModel):
         parent : optional
             the default is QtCore.QModelIndex()
         """
+        print(row)
         self.beginRemoveRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
             self.data = self.data.drop(self.data.index[row])

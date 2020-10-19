@@ -5,9 +5,11 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import Helpers
+import PostProcessing as pp
 import Losses
 
-GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 3: "Chaetognatha", 4: "Unidentified", 5: "Jellyfish"}
+GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
+              3: "Chaetognatha", 4: "Unidentified", 5: "Jellyfish"}
 
 #IMAGE_SHAPE = (4272, 2848)
 IMAGE_SHAPE = (2848, 4272)
@@ -17,8 +19,24 @@ CLASS_WEIGHTS = np.array([ 1,  1.04084507,  1.04084507,  1,  1,
        12.52542373])
 
 class Predicter():
+    """
+    Class that handles the complete prediction process. First, animal posisions
+    and groups on an image are predicted with a neural network. The 
+    generated location heatmaps are then focused into single points. Then,
+    heads and tails are matched. 
+    """
+    
     def __init__(self, neural_network_path=None, class_weights=None):
-        
+        """
+        Init function.
+
+        Parameters
+        ----------
+        neural_network_path : string, optional
+            Path to neural network used for predictions. The default is None.
+        class_weights : list<float>, optional
+            Class weights for the neural network. The default is None.
+        """
         self.neural_network = None
         
         if class_weights is not None:
@@ -30,6 +48,22 @@ class Predicter():
             self.loadNeuralNet(neural_network_path)
         
     def loadNeuralNet(self, path, weights=None):
+        """
+        Loads a neural network from a path with weights for the weighted
+        categorical crossentropy loss.
+
+        Parameters
+        ----------
+        path : string
+            Path to neural network.
+        weights : list<float>, optional
+            Class weights for the network. The default is None.
+
+        Returns
+        -------
+        bool
+            True, if the loading was successfull.
+        """
         if os.path.isfile(path):
             try:
             # if specified, use given weights
@@ -52,16 +86,39 @@ class Predicter():
             return False
         
     def predictImage(self, img_path, file_id, experiment_id="", user_id=""):
+        """
+        Handles the prediction of an image. From the neural network prediction
+        (heatmaps), coordinates are inferred. Then, heads and tails are 
+        matched.
+
+        Parameters
+        ----------
+        img_path : string
+            Path to the image to predict.
+        file_id : string
+            ID of the image. Used as file ID in the returned dataframe.
+        experiment_id : string, optional
+            ID of experiment. Used as experiment ID in the returned dataframe. 
+            The default is "".
+        user_id : string, optional
+            ID of currently working user. The default is "".
+
+        Returns
+        -------
+        df : DataFrame
+            Prediction information wrapped in a dataframe.
+        """
         # create dataframe to store predictions
-        df = pd.DataFrame(columns=["file_id", "object_remarks", "group", "species", "LX1", "LY1", "LX2", "LY2"])
+        df = pd.DataFrame(columns=["file_id", "object_remarks", "group", 
+                                   "species", "LX1", "LY1", "LX2", "LY2"])
         
         if self.neural_network is not None:            
             # load image
-            image = Helpers.loadImage(img_path, factor=32)
-            img = Helpers.loadImage(img_path, factor=32, rescale_range=False)
+            image = pp.loadImage(img_path, factor=32)
+            img = pp.loadImage(img_path, factor=32, rescale_range=False)
     
             # predict image
-            prediction = Helpers.applyNnToImage(self.neural_network, image)
+            prediction = pp.applyNnToImage(self.neural_network, image)
             
             # iterate over the animal groups
             for i in range(1, prediction.shape[3], 2):
@@ -72,11 +129,11 @@ class Predicter():
                 tails = tails.astype('uint8')
             
                 # get coordinates
-                head_coordinates = Helpers.findCoordinates(heads, 110, 5) # thresh for fish:100, jellyfish:10?
-                tail_coordinates = Helpers.findCoordinates(tails, 110, 5)
+                head_coordinates = pp.findCoordinates(heads, 110, 5) 
+                tail_coordinates = pp.findCoordinates(tails, 110, 5)
                 
                 # find head-tail matches
-                matches = Helpers.findHeadTailMatches(head_coordinates, tail_coordinates)
+                matches = pp.findHeadTailMatches(head_coordinates, tail_coordinates)
 
                 # # show prediction heatmap and coordinates
                 # plt.imshow(heads, cmap=plt.cm.gray)
@@ -99,7 +156,7 @@ class Predicter():
                 # plt.show()
                 
                 # scale matches to image resolution
-                matches = Helpers.scaleMatchCoordinates(matches, heads.shape, IMAGE_SHAPE)
+                matches = pp.scaleMatchCoordinates(matches, heads.shape, IMAGE_SHAPE)
                 
                 group = GROUP_DICT[np.ceil(i/2)]
                 species = "Unidentified"
@@ -132,7 +189,7 @@ class Predicter():
                               "manually_corrected": "False",
                               "experiment_id": experiment_id,
                               "user_id": user_id}
-                    df = df.append(animal, ignore_index=True)   # @todo potentiall index ignoring could be problematic               
+                    df = df.append(animal, ignore_index=True)          
         else:
             Helpers.displayErrorMsg(
                 "Missing Neural Network", 
@@ -142,6 +199,19 @@ class Predicter():
         return df
         
     def predictImageList(self, image_pathes):
+        """
+        Predicts a list of images.
+
+        Parameters
+        ----------
+        image_pathes : list<string>
+            Pathes to images to predict.
+
+        Returns
+        -------
+        df : DataFrame
+            Prediction information wrapped in a dataframe..
+        """
         df = pd.DataFrame(columns=["file_id", "object_remarks", "group", "species", 
                 "LX1", "LY1", "LX2", "LY2", "LX3", "LY3", "LX4", "LY4", 
                 "RX1", "RY1", "RX2", "RY2", "RX3", "RY3", "RX4", "RY4",

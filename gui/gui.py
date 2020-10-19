@@ -2,13 +2,13 @@ import time
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import Models
-from TableWindow import TableWindow
 import PageHome
 import PageSettings
 import PageAbout
 import PageData
-from WelcomeWindow import WelcomeWindow
 #import PageHandbook
+from TableWindow import TableWindow
+from WelcomeWindow import WelcomeWindow
 
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
@@ -46,6 +46,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         # restore values from previous session
         self.restorePreviousValues()
+        
+        # disable image directory selection options
+        self.page_data.frame_data_information.setEnabled(False)
 
         print(self.settings.fileName())
 
@@ -85,9 +88,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
             self.page_data.restoreValues(self.settings)
         
         except:
-            # check if any key exists, if not, show welcome screen
+            # check if any key exists, if not, show welcome screen 
             if not self.settings.contains("windowSize"):
-                self.showWelcome()
+                self.showWelcome()                
         
     # save some values and options when closing the program
     def closeEvent(self, event):

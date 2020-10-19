@@ -12,6 +12,7 @@ from DistanceMeasurer import DistanceMeasurer
 # IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
 IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
 IMAGE_DIRECTORY_ROOT = "G:/Universität/UniBremen/Semester4/Data/moreTestData/"
+IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Desktop/usability-test/input_images/"
 
 IMAGE_SIZE = (4272, 2848)
 #IMAGE_SIZE = (2848, 4272)
@@ -66,7 +67,7 @@ class PageData(QtWidgets.QWidget):
     def onImageDirEditChanged(self, text=None, updateVisuals=True):
         """ Function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
-        print(text)
+
         if not os.path.isdir(text): # check if directory exists
             self.lineEdit_img_dir.setText("")
             print("The entered img dir is not a valid path.") 
@@ -999,7 +1000,7 @@ class PageData(QtWidgets.QWidget):
         """ Gets current image list from photo viewer and calculates the 
         length of animals whose coordinates are valid. """
         
-        # @todo this function requires images and coordinates to be rectified!!
+        # @todo check if the coordinate rectification is correct
         
         # get list of images to process (images of the current day)            
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
@@ -1032,18 +1033,14 @@ class PageData(QtWidgets.QWidget):
                                               self.camera_config, 
                                               [animal])
         
-                    print(f"distances {distances}")
-                    
                     # add length measurements to model
                     idx = cur_entries.index[i]
                     self.models.model_animals.data.loc[idx, "length"] = distances[0]
-                    print(idx)
                     
                     # update animal length
                     for animal in self.parent().parent().page_home.photo_viewer.imageArea.animal_painter.animal_list:
-                        print(animal.row_index)
                         if animal.row_index == idx:
-                            print("length set on animal")
+                            print(f"length {distances[0]} set on animal")
                             animal.setLength(distances[0])
                 
             # update label displaying number of rectified and matched images

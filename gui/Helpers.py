@@ -2,26 +2,46 @@ import os
 import cv2
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from skimage.transform import resize
-from scipy.optimize import linear_sum_assignment
-from skimage.feature import peak_local_max
+
 from keras.preprocessing.image import load_img, img_to_array
 from PyQt5 import QtCore, QtWidgets, QtGui
-import Losses
-
-    
 """
-Helper function to get an icon from a ressource path
-"""       
+Helper functions and classes
+"""   
+    
 def getIcon(ressource_path):
+    """
+    Gets an icon from a ressource path.
+
+    Parameters
+    ----------
+    ressource_path : string
+        Path to icon.
+
+    Returns
+    -------
+    icon : QIcon
+        Loaded icon.
+
+    """
     icon = QtGui.QIcon()
     icon.addPixmap(QtGui.QPixmap(ressource_path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
     
     return icon
 
 def displayErrorMsg(text, information, windowTitle):
+    """
+    Displays an error message with the given text.
+
+    Parameters
+    ----------
+    text : string
+        Error description.
+    information : string
+        More information about the error.
+    windowTitle : string
+        Title of error window.
+    """
     msg = QtWidgets.QMessageBox()
     msg.setIcon(QtWidgets.QMessageBox.Critical)
     msg.setText(text)
@@ -389,173 +409,3 @@ class MenuFrame(QtWidgets.QFrame):
         self.btn_menu.setIconSize(QtCore.QSize(30, 30))
         self.btn_menu.setObjectName("btn_menu")
         horizontalLayout_31.addWidget(self.btn_menu)
-
-
-# --- neural network helpers ----------------------------------------------- #
-def loadImage(fname, factor=32, rescale_range=True):
-    "Loads an image as a h*w*3 numpy array in [-1, 1]"
-
-    img = img_to_array(load_img(fname), dtype="uint8")
-    
-    # if image is still large, downscale it by 25%
-    #from PIL import Image, ImageEnhance, ImageOps
-    #from skimage.transform import resize
-    if img.shape[0] > 2500:
-        img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
-
-    rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
-    if rest_x != 0:
-        img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
-                     constant_values=0)
-    if rest_y != 0:        
-        img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
-                     constant_values=0)
-       
-    if rescale_range:
-        # image needs to be in [-1,1]
-        img = np.asarray(img)
-        img = 2.*img/np.max(img) - 1
-    return img
-
-def applyNnToImage(model, image):
-    # predicted heatmap
-    X = np.expand_dims(image, axis=0)
-    yHat = model.predict(X)
-    return yHat
-
-def applyThresholdToHm(image, threshold=50):
-    img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
-    return img_thr
-
-def nonMaxSuppression(image, min_distance=20):
-    coordinates = peak_local_max(image, min_distance=min_distance)
-    return coordinates
-    
-def resizeHm(img, hm):
-    factor = img.shape[0]//hm.shape[0]
-    
-    hmResized = np.repeat (hm, factor, axis=0) # y
-    hmResized = np.repeat (hmResized, factor, axis=1) #x
-    hmResized = np.clip (hmResized*2, 0, 1)
-    hmResized = hmResized[:, :, np.newaxis]
-        
-    return hmResized
-
-def findCoordinates(heatmap, threshold=50, radius=20):
-    thr = applyThresholdToHm(heatmap, threshold)
-    #plt.imshow(thr)
-    #plt.show()
-    coordinates = nonMaxSuppression(thr, radius)
-    
-    # remove coordinates whose x and y are closer than 10px
-    df = pd.DataFrame(coordinates)
-    df = df.sort_values(0, ignore_index=True)
-    
-
-    final_coords = df.copy() 
-    
-    for i in range(len(df)):
-        for j in range(i, len(df)):
-            if abs(df.iloc[i][0] - df.iloc[j][0]) < 10 \
-            and abs(df.iloc[i][1] - df.iloc[j][1]) < 10 \
-            and i != j and j in final_coords.index:
-                #print(i,j)
-                final_coords.drop(j, inplace=True)  
-                
-    # drop duplicates
-    final_coords = pd.DataFrame(final_coords).drop_duplicates()
-    
-    # switch x and y
-    final_coords = final_coords.reindex(columns=[1,0])
-    
-    final_coords = final_coords.to_numpy()
-    
-    return final_coords
-
-def weightedEuclidean(x, y):
-    a = 0.54 # put more weight on x-error
-    b = 0.46 
-    return np.sqrt(a*x*x + b*y*y)
-
-
-def findHeadTailMatches(heads, tails):
-    ht_distances = []
-    
-    # calculate distance from every head to every tail
-    for i in range(len(heads)):
-        if len(tails) > 0:
-            head = heads[i]
-            deltay = abs(np.array(tails)[:,0] - head[0])
-            deltax = abs(np.array(tails)[:,1] - head[1])
-        
-            weighted_delta = weightedEuclidean(deltax, deltay)
-            ht_distances.append(weighted_delta)
-            
-    # calculate matches minimizing the total distance
-    ht_distances = np.array(ht_distances)
-    matches = np.array([])
-    if ht_distances.size != 0:
-        head_assignment, tail_assignment = linear_sum_assignment(ht_distances)
-        matches = np.array([(heads[head_assignment[i]], tails[tail_assignment[i]]) for i in range(len(tail_assignment))])
-    return matches 
-
-def scaleMatchCoordinates(matches, input_res, output_res):
-    xfactor = output_res[0]/input_res[0]
-    yfactor = output_res[1]/input_res[1]
-    
-    scaled_matches = []
-    for m in matches:
-        m = [[m[0][0]*xfactor, m[0][1]*yfactor], # scale head
-             [m[1][0]*xfactor, m[1][1]*yfactor]] # scale tail
-        scaled_matches.append(m)
-    
-    return np.array(scaled_matches)
-
-def exportAnimalsToCsv():
-    pass
-
-
-
-
-
-# # -------------------- navigation actions -------------------------------- #    
-# def action_to_home_page(self):  
-#     self.check_all_settings()
-#     self.stackedWidget.setCurrentIndex(0)
-
-# def action_to_data_page(self):
-#     self.check_all_settings()
-#     self.stackedWidget.setCurrentIndex(1)
-
-# def action_to_settings_page(self):
-#     self.check_all_settings()
-#     self.stackedWidget.setCurrentIndex(2)
-    
-# def action_to_handbook_page(self):
-#     self.check_all_settings()
-#     self.stackedWidget.setCurrentIndex(3)
-    
-# def action_to_about_page(self):
-#     self.check_all_settings()
-#     self.stackedWidget.setCurrentIndex(4)
-        
-# def append_main_menu_to_button(btn):
-#     # create the main menu
-#     menu = QtWidgets.QMenu()
-#     menu.addAction('Home', action_to_home_page)
-#     menu.addAction('Data', action_to_data_page)
-#     menu.addAction('Settings', action_to_settings_page)
-#     menu.addAction('Handbook', action_to_handbook_page)
-#     menu.addAction('About', action_to_about_page)
-    
-#     # set the menu style
-#     menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); border-radius: 3px; font:12pt 'Century Gothic'}\n"
-#                "QMenu::item {background-color: transparent;}\n"
-#                "QMenu::item:selected {background-color: rgb(0, 203, 221);}")
-    
-#     # attach menu to button
-#     btn.setMenu(menu)
-    
-#     # hide the right arrow of the menu
-#     btn.setStyleSheet( btn.styleSheet() + "QPushButton::menu-indicator {image: none;}");
-

@@ -91,9 +91,11 @@ class PageHome(QtWidgets.QWidget):
                 self.models.model_species.appendRow(item)
 
     def showEvent(self, event):
-        print("homw show event")
+        print("home show event")
         # redraw animals when opening the page
-        self.photo_viewer.imageArea.animal_painter.redraw()
+        #self.photo_viewer.imageArea.animal_painter.redraw()
+        # reload current image
+        self.photo_viewer.loadImage(self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
 
     def _initUi(self):
    
@@ -506,14 +508,12 @@ class PageHome(QtWidgets.QWidget):
         pass
 
     def displayRightImage(self):
-        print("on right image")
         self.btn_imgSwitch.setText("R")
         self.photo_viewer.activateLRMode(False)
         self.photo_viewer.setImageEnding("*_R.jpg")
         pass
     
     def displayBothImages(self):
-        print("on both images")
         self.btn_imgSwitch.setText("LR")
         self.photo_viewer.activateLRMode(True)
         pass

@@ -1,100 +1,94 @@
-#!/usr/bin/python
-
-# coding: utf-8
-
 #from sklearn.cluster import DBSCAN
 #from statistics import median
 import numpy as np
 import cv2
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import keras
 from keras.preprocessing.image import load_img, img_to_array
-import tensorflow as tf
 from skimage.feature import peak_local_max
 from skimage.transform import resize
+from scipy.optimize import linear_sum_assignment
 
 
-def loadNn(path):
-    if os.path.isfile(path):
-        return tf.keras.models.load_model(path)
-    else:
-        return None
+# def loadNn(path):
+#     if os.path.isfile(path):
+#         return tf.keras.models.load_model(path)
+#     else:
+#         return None
 
-def loadImage(fname, factor=64):
-    "Loads an image as a h*w*3 numpy array in [-1, 1]"
+# def loadImage(fname, factor=64):
+#     "Loads an image as a h*w*3 numpy array in [-1, 1]"
 
-    img = img_to_array(load_img(fname), dtype="uint8")
+#     img = img_to_array(load_img(fname), dtype="uint8")
     
-    # if image is still large, downscale it by 25%
-    #from PIL import Image, ImageEnhance, ImageOps
-    #from skimage.transform import resize
-    if img.shape[0] > 2500:
-        img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
+#     # if image is still large, downscale it by 25%
+#     #from PIL import Image, ImageEnhance, ImageOps
+#     #from skimage.transform import resize
+#     if img.shape[0] > 2500:
+#         img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
 
-    print(f"image before {img.shape}")
-    rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
-    if rest_x != 0:
-        img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
-                     constant_values=0)
-    if rest_y != 0:        
-        img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
-                     constant_values=0)
+#     print(f"image before {img.shape}")
+#     rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
+#     if rest_x != 0:
+#         img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
+#                      constant_values=0)
+#     if rest_y != 0:        
+#         img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
+#                      constant_values=0)
        
-    # image needs to be in [-1,1]
-    img = np.asarray(img)
-    img = 2.*img/np.max(img) - 1
-    print(f"image after {img.shape}")
-    return img
+#     # image needs to be in [-1,1]
+#     img = np.asarray(img)
+#     img = 2.*img/np.max(img) - 1
+#     print(f"image after {img.shape}")
+#     return img
 
-def applyNnToImage(model, image):
-    # predicted heatmap
-    X = np.expand_dims(image, axis=0)
-    yHat = model.predict(X)
-    return yHat
+# def applyNnToImage(model, image):
+#     # predicted heatmap
+#     X = np.expand_dims(image, axis=0)
+#     yHat = model.predict(X)
+#     return yHat
 
-def applyThresholdToHm(image, threshold=50):
-    img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
-    return img_thr
+# def applyThresholdToHm(image, threshold=50):
+#     img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
+#     return img_thr
 
-def nonMaxSuppression(image, min_distance=20):
-    coordinates = peak_local_max(image, min_distance=min_distance)
-    return coordinates
+# def nonMaxSuppression(image, min_distance=20):
+#     coordinates = peak_local_max(image, min_distance=min_distance)
+#     return coordinates
     
-def resizeHm(img, hm):
-    factor = img.shape[0]//hm.shape[0]
+# def resizeHm(img, hm):
+#     factor = img.shape[0]//hm.shape[0]
     
-    hmResized = np.repeat (hm, factor, axis=0) # y
-    hmResized = np.repeat (hmResized, factor, axis=1) #x
-    hmResized = np.clip (hmResized*2, 0, 1)
-    hmResized = hmResized[:, :, np.newaxis]
+#     hmResized = np.repeat (hm, factor, axis=0) # y
+#     hmResized = np.repeat (hmResized, factor, axis=1) #x
+#     hmResized = np.clip (hmResized*2, 0, 1)
+#     hmResized = hmResized[:, :, np.newaxis]
         
-    # print(f"hmresized shape {hmResized.shape}")
-    # if img.dtype =="uint8":
-    #     img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
-    # else:
-    #     img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
-    #plt.imshow(hmResized)
+#     # print(f"hmresized shape {hmResized.shape}")
+#     # if img.dtype =="uint8":
+#     #     img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
+#     # else:
+#     #     img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
+#     #plt.imshow(hmResized)
 
-def findCoordinates(heatmap):
-    thr = applyThresholdToHm(heatmap, 50)
-    coordinates = nonMaxSuppression(thr, 20)
+# def findCoordinates(heatmap):
+#     thr = applyThresholdToHm(heatmap, 50)
+#     coordinates = nonMaxSuppression(thr, 20)
     
-    # remove coordinates whose x and y are closer than 5px
-    df = pd.DataFrame(coordinates)
-    df = df.sort_values(0, ignore_index=True)
+#     # remove coordinates whose x and y are closer than 5px
+#     df = pd.DataFrame(coordinates)
+#     df = df.sort_values(0, ignore_index=True)
     
-    final_coords = []
-    final_coords.append(df.iloc[0])  
-    for i in range(1, len(df)):
-        if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 5 \
-        or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 5:
-             final_coords.append(df.iloc[i])  
+#     final_coords = []
+#     final_coords.append(df.iloc[0])  
+#     for i in range(1, len(df)):
+#         if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 5 \
+#         or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 5:
+#              final_coords.append(df.iloc[i])  
              
-    final_coords = pd.DataFrame(final_coords).to_numpy()
+#     final_coords = pd.DataFrame(final_coords).to_numpy()
     
-    return final_coords
+#     return final_coords
 
 
 def rectifyAndMatch(matcher, camera_config, left_image_path, right_image_path, objects_left):    
@@ -300,7 +294,159 @@ class StereoCorrespondence():
 
         return merged_objects, img_stereo
     
+ 
+# --- neural network helpers ----------------------------------------------- #
+def loadImage(fname, factor=32, rescale_range=True):
+    """
+    Loads an image as a h*w*3 numpy array in [-1, 1] (if rescale_range is True)
+
+    Parameters
+    ----------
+    fname : string
+        Path to image.
+    factor : int, optional
+        Factor used for padding necessary for the neural network prediction. 
+        The default is 32.
+    rescale_range : TYPE, optional
+        Tells if the image range should be scaled to [-1,1]. The default is True.
+
+    Returns
+    -------
+    img : np.array
+        Loaded image.
+    """
+    img = img_to_array(load_img(fname), dtype="uint8")
     
+    # if image is still large, downscale it by 25%
+    #from PIL import Image, ImageEnhance, ImageOps
+    #from skimage.transform import resize
+    if img.shape[0] > 2500:
+        img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
+
+    rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
+    if rest_x != 0:
+        img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
+                     constant_values=0)
+    if rest_y != 0:        
+        img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
+                     constant_values=0)
+       
+    if rescale_range:
+        # image needs to be in [-1,1]
+        img = np.asarray(img)
+        img = 2.*img/np.max(img) - 1
+    return img
+
+def applyNnToImage(model, image):
+    """
+    Applies a neural network to an image.
+
+    Parameters
+    ----------
+    model : Keras model
+        Neural network model used for the prediction.
+    image : np.array
+        Image in range in [-1,1] that is to be predicted.
+
+    Returns
+    -------
+    yHat : list
+        Prediction of the neural network.
+
+    """
+    # predicted heatmap
+    X = np.expand_dims(image, axis=0)
+    yHat = model.predict(X)
+    return yHat
+
+def applyThresholdToHm(image, threshold=50):
+    img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
+    return img_thr
+
+def nonMaxSuppression(image, min_distance=20):
+    coordinates = peak_local_max(image, min_distance=min_distance)
+    return coordinates
     
+def resizeHm(img, hm):
+    factor = img.shape[0]//hm.shape[0]
+    
+    hmResized = np.repeat (hm, factor, axis=0) # y
+    hmResized = np.repeat (hmResized, factor, axis=1) #x
+    hmResized = np.clip (hmResized*2, 0, 1)
+    hmResized = hmResized[:, :, np.newaxis]
+        
+    return hmResized
+
+def findCoordinates(heatmap, threshold=50, radius=20):
+    thr = applyThresholdToHm(heatmap, threshold)
+    #plt.imshow(thr)
+    #plt.show()
+    coordinates = nonMaxSuppression(thr, radius)
+    
+    # remove coordinates whose x and y are closer than 10px
+    df = pd.DataFrame(coordinates)
+    df = df.sort_values(0, ignore_index=True)
+    
+
+    final_coords = df.copy() 
+    
+    for i in range(len(df)):
+        for j in range(i, len(df)):
+            if abs(df.iloc[i][0] - df.iloc[j][0]) < 10 \
+            and abs(df.iloc[i][1] - df.iloc[j][1]) < 10 \
+            and i != j and j in final_coords.index:
+                #print(i,j)
+                final_coords.drop(j, inplace=True)  
+                
+    # drop duplicates
+    final_coords = pd.DataFrame(final_coords).drop_duplicates()
+    
+    # switch x and y
+    final_coords = final_coords.reindex(columns=[1,0])
+    final_coords = final_coords.to_numpy()
+    
+    return final_coords
+
+def weightedEuclidean(x, y):
+    a = 0.54 # put more weight on x-error
+    b = 0.46 
+    return np.sqrt(a*x*x + b*y*y)
+
+
+def findHeadTailMatches(heads, tails):
+    ht_distances = []
+    
+    # calculate distance from every head to every tail
+    for i in range(len(heads)):
+        if len(tails) > 0:
+            head = heads[i]
+            deltay = abs(np.array(tails)[:,0] - head[0])
+            deltax = abs(np.array(tails)[:,1] - head[1])
+        
+            weighted_delta = weightedEuclidean(deltax, deltay)
+            ht_distances.append(weighted_delta)
+            
+    # calculate matches minimizing the total distance
+    ht_distances = np.array(ht_distances)
+    matches = np.array([])
+    if ht_distances.size != 0:
+        head_assignment, tail_assignment = linear_sum_assignment(ht_distances)
+        matches = np.array([(heads[head_assignment[i]], tails[tail_assignment[i]]) for i in range(len(tail_assignment))])
+    return matches 
+
+def scaleMatchCoordinates(matches, input_res, output_res):
+    xfactor = output_res[0]/input_res[0]
+    yfactor = output_res[1]/input_res[1]
+    
+    scaled_matches = []
+    for m in matches:
+        m = [[m[0][0]*xfactor, m[0][1]*yfactor], # scale head
+             [m[1][0]*xfactor, m[1][1]*yfactor]] # scale tail
+        scaled_matches.append(m)
+    
+    return np.array(scaled_matches)
+
+def exportAnimalsToCsv():
+    pass   
     
     

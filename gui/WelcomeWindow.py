@@ -216,7 +216,8 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         # check if user ID is entered
         if self.lineEdit_user_id.text() != "":
             # check if config file is selected
-            if self.lineEdit_config.text() != "" and os.path.isfile(self.lineEdit_config.text()):
+            if self.lineEdit_config.text() != "" and os.path.isfile(
+                    self.lineEdit_config.text()):
                 # close welcome window
                 self.close()
                 

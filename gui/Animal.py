@@ -1,5 +1,3 @@
-#https://stackoverflow.com/questions/60571837/how-to-move-a-figurecreated-using-paintevent-by-simply-draging-it-in-pyqt5
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import AnimalGroup, AnimalSpecies
 import Helpers
@@ -7,61 +5,17 @@ import Helpers
 class Animal():
     """ 
     Class to represent an animal on an image. 
-    
-    Attributes
-    ----------
-    group: string
-        group of the animal
-    species: string
-        species of the animal
-    remark: string
-        remark to the animal
-    length: float
-        length of the animal 
-    row_index : int
-        row index of the represented animal in the data table
-    pixmap_width: int
-        width (=height) of the pixmaps for animal head and tail
-    original_pos_head: QPoint
-        position of the animal head on the original resolution image
-    original_pos_tail: QPoint
-        position of the animal tail on the original resolution image
-    position_head: QPoint
-        position of the animal head on the currently displayed size of the 
-        image
-    position_tail: QPoint
-        position of the animal tail on the currently displayed size of the 
-        image
-    is_head_drawn: bool
-        states if the head of the animal is drawn on the canvas
-    is_tail_drawn: bool
-        states if the tail of the animal is drawn on the canvas
-    boundingBoxOffset: [int, int]
-        distance between head/tail points and bounding box
-        
-    Methods
-    -------
-    createHeadVisual():
-    createTailVisual():
-    setManuallyCorrected(corrected=False):
-        if the user has adapted the animal, this variable has to be set to 
-        True (for statistical evaluation purposes of the neural network)
-    getColorsAccordingToGroup():
-        finds the color for the animal according to its group 
-    setPositionHead
-    setPositionTail
-    setGroup
-    setSpecies
-    setRemark
-    calculateBoundingBox
     """
-    
-    
-    # the input position refers to the center of the visual!
-    def __init__(self, models, row_index, position_head=QtCore.QPoint(-1,-1), 
+
+    # the input position refers to the center of the visual
+    def __init__(self, models, 
+                 row_index, 
+                 position_head=QtCore.QPoint(-1,-1), 
                  position_tail=QtCore.QPoint(-1,-1), 
                  group=AnimalGroup.UNIDENTIFIED, 
-                 species=AnimalSpecies.UNIDENTIFIED, remark="", length=-1):
+                 species=AnimalSpecies.UNIDENTIFIED, 
+                 remark="", 
+                 length=-1):
         """
         Init function.
 
@@ -84,6 +38,8 @@ class Animal():
             The default is AnimalSpecies.UNIDENTIFIED.
         remark : string, optional
             The remark to the animal. The default is "".
+        length: int, optional
+            The length of the animal. The default is -1.
         """
         # data models
         self._models = models
@@ -109,7 +65,7 @@ class Animal():
         self.species = species
         self.remark = remark
         self.length = length if length > 0 else 0
-        #self.height = None
+        #self.height = height if height > 0 else 0
       
         # set the visual for the head, tail and line between them @todo pblic or private?
         self.pos_visual_head = position_head - QtCore.QPoint(
@@ -146,10 +102,22 @@ class Animal():
      
      
     def createHeadVisual(self):
+        """
+        Creates a pixmap item (showing a circle), that is drawable on a 
+        QGraphicsScene for the animal head and sets its position to the animal 
+        head position.
+
+        Returns
+        -------
+        QGraphicsPixmapItem
+            The visual of the animal head (a circle).
+        """
         if self.position_head != QtCore.QPoint(-1,-1):
             # create the head visual
             self.head_item_visual = QtWidgets.QGraphicsPixmapItem( \
                 self._pixmap_head)
+            
+            # set position of head visual
             self.head_item_visual.setPos(self.rect_head.center() \
                                          - QtCore.QPoint( \
                                              self.pixmap_width/4, 
@@ -160,10 +128,22 @@ class Animal():
         return self.head_item_visual
      
     def createTailVisual(self):
+        """
+        Creates a pixmap item (showing a cross), that is drawable on a 
+        QGraphicsScene for the animal tail and sets its position to the animal 
+        tail position.
+
+        Returns
+        -------
+        QGraphicsPixmapItem
+            The visual of the animal tail (a cross).
+        """
         if self.position_tail != QtCore.QPoint(-1,-1):
             # create the tail visual
             self.tail_item_visual = QtWidgets.QGraphicsPixmapItem( \
                 self._pixmap_tail)
+                
+            # set position of tail visual
             self.tail_item_visual.setPos(self.rect_tail.center() \
                                          - QtCore.QPoint( \
                                              self.pixmap_width/4, 
@@ -175,7 +155,7 @@ class Animal():
     
     def setManuallyCorrected(self, corrected=False):
         """
-        Sets the manually-corrected parameter of animal.
+        Sets the manually-corrected parameter of the animal.
 
         Parameters
         ----------
@@ -187,8 +167,8 @@ class Animal():
                     
     def getColorsAccordingToGroup(self):
         """
-        Function that finds the colour for the animal according to its group 
-        and finds the pixmaps for head and tail accordingly.
+        Finds the colour for the animal according to its group and sets the 
+        pixmaps for head and tail accordingly.
         """
         self.color = ""
         
@@ -238,6 +218,15 @@ class Animal():
         
     
     def setPositionHead(self, pos):
+        """
+        Sets the head position, moves the displayed rect and adapts the line 
+        connecting head and tail accordingly. Also, bounding boxes are updated.
+
+        Parameters
+        ----------
+        pos : QPoint
+            New animal head position.
+        """
         self.position_head = pos
         self.rect_head.moveTopLeft(pos - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2))
@@ -248,6 +237,15 @@ class Animal():
         self.calculateBoundingBox() 
     
     def setPositionTail(self, pos):
+        """
+        Sets the tail position, moves the displayed rect and adapts the line 
+        connecting head and tail accordingly. Also, bounding boxes are updated.
+
+        Parameters
+        ----------
+        pos : QPoint
+            New animal tail position.
+        """
         self.position_tail = pos
         self.rect_tail.moveTopLeft(pos - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2))
@@ -258,6 +256,14 @@ class Animal():
         self.calculateBoundingBox()
         
     def setGroup(self, group):
+        """
+        Sets the animal group, adapts the colours and updates the model entry.
+
+        Parameters
+        ----------
+        group : string
+            New animal group.
+        """
         self.group = group
         self.getColorsAccordingToGroup()
         
@@ -267,6 +273,14 @@ class Animal():
                 self.row_index, 'group'] = group
     
     def setSpecies(self, species):
+        """
+        Sets the animal species and updates the model entry.
+
+        Parameters
+        ----------
+        species : string
+            New animal species.
+        """
         self.species = species
         
         # adapt species in data model if there is an entry for this animal
@@ -275,6 +289,14 @@ class Animal():
                 self.row_index, 'species'] = species
     
     def setRemark(self, remark):
+        """
+        Sets a remark for the animal and updates the model entry.
+
+        Parameters
+        ----------
+        remark : string
+            New animal remark.
+        """
         self.remark = remark
         
         # adapt species in data model if there is an entry for this animal
@@ -283,6 +305,7 @@ class Animal():
                 self.row_index, 'object_remarks'] = remark
     
     def calculateBoundingBox(self):
+        """ Calculates the bounding box of the animal. """
         pos_x = min(self.position_tail.x(), self.position_head.x()) \
             - self.boundingBoxOffset[0]/2 
         pos_y = min(self.position_tail.y(), self.position_head.y()) \
@@ -298,11 +321,20 @@ class Animal():
         self.boundingBox.setHeight(size_y)
         
     def setLength(self, length):
+        """
+        Sets the length of the animal.
+
+        Parameters
+        ----------
+        length : float
+            Length of the animal.
+        """
         self.length = float(length)
 
 
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
     """ A widget to provide all information about the current animal. """
+    
     def __init__ (self, models, parent = None):
         """
         Init function.
@@ -318,10 +350,12 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         """
         super(QtWidgets.QWidget, self).__init__(parent)
         
+        # @todo replace by an instance of an animal
         self.group = AnimalGroup.UNIDENTIFIED.name.title()
         self.species = AnimalSpecies.UNIDENTIFIED.name.title()
         self.remark = ""
         self.length = 0
+        
         self.models = models
         
         self._initUi()
@@ -340,12 +374,12 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
     def _initActions(self):
         """ Function to connect signals and slots. """
         # connecting signals and slots
-        self.spinBox_length.valueChanged.connect(self.on_length_spinbox_changed)
-        self.comboBox_group.currentTextChanged.connect(self.on_group_combobox_changed)
-        self.comboBox_species.currentTextChanged.connect(self.on_species_combobox_changed)
-        self.comboBox_remark.currentTextChanged.connect(self.on_remark_combobox_changed)
-        self.comboBox_remark.lineEdit().editingFinished.connect(self.on_remark_combobox_edited)
-        self.comboBox_remark.lineEdit().returnPressed.connect(self.on_remark_combobox_return_pressed)
+        self.spinBox_length.valueChanged.connect(self.onLengthSpinboxChanged)
+        self.comboBox_group.currentTextChanged.connect(self.onGroupComboboxChanged)
+        self.comboBox_species.currentTextChanged.connect(self.onSpeciesComboboxChanged)
+        self.comboBox_remark.currentTextChanged.connect(self.onRemarkComboboxChanged)
+        self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
+        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxReturnPressed)
         
     def _initModels(self):
         """ Function to set the data models on class widgets. """
@@ -353,7 +387,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_species.setModel(self.models.model_species)
         self.comboBox_remark.setModel(self.models.model_animal_remarks)
         
-    def on_remark_combobox_return_pressed(self):
+    def onRemarkComboboxReturnPressed(self):
         """ Function dealing with the return event on the editable combobox 
         for animal remarks. This ensures that the newly typed entry is 
         capitalized and right-aligned. """
@@ -376,7 +410,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.focusNextChild()
 
     # @todo would editfinsihed not be enough?   
-    def on_remark_combobox_edited(self):
+    def onRemarkComboboxEdited(self):
         """
         Function called when animal remark is edited. 
         """
@@ -393,12 +427,12 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.focusNextChild()
      
     # @todo why to i need this?
-    def on_remark_combobox_changed(self, remark):
+    def onRemarkComboboxChanged(self, remark):
         """ Function handling when the animal remark combobox gets changed, 
         i.e. the editing is not finished yet. """
         self.parent().animal_painter.setAnimalRemark(str(remark))
         
-    def on_species_combobox_changed(self, species):
+    def onSpeciesComboboxChanged(self, species):
         """ Function called when the species combobox is changed. 
         It sets the species of the current animal. 
 
@@ -419,7 +453,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             print("Given species was not in combobox")
             #@todo add species to model
             
-    def on_group_combobox_changed(self, group):
+    def onGroupComboboxChanged(self, group):
         """
         Function called when group combobox entry is changed. It sets the
         group of the current animal.
@@ -438,12 +472,29 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         else:
             print("Given group was not in combobox")
      
-    def on_length_spinbox_changed(self, value):
+    def onLengthSpinboxChanged(self, value):
+        """
+        Called when length combobox is changed. Sets the length of the
+        current animal. 
+
+        Parameters
+        ----------
+        value : float
+            New value for animal length.
+        """
         self.length = value
-        self.parent().animal_painter.cur_animal.length = value#setAnimalLength(value)
+        self.parent().animal_painter.cur_animal.length = value
         self.focusNextChild()
         
     def setAnimal(self, animal):
+        """
+        Copies a given animal into the specifications window.
+
+        Parameters
+        ----------
+        animal : Animal
+            Animal to copy.
+        """
         # set group
         if animal.group in AnimalGroup.__members__.values(): 
             self.group = animal.group.name.title()
@@ -456,19 +507,23 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         else:
             self.species = animal.species
 
+        # set remark
         if animal.remark is not None:
             self.remark = str(animal.remark)
         else:
             self.remark = ""
-            
+        
+        # set length
         self.length = animal.length
         self.updateVisuals()
     
     def updateVisuals(self):
+        """ Sets the visuals of the specifications widget to the currently
+        set animal. """
         # set group combobox
         index = self.comboBox_group.findText(self.group) 
         if index != -1:
-            self.comboBox_group.blockSignals(True) # blocking signal to avoid calling on_group_combobox_changed and thus starting a loop
+            self.comboBox_group.blockSignals(True) # blocking signal to avoid calling onGroupComboboxChanged and thus starting a loop
             self.comboBox_group.setCurrentIndex(index)
             self.comboBox_group.blockSignals(False)
 
@@ -499,7 +554,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             #self.model_remarks.appendRow(item)
 
         # set length spinbox
-        print(f"animals specs: set length to {self.length}")
         if self.length is not None and self.length != -1: 
             self.spinBox_length.blockSignals(True)
             self.spinBox_length.setValue(self.length) 
@@ -507,8 +561,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         else: 
             self.spinBox_length.setValue(0)
 
-    
     def _initUi(self):
+        """ Inits the UI. """
         self.setObjectName("animal_specs_widget")
         self.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:white;} ")
            
@@ -593,7 +647,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # self.spinBox_heigth.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         # self.spinBox_heigth.setMaximum(9999.99)
         # self.spinBox_heigth.setObjectName("spinBox_heigth")
-        
             
         # add widgets to layout
         layout.addWidget(self.label_group, 0, 0, 1, 1)

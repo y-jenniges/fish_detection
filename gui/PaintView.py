@@ -195,7 +195,8 @@ class PhotoViewer(QtWidgets.QWidget):
                 if self.cur_image_index < len(self.image_list) - 1:
                     # get the new image and load it
                     path = self.image_list[self.cur_image_index+1]
-                    self.cur_image_index = self.cur_image_index + 1        
+                    self.cur_image_index = self.cur_image_index + 1    
+                    self.cur_animal = None
                     self.loadImage(path)
                 
                 # update the previous image in the csv file
@@ -209,6 +210,7 @@ class PhotoViewer(QtWidgets.QWidget):
             # set current image to status "checked"
             cur_file_indices = self.models.model_animals.data[
                 self.models.model_animals.data['file_id'] ==  cur_file_id].index
+            
             for idx in cur_file_indices:
                 self.models.model_animals.data.loc[idx, "status"] = "checked"
                 
@@ -216,11 +218,11 @@ class PhotoViewer(QtWidgets.QWidget):
             if self.cur_image_index > 0:
                 path = self.image_list[self.cur_image_index-1]
                 self.cur_image_index = self.cur_image_index - 1
+                self.cur_animal = None
                 self.loadImage(path) 
             
             # update the previous image in the csv file
             self.exportToCsv(cur_file_id)
-
 
     def updateImageCountVisual(self):
         num_images = len(self.image_list)
@@ -460,6 +462,10 @@ class AnimalPainter():
     Class providing the logic for adding/removing/moving and jumping between 
     animals. It needs a QGraphicsView that it can paint on and that delegates 
     the mouse events to the AnimalPainter.
+    
+    Dragging implementation taken from
+    #https://stackoverflow.com/questions/60571837/how-to-move-a-figurecreated-using-paintevent-by-simply-draging-it-in-pyqt5
+    (last access: 19.10.2020)
     """
     def __init__(self, models, imageArea):
         """
@@ -759,6 +765,8 @@ class AnimalPainter():
                     self.is_add_mode_active = False
                 else:
                     displayErrorMsg("Error", "Please draw head and tail before switching off the Add-mode.", "Error")
+            else:
+                self.is_add_mode_active = False
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
@@ -857,7 +865,7 @@ class AnimalPainter():
                     # if on left image, create new row
                     if self.image_ending == "*_L.jpg":
                         self.models.model_animals.insertRows(
-                            self.models.model_animals.rowCount(), 1, 
+                            self.models.model_animals.rowCount()+1, 1, 
                             [self.cur_animal], cur_image_path, 
                             image_remark, experiment_id, user_id)
                     elif self.image_ending == "*_R.jpg":
@@ -868,7 +876,7 @@ class AnimalPainter():
                         self.models.model_animals.data.loc[self.cur_animal.row_index, "RY2"] = self.cur_animal.original_pos_tail.y()
                 else:                    
                     # create a new animal
-                    self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount(),
+                    self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount()+1,
                                              position_head = pos)
                     self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                               
@@ -880,7 +888,7 @@ class AnimalPainter():
  
             else:                
                 # create a new animal
-                self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount(),
+                self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount()+1,
                                          position_head = pos)
                 self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                 
