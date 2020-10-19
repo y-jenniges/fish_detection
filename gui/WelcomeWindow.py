@@ -104,8 +104,7 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.lineEdit_user_id.setCursorPosition(0)
         self.lineEdit_user_id.setReadOnly(False)
         self.lineEdit_user_id.setObjectName("lineEdit_user_id")
-        self.lineEdit_user_id.setToolTip("User ID = first letter of first name + first letter of last name")
-        
+
         # set a validator to ensure that the user ID consists of up to three 
         # letters (at least one letter)
         reg_ex = QtCore.QRegExp("[a-zA-Z]{1,3}")
@@ -128,7 +127,6 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.lineEdit_config.setMinimumSize(QtCore.QSize(0, 40))
         self.lineEdit_config.setMaximumSize(QtCore.QSize(16777215, 40))
         self.lineEdit_config.setReadOnly(True)
-        self.lineEdit_config.setToolTip("Path to camera configuration file")
 
         # button to browse for a camera config file
         self.btn_browse_config = QtWidgets.QPushButton(self.frame_cam_config)
@@ -173,17 +171,21 @@ class WelcomeWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self):
         """ Retranslates UI. """
-        self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", u"Welcome", None))
-        self.label_hello.setText(QtCore.QCoreApplication.translate("MainWindow", u"Hello and welcome to MarOMarker (Marine Organism Marker).\n"
+        self.setWindowTitle(QtCore.QCoreApplication.translate("WelcomeWindow", u"Welcome", None))
+        self.label_hello.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Hello and welcome to MarOMarker (Marine Organism Marker).\n"
 "", None))
-        self.label_fill_in.setText(QtCore.QCoreApplication.translate("MainWindow", u"Please fill in the following fields. You can change them later in \u201cSettings\u201d.", None))
-        self.label_enter_id.setText(QtCore.QCoreApplication.translate("MainWindow", u"Enter your personal ID.", None))
-        self.lineEdit_user_id.setPlaceholderText(QtCore.QCoreApplication.translate("MainWindow", u"User ID...", None))
-        self.label_choose_config.setText(QtCore.QCoreApplication.translate("MainWindow", u"Choose a camera configuration file.", None))
+        self.label_fill_in.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Please fill in the following fields. You can change them later in \u201cSettings\u201d.", None))
+        self.label_enter_id.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Enter your personal ID.", None))
+        self.lineEdit_user_id.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"User ID...", None))
+        self.lineEdit_user_id.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow",u"User ID = first letter of first name + first letter of last name", None))
+        
+        self.label_choose_config.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Choose a camera configuration file.", None))
         self.lineEdit_config.setText("")
-        self.lineEdit_config.setPlaceholderText(QtCore.QCoreApplication.translate("MainWindow", u"Path to camera configuration file...", None))
-        self.btn_browse_config.setText(QtCore.QCoreApplication.translate("MainWindow", u"Browse", None))
-        self.btn_ok.setText(QtCore.QCoreApplication.translate("MainWindow", u"OK", None))
+        self.lineEdit_config.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file...", None))
+        self.lineEdit_config.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file", None))
+        
+        self.btn_browse_config.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Browse", None))
+        self.btn_ok.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"OK", None))
            
     def onUserIdChanged(self, text):
         """ Handles when user ID is changed. It adaptes the user ID on 

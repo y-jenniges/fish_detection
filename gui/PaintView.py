@@ -325,12 +325,12 @@ class PhotoViewer(QtWidgets.QWidget):
         self.btn_next_image.setObjectName("btn_next_image")
         
         # button for opening image in separate window
-        self.btn_openImg = QtWidgets.QPushButton(frame_right)
-        self.btn_openImg.setMinimumSize(QtCore.QSize(40, 40))
-        self.btn_openImg.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_openImg.setIcon(getIcon(":/icons/icons/open_image.png"))
-        self.btn_openImg.setIconSize(QtCore.QSize(30, 30))
-        self.btn_openImg.setObjectName("btn_openImg")
+        # self.btn_openImg = QtWidgets.QPushButton(frame_right)
+        # self.btn_openImg.setMinimumSize(QtCore.QSize(40, 40))
+        # self.btn_openImg.setMaximumSize(QtCore.QSize(40, 40))
+        # self.btn_openImg.setIcon(getIcon(":/icons/icons/open_image.png"))
+        # self.btn_openImg.setIconSize(QtCore.QSize(30, 30))
+        # self.btn_openImg.setObjectName("btn_openImg")
         
         # layout
         layout_frame_right = QtWidgets.QVBoxLayout(frame_right)
@@ -341,7 +341,7 @@ class PhotoViewer(QtWidgets.QWidget):
         layout_frame_right.addItem(spacerItem9)
         layout_frame_right.addWidget(self.btn_next_image)
         layout_frame_right.addItem(spacerItem10)
-        layout_frame_right.addWidget(self.btn_openImg)
+        #layout_frame_right.addWidget(self.btn_openImg)
         
         # --- main widget --------------------------------------------------- #      
         # main layout

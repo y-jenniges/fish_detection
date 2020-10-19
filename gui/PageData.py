@@ -711,6 +711,7 @@ class PageData(QtWidgets.QWidget):
         self.comboBox_image_filter.addItem("")
         self.comboBox_image_filter.addItem("")
         self.comboBox_image_filter.addItem("")
+        self.comboBox_image_filter.setEnabled(False)
         
         # add widgets to data filter frame
         self.layout_data_filter.addWidget(self.label_image_filter)

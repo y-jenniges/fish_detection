@@ -111,8 +111,6 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.saveCurrentValues(self.settings)
         self.models.saveCurrentValues(self.settings)
         
-        #self.settings.setValue("welcomed", True)
-        
         # save image data, update CSV output file
         index = self.page_home.photo_viewer.cur_image_index
         if index < len(self.page_home.photo_viewer.image_list):        
@@ -151,8 +149,22 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_home.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
         self.page_home.btn_imgSwitch.setText(_translate("MainWindow", "L"))
-        self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))    
-        self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))     
+        self.page_home.comboBox_imgRemark.lineEdit().setPlaceholderText(_translate("MainWindow", "Image remark..."))   
+        self.page_home.photo_viewer.label_imgCount.setText(_translate("MainWindow", "01/48"))   
+        self.page_home.comboBox_imgRemark.setToolTip(_translate("MainWindow", "Remark to the current image"))
+        
+        self.page_home.frame_topBar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
+        self.page_home.btn_filter.setToolTip(_translate("MainWindow", "Image filters"))
+        self.page_home.btn_imgSwitch.setToolTip(_translate("MainWindow", "Switch to left, right or left-right image(s) (shortcuts: 1, 2, 3)"))
+        self.page_home.btn_zoom.setToolTip(_translate("MainWindow", "Image zoom"))
+        self.page_home.btn_add.setToolTip(_translate("MainWindow", "Add animal mode (O: head, X: tail, shortcut: +)"))
+        self.page_home.btn_previous.setToolTip(_translate("MainWindow", "Previous animal (shortcut: a)"))
+        self.page_home.btn_next.setToolTip(_translate("MainWindow", "Next animal (shortcut: d)"))
+        self.page_home.btn_delete.setToolTip(_translate("MainWindow", "Remove animal mode (shortcut: -)"))
+        self.page_home.btn_undo.setToolTip(_translate("MainWindow", "Undo last action"))
+        self.page_home.photo_viewer.btn_previous_image.setToolTip(_translate("MainWindow", "Previous image (shortcut: left arrow)"))
+        self.page_home.photo_viewer.btn_next_image.setToolTip(_translate("MainWindow", "Next image (shortcut: right arrow)"))
+        #self.page_home.photo_viewer.btn_openImg.setToolTip(_translate("MainWindow", "Open image in separate window"))
         
         # texts for data page
         self.page_data.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
@@ -202,6 +214,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.label_length_measurement_text.setText(_translate("MainWindow", "   #Calculated images: "))
         self.page_data.label_length_measurement_number.setText(_translate("MainWindow", "0"))
         
+        self.page_data.frame_topBar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
+        self.page_data.lineEdit_img_dir.setToolTip(_translate("MainWindow", "Directory, where left and right images are (automatically set by date selection)"))
+        self.page_data.lineEdit_output_dir.setToolTip(_translate("MainWindow", "Output file is generated here"))
+        self.page_data.lineEdit_img_prefix.setToolTip(_translate("MainWindow", "Optional prefix for images to search for"))
+        self.page_data.lineEdit_exp_id.setToolTip(_translate("MainWindow", "ID of the experiment for which the photos were taken"))
+        
         # texts for settings page
         self.page_settings.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_settings.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
@@ -230,10 +248,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.btn_add_species.setText(_translate("MainWindow", "Add"))
         self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
         
+        self.page_settings.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
+        
         # texts for the handbook page
         # self.page_handbook.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         # self.page_handbook.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
         # self.page_handbook.frame_controlBar.label_settings_3.setText(_translate("MainWindow", "Handbook"))
+        
+        # self.page_handbook.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
    
         # texts for the about page        
         self.page_about.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
@@ -258,6 +280,8 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
                        "Prof. Dr. Philipp Fischer<br>\n"
                        "<br>\n"
                        "September 2020"))
+            
+        self.page_about.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
  
     def _initUi(self):
         """
