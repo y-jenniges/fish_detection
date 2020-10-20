@@ -163,6 +163,20 @@ def scaleMatchCoordinates(matches, input_res, output_res):
 def exportAnimalsToCsv():
     pass
 
+def oneHotToGroup(one_hot):
+    if np.array_equal(one_hot, np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "fish_head"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "fish_tail"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "crust_head"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "crust_tail"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "chaeto_head"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0])): return "chaeto_tail"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])): return "unid_head"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0])): return "unid_tail"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0])): return "jelly_head"
+    elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])): return "jelly_tail"
+    else:
+        print("unknown one hot encoding")
+        
 model_path = "../data/output/800/model-H"
 #model_path = "../data/output/801/model-H"
 #model_path = "../data/output/900/model-H"
@@ -190,13 +204,15 @@ test_labels, train_labels_animals, train_labels_no_animals, val_labels, class_we
 # gt_tails = np.array([np.array(animal["position"]) for animal in gt["animals"] if np.array_equal(animal["group"], fish_tails)])
 
 
+classes = ["fish_head", "fish_tail", "crust_head", "crust_tail", 
+           "chaeto_head", "chaeto_tail", 
+           "jelly_head", "jelly_tail", "unid_head", "unid_tail", ]
 
 # evaluate coordinates
 eval_df = pd.DataFrame(0, columns=["tp", "tn", "fp", "fn"], 
-                       index=["fish_head", "fish_tail", "crust_head", "crust_tail", 
-                              "chaeto_head", "chaeto_tail", "unid_head", "unid_tail", 
-                              "jelly_head", "jelly_tail"])
+                       index=classes)
 
+confusion_df = pd.DataFrame(0, columns=["nothing"]+classes, index=["nothing"]+classes)
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
@@ -312,6 +328,7 @@ for gt in test_labels:
     gt_jh = [x["position"] for x in gt["animals"] if x["group"] == jelly_h]
     gt_jt = [x["position"] for x in gt["animals"] if x["group"] == jelly_t]
     
+    gt_all = gt["animals"]
     for i in range(len(df)):
         if df.iloc[i]["group"] == "Fish": 
             idx = 0
@@ -326,11 +343,11 @@ for gt in test_labels:
             gt_h = gt_chh
             gt_t = gt_cht
         elif df.iloc[i]["group"] == "Unidentified": 
-            idx = 6
+            idx = 8
             gt_h = gt_uh
             gt_t = gt_ut
         elif df.iloc[i]["group"] == "Jellyfish": 
-            idx = 8
+            idx = 6
             gt_h = gt_jh
             gt_t = gt_jt
         else: 
@@ -365,6 +382,35 @@ for gt in test_labels:
         if not found:
             eval_df.iloc[idx+1]["fp"] += 1
             
+        # confusion matrix ----------------------------------- #
+        found = False
+        for a in gt_all["animals"]:
+            distance= np.linalg.norm(np.array(a["position"]) - head)
+            
+            if distance < 30:
+                found = True
+                gt_group = oneHotToGroup(np.array(a["group"]))
+                confusion_df.iloc[idx+1][gt_group] += 1
+                gt_all["animals"].remove(a)
+                break
+                
+        if not found:
+            confusion_df.iloc[idx+1]["nothing"] += 1
+        
+        found = False
+        for a in gt_all["animals"]:
+            distance = np.linalg.norm(np.array(a["position"]) - tail)
+            
+            if distance < 30:
+                found = True
+                gt_group = oneHotToGroup(np.array(a["group"]))
+                confusion_df.iloc[idx+2][gt_group] += 1
+                gt_all["animals"].remove(a)
+                break
+                
+        if not found:
+            confusion_df.iloc[idx+2]["nothing"] += 1
+            
     eval_df.iloc[0]["fn"] += len(gt_fh) 
     eval_df.iloc[1]["fn"] += len(gt_ft) 
     
@@ -380,7 +426,9 @@ for gt in test_labels:
     eval_df.iloc[8]["fn"] += len(gt_jh) 
     eval_df.iloc[9]["fn"] += len(gt_jt) 
     
-    print(eval_df)
+    
+    print(confusion_df)
+print(eval_df)
 
 # #matches = findHeadTailMatches(head_coordinates, tail_coordinates)
 # matches = findHeadTailMatches(gt_heads, gt_tails)
