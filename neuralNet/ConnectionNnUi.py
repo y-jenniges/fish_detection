@@ -239,6 +239,8 @@ for gt in test_labels:
     
     # iterate over the groups
     df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
+    df = pd.DataFrame(columns=["group", "x", "y"])   
+    
     for i in range(1, prediction.shape[3], 2):
         #print(i)
         
@@ -250,56 +252,66 @@ for gt in test_labels:
     
         # get coordinates
         #print("get head coordinates")
-        head_coordinates = findCoordinates(heads, 110, 5) # thresh for fish:100, jellyfish:10?
+        head_coordinates = findCoordinates(heads, 110, 5) 
         #print("get tail coordinates")
         tail_coordinates = findCoordinates(tails, 110, 5)
         
-        #print("find head tail matches")
-        # find head-tail matches
-        matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+        # #print("find head tail matches")
+        # # find head-tail matches
+        # matches = findHeadTailMatches(head_coordinates, tail_coordinates)
     
-        # scale matches to image resolution
-        matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
+        # # scale matches to image resolution
+        # matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
         
         group = GROUP_DICT[np.ceil(i/2)]
         
-        #file_id = Rectified_TN_Exif_Remos1_2015.08.02_00.00.49
+        # # show prediction heatmap and coordinates
+        # plt.imshow(heads, cmap=plt.cm.gray)
+        # plt.autoscale(False)
+        # plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
+        # plt.show()
         
-        # show prediction heatmap and coordinates
-        plt.imshow(heads, cmap=plt.cm.gray)
-        plt.autoscale(False)
-        plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
-        plt.show()
-        
-        plt.imshow(tails, cmap=plt.cm.gray)
-        plt.autoscale(False)
-        plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
-        plt.show()
+        # plt.imshow(tails, cmap=plt.cm.gray)
+        # plt.autoscale(False)
+        # plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
+        # plt.show()
     
-        # plot each match with a different colour
-        colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
-        plt.imshow(heads, cmap=plt.cm.gray)
-        plt.imshow(img)
-        for i in range(matches.shape[0]):
-            plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
-            plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
-        plt.show()
+        # # plot each match with a different colour
+        # colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
+        # plt.imshow(heads, cmap=plt.cm.gray)
+        # plt.imshow(img)
+        # for i in range(matches.shape[0]):
+        #     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+        #     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
+        # plt.show()
     
     
-        # append predicted animals from the current group
-        for m in matches:
-            animal = {"group": group, 
-                      "LX1": m[0][0], "LY1": m[0][1], # head
-                      "LX2": m[1][0], "LY2": m[1][1]} # tail
-            df = df.append(animal, ignore_index=True)
+        # # append predicted animals from the current group
+        # for m in matches:
+        #     animal = {"group": group, 
+        #               "LX1": m[0][0], "LY1": m[0][1], # head
+        #               "LX2": m[1][0], "LY2": m[1][1]} # tail
+        #     df = df.append(animal, ignore_index=True)
       
+        one_hot_h = np.zeros(11)
+        one_hot_h[i] = 1
         
-    
-
-    
-    # conf_true = [group_map(x["group"]) for x in gt["animals"]]
-    # conf_pred = []
-
+        one_hot_t = np.zeros(11)
+        one_hot_t[i+1] = 1
+        
+        group_h = oneHotToGroup(one_hot_h)
+        group_t = oneHotToGroup(one_hot_t)
+        
+        head_coordinates *= 2
+        tail_coordinates *= 2
+        
+        for h in head_coordinates:
+            entry = {"group": group_h, "x": h[0], "y": h[1]}
+            df = df.append(entry, ignore_index=True)
+        
+        for t in tail_coordinates:
+            entry = {"group": group_t, "x": t[0], "y": t[1]}
+            df = df.append(entry, ignore_index=True)
 
     nothing = [1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     
@@ -329,87 +341,69 @@ for gt in test_labels:
     gt_jt = [x["position"] for x in gt["animals"] if x["group"] == jelly_t]
     
     gt_all = gt["animals"]
+    
     for i in range(len(df)):
-        if df.iloc[i]["group"] == "Fish": 
+        if df.iloc[i]["group"] == "fish_head": 
             idx = 0
-            gt_h = gt_fh
-            gt_t = gt_ft
-        elif df.iloc[i]["group"] == "Crustacea": 
+            gt_s = gt_fh
+        elif  df.iloc[i]["group"] == "fish_tail": 
+            idx = 1
+            gt_s = gt_ft
+        elif df.iloc[i]["group"] == "crust_head": 
             idx = 2
-            gt_h = gt_crh
-            gt_t = gt_crt
-        elif df.iloc[i]["group"] == "Chaetognatha": 
+            gt_s = gt_crh
+        elif df.iloc[i]["group"] == "crust_tail": 
+            idx = 3
+            gt_s = gt_crt
+        elif df.iloc[i]["group"] == "chaeto_head": 
             idx = 4
-            gt_h = gt_chh
-            gt_t = gt_cht
-        elif df.iloc[i]["group"] == "Unidentified": 
+            gt_s = gt_chh
+        elif df.iloc[i]["group"] == "chaeto_tail": 
+            idx = 5
+            gt_s = gt_cht
+        elif df.iloc[i]["group"] == "unid_head": 
             idx = 8
-            gt_h = gt_uh
-            gt_t = gt_ut
-        elif df.iloc[i]["group"] == "Jellyfish": 
+            gt_s = gt_uh
+        elif df.iloc[i]["group"] == "unid_tail": 
+            idx = 9
+            gt_s = gt_ut
+        elif df.iloc[i]["group"] == "jelly_head": 
             idx = 6
-            gt_h = gt_jh
-            gt_t = gt_jt
+            gt_s = gt_jh
+        elif df.iloc[i]["group"] == "jelly_tail": 
+            idx = 7
+            gt_s = gt_jt
         else: 
             print("unknown group", df.iloc[i]["group"])
         
-        head = np.array([df.iloc[i]["LX1"], df.iloc[i]["LY1"]])
-        tail = np.array([df.iloc[i]["LX2"], df.iloc[i]["LY2"]])
-        
+        data_point = np.array([df.iloc[i]["x"], df.iloc[i]["y"]])
+                
         found = False
-        for h in gt_h:
-            distance = np.linalg.norm(np.array(h) - head)
-            
+        for entry in gt_s:
+            distance = np.linalg.norm(np.array(entry) - data_point)
             if distance < 30:
                 found = True
                 eval_df.iloc[idx]["tp"] += 1
-                gt_h.remove(h)
+                gt_s.remove(t)
                 break
-                print("tp")
-                
         if not found:
             eval_df.iloc[idx]["fp"] += 1
-                
-        found = False
-        for t in gt_t:
-            distance = np.linalg.norm(np.array(t) - tail)
-            if distance < 30:
-                found = True
-                eval_df.iloc[idx+1]["tp"] += 1
-                gt_t.remove(t)
-                print("tp")
-                break
-        if not found:
-            eval_df.iloc[idx+1]["fp"] += 1
             
         # confusion matrix ----------------------------------- #
         found = False
         for a in gt_all["animals"]:
-            distance= np.linalg.norm(np.array(a["position"]) - head)
+            distance= np.linalg.norm(np.array(a["position"]) - data_point)
             
             if distance < 30:
                 found = True
-                gt_group = oneHotToGroup(np.array(a["group"]))
+                gt_group = a["group"]
                 confusion_df.iloc[idx+1][gt_group] += 1
                 gt_all["animals"].remove(a)
                 break
                 
         if not found:
             confusion_df.iloc[idx+1]["nothing"] += 1
-        
-        found = False
-        for a in gt_all["animals"]:
-            distance = np.linalg.norm(np.array(a["position"]) - tail)
-            
-            if distance < 30:
-                found = True
-                gt_group = oneHotToGroup(np.array(a["group"]))
-                confusion_df.iloc[idx+2][gt_group] += 1
-                gt_all["animals"].remove(a)
-                break
-                
-        if not found:
-            confusion_df.iloc[idx+2]["nothing"] += 1
+
             
     eval_df.iloc[0]["fn"] += len(gt_fh) 
     eval_df.iloc[1]["fn"] += len(gt_ft) 
@@ -426,9 +420,9 @@ for gt in test_labels:
     eval_df.iloc[8]["fn"] += len(gt_jh) 
     eval_df.iloc[9]["fn"] += len(gt_jt) 
     
-    
+    print(eval_df)
     print(confusion_df)
-print(eval_df)
+
 
 # #matches = findHeadTailMatches(head_coordinates, tail_coordinates)
 # matches = findHeadTailMatches(gt_heads, gt_tails)
