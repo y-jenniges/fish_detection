@@ -271,7 +271,7 @@ for gt in test_labels:
     
     # iterate over the groups
     df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
-    df = pd.DataFrame(columns=["group", "x", "y"])   
+    #df = pd.DataFrame(columns=["group", "x", "y"])   
     
     for i in range(1, prediction.shape[3], 2):
         #print(i)
@@ -325,36 +325,40 @@ for gt in test_labels:
                       "LX2": m[1][0], "LY2": m[1][1]} # tail
             df = df.append(animal, ignore_index=True)
       
-            found = False
-            # iterate over gt heads
-            for j in range(0, len(gt["animals"]), 2):
-                
-                # only continue if the group is the same
-                if oneHotToGeneralGroup(gt["animals"][j]["group"]) == group:
-                    head = np.array([animal["LX1"], animal["LY1"]])
-                    distance_head = np.linalg.norm(np.array(gt["animals"][j]["position"]) - head)
+        
+    for i in range(len(df)):
+        found = False
+        animal = df.iloc[i]
+        
+        # iterate over gt heads
+        for j in range(0, len(gt["animals"]), 2):
+            
+            # only continue if the group is the same
+            if oneHotToGeneralGroup(gt["animals"][j]["group"]) == animal["group"]:
+                head = np.array([animal["LX1"], animal["LY1"]])
+                distance_head = np.linalg.norm(np.array(gt["animals"][j]["position"]) - head)
     
-                    if distance_head < 30:
-                        tail = np.array([animal["LX2"], animal["LY2"]])
-                        distance_tail = np.linalg.norm(np.array(gt["animals"][j+1]["position"]) - tail)
-                    
-                        if distance_tail < 30:
-                            found = True
-                            eval_df.loc[group, "tp"] += 1
-                            gt["animals"].remove(gt["animals"][j]) # remove head
-                            gt["animals"].remove(gt["animals"][j]) # remove tail
-                            break
-                if found:
-                    break
-                   
-            # add wrong detections
-            if not found:
-                eval_df.loc[group, "fp"] += 1
+                if distance_head < 30:
+                    tail = np.array([animal["LX2"], animal["LY2"]])
+                    distance_tail = np.linalg.norm(np.array(gt["animals"][j+1]["position"]) - tail)
                 
-            # add unrecognized animals of the group
-            for k in range(0, len(gt["animals"]), 2):
-                g = oneHotToGeneralGroup(gt["animals"][k]["group"])
-                eval_df.loc[group, "fn"] += 1
+                    if distance_tail < 30:
+                        found = True
+                        eval_df.loc[group, "tp"] += 1
+                        gt["animals"].remove(gt["animals"][j]) # remove head
+                        gt["animals"].remove(gt["animals"][j]) # remove tail
+                        break
+            # if found:
+            #     break
+               
+        # add wrong detections
+        if not found:
+            eval_df.loc[group, "fp"] += 1
+        
+    # add unrecognized animals of the group
+    for k in range(0, len(gt["animals"]), 2):
+        g = oneHotToGeneralGroup(gt["animals"][k]["group"])
+        eval_df.loc[group, "fn"] += 1
       
     #     one_hot_h = np.zeros(11)
     #     one_hot_h[i] = 1
