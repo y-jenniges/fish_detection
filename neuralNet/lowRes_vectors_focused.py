@@ -81,7 +81,7 @@ dg.showEntryOfGenerator (valGenL, 0, False)
 # # For reference you can access the MobileNet.V2 source code at
 # # https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 
-def ourBlock (x, basename, channels=15):
+def ourBlock (x, basename, channels=17):
 #def ourBlock(x, basename, channels=Globals.channels):
     """Our own block of computation layers used several times in the network. It is similar to
     the block used in MobileNet.V2 but simplified. x is the layer to attach the block to,
@@ -129,7 +129,7 @@ x = ourBlock (x, "block_17")
 out_h = layers.Conv2D(11, 1, padding='same', activation="softmax", name = "heatmap")(x)
 
 # vector output layer
-out_v = layers.Conv2D(4, 1, padding='same', activation="linear", name = "vectors")(x)
+out_v = layers.Conv2D(6, 1, padding='same', activation="linear", name = "vectors")(x)
 
 # define and compile model
 modelL = keras.Model(inputs=input, outputs=[out_h, out_v])
