@@ -9,7 +9,7 @@ import HeatmapClass
 import HelperFunctions as helpers
 
 
-OPTION = "body_segmentation" 
+OPTION = "all_animals" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -87,7 +87,7 @@ def generateAllHeatmaps(entry, res='low'):
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm + hm_body #@todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
+            hm_5_head.hm + hm_5_tail.hm #+ hm_body #@todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
     
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
@@ -325,7 +325,7 @@ class DataGenerator(keras.utils.Sequence):
         elif OPTION == "body_segmentation":
             heatmaps = np.array([e[1] for e in batch])
             hm_body = np.array([e[2] for e in batch])
-            return X, {"heatmap": heatmaps, "connection": hm_body}# @todo adapt
+            return X, {"heatmap": heatmaps, "segmentation": hm_body}# @todo adapt
         
         elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
             heatmaps = np.array([e[1] for e in batch])

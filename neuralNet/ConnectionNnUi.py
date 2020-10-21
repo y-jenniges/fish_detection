@@ -14,13 +14,13 @@ from sklearn.metrics import confusion_matrix
 import HelperFunctions as helpers
 import DataGenerator as dg
 
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)    
+#random.set_seed(2)
+set_random_seed(2)    
     
 # dict mapping group ID to its string representation
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
@@ -29,7 +29,7 @@ GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea",
 
 def loadNn(path, weights=None):
     if os.path.isfile(path):
-        model = tf.keras.models.load_model(
+        model = keras.models.load_model(
             path, 
             custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
         return model
@@ -264,7 +264,7 @@ for gt in test_labels:
         
     
     #print("model loaded. predicting...")
-    prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)#applyNnToImage(model, image)
+    prediction = applyNnToImage(model, image)#np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
     
     #print("prediction done")
     

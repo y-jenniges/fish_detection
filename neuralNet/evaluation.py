@@ -6,19 +6,19 @@ import keras
 import HelperFunctions as helpers
 import HeatmapClass
 import DataGenerator as dg
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 from keras import backend as K
 import Losses
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
 BATCH_SIZE = 1
 
-test_path = "../data/output/900/"
+test_path = "../data/output/800/"
 model_path = "model-H"
 
 
@@ -51,7 +51,7 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
     
 # load model
 #model = keras.models.load_model(os.path.join(test_path,model_path))
-model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights)})
+model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights),  "weighted_mean_squared_error": Losses.weighted_mean_squared_error})
 
 
 #prepareEntry = dg.prepareEntryLowResHeatmap
@@ -59,19 +59,21 @@ prepareEntry=dg.prepareEntryHighResHeatmap
 
 testGen = dg.DataGenerator (dataset=test_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
 
-tfi = dg.DataGenerator (dataset=fish_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
-tcr = dg.DataGenerator (dataset=crust_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
-tch = dg.DataGenerator (dataset=chaeto_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
-tje = dg.DataGenerator (dataset=jellyfish_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
-tun = dg.DataGenerator (dataset=unidentified_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
+tfi = dg.DataGenerator(dataset=fish_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
+tcr = dg.DataGenerator(dataset=crust_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
+tch = dg.DataGenerator(dataset=chaeto_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
+tje = dg.DataGenerator(dataset=jellyfish_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
+tun = dg.DataGenerator(dataset=unidentified_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
 
 gens = [testGen, tfi, tcr, tch, tje, tun]
 
+print(model.metrics_names)
 for gen in gens:
     # evaluate on test data
-    print("Evaluate on test data")
+    #print("Evaluate on test data")
     results = model.evaluate_generator(gen, verbose=1)
-    print("test loss, test acc:", results)
+    #print("test loss, test acc:", results)
+
 
 # # minimalistic CNN
 # def generateY(entry):

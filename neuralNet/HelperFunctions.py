@@ -506,7 +506,7 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         else:
             img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
     plt.imshow(img)
-    #plt.axis("off")
+    plt.axis("off")
     
     if gt is not None:            
         group_array = np.zeros(Globals.channels)
