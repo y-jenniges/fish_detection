@@ -15,13 +15,13 @@ import HelperFunctions as helpers
 import DataGenerator as dg
 import keras
 
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)    
+random.set_seed(2)
+#set_random_seed(2)    
     
 # dict mapping group ID to its string representation
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
@@ -259,7 +259,7 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
 
 #test_labels = [test_labels[7]]
 for gt in test_labels:
-    #print("load image", gt["filename"])
+    print("load image", gt["filename"])
     image = loadImage(gt["filename"], factor=32)
     img = loadImage(gt["filename"], factor=32, rescale_range=False)
         
@@ -352,10 +352,10 @@ for gt in test_labels:
             if not found:
                 eval_df.loc[group, "fp"] += 1
             
-            # add unrecognized animals of the group
-            for k in range(0, len(gt["animals"]), 2):
-                if oneHotToGeneralGroup(gt["animals"][k]["group"]) == group:
-                    eval_df.loc[group, "fn"] += 1
+    # add unrecognized animals of the group
+    for k in range(0, len(gt["animals"]), 2):
+        g = oneHotToGeneralGroup(gt["animals"][k]["group"])
+        eval_df.loc[group, "fn"] += 1
             
     print(eval_df)
       
