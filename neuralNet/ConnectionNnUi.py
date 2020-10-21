@@ -13,6 +13,7 @@ import Losses
 from sklearn.metrics import confusion_matrix
 import HelperFunctions as helpers
 import DataGenerator as dg
+import keras
 
 #from tensorflow import random
 from tensorflow import set_random_seed
@@ -258,7 +259,7 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
 
 #test_labels = [test_labels[7]]
 for gt in test_labels:
-    print("load image", gt["filename"])
+    #print("load image", gt["filename"])
     image = loadImage(gt["filename"], factor=32)
     img = loadImage(gt["filename"], factor=32, rescale_range=False)
         
@@ -359,6 +360,8 @@ for gt in test_labels:
     for k in range(0, len(gt["animals"]), 2):
         g = oneHotToGeneralGroup(gt["animals"][k]["group"])
         eval_df.loc[group, "fn"] += 1
+        
+    print(eval_df)
       
     #     one_hot_h = np.zeros(11)
     #     one_hot_h[i] = 1
