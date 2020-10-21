@@ -34,11 +34,11 @@ bodyPart:
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
-EPOCHS_2 = 100
+EPOCHS_2 = 50
 EPOCHS_3 = 20
 
 # output directory
-out_path = "../data/output/1001/"
+out_path = "../data/output/1000/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
@@ -142,7 +142,7 @@ out_segmentation = layers.Conv2D (1, 1, padding='same', activation="sigmoid", na
 modelL = keras.Model(inputs=input, outputs=[out_heatmaps, out_segmentation])
 modelL.compile(loss={
     "heatmap": Losses.weighted_categorical_crossentropy(weights), 
-    "segmentation": binary_crossentropy},
+    "segmentation": "binary_crossentropy"},
     optimizer=keras.optimizers.Adam(), 
     metrics=["mae", "acc"], 
     )
@@ -165,7 +165,7 @@ for l in modelL.layers:
 # compile and fit model again
 modelL.compile(loss={
     "heatmap": Losses.weighted_categorical_crossentropy(weights), 
-    "segmentation": binary_crossentropy},
+    "segmentation": "binary_crossentropy"},
     optimizer=keras.optimizers.Adam(), 
     metrics=["mae", "acc"], 
     )
@@ -212,7 +212,7 @@ out_segmentation = layers.Conv2D (1, 1, padding='same', activation="sigmoid", na
 modelH = keras.Model(inputs=input, outputs=[out_heatmaps, out_segmentation])
 modelH.compile(loss={
     "heatmap": Losses.weighted_categorical_crossentropy(weights), 
-    "segmentation": binary_crossentropy},
+    "segmentation": "binary_crossentropy"},
     optimizer=keras.optimizers.Adam(), 
     metrics=["mae", "acc"], 
     )
