@@ -386,7 +386,7 @@ print(f"final score {true_positives}")
 #     # add unrecognized animals of the group
 #     for k in range(0, len(gt["animals"]), 2):
 #         g = oneHotToGeneralGroup(gt["animals"][k]["group"])
-#         eval_df.loc[group, "fn"] += 1
+#         eval_df.loc[g, "fn"] += 1
             
 #     print(eval_df)
       
@@ -605,33 +605,37 @@ print(f"final score {true_positives}")
 # print(sum(np.abs(angles))/len(np.abs(angles))) 
     
 
+import numpy as np
+import matplotlib.pyplot as plt
 
+barWidth = 0.2
 
-# barWidth = 0.2
+bars1 = [393, 556, 405] # model 1
+bars2 = [430, 729, 368] # model 2
+bars3 = [248, 376, 550] # model 3 
+bars4 = [395, 448, 403] # model 4
 
-# bars1 = [393, 556, 405]
-# bars2 = [430, 729, 368]
-# bars3 = [248, 376, 550]
-# bars4 = [395, 448, 403]
+# acc und recall aus match eval
+bars5 = []
 
-# r1 = np.arange(len(bars1))
-# r2 = [x + barWidth for x in r1]
-# r3 = [x + barWidth for x in r2]
-# r4 = [x + barWidth for x in r3]
+r1 = np.arange(len(bars1))
+r2 = [x + barWidth for x in r1]
+r3 = [x + barWidth for x in r2]
+r4 = [x + barWidth for x in r3]
 
-# # Make the plot
-# plt.bar(r1, bars1, color='#7f6d5f', width=barWidth, edgecolor='white', label='No weights, 50')
-# plt.bar(r2, bars2, color='#557f2d', width=barWidth, edgecolor='white', label='No weights, 100')
-# plt.bar(r3, bars3, color='#2d7f5e', width=barWidth, edgecolor='white', label='Weights, 50')
-# plt.bar(r4, bars4, color='#2d7f5f', width=barWidth, edgecolor='white', label='Weights, 100') 
+# Make the plot
+plt.bar(r1, bars1, color='#7f6d5f', width=barWidth, edgecolor='white', label='No weights, 50')
+plt.bar(r2, bars2, color='#557f2d', width=barWidth, edgecolor='white', label='No weights, 100')
+plt.bar(r3, bars3, color='#2d7f5e', width=barWidth, edgecolor='white', label='Weights, 50')
+plt.bar(r4, bars4, color='#2d7f5f', width=barWidth, edgecolor='white', label='Weights, 100') 
 
-# # Add xticks on the middle of the group bars
-# plt.xlabel('group', fontweight='bold')
-# plt.xticks([r + barWidth for r in range(len(bars1))], ['True positives', 'False positives', 'False negatives'])
+# Add xticks on the middle of the group bars
+plt.xlabel('group', fontweight='bold')
+plt.xticks([r + barWidth for r in range(len(bars1))], ['True positives', 'False positives', 'False negatives'])
  
-# # Create legend & Show graphic
-# plt.legend()
-# plt.show()
+# Create legend & Show graphic
+plt.legend()
+plt.show()
 
 # import pandas as pd
 # import matplotlib.pyplot as plt
