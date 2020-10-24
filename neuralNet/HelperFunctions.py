@@ -278,7 +278,7 @@ def downsample (T, factor=64):
   newSh = sh[:-3] + (sh[-3]//factor, factor) + (sh[-2]//factor, factor) + sh[-1:]
   return T.reshape(newSh).mean(axis=(-4, -2))
 
-def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=None):
+def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=None, gt=None):
     # get directions of vectors 
     u = vectors[:,:,1]
     v = vectors[:,:,0]
@@ -305,11 +305,16 @@ def show_image_with_non_zero_vectors(image, vectors, vector_scale=200, filename=
         for i in range(len(ui)):
             plt.quiver(ui[1]*factor, ui[0]*factor, 
                         vz*vector_scale, uz*vector_scale, 
-                        color=["r"], width=1/250, 
+                        color=["w"], width=1/250, 
                         angles='xy', scale_units='xy', scale=1)   
     else:
         print("vz and uz not equal shape")
         
+    if gt is not None:
+        for i in range(0, len(gt), 2):
+            plt.scatter(gt[i]["position"][0], gt[i]["position"][1], s=20, marker='o', c='r')
+            plt.scatter(gt[i+1]["position"][0], gt[i+1]["position"][1], s=20, marker='x', c='b')
+    
     if filename is not None:
         plt.savefig(filename, dpi=150, bbox_inches='tight')
     

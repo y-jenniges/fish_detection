@@ -34,10 +34,10 @@ bodyPart:
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
-EPOCHS_2 = 50
+EPOCHS_2 = 100
 
 # output directory
-out_path = "../data/output/1100/"
+out_path = "../data/output/78/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"

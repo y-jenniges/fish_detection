@@ -1,15 +1,24 @@
-# Tools to load the training / test set on the fly, so the whole dataset
-# doesn't need to be kept in memory.
-import json
-import os
+"""
+Adapted from lecture "Anwendungen der Bildverarbeitung" by Udo Frese, 
+University Bremen, 2019
+
+It offers tools to load the training/validation/test set on the fly, so the 
+whole dataset doesn't need to be kept in memory.
+"""
 import numpy as np
 import random
 import keras
 import HeatmapClass
 import HelperFunctions as helpers
+# from tensorflow import random 
+from tensorflow import set_random_seed
 
+# fix random seeds of numpy and tensorflow for reproducability
+np.random.seed(0)
+#random.set_seed(2)
+set_random_seed(2)
 
-OPTION = "all_animals" 
+OPTION = "vector_fields" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -24,8 +33,9 @@ def dummyPrepareEntry (entry, hm_folder):
     return (helpers.loadImage(entry['filename']), [])
     
 def generateAllHeatmaps(entry, res='low'):
-   # hm_0 = HeatmapClass.Heatmap(entry, resolution=res, group=0, bodyPart="front")
-    
+    """ Generates heatmaps, vector fields, segmentation information accroding
+    to chosen option and resolution (low is 1/32 and high is 1/2 of the
+    original resolution)."""
     hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
     hm_1_tail = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="back")
     hm_1_body = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="connection")
@@ -67,8 +77,6 @@ def generateAllHeatmaps(entry, res='low'):
     
     # head and tail vectors
     head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry, 32, 200, f)
-    # head_vectors = np.array(helpers.downsample(head_vectors, f))
-    # tail_vectors = np.array(helpers.downsample(tail_vectors, f))    
     
     # head and tail heatmaps
     hm_heads = helpers.sumHeatmaps([hm_1_head.hm, hm_2_head.hm, hm_3_head.hm, 
@@ -81,14 +89,16 @@ def generateAllHeatmaps(entry, res='low'):
                                    hm_3_body.hm, hm_4_body.hm, hm_5_body.hm])
     
     # nothing heatmap
+    #@todo pay attention here!!!!!!!!!!! worth another test round to see if 
+    # including hm_body improves sth for vectors (usually it should only be 
+    # included in nothing heatmap for segmentation option)
     hm_y, hm_x = hm_1_head.hm.shape[0], hm_1_head.hm.shape[1]
     hm_0 = np.ones((hm_y, hm_x, 1), dtype=np.float32)
     hm_0 -= hm_1_head.hm + hm_1_tail.hm + \
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm #+ hm_body #@todo pay attention here!!!!!!!!!!! worth another test round to see if including this improves sth
-    
+            hm_5_head.hm + hm_5_tail.hm + hm_body 
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
     if OPTION == "all_animals":
@@ -126,7 +136,9 @@ def generateAllHeatmaps(entry, res='low'):
         return
 
 def generateFishHeadHeatmaps(entry, res="low"):
-    # generate heatmap
+    """ Creates the fish head heatmap in the desired resolution 
+    (low is 1/32 and high is 1/2 of original resolution). """
+    # generate fish head heatmap
     hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
     
     # perform downsampling
@@ -183,48 +195,8 @@ def prepareEntryLowResHeatmap(entry):
 def prepareEntryHighResHeatmap (entry):
     return prepareEntryHeatmap(entry, "high")
     
-#     """Get's an entry of the dataset (filename, annotation), load filename and
-#     converts annotation into a low-res heatmap. Returning both as x, y pair.
-#     to be passed to keras."""
-    
-#     # filename = entry['filename']
-#     # annotation = entry['animals']
-#     heatmaps=[]
-    
-#     # heatmap = HeatmapClass.Heatmap(entry, resolution='high', group=1, bodyPart='front')
-#         # use precalculated heatmaps, if their folder is specified
-#     if hm_folder != None:
-#         hm_file_path = hm_folder + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
-#         with open(hm_file_path, 'r') as f:
-#             hm_json = json.load(f)
-#             hm = np.array(hm_json['hm_1f'])
-#             # todo adapt the precalculated heatmaps! (i.e. clip them to 0-1)
-#             np.clip (hm, 0, 1, out=hm)
-#     else:
-#         #print("Calculating heatmap...")
-#         #heatmaps, hm_body = generateAllHeatmaps(entry, res="high")
-#         heatmaps, vectors = generateAllHeatmaps(entry, res="high")
-        
-#     #head_vectors, tail_vectors = helpers.get_head_tail_vectors(entry)
-    
-#     # load image and make its range [-1,1] (suitable for mobilenet)
-#     image = helpers.loadImage(entry['filename'], 32)#/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-#     #image = helpers.loadImage(entry['filename'])/np.array(128,dtype=np.float32)-np.array(1,dtype=np.float32)
-#     #image = 2.*(image - np.min(image))/np.ptp(image)-1
-#     image = 2.*image/np.max(image) - 1
-#     #image = helpers.downsample(image, factor=2)
-
-#     heatmaps = np.concatenate(heatmaps, axis=2)
-#     vectors = np.concatenate(vectors, axis=2)
-  
-    
-    
-# #    return np.asarray(image), np.asarray(heatmaps), np.asarray(hm_body)
-#     return np.asarray(image), np.asarray(heatmaps), np.asarray(vectors)
-
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
-    """Fetches the first batch, prints dataformat statistics and 
-    shows the first entry both as image X and annotation y."""    
+    """Fetches the first batch and prints dataformat statistics. """    
 
     X, y = dataGen[i]
     
@@ -244,22 +216,6 @@ def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     elif OPTION == "body_segmentation":
         print(f"y['heatmap'] has shape {y['heatmap'].shape}, y ['segmentation'] has shape {y['segmentation'].shape}")
 
-    
-
-    # todo how to i know the resolution
-    #if showHeatmaps:
-        # hm_folder_path = "../data/heatmaps_lowRes/"
-        # hm_file_path = hm_folder_path + entry['filename'].split("/")[-1].rsplit(".jpg",1)[0] + '.json'    
-        # with open(hm_file_path, 'r') as f:
-        #     hms = json.load(f)
-            
-        # show heatmap for 2 batches
-        # for j in range(2):
-            #print(j)
-            #print(X[i])
-            #helpers.showImageWithHeatmap (X[i], y[i][j])
-
-        
 
 class DataGenerator(keras.utils.Sequence):
     """Provides a dataset of the erdbeer to keras in a load on demand fashion
@@ -270,7 +226,6 @@ class DataGenerator(keras.utils.Sequence):
     Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
     
     def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
-        #print("DataGenerator: init")
         'Initialization'
         
         self.hm_folder_path = hm_folder_path
@@ -287,21 +242,13 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
         
     def __len__(self):
-        #print("DataGenerator: len")
         'Denotes the number of batches per epoch'
-        #return int(np.floor(len(self.dataset) / self.batch_size))
-        #print(f"self.animal_size {self.animal_size}\nself.no_animal_size {self.no_animal_size}\nself.batch_size {self.batch_size}\n")_
-
         number_of_images = np.floor(len(self.dataset) + (len(self.dataset)/self.batch_size)*self.no_animal_size)
-        #print(f"number_of_images {number_of_images}")
 
         return int(np.floor(number_of_images/self.batch_size))
-        #return int((np.floor(len(self.dataset)) + np.floor(self.no_animal_ratio*len(self.no_animal_dataset)))/ self.batch_size)
-      
+
     def __getitem__(self, index):
         'Generate one batch of data'   
-        #no_animal_hm_path = os.path.join(self.hm_folder_path, "../training_no_animals/") if self.hm_folder_path != None else None
-
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
              
@@ -311,7 +258,6 @@ class DataGenerator(keras.utils.Sequence):
         batch = batch_animals + batch_no_animals
         
         X = np.array([e[0] for e in batch])
-        
         
         # get y depending on option
         if OPTION == "fish_heads":
@@ -325,19 +271,18 @@ class DataGenerator(keras.utils.Sequence):
         elif OPTION == "body_segmentation":
             heatmaps = np.array([e[1] for e in batch])
             hm_body = np.array([e[2] for e in batch])
-            return X, {"heatmap": heatmaps, "segmentation": hm_body}# @todo adapt
+            return X, {"heatmap": heatmaps, "segmentation": hm_body}
         
         elif OPTION == "vector_fields" or OPTION == "vector_fields_weighted":
             heatmaps = np.array([e[1] for e in batch])
             vectors = np.array([e[2] for e in batch])
-            return X, {"heatmap": heatmaps, "vectors": vectors} #, {"heatmap": self.weights, "vectors": np.array([1,1,1,1])} would that work?
+            return X, {"heatmap": heatmaps, "vectors": vectors}
         
         else:
             print("Error: unknown option in data generator, get_item!")
             return 
         
     def get_ground_truth (self, index):
-        #print("DataGenerator: get_ground_truth")
         'Generate ground_truth for the batch in the original format (not heatmap).'
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size]
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
@@ -346,11 +291,7 @@ class DataGenerator(keras.utils.Sequence):
         return [e['animals'] for e in batch]          
 
     def on_epoch_end(self):
-        #print("DataGenerator: on_epoch_end")
         'Updates indexes after each epoch'
         if self.shuffle:
             random.shuffle(self.dataset)
             random.shuffle(self.no_animal_dataset)
-
-		
-	
