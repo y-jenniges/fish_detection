@@ -10,15 +10,15 @@ import random
 import keras
 import HeatmapClass
 import HelperFunctions as helpers
-# from tensorflow import random 
-from tensorflow import set_random_seed
+from tensorflow import random 
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)
+random.set_seed(2)
+#set_random_seed(2)
 
-OPTION = "vector_fields" 
+OPTION = "all_animals" 
 # "fish_heads"
 # "all_animals"
 # "body_segmentation"
@@ -98,7 +98,7 @@ def generateAllHeatmaps(entry, res='low'):
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm + hm_body 
+            hm_5_head.hm + hm_5_tail.hm #+ hm_body 
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
     if OPTION == "all_animals":

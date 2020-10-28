@@ -15,13 +15,14 @@ import HelperFunctions as helpers
 import DataGenerator as dg
 import keras
 
-from tensorflow import random
-#from tensorflow import set_random_seed
+
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)    
+#random.set_seed(2)
+set_random_seed(2)    
     
 # dict mapping group ID to its string representation
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
@@ -89,9 +90,10 @@ def resizeHm(img, hm):
     return hmResized
 
 def findCoordinates(heatmap, threshold=50, radius=20):
+    #plt.imshow(heatmap)
     thr = applyThresholdToHm(heatmap, threshold)
-    plt.imshow(thr)
-    plt.show()
+    #plt.imshow(thr)
+    #plt.show()
     coordinates = nonMaxSuppression(thr, radius)
     
     # remove coordinates whose x and y are closer than 10px
@@ -162,9 +164,6 @@ def scaleMatchCoordinates(matches, input_res, output_res):
     
     return np.array(scaled_matches)
 
-def exportAnimalsToCsv():
-    pass
-
 def oneHotToGroup(one_hot):
     if np.array_equal(one_hot, np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "fish_head"
     elif np.array_equal(one_hot, np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])): return "fish_tail"
@@ -192,14 +191,17 @@ def oneHotToGeneralGroup(one_hot):
     elif np.array_equal(one_hot, np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])): return "Jellyfish"
     else:
         print("unknown one hot encoding")
-        
-model_path = "../data/output/800/model-H"
+   
+     
+model_path = "../data/output/1001/model-H"
+#model_path = "../data/output/800/model-H"
 #model_path = "../data/output/801/model-H"
 #model_path = "../data/output/900/model-H"
 #model_path = "../data/output/901/model-H"
 #modelPath = "../data/output/59/model-L"
 #modelPath = "../data/output/48/model-L" # trained on all animals, coordiantes dont work
 
+# model weights used in all weighted models in this Masters thesis
 weights = np.array([ 1.        ,  1.04084507,  1.04084507,  1.        ,  1.        ,
         8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
        12.52542373])
@@ -231,7 +233,7 @@ eval_df = pd.DataFrame(0, columns=["tp", "tn", "fp", "fn"],
                        index=classes)
 
 confusion_df = pd.DataFrame(0, columns=["nothing"]+classes, index=["nothing"]+classes)
-#img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
+img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/60.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/39.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/maritime_dataset_25/test_data/51.jpg"
 #img_path = "G:/Universität/UniBremen/Semester4/Data/moreTestData/2015_08/Rectified Images/Rectified_TN_Exif_Remos1_2015.08.02_01.00.49_L.jpg"
@@ -257,37 +259,123 @@ unidentified_labels = helpers.filter_labels_for_animal_group(test_labels, uniden
 jellyfish_id = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish_id)
 
+#test_labels = test_labels + train_labels_animals + val_labels
+
+
+# # closest match evaluation on gt ----------------------------------------- #
+# true_positives = 0
+# for gt in test_labels:
+#     image = loadImage(gt["filename"], factor=32)
+    
+#     heads = []
+#     tails = []
+#     groups = []
+    
+#     # gt
+#     for i in range(0, len(gt["animals"]), 2):
+#         heads.append(gt["animals"][i]["position"])
+#         tails.append(gt["animals"][i+1]["position"])
+#         groups.append(gt["animals"][i]["group"])
+    
+#     # matches
+#     matches = findHeadTailMatches(np.array(heads), np.array(tails))
+    
+#     for m in matches:
+#         h = np.array([m[0][0], m[0][1]])
+#         t = np.array([m[1][0], m[1][1]])
+#         for i in range(0, len(gt["animals"]), 2):
+#             if np.array_equal(np.array(gt["animals"][i]["group"]), groups[i//2]):
+#                 if np.array_equal(np.array(gt["animals"][i]["position"]), h):
+#                     if np.array_equal(np.array(gt["animals"][i+1]["position"]), t):
+#                         true_positives += 1
+#     print(f"current score {true_positives}")
+
+# print(f"final score {true_positives}")
+    
 test_labels = test_labels + train_labels_animals + val_labels
-#test_labels = [test_labels[7]]
-
-true_positives = 0
+# coordinate evaluation ----------------------------------------------------- #
 for gt in test_labels:
+    print("load image", gt["filename"])
     image = loadImage(gt["filename"], factor=32)
+    img = loadImage(gt["filename"], factor=32, rescale_range=False)
+        
+    #prediction = applyNnToImage(model, image)
+    prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
     
-    heads = []
-    tails = []
+    # iterate over the groups
+    #df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
+    #df = pd.DataFrame(columns=["group", "x", "y"])   
     
-    # gt
-    for i in range(0, len(gt["animals"]), 2):
-        heads.append(gt["animals"][i]["position"])
-        tails.append(gt["animals"][i+1]["position"])
+    # iterate over classes
+    for i in range(1, prediction.shape[3]):
+        hm = prediction[0,:,:,i]*255
+        hm = hm.astype('uint8')
+        
+        # get coordinates
+        coordinates = findCoordinates(hm, 110, 5) 
+        
+        # get group 
+        #group = GROUP_DICT[np.ceil(i/2)]
+        group_array = np.zeros(prediction.shape[3])
+        group_array[i] = 1
+        idx = oneHotToGeneralGroup(group_array)
+        
+        # get groundtruth coordinates
+        gt_coords = []
+        for entry in gt["animals"]:
+            if np.array_equal(entry["group"], group_array):
+                gt_coords.append(entry)
+           
+        # iterate over coordinates
+        for j in range(len(coordinates)):
+            found = False
+            
+            # iterate over groundtruth
+            for entry in gt["animals"]:
+                    
+                    data_point = np.array(coordinates[j])*2
+                    distance = np.linalg.norm(np.array(entry["position"]) - data_point)
+                    
+                    # check distances
+                    if distance < 30:
+                        
+                        # make sure, gt and prediction are of same class
+                        if np.array_equal(group_array , entry["group"]):
+                            found = True
+                            eval_df.loc[idx, "tp"] += 1
+                            gt["animals"].remove(entry)
+                            
+                            # show prediction heatmap, gt and coordinates
+                            plt.imshow(hm, cmap=plt.cm.gray)
+                            plt.plot(coordinates[:, 0], coordinates[:, 1], 'r.')
+                            for animal in gt_coords:
+                                plt.plot(animal["position"][0]/2, animal["position"][1]/2, 'bx')
+                            plt.autoscale(False)
+                            plt.show()
+                            
+                            print(eval_df)
+                            break
+                
+            # if coordinate was not found, it is a false positive
+            if not found:
+                eval_df.loc[idx, "fp"] += 1
+                
+        # add unrecognized animals of the group
+        for ani in gt["animals"]:
+            if np.array_equal(group_array , ani["group"]):
+                eval_df.loc[idx, "fn"] += 1
+   
+print(eval_df)
+#                 tp  tn   fn  fp
+# Fish          3338   0  600   0
+# Crustacea     3243   0  325   0
+# Chaetognatha   219   0   31   0
+# Unidentified   136   0   20   0
+# Jellyfish      182   0   36   0
+# total         
     
-    # matches
-    matches = findHeadTailMatches(np.array(heads), np.array(tails))
     
-    for m in matches:
-        h = np.array([m[0][0], m[0][1]])
-        t = np.array([m[1][0], m[1][1]])
-        for i in range(0, len(gt["animals"]), 2):
-            if np.array_equal(np.array(gt["animals"][i]["position"]), h):
-                if np.array_equal(np.array(gt["animals"][i+1]["position"]), t):
-                    true_positives += 1
-    print(f"current score {true_positives}")
-
-print(f"final score {true_positives}")
-    
-    
-
+## regular prediction and post processing pipeline -------------------------- #
 # for gt in test_labels:
 #     print("load image", gt["filename"])
 #     image = loadImage(gt["filename"], factor=32)
@@ -320,12 +408,12 @@ print(f"final score {true_positives}")
 #         #print("get tail coordinates")
 #         tail_coordinates = findCoordinates(tails, 110, 5)
         
-#         #print("find head tail matches")
-#         # find head-tail matches
-#         matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+#         # #print("find head tail matches")
+#         # # find head-tail matches
+#         # matches = findHeadTailMatches(head_coordinates, tail_coordinates)
     
-#         # scale matches to image resolution
-#         matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
+#         # # scale matches to image resolution
+#         # matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
         
 #         group = GROUP_DICT[np.ceil(i/2)]
         
@@ -340,24 +428,24 @@ print(f"final score {true_positives}")
 #         plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
 #         plt.show()
     
-#         # plot each match with a different colour
-#         colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
-#         plt.imshow(heads, cmap=plt.cm.gray)
-#         plt.imshow(img)
-#         for i in range(matches.shape[0]):
-#             plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
-#             plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
-#         plt.show()
+        # # plot each match with a different colour
+        # colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
+        # plt.imshow(heads, cmap=plt.cm.gray)
+        # plt.imshow(img)
+        # for i in range(matches.shape[0]):
+        #     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+        #     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
+        # plt.show()
     
     
-#         # append predicted animals from the current group
-#         for m in matches:
-#             animal = {"group": group, 
-#                       "LX1": m[0][0], "LY1": m[0][1], # head
-#                       "LX2": m[1][0], "LY2": m[1][1]} # tail
-#             df = df.append(animal, ignore_index=True)
+        # # append predicted animals from the current group
+        # for m in matches:
+        #     animal = {"group": group, 
+        #               "LX1": m[0][0], "LY1": m[0][1], # head
+        #               "LX2": m[1][0], "LY2": m[1][1]} # tail
+        #     df = df.append(animal, ignore_index=True)
       
-        
+# evaluate result after prediction, coordinate extraction and matching ----- #      
 #             found = False
             
 #             # iterate over gt heads
@@ -389,7 +477,8 @@ print(f"final score {true_positives}")
 #         eval_df.loc[g, "fn"] += 1
             
 #     print(eval_df)
-      
+     
+# calculate confusion matrix entries --------------------------------------- #
     #     one_hot_h = np.zeros(11)
     #     one_hot_h[i] = 1
         
@@ -474,17 +563,17 @@ print(f"final score {true_positives}")
     #         print("unknown group", df.iloc[i]["group"])
         
     #     data_point = np.array([df.iloc[i]["x"], df.iloc[i]["y"]])
-                
-    #     found = False
-    #     for entry in gt_s:
-    #         distance = np.linalg.norm(np.array(entry) - data_point)
-    #         if distance < 30:
-    #             found = True
-    #             eval_df.iloc[idx]["tp"] += 1
-    #             gt_s.remove(entry)
-    #             break
-    #     if not found:
-    #         eval_df.iloc[idx]["fp"] += 1
+               
+        # found = False
+        # for entry in gt_s:
+        #     distance = np.linalg.norm(np.array(entry) - data_point)
+        #     if distance < 30:
+        #         found = True
+        #         eval_df.iloc[idx]["tp"] += 1
+        #         gt_s.remove(entry)
+        #         break
+        # if not found:
+        #     eval_df.iloc[idx]["fp"] += 1
             
     #     # confusion matrix ----------------------------------- #
     #     found = False
@@ -521,55 +610,7 @@ print(f"final score {true_positives}")
     # print(confusion_df)
 
 
-# #matches = findHeadTailMatches(head_coordinates, tail_coordinates)
-# matches = findHeadTailMatches(gt_heads, gt_tails)
-
-# # show groundtruth
-# helpers.showImageWithHeatmap(img, None, gt["animals"], 1, "both")
-
-
-# # plot each match with a different colour
-# colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
-# plt.imshow(heads, cmap=plt.cm.gray)
-# plt.imshow(img)
-# for i in range(matches.shape[0]):
-#     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
-#     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
-# plt.show()
-
-
-
-# import math
-# labels = train_labels_animals + val_labels + test_labels
-
-# # calculate how often the matching by findHeadTailMatch was correct
-# neg_scores_list = []
-# pos_scores_list = []
-# problem_entries = []
-# for entry in labels:
-#     heads = []
-#     tails = []
-#     for i in range(0, len(entry["animals"]), 2):
-#         heads.append(entry["animals"][i]["position"])
-#         tails.append(entry["animals"][i+1]["position"])
-    
-#     if len(heads) > 0 and len(tails) > 0:
-#         matches = findHeadTailMatches(heads, tails)
-        
-#         gt = np.array(range(len(matches)))
-        
-#         scores = np.equal(matches, gt)
-#         pos_score = np.count_nonzero(scores == True)
-#         neg_score = np.count_nonzero(scores == False)
-        
-#         neg_scores_list.append(neg_score)
-#         pos_scores_list.append(pos_score)
-        
-#         if neg_score != 0:
-#             problem_entries.append(entry)
-
-
-# # plot problematic entries
+# # plot problematic entries ------------------------------------------------ #
 # for entry in problem_entries[:5]:
 #     heads = []
 #     tails = []
@@ -585,7 +626,9 @@ print(f"final score {true_positives}")
 #     plt.show()
     
 
-# calculate angle between head and tail
+# calculate angle between head and tail ------------------------------------- #
+# import math
+# labels = test_labels + train_labels_animals + val_labels
 # angles = []
 # count = 0
 # for entry in labels:
@@ -605,38 +648,7 @@ print(f"final score {true_positives}")
 # print(sum(np.abs(angles))/len(np.abs(angles))) 
     
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-barWidth = 0.2
-
-bars1 = [393, 556, 405] # model 1
-bars2 = [430, 729, 368] # model 2
-bars3 = [248, 376, 550] # model 3 
-bars4 = [395, 448, 403] # model 4
-
-# acc und recall aus match eval
-bars5 = []
-
-r1 = np.arange(len(bars1))
-r2 = [x + barWidth for x in r1]
-r3 = [x + barWidth for x in r2]
-r4 = [x + barWidth for x in r3]
-
-# Make the plot
-plt.bar(r1, bars1, color='#7f6d5f', width=barWidth, edgecolor='white', label='No weights, 50')
-plt.bar(r2, bars2, color='#557f2d', width=barWidth, edgecolor='white', label='No weights, 100')
-plt.bar(r3, bars3, color='#2d7f5e', width=barWidth, edgecolor='white', label='Weights, 50')
-plt.bar(r4, bars4, color='#2d7f5f', width=barWidth, edgecolor='white', label='Weights, 100') 
-
-# Add xticks on the middle of the group bars
-plt.xlabel('group', fontweight='bold')
-plt.xticks([r + barWidth for r in range(len(bars1))], ['True positives', 'False positives', 'False negatives'])
- 
-# Create legend & Show graphic
-plt.legend()
-plt.show()
-
+# plot confusion matrices --------------------------------------------------- #
 # import pandas as pd
 # import matplotlib.pyplot as plt
 # import numpy as np
