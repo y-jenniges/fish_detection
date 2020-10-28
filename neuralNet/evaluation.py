@@ -18,7 +18,7 @@ random.set_seed(2)
 
 BATCH_SIZE = 1
 
-test_path = "../data/output/800/"
+test_path = "../data/output/901/"
 model_path = "model-H"
 
 
@@ -51,7 +51,7 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
     
 # load model
 #model = keras.models.load_model(os.path.join(test_path,model_path))
-model = keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights),  "weighted_mean_squared_error": Losses.weighted_mean_squared_error})
+model = tf.keras.models.load_model(os.path.join(test_path,model_path), custom_objects={"loss": Losses.weighted_categorical_crossentropy(weights),  "weighted_mean_squared_error": Losses.weighted_mean_squared_error})
 
 
 #prepareEntry = dg.prepareEntryLowResHeatmap
@@ -65,14 +65,62 @@ tch = dg.DataGenerator(dataset=chaeto_labels, prepareEntry=prepareEntry, batch_s
 tje = dg.DataGenerator(dataset=jellyfish_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
 tun = dg.DataGenerator(dataset=unidentified_labels, prepareEntry=prepareEntry, batch_size=BATCH_SIZE, shuffle=False)
 
-gens = [testGen, tfi, tcr, tch, tje, tun]
+gens = [testGen]#, tfi, tcr, tch, tje, tun]
 
-print(model.metrics_names)
-for gen in gens:
-    # evaluate on test data
-    #print("Evaluate on test data")
-    results = model.evaluate_generator(gen, verbose=1)
-    #print("test loss, test acc:", results)
+# print(model.metrics_names)
+# for gen in gens:
+#     results = model.evaluate_generator(gen, verbose=1)
+#     print(results)
+
+
+
+mae = []
+for i in range(11):
+    mae.append(tf.keras.metrics.MeanAbsoluteError())
+    
+# accuracy = tf.keras.metrics.CategoricalAccuracy()
+# loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+# optimizer = tf.keras.optimizers.Adam()
+
+import time
+
+test_labels = test
+for entry in test_labels:
+    #start = time.time()
+    
+    x, y_true = dg.prepareEntryHeatmap(entry, "high")
+    x = np.expand_dims(x, axis=0)    
+    
+    y_pred = model.predict(x)
+    
+    # with tf.GradientTape() as tape:
+    #     logits = model(x)
+    #     # Compute the loss value for this batch.
+    #     loss_value = loss_fn(y_true, logits)
+    
+    # print(f"loss {loss_value}")
+
+    # Update the state of the `accuracy` metric.
+    #mae.update_state(y_true, logits)
+    
+    # calculate metrics for each channel
+    for i in range(y_true.shape[2]):
+        mae[i].update_state(y_true[:,:,i], y_pred[0,:,:,i])
+        print(f"mae {mae[i].result().numpy()}")
+    
+    #print()
+    #print(time.time() - start)
+    
+
+results = []
+print("final MAE")
+for i in range(len(mae)):
+    results.append(mae[i].result().numpy())
+    print({mae[i].result().numpy()})    
+    
+results = np.array(results)
+total_mae = np.mean(results)
+print(f"total mae: {total_mae}")
 
 
 # # minimalistic CNN
