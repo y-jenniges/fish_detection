@@ -16,13 +16,13 @@ import DataGenerator as dg
 import keras
 
 
-#from tensorflow import random
-from tensorflow import set_random_seed
+from tensorflow import random
+#from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-#random.set_seed(2)
-set_random_seed(2)    
+random.set_seed(2)
+#set_random_seed(2)    
     
 # dict mapping group ID to its string representation
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
@@ -292,9 +292,11 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
 
 # print(f"final score {true_positives}")
     
-test_labels = test_labels + train_labels_animals + val_labels
+print(test_labels[94])
+test = test_labels + train_labels_animals + val_labels
+#test = [val_labels[2]]#test_labels[94].copy()]#, test_labels[298].copy()]
 # coordinate evaluation ----------------------------------------------------- #
-for gt in test_labels:
+for gt in test:
     print("load image", gt["filename"])
     image = loadImage(gt["filename"], factor=32)
     img = loadImage(gt["filename"], factor=32, rescale_range=False)
@@ -320,7 +322,7 @@ for gt in test_labels:
         group_array[i] = 1
         idx = oneHotToGeneralGroup(group_array)
         
-        # get groundtruth coordinates
+        # get groundtruth coordinates (only for plotting)
         gt_coords = []
         for entry in gt["animals"]:
             if np.array_equal(entry["group"], group_array):
@@ -333,6 +335,7 @@ for gt in test_labels:
             # iterate over groundtruth
             for entry in gt["animals"]:
                     
+                    # multiply point by 2 since high res is only half of original res
                     data_point = np.array(coordinates[j])*2
                     distance = np.linalg.norm(np.array(entry["position"]) - data_point)
                     
@@ -345,13 +348,13 @@ for gt in test_labels:
                             eval_df.loc[idx, "tp"] += 1
                             gt["animals"].remove(entry)
                             
-                            # show prediction heatmap, gt and coordinates
-                            plt.imshow(hm, cmap=plt.cm.gray)
-                            plt.plot(coordinates[:, 0], coordinates[:, 1], 'r.')
-                            for animal in gt_coords:
-                                plt.plot(animal["position"][0]/2, animal["position"][1]/2, 'bx')
-                            plt.autoscale(False)
-                            plt.show()
+                            # # show prediction heatmap, gt and coordinates
+                            # plt.imshow(hm, cmap=plt.cm.gray)
+                            # plt.plot(coordinates[:, 0], coordinates[:, 1], 'r.')
+                            # for animal in gt_coords:
+                            #     plt.plot(animal["position"][0]/2, animal["position"][1]/2, 'bx')
+                            # plt.autoscale(False)
+                            # plt.show()
                             
                             print(eval_df)
                             break
@@ -360,20 +363,71 @@ for gt in test_labels:
             if not found:
                 eval_df.loc[idx, "fp"] += 1
                 
+                
         # add unrecognized animals of the group
         for ani in gt["animals"]:
             if np.array_equal(group_array , ani["group"]):
                 eval_df.loc[idx, "fn"] += 1
-   
+  
+    
 print(eval_df)
+
+true_test_labels, true_train_labels_animals, true_train_labels_no_animals, true_val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
+
+mean_distance_of_fns = 0
+min_dists = []
+for entry in test:
+    truth = [x for x in true_test_labels if x["filename"] == entry["filename"]][0]
+    for animal in entry["animals"]:
+        min_dist = 2000
+        
+        for true_animal in truth["animals"]:
+            dist = np.linalg.norm(np.array(true_animal["position"]) - np.array(animal["position"]))
+            
+            if dist < min_dist:
+                min_dist = dist
+        
+        min_dists.append(min_dist)
+    
+print(min_dists)
+print(np.mean(np.array(min_dists)))
+
 #                 tp  tn   fn  fp
 # Fish          3338   0  600   0
 # Crustacea     3243   0  325   0
 # Chaetognatha   219   0   31   0
 # Unidentified   136   0   20   0
 # Jellyfish      182   0   36   0
-# total         
-    
+# # total         
+
+# #all (4067)
+# all (4261) passt
+# #                 tp  tn  fp   fn
+# # Fish          3452   0   0  622
+# # Crustacea     3409   0   0  359
+# # Chaetognatha   229   0   0   31
+# # Unidentified   142   0   0   22
+# # Jellyfish      208   0   0   48
+
+# val (388) passt
+#                tp  tn  fp  fn
+# Fish          114   0   0  22
+# Crustacea     166   0   0  34
+# Chaetognatha   10   0   0   0
+# Unidentified    6   0   0   2
+# Jellyfish      26   0   0   8
+
+# test (399)
+#                tp  tn  fp  fn
+# Fish          315   0   0  51
+# Crustacea     353   0   0  29
+# Chaetognatha   20   0   0   2
+# Unidentified    8   0   0   2
+# Jellyfish      14   0   0   4
+
+
+# train (3474)
+
     
 ## regular prediction and post processing pipeline -------------------------- #
 # for gt in test_labels:
