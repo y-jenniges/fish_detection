@@ -16,13 +16,13 @@ import DataGenerator as dg
 import keras
 
 
-from tensorflow import random
-#from tensorflow import set_random_seed
+#from tensorflow import random
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)    
+#random.set_seed(2)
+set_random_seed(2)    
     
 # dict mapping group ID to its string representation
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
@@ -193,11 +193,11 @@ def oneHotToGeneralGroup(one_hot):
         print("unknown one hot encoding")
    
      
-model_path = "../data/output/1001/model-H"
+#model_path = "../data/output/1001/model-H"
 #model_path = "../data/output/800/model-H"
 #model_path = "../data/output/801/model-H"
 #model_path = "../data/output/900/model-H"
-#model_path = "../data/output/901/model-H"
+model_path = "../data/output/901/model-H"
 #modelPath = "../data/output/59/model-L"
 #modelPath = "../data/output/48/model-L" # trained on all animals, coordiantes dont work
 
@@ -207,7 +207,7 @@ weights = np.array([ 1.        ,  1.04084507,  1.04084507,  1.        ,  1.     
        12.52542373])
 
 print("load model...")
-#model = loadNn(model_path, weights)
+model = loadNn(model_path, weights)
 
 
 # get gt
@@ -292,245 +292,205 @@ jellyfish_labels = helpers.filter_labels_for_animal_group(test_labels, jellyfish
 
 # print(f"final score {true_positives}")
     
-print(test_labels[94])
-test = test_labels + train_labels_animals + val_labels
-#test = [val_labels[2]]#test_labels[94].copy()]#, test_labels[298].copy()]
-# coordinate evaluation ----------------------------------------------------- #
-for gt in test:
-    print("load image", gt["filename"])
-    image = loadImage(gt["filename"], factor=32)
-    img = loadImage(gt["filename"], factor=32, rescale_range=False)
-        
-    #prediction = applyNnToImage(model, image)
-    prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
-    
-    # iterate over the groups
-    #df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
-    #df = pd.DataFrame(columns=["group", "x", "y"])   
-    
-    # iterate over classes
-    for i in range(1, prediction.shape[3]):
-        hm = prediction[0,:,:,i]*255
-        hm = hm.astype('uint8')
-        
-        # get coordinates
-        coordinates = findCoordinates(hm, 110, 5) 
-        
-        # get group 
-        #group = GROUP_DICT[np.ceil(i/2)]
-        group_array = np.zeros(prediction.shape[3])
-        group_array[i] = 1
-        idx = oneHotToGeneralGroup(group_array)
-        
-        # get groundtruth coordinates (only for plotting)
-        gt_coords = []
-        for entry in gt["animals"]:
-            if np.array_equal(entry["group"], group_array):
-                gt_coords.append(entry)
-           
-        # iterate over coordinates
-        for j in range(len(coordinates)):
-            found = False
-            
-            # iterate over groundtruth
-            for entry in gt["animals"]:
-                    
-                    # multiply point by 2 since high res is only half of original res
-                    data_point = np.array(coordinates[j])*2
-                    distance = np.linalg.norm(np.array(entry["position"]) - data_point)
-                    
-                    # check distances
-                    if distance < 30:
-                        
-                        # make sure, gt and prediction are of same class
-                        if np.array_equal(group_array , entry["group"]):
-                            found = True
-                            eval_df.loc[idx, "tp"] += 1
-                            gt["animals"].remove(entry)
-                            
-                            # # show prediction heatmap, gt and coordinates
-                            # plt.imshow(hm, cmap=plt.cm.gray)
-                            # plt.plot(coordinates[:, 0], coordinates[:, 1], 'r.')
-                            # for animal in gt_coords:
-                            #     plt.plot(animal["position"][0]/2, animal["position"][1]/2, 'bx')
-                            # plt.autoscale(False)
-                            # plt.show()
-                            
-                            print(eval_df)
-                            break
-                
-            # if coordinate was not found, it is a false positive
-            if not found:
-                eval_df.loc[idx, "fp"] += 1
-                
-                
-        # add unrecognized animals of the group
-        for ani in gt["animals"]:
-            if np.array_equal(group_array , ani["group"]):
-                eval_df.loc[idx, "fn"] += 1
-  
-    
-print(eval_df)
 
-true_test_labels, true_train_labels_animals, true_train_labels_no_animals, true_val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
-
-mean_distance_of_fns = 0
-min_dists = []
-for entry in test:
-    truth = [x for x in true_test_labels if x["filename"] == entry["filename"]][0]
-    for animal in entry["animals"]:
-        min_dist = 2000
-        
-        for true_animal in truth["animals"]:
-            dist = np.linalg.norm(np.array(true_animal["position"]) - np.array(animal["position"]))
-            
-            if dist < min_dist:
-                min_dist = dist
-        
-        min_dists.append(min_dist)
-    
-print(min_dists)
-print(np.mean(np.array(min_dists)))
-
-#                 tp  tn   fn  fp
-# Fish          3338   0  600   0
-# Crustacea     3243   0  325   0
-# Chaetognatha   219   0   31   0
-# Unidentified   136   0   20   0
-# Jellyfish      182   0   36   0
-# # total         
-
-# #all (4067)
-# all (4261) passt
-# #                 tp  tn  fp   fn
-# # Fish          3452   0   0  622
-# # Crustacea     3409   0   0  359
-# # Chaetognatha   229   0   0   31
-# # Unidentified   142   0   0   22
-# # Jellyfish      208   0   0   48
-
-# val (388) passt
-#                tp  tn  fp  fn
-# Fish          114   0   0  22
-# Crustacea     166   0   0  34
-# Chaetognatha   10   0   0   0
-# Unidentified    6   0   0   2
-# Jellyfish      26   0   0   8
-
-# test (399)
-#                tp  tn  fp  fn
-# Fish          315   0   0  51
-# Crustacea     353   0   0  29
-# Chaetognatha   20   0   0   2
-# Unidentified    8   0   0   2
-# Jellyfish      14   0   0   4
-
-
-# train (3474)
-
-    
-## regular prediction and post processing pipeline -------------------------- #
-# for gt in test_labels:
+# # coordinate evaluation ----------------------------------------------------- #
+# test = test_labels #test_labels + train_labels_animals + val_labels
+# for gt in test:
 #     print("load image", gt["filename"])
 #     image = loadImage(gt["filename"], factor=32)
 #     img = loadImage(gt["filename"], factor=32, rescale_range=False)
         
-    
-#     #print("model loaded. predicting...")
-#     #prediction = applyNnToImage(model, image)
-#     prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
-    
-#     #print("prediction done")
-    
-    
-#     # iterate over the groups
-#     df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
-#     #df = pd.DataFrame(columns=["group", "x", "y"])   
-    
-#     for i in range(1, prediction.shape[3], 2):
-#         #print(i)
+#     prediction = applyNnToImage(model, image)
+#     #prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
+ 
+#     # iterate over classes
+#     for i in range(1, prediction.shape[3]):
+#         hm = prediction[0,:,:,i]*255
+#         hm = hm.astype('uint8')
         
-#         heads = prediction[0,:,:,i]*255
-#         heads = heads.astype('uint8')
-        
-#         tails = prediction[0,:,:,i+1]*255
-#         tails = tails.astype('uint8')
-    
 #         # get coordinates
-#         #print("get head coordinates")
-#         head_coordinates = findCoordinates(heads, 110, 5) 
-#         #print("get tail coordinates")
-#         tail_coordinates = findCoordinates(tails, 110, 5)
+#         coordinates = findCoordinates(hm, 110, 5) 
         
-#         # #print("find head tail matches")
-#         # # find head-tail matches
-#         # matches = findHeadTailMatches(head_coordinates, tail_coordinates)
-    
-#         # # scale matches to image resolution
-#         # matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
+#         # get group 
+#         #group = GROUP_DICT[np.ceil(i/2)]
+#         group_array = np.zeros(prediction.shape[3])
+#         group_array[i] = 1
+#         idx = oneHotToGroup(group_array)
         
-#         group = GROUP_DICT[np.ceil(i/2)]
-        
-#         # show prediction heatmap and coordinates
-#         plt.imshow(heads, cmap=plt.cm.gray)
-#         plt.autoscale(False)
-#         plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
-#         plt.show()
-        
-#         plt.imshow(tails, cmap=plt.cm.gray)
-#         plt.autoscale(False)
-#         plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
-#         plt.show()
-    
-        # # plot each match with a different colour
-        # colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
-        # plt.imshow(heads, cmap=plt.cm.gray)
-        # plt.imshow(img)
-        # for i in range(matches.shape[0]):
-        #     plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
-        #     plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
-        # plt.show()
-    
-    
-        # # append predicted animals from the current group
-        # for m in matches:
-        #     animal = {"group": group, 
-        #               "LX1": m[0][0], "LY1": m[0][1], # head
-        #               "LX2": m[1][0], "LY2": m[1][1]} # tail
-        #     df = df.append(animal, ignore_index=True)
-      
-# evaluate result after prediction, coordinate extraction and matching ----- #      
+#         # get groundtruth coordinates (only for plotting)
+#         gt_coords = []
+#         for entry in gt["animals"]:
+#             if np.array_equal(entry["group"], group_array):
+#                 gt_coords.append(entry)
+           
+#         # iterate over coordinates
+#         for j in range(len(coordinates)):
 #             found = False
             
-#             # iterate over gt heads
-#             for j in range(0, len(gt["animals"]), 2):
-                
-#                 # only continue if the group is the same
-#                 if oneHotToGeneralGroup(gt["animals"][j]["group"]) == group:
-#                     head = np.array([animal["LX1"], animal["LY1"]])
-#                     distance_head = np.linalg.norm(np.array(gt["animals"][j]["position"]) - head)
-        
-#                     if distance_head < 30:
-#                         tail = np.array([animal["LX2"], animal["LY2"]])
-#                         distance_tail = np.linalg.norm(np.array(gt["animals"][j+1]["position"]) - tail)
+#             # iterate over groundtruth
+#             for entry in gt["animals"]:
                     
-#                         if distance_tail < 30:
+#                     # multiply point by 2 since high res is only half of original res
+#                     data_point = np.array(coordinates[j])*2
+#                     distance = np.linalg.norm(np.array(entry["position"]) - data_point)
+                    
+#                     # check distances
+#                     if distance < 30:
+                        
+#                         # make sure, gt and prediction are of same class
+#                         if np.array_equal(group_array , entry["group"]):
 #                             found = True
-#                             eval_df.loc[group, "tp"] += 1
-#                             gt["animals"].remove(gt["animals"][j]) # remove head
-#                             gt["animals"].remove(gt["animals"][j]) # remove tail
+#                             eval_df.loc[idx, "tp"] += 1
+#                             gt["animals"].remove(entry)
+                            
+#                             # show prediction heatmap, gt and coordinates
+#                             plt.imshow(hm, cmap=plt.cm.gray)
+#                             plt.plot(coordinates[:, 0], coordinates[:, 1], 'r.')
+#                             for animal in gt_coords:
+#                                 plt.plot(animal["position"][0]/2, animal["position"][1]/2, 'bx')
+#                             plt.autoscale(False)
+#                             plt.axis("off")
+#                             plt.show()
+                            
+#                             print(eval_df)
 #                             break
-                   
-#             # add wrong detections
+                
+#             # if coordinate was not found, it is a false positive
 #             if not found:
-#                 eval_df.loc[group, "fp"] += 1
+#                 eval_df.loc[idx, "fp"] += 1
+                
+                
+#         # add unrecognized animals of the group
+#         for ani in gt["animals"]:
+#             if np.array_equal(group_array , ani["group"]):
+#                 eval_df.loc[idx, "fn"] += 1
+  
+    
+# print(eval_df)
+
+# inpect remaining FNs after coordinate evaluation (find min distance to groudtruth) -------------------- #
+# true_test_labels, true_train_labels_animals, true_train_labels_no_animals, true_val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
+
+# mean_distance_of_fns = 0
+# min_dists = []
+# for entry in test:
+#     truth = [x for x in true_test_labels if x["filename"] == entry["filename"]][0]
+#     for animal in entry["animals"]:
+#         min_dist = 2000
+        
+#         for true_animal in truth["animals"]:
+#             if np.array_equal(np.array(true_animal["group"]), np.array(animal["group"])):
+
+#                 dist = np.linalg.norm(np.array(true_animal["position"]) - np.array(animal["position"]))
+                
+#                 if dist < min_dist and dist > 0:
+#                     min_dist = dist
+        
+#         min_dists.append(min_dist)
+    
+# print(min_dists)
+# print(np.mean(np.array(min_dists)))
+
+
+    
+# complete prediction pipeline --------------------------------------------- #
+for gt in test_labels:
+    print("load image", gt["filename"])
+    image = loadImage(gt["filename"], factor=32)
+    img = loadImage(gt["filename"], factor=32, rescale_range=False)
+        
+    # yHat
+    prediction = applyNnToImage(model, image)
+    #prediction = np.expand_dims(dg.prepareEntryHeatmap(gt, "high")[1],0)
+
+    # iterate over the groups
+    df = pd.DataFrame(columns=["group", "LX1", "LY1", "LX2", "LY2"])    
+    #df = pd.DataFrame(columns=["group", "x", "y"])   
+    
+    for i in range(1, prediction.shape[3], 2):
+        #print(i)
+        
+        heads = prediction[0,:,:,i]*255
+        heads = heads.astype('uint8')
+        
+        tails = prediction[0,:,:,i+1]*255
+        tails = tails.astype('uint8')
+    
+        # get coordinates
+        head_coordinates = findCoordinates(heads, 110, 5) 
+        tail_coordinates = findCoordinates(tails, 110, 5)
+        
+        # find head-tail matches
+        matches = findHeadTailMatches(head_coordinates, tail_coordinates)
+    
+        # scale matches to image resolution
+        matches = scaleMatchCoordinates(matches, heads.shape, img.shape)
+        
+        group = GROUP_DICT[np.ceil(i/2)]
+        
+        # show prediction heatmap and coordinates
+        plt.imshow(heads, cmap=plt.cm.gray)
+        plt.autoscale(False)
+        plt.plot(head_coordinates[:, 0], head_coordinates[:, 1], 'r.')
+        plt.show()
+        
+        plt.imshow(tails, cmap=plt.cm.gray)
+        plt.autoscale(False)
+        plt.plot(tail_coordinates[:, 0], tail_coordinates[:, 1], 'r.')
+        plt.show()
+    
+        # plot each match with a different colour
+        colors = cm.rainbow(np.linspace(0, 1, matches.shape[0]))
+        plt.imshow(heads, cmap=plt.cm.gray)
+        plt.imshow(img)
+        for i in range(matches.shape[0]):
+            plt.scatter(matches[i,:,0], matches[i,:,1], color=colors[i])
+            plt.plot([matches[i,0,0], matches[i,1,0]], [matches[i,0,1], matches[i,1,1]], color=colors[i])
+        plt.show()
+    
+    
+        # append predicted animals from the current group
+        for m in matches:
+            animal = {"group": group, 
+                      "LX1": m[0][0], "LY1": m[0][1], # head
+                      "LX2": m[1][0], "LY2": m[1][1]} # tail
+            df = df.append(animal, ignore_index=True)
+      
+            # evaluate result after prediction, coordinate extraction and matching ------------------- #      
+            found = False
             
-#     # add unrecognized animals of the group
-#     for k in range(0, len(gt["animals"]), 2):
-#         g = oneHotToGeneralGroup(gt["animals"][k]["group"])
-#         eval_df.loc[g, "fn"] += 1
+            # iterate over gt heads
+            for j in range(0, len(gt["animals"]), 2):
+                # head distance
+                head = np.array([animal["LX1"], animal["LY1"]])
+                distance_head = np.linalg.norm(np.array(gt["animals"][j]["position"]) - head)
+    
+                if distance_head < 30:
+                    # tail distance
+                    tail = np.array([animal["LX2"], animal["LY2"]])
+                    distance_tail = np.linalg.norm(np.array(gt["animals"][j+1]["position"]) - tail)
+                
+                    if distance_tail < 30:
+                        # only continue if the group is the same
+                        if oneHotToGeneralGroup(gt["animals"][j]["group"]) == group:
+                            found = True
+                            eval_df.loc[group, "tp"] += 1
+                            gt["animals"].remove(gt["animals"][j]) # remove head
+                            gt["animals"].remove(gt["animals"][j]) # remove tail
+                            break
+                        else:
+                            print("DIFFERENT GROUP ------------------------------------------------")
+                   
+            # add wrong detections
+            if not found:
+                eval_df.loc[group, "fp"] += 1
             
-#     print(eval_df)
+    # add unrecognized animals of the group
+    for k in range(0, len(gt["animals"]), 2):
+        g = oneHotToGeneralGroup(gt["animals"][k]["group"])
+        eval_df.loc[g, "fn"] += 1
+            
+    print(eval_df)
      
 # calculate confusion matrix entries --------------------------------------- #
     #     one_hot_h = np.zeros(11)

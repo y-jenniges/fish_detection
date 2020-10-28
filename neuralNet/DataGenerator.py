@@ -10,13 +10,13 @@ import random
 import keras
 import HeatmapClass
 import HelperFunctions as helpers
-from tensorflow import random 
-#from tensorflow import set_random_seed
+#from tensorflow import random 
+from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
-random.set_seed(2)
-#set_random_seed(2)
+#random.set_seed(2)
+set_random_seed(2)
 
 OPTION = "all_animals" 
 # "fish_heads"
