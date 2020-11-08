@@ -79,6 +79,7 @@ class PageSettings(QtWidgets.QWidget):
             "\n"
             "QTabWidget::pane { /* The tab widget frame */\n"
             "       border:None;\n"
+            "       background-color:rgb(240, 240, 240);;"
             "}\n"
             "/* Style the tab using the tab sub-control. Note that\n"
             "    it reads QTabBar _not_ QTabWidget */\n"

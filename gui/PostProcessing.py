@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
-from keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.preprocessing.image import load_img, img_to_array # check if t works, otherwise only keras
 from skimage.feature import peak_local_max
 from skimage.transform import resize
 from scipy.optimize import linear_sum_assignment
@@ -157,7 +157,7 @@ class StereoCorrespondence():
         self.map_R1, self.map_R2 = cv2.initUndistortRectifyMap(self.c_R, self.d_R, self.R2, self.P2, img_size, m1type=cv2.CV_32FC2)
        
     def distortPoint(self, point, lr="L"):
-        """ redistort undistorted point """
+        """Redistort undistorted point """
         x = np.int64(point[0])
         y = np.int64(point[1])
         
@@ -174,17 +174,17 @@ class StereoCorrespondence():
         return [distorted_x, distorted_y]
     
     def undistortPoint(self, point, lr="L"):
-        """ undistort point """
+        """Undistort point """
         rectified = [0,0]
         if lr == "L":
-            rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
+            rectified = cv2.undistortPoints(np.expand_dims([point], 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
         elif lr == "R":
-            rectified = cv2.undistortPoints(np.expand_dims(point, 1), self.c_R, self.d_R, R=self.R2, P=self.P2)
-        print(rectified)
+            rectified = cv2.undistortPoints(np.expand_dims([point], 1), self.c_R, self.d_R, R=self.R2, P=self.P2)
+        #print(rectified)
         return rectified[0][0]
     
     def templateMatching(self, template, img, position, epiline_thresh, template_radius):
-        """template matching near the epiline"""
+        """Template matching near the epiline"""
         
         vert_thresh = 5 #vertical search radius
         

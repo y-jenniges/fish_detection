@@ -1,9 +1,4 @@
 import os
-import cv2
-import numpy as np
-import pandas as pd
-
-from keras.preprocessing.image import load_img, img_to_array
 from PyQt5 import QtCore, QtWidgets, QtGui
 """
 Helper functions and classes
@@ -47,6 +42,7 @@ def displayErrorMsg(text, information, windowTitle):
     msg.setText(text)
     msg.setInformativeText(information)
     msg.setWindowTitle(windowTitle)
+    msg.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png')) 
     msg.exec_()
 
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):

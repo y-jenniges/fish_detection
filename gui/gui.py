@@ -1,3 +1,23 @@
+"""
+MarOMarker is a program for the semi-automatic annotation and 
+measurement of marine organisms on stereoscopic images. 
+Copyright(C) 2020  Yvonne Jenniges
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Cou can contact me by yvonne.jenniges@gmx.de
+"""
 import time
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -190,7 +210,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.btn_out_dir.setText(_translate("MainWindow", "Browse"))
         self.page_data.lineEdit_exp_id.setPlaceholderText(_translate("MainWindow", "ID of the experiment..."))
         self.page_data.label_img_prefix.setText(_translate("MainWindow", "Image prefix"))
-        self.page_data.label_data_selection.setText(_translate("MainWindow", "Select date"))
+        self.page_data.label_data_selection.setText(_translate("MainWindow", "Select date and\noutput directory"))
         
         self.page_data.btn_nn_activation.setText(_translate("MainWindow", "Run neural network"))
         self.page_data.label_nn_activation.setText(_translate("MainWindow", "Run neural network"))
@@ -541,7 +561,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """ Called when the output directory on the data page was changed. """
         self.page_home.photo_viewer.setOutDir(text)
         
-    def getResultFileName(self, isInProgress=True):
+    def getResultFileName(self, isInProgress=False):
         """
         Defines the convention for the result file name. It is 
         results_yyyy_MM_STATE.csv, where _STATE is empty if the image editing 
@@ -639,6 +659,10 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """ Directs to about page. """
         self.stackedWidget.setCurrentIndex(3)
         
+    def onExitButton(self):
+        """ Closes the program. """
+        self.close()
+        
     def appendMainMenuToButton(self, btn):
         """
         Appends the menu to a given button. 
@@ -650,11 +674,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """
         # create the main menu
         menu = QtWidgets.QMenu()
-        menu.addAction('Home', self.directToHomePage)
-        menu.addAction('Data', self.directToDataPage)
-        menu.addAction('Settings', self.directToSettingsPage)
-        #menu.addAction('Handbook', self.directToHandbookPage)
-        menu.addAction('About', self.directToABoutPage)
+        menu.addAction("Home", self.directToHomePage)
+        menu.addAction("Data", self.directToDataPage)
+        menu.addAction("Settings", self.directToSettingsPage)
+        #menu.addAction("Handbook", self.directToHandbookPage)
+        menu.addAction("About", self.directToABoutPage)
+        menu.addAction("Exit", self.onExitButton)
         
         # set the menu style
         menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); "

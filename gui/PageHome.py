@@ -95,7 +95,8 @@ class PageHome(QtWidgets.QWidget):
         # redraw animals when opening the page
         #self.photo_viewer.imageArea.animal_painter.redraw()
         # reload current image
-        self.photo_viewer.loadImage(self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
+        if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list):
+            self.photo_viewer.loadImage(self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
 
     def _initUi(self):
    

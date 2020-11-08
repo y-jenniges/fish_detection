@@ -168,7 +168,8 @@ class PhotoViewer(QtWidgets.QWidget):
                 if remark == "nan": remark = ""
                 self.newImageLoaded.emit(remark)
             
-        # reset current animal, hide specs widget and update bounding boxes (none should be drawn since cur_animal is None)
+        # reset current animal, hide specs widget and update bounding boxes 
+        # (none should be drawn since cur_animal is None)
         self.imageArea.animal_painter.cur_animal = None
         self.imageArea.animal_painter.widget_animal_specs.hide()
         self.imageArea.animal_painter.updateBoundingBoxes()    
@@ -181,7 +182,17 @@ class PhotoViewer(QtWidgets.QWidget):
     
     def on_next_image(self):
         if not self.models.model_animals.isEmpty(): 
-            if self.cur_image_index < len(self.image_list):
+            # only go to next image if cur animal is none or complete
+            cur_animal = self.imageArea.animal_painter.cur_animal
+
+            if cur_animal is not None and \
+            ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
+             (not cur_animal.is_head_drawn and cur_animal.is_tail_drawn)):
+                displayErrorMsg("Error", 
+                                "Please draw head and tail before switching the image.", 
+                                "Error")  
+            # only go to next image if there is one and the add mode is inactive
+            elif self.cur_image_index < len(self.image_list) -1:
                 cur_file_id = os.path.basename(self.image_list[self.cur_image_index]).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
                 
                 # set current image to status "checked"
@@ -191,38 +202,46 @@ class PhotoViewer(QtWidgets.QWidget):
                 for idx in cur_file_indices:
                     self.models.model_animals.data.loc[idx, "status"] = "checked"
                 
-                # if there is a next image, load it
-                if self.cur_image_index < len(self.image_list) - 1:
-                    # get the new image and load it
-                    path = self.image_list[self.cur_image_index+1]
-                    self.cur_image_index = self.cur_image_index + 1    
-                    self.cur_animal = None
-                    self.loadImage(path)
+                # get the new image and load it
+                path = self.image_list[self.cur_image_index+1]
+                self.cur_image_index = self.cur_image_index + 1    
+                self.cur_animal = None
+                self.loadImage(path)
                 
                 # update the previous image in the csv file
                 self.exportToCsv(cur_file_id)
     
     def on_previous_image(self):
         if not self.models.model_animals.isEmpty(): 
-            # current file_id
-            cur_file_id = os.path.basename(self.image_list[self.cur_image_index]).strip(".jpg").strip(".png").strip("_L").strip("_R")
-            
-            # set current image to status "checked"
-            cur_file_indices = self.models.model_animals.data[
-                self.models.model_animals.data['file_id'] ==  cur_file_id].index
-            
-            for idx in cur_file_indices:
-                self.models.model_animals.data.loc[idx, "status"] = "checked"
+            # only go to previous image if cur animal is none or complete
+            cur_animal = self.imageArea.animal_painter.cur_animal
+
+            if cur_animal is not None and \
+            ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
+             (not cur_animal.is_head_drawn and cur_animal.is_tail_drawn)):
+                displayErrorMsg("Error", 
+                                "Please draw head and tail before switching the image.", 
+                                "Error")  
+            # only go to previous image if there is one and the add mode is inactive
+            elif self.cur_image_index > 0:
+                # current file_id
+                cur_file_id = os.path.basename(self.image_list[self.cur_image_index]).strip(".jpg").strip(".png").strip("_L").strip("_R")
                 
-            # if there is a previous image, load it
-            if self.cur_image_index > 0:
+                # set current image to status "checked"
+                cur_file_indices = self.models.model_animals.data[
+                    self.models.model_animals.data['file_id'] ==  cur_file_id].index
+                
+                for idx in cur_file_indices:
+                    self.models.model_animals.data.loc[idx, "status"] = "checked"
+                    
+                # load image
                 path = self.image_list[self.cur_image_index-1]
                 self.cur_image_index = self.cur_image_index - 1
                 self.cur_animal = None
                 self.loadImage(path) 
-            
-            # update the previous image in the csv file
-            self.exportToCsv(cur_file_id)
+                
+                # update the previous image in the csv file
+                self.exportToCsv(cur_file_id)
 
     def updateImageCountVisual(self):
         num_images = len(self.image_list)
@@ -424,7 +443,8 @@ class ImageArea(QtWidgets.QGraphicsView):
         if self.hasPhoto():  
             factor = 1
             
-            # zoom in if y > 0 (wheel forward), else zoom out (maximum zoom level of 30)
+            # zoom in if y > 0 (wheel forward), else zoom out 
+            # (maximum zoom level of 30)
             if event.angleDelta().y() > 0 and self._zoom <= 30:
                 factor = 1.15
                 self._zoom += 1
@@ -432,7 +452,8 @@ class ImageArea(QtWidgets.QGraphicsView):
                 factor = 0.9
                 self._zoom -= 1
             
-            # scale the view if zoom is positive, else set it to zero and fit the photo in the view
+            # scale the view if zoom is positive, else set it to zero and fit 
+            # the photo in the view
             if self._zoom > 0:
                 self.scale(factor, factor)
                 self.parent().setArrowShortcutsActive(False)
@@ -531,7 +552,9 @@ class AnimalPainter():
             self.drawAnimalLine(self.cur_animal)
             
             self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
-            self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(self.cur_animal.boundingBox, QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+            self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(
+                self.cur_animal.boundingBox, 
+                QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
      
     def redraw(self):
         """ Redraws all animals on the current image. """
@@ -569,7 +592,8 @@ class AnimalPainter():
             self.widget_animal_specs.move(0,0)
         
             # get position of current bounding box from scene
-            pos = self.imageArea.mapFromScene(self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
+            pos = self.imageArea.mapFromScene(
+                self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
             
             # move the zoom widget a bit below the button position and center it below the button
             self.widget_animal_specs.move(pos)
@@ -747,7 +771,7 @@ class AnimalPainter():
             self.is_remove_mode_active = False
             
         elif self.is_add_mode_active:
-            if not self.cur_animal or( self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
+            if not self.cur_animal or (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
                 self.is_add_mode_active = False
                 self.is_remove_mode_active = True
                 
@@ -825,7 +849,6 @@ class AnimalPainter():
                     self.animal_list.remove(animal) 
                     break
 
-
         # if user is not removing and not adding animals, switch the current animal to what the user clicks on
         # if the user clicks on no organism, there is no current animal
         elif(not self.is_remove_mode_active and not self.is_add_mode_active):
@@ -837,8 +860,7 @@ class AnimalPainter():
                     break
             
             if not is_click_on_animal: self.cur_animal = None
-            
-                    
+                            
         elif(self.is_add_mode_active):
             # calculate click position in original format
             original_x = round(pos.x()*self.original_img_width/self.imageArea.width())
@@ -862,10 +884,10 @@ class AnimalPainter():
                     experiment_id = self.imageArea.parent().parent().parent().parent().page_data.lineEdit_exp_id.text()
                     user_id = self.imageArea.parent().parent().parent().parent().page_settings.lineEdit_user_id.text()
                     
-                    # if on left image, create new row
+                    # if animal is on left image, create new row
                     if self.image_ending == "*_L.jpg":
                         self.models.model_animals.insertRows(
-                            self.models.model_animals.rowCount()+1, 1, 
+                            self.cur_animal.row_index, 1, 
                             [self.cur_animal], cur_image_path, 
                             image_remark, experiment_id, user_id)
                     elif self.image_ending == "*_R.jpg":
@@ -876,8 +898,9 @@ class AnimalPainter():
                         self.models.model_animals.data.loc[self.cur_animal.row_index, "RY2"] = self.cur_animal.original_pos_tail.y()
                 else:                    
                     # create a new animal
-                    self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount()+1,
-                                             position_head = pos)
+                    self.cur_animal = Animal(self.models, 
+                                             row_index=self.models.model_animals.data.index.max()+1,
+                                             position_head=pos)
                     self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                               
                     # calculate position in original format
@@ -888,8 +911,9 @@ class AnimalPainter():
  
             else:                
                 # create a new animal
-                self.cur_animal = Animal(self.models, row_index = self.models.model_animals.rowCount()+1,
-                                         position_head = pos)
+                self.cur_animal = Animal(self.models, 
+                                         row_index=self.models.model_animals.data.index.max()+1,
+                                         position_head=pos)
                 self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
                 
                 # calculate position in original format

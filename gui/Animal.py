@@ -261,16 +261,21 @@ class Animal():
 
         Parameters
         ----------
-        group : string
+        group : string or AnimalGroup
             New animal group.
         """
         self.group = group
         self.getColorsAccordingToGroup()
         
+        if isinstance(group, AnimalGroup):
+            g = group.name.title()
+        else:
+            g = group.title()
+            
         # adapt group in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
-                self.row_index, 'group'] = group
+                self.row_index, 'group'] = g
     
     def setSpecies(self, species):
         """

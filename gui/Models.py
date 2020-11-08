@@ -424,6 +424,7 @@ class TableModel(QtCore.QAbstractTableModel):
         """
         self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
+            print("new row")
             new_row = self._create_row(animals[i], image_path, image_remark, 
                                        experiment_id, user_id)
             self.data = self.data.append(new_row)    
@@ -488,7 +489,6 @@ class TableModel(QtCore.QAbstractTableModel):
         parent : optional
             the default is QtCore.QModelIndex()
         """
-        print(row)
         self.beginRemoveRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
             self.data = self.data.drop(self.data.index[row])
@@ -646,7 +646,7 @@ class TableModel(QtCore.QAbstractTableModel):
                                 "height": -1,
                                 "image_remarks": image_remark,
                                 "status": "checked",
-                                "manually_corrected": "yes",
+                                "manually_corrected": "True",
                                 "experiment_id": experiment_id,
                                 "user_id": user_id
                                 }, index=[animal.row_index])
