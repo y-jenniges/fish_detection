@@ -8,7 +8,7 @@ import pickle
 import numpy as np
 import keras
 from keras import layers
-#from tensorflow import random
+#from tensorflow import random # for more current TF version
 from tensorflow import set_random_seed
 import Losses
 import DataGenerator as dg
@@ -19,22 +19,10 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-"""group: 
-    0 - nothing, 
-    1 - fish, 
-    2 - crustacea, 
-    3- chaetognatha, 
-    4 - unidentified_object, 
-    5 - jellyfish
-bodyPart: 
-    'front'
-    'back'
-    'both'
-"""
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
-EPOCHS_2 = 50
+EPOCHS_2 = 100
 
 # output directory
 out_path = "../data/output/1200/"

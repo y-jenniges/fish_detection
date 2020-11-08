@@ -8,7 +8,7 @@ import pickle
 import numpy as np
 import keras
 from keras import layers
-#from tensorflow import random
+#from tensorflow import random # for more current TF version
 from tensorflow import set_random_seed
 import Losses
 import DataGenerator as dg
@@ -19,32 +19,20 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-"""group: 
-    0 - nothing, 
-    1 - fish, 
-    2 - crustacea, 
-    3- chaetognatha, 
-    4 - unidentified_object, 
-    5 - jellyfish
-bodyPart: 
-    'front'
-    'back'
-    'both'
-"""
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
 EPOCHS_2 = 100
 
 # output directory
-out_path = "../data/output/78/"
+out_path = "../data/output/79/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
 
 weights = np.array(list(class_weights.values()))
-print(f"sample weights {weights}")
+print(f"class weights {weights}")
 
 # sample image
 data_root = "../data/maritime_dataset_25/"
@@ -56,12 +44,12 @@ trainGenL = dg.DataGenerator (dataset=train_labels,
                               no_animal_dataset=train_labels_no_animals,
                               no_animal_ratio=0,
                               prepareEntry=dg.prepareEntryLowResHeatmap,
-                              batch_size=BATCH_SIZE,
+                              batch_size=BATCH_SIZE
                               )
 
 valGenL = dg.DataGenerator (dataset=val_labels, 
                             prepareEntry=dg.prepareEntryLowResHeatmap,
-                            batch_size=BATCH_SIZE,
+                            batch_size=BATCH_SIZE
                             )
 
 print("DataGenerators initialized")

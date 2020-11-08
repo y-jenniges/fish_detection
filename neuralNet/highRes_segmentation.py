@@ -19,26 +19,14 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-"""group: 
-    0 - nothing, 
-    1 - fish, 
-    2 - crustacea, 
-    3- chaetognatha, 
-    4 - unidentified_object, 
-    5 - jellyfish
-bodyPart: 
-    'front'
-    'back'
-    'both'
-"""
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
-EPOCHS_2 = 50
+EPOCHS_2 = 100
 EPOCHS_3 = 20
 
 # output directory
-out_path = "../data/output/1000/"
+out_path = "../data/output/1001/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"

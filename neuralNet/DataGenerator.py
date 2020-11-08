@@ -8,22 +8,22 @@ whole dataset doesn't need to be kept in memory.
 import numpy as np
 import random
 import keras
+#from tensorflow import random # for more current TF version
+from tensorflow import set_random_seed
 import HeatmapClass
 import HelperFunctions as helpers
-#from tensorflow import random 
-from tensorflow import set_random_seed
 
 # fix random seeds of numpy and tensorflow for reproducability
 np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-OPTION = "all_animals" 
-# "fish_heads"
-# "all_animals"
-# "body_segmentation"
-# "vector_fields" 
-# "vector_fields_weighted"
+OPTION = "fish_heads" 
+# "fish_heads" # for lowRes_fishHeads*
+# "all_animals" # for highRes_allAnimals*
+# "body_segmentation" # for highRes_segmentation
+# "vector_fields" # for lowRes_vectors
+# "vector_fields_weighted" # for lowRes_vectors_focused
 
 def dummyPrepareEntry (entry, hm_folder):
     """Dummy function to prepare an entry of the dataset. It takes one entry
@@ -33,28 +33,28 @@ def dummyPrepareEntry (entry, hm_folder):
     return (helpers.loadImage(entry['filename']), [])
     
 def generateAllHeatmaps(entry, res='low'):
-    """ Generates heatmaps, vector fields, segmentation information accroding
+    """ Generates heatmaps, vector fields, segmentation information according
     to chosen option and resolution (low is 1/32 and high is 1/2 of the
     original resolution)."""
-    hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
-    hm_1_tail = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="back")
-    hm_1_body = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="connection")
+    hm_1_head = HeatmapClass.Heatmap(entry, group=1, bodyPart="front")
+    hm_1_tail = HeatmapClass.Heatmap(entry, group=1, bodyPart="back")
+    hm_1_body = HeatmapClass.Heatmap(entry, group=1, bodyPart="connection")
     
-    hm_2_head = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="front")
-    hm_2_tail = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="back")
-    hm_2_body = HeatmapClass.Heatmap(entry, resolution=res, group=2, bodyPart="connection")
+    hm_2_head = HeatmapClass.Heatmap(entry, group=2, bodyPart="front")
+    hm_2_tail = HeatmapClass.Heatmap(entry, group=2, bodyPart="back")
+    hm_2_body = HeatmapClass.Heatmap(entry, group=2, bodyPart="connection")
     
-    hm_3_head = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="front")
-    hm_3_tail = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="back")
-    hm_3_body = HeatmapClass.Heatmap(entry, resolution=res, group=3, bodyPart="connection")
+    hm_3_head = HeatmapClass.Heatmap(entry, group=3, bodyPart="front")
+    hm_3_tail = HeatmapClass.Heatmap(entry, group=3, bodyPart="back")
+    hm_3_body = HeatmapClass.Heatmap(entry, group=3, bodyPart="connection")
     
-    hm_4_head = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="front")
-    hm_4_tail = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="back")
-    hm_4_body = HeatmapClass.Heatmap(entry, resolution=res, group=4, bodyPart="connection")
+    hm_4_head = HeatmapClass.Heatmap(entry, group=4, bodyPart="front")
+    hm_4_tail = HeatmapClass.Heatmap(entry, group=4, bodyPart="back")
+    hm_4_body = HeatmapClass.Heatmap(entry, group=4, bodyPart="connection")
     
-    hm_5_head = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="front")
-    hm_5_tail = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="back")
-    hm_5_body = HeatmapClass.Heatmap(entry, resolution=res, group=5, bodyPart="connection")
+    hm_5_head = HeatmapClass.Heatmap(entry, group=5, bodyPart="front")
+    hm_5_tail = HeatmapClass.Heatmap(entry, group=5, bodyPart="back")
+    hm_5_body = HeatmapClass.Heatmap(entry, group=5, bodyPart="connection")
                   
     # downsampling
     if res=="low": f=32
@@ -89,16 +89,17 @@ def generateAllHeatmaps(entry, res='low'):
                                    hm_3_body.hm, hm_4_body.hm, hm_5_body.hm])
     
     # nothing heatmap
-    #@todo pay attention here!!!!!!!!!!! worth another test round to see if 
-    # including hm_body improves sth for vectors (usually it should only be 
-    # included in nothing heatmap for segmentation option)
     hm_y, hm_x = hm_1_head.hm.shape[0], hm_1_head.hm.shape[1]
     hm_0 = np.ones((hm_y, hm_x, 1), dtype=np.float32)
     hm_0 -= hm_1_head.hm + hm_1_tail.hm + \
             hm_2_head.hm + hm_2_tail.hm + \
             hm_3_head.hm + hm_3_tail.hm + \
             hm_4_head.hm + hm_4_tail.hm + \
-            hm_5_head.hm + hm_5_tail.hm #+ hm_body 
+            hm_5_head.hm + hm_5_tail.hm 
+        
+    if OPTION == "body_segmentation":
+        hm_0 -= hm_body
+        
     hm_0 = np.clip (hm_0, 0, 1, out=hm_0)
 
     if OPTION == "all_animals":
@@ -139,7 +140,7 @@ def generateFishHeadHeatmaps(entry, res="low"):
     """ Creates the fish head heatmap in the desired resolution 
     (low is 1/32 and high is 1/2 of original resolution). """
     # generate fish head heatmap
-    hm_1_head = HeatmapClass.Heatmap(entry, resolution=res, group=1, bodyPart="front")
+    hm_1_head = HeatmapClass.Heatmap(entry, group=1, bodyPart="front")
     
     # perform downsampling
     if res=="low": 
@@ -150,11 +151,11 @@ def generateFishHeadHeatmaps(entry, res="low"):
     
     return hm_1_head.hm
 
-
 def prepareEntryHeatmap (entry, res="low"):
     """Get's an entry of the dataset (filename, annotation), load filename and
     converts annotation into a heatmap in desired resolution 
-    (low:1/32, high:1/2). Returning both as x, y pair to be passed to keras."""
+    (low:1/32, high:1/2) and depending on selected OPTION. Returning both 
+    as x, y pair to be passed to keras."""
 
     # load image and make its range [-1,1] (suitable for mobilenet)
     image = helpers.loadImage(entry['filename'], 32)
@@ -190,23 +191,17 @@ def prepareEntryHeatmap (entry, res="low"):
         return 
   
 def prepareEntryLowResHeatmap(entry):
+    """ Prepare low resolution heatmaps. """
     return prepareEntryHeatmap(entry, "low")
 
 def prepareEntryHighResHeatmap (entry):
+    """ Prepare high resolution heatmaps. """
     return prepareEntryHeatmap(entry, "high")
     
 def showEntryOfGenerator(dataGen, i, showHeatmaps=False):
     """Fetches the first batch and prints dataformat statistics. """    
-
     X, y = dataGen[i]
     
-    # eLo = helpers.entropy(y)
-    # eHi = helpers.entropy(np.mean(y, axis=(0,1,2)))
-    
-    # print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
-    #print(f"y has shape {y.shape}, type {y.dtype} and range [{np.min(y):.3f}..{np.max(y):.3f}] and entropy [{eLo:.7f}..{eHi:.7f}]")
-    
-
     print(f"X has shape {X.shape}, type {X.dtype} and range [{np.min(X):.3f}..{np.max(X):.3f}]") 
     
     if OPTION == "fish_heads" or OPTION == "all_animals":
@@ -223,12 +218,30 @@ class DataGenerator(keras.utils.Sequence):
     To obtain the actual entry, the filename is loaded and converted to
     an image and the labels passed to a given function to convert it into
     a tensor.
-    Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly"""
+    Adapted from https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly   
+    """
     
-    def __init__(self, dataset, hm_folder_path=None, no_animal_dataset=[], no_animal_ratio=0, prepareEntry=dummyPrepareEntry, batch_size=4, shuffle=True):
-        'Initialization'
-        
-        self.hm_folder_path = hm_folder_path
+    def __init__(self, dataset, no_animal_dataset=[], 
+                 no_animal_ratio=0, prepareEntry=dummyPrepareEntry, 
+                 batch_size=4, shuffle=True):
+        """
+        Init funciton. 
+
+        Parameters
+        ----------
+        dataset : list of dicts (keys: filename, animals)
+            Groundtruth labels for the images showing animals.
+        no_animal_dataset : list of dicts (keys: filename, animals), optional
+            Groundtruth labels for the images showing no animals. The default is [].
+        no_animal_ratio : float, optional
+            Ratio of labels taken from the no_animal_dataset. The default is 0.
+        prepareEntry : function, optional
+            Returns a prepared entry of the dataset. The default is dummyPrepareEntry.
+        batch_size : int, optional
+            Size of one data batch. The default is 4.
+        shuffle : bool, optional
+            If the labels are shuffeld after an epoch. The default is True.
+        """  
         self.dataset = dataset
         self.no_animal_dataset = no_animal_dataset 
         self.no_animal_ratio = no_animal_ratio
@@ -242,13 +255,13 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
         
     def __len__(self):
-        'Denotes the number of batches per epoch'
+        """Denotes the number of batches per epoch"""
         number_of_images = np.floor(len(self.dataset) + (len(self.dataset)/self.batch_size)*self.no_animal_size)
 
         return int(np.floor(number_of_images/self.batch_size))
 
     def __getitem__(self, index):
-        'Generate one batch of data'   
+        """Generate one batch of data"""
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size] 
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
              
@@ -283,7 +296,7 @@ class DataGenerator(keras.utils.Sequence):
             return 
         
     def get_ground_truth (self, index):
-        'Generate ground_truth for the batch in the original format (not heatmap).'
+        """Generate ground_truth for the batch in the original format (not heatmap)."""
         batch_animals = self.dataset[index*self.animal_size:(index+1)*self.animal_size]
         batch_no_animals = self.no_animal_dataset[index*self.no_animal_size:(index+1)*self.no_animal_size]
         batch = batch_animals + batch_no_animals
@@ -291,7 +304,7 @@ class DataGenerator(keras.utils.Sequence):
         return [e['animals'] for e in batch]          
 
     def on_epoch_end(self):
-        'Updates indexes after each epoch'
+        """Updates indexes after each epoch."""
         if self.shuffle:
             random.shuffle(self.dataset)
             random.shuffle(self.no_animal_dataset)

@@ -18,7 +18,7 @@ random.set_seed(2)
 
 BATCH_SIZE = 1
 
-test_path = "../data/output/901/"
+test_path = "../data/output/1001/"
 model_path = "model-H"
 
 
@@ -77,7 +77,9 @@ gens = [testGen]#, tfi, tcr, tch, tje, tun]
 mae = []
 for i in range(11):
     mae.append(tf.keras.metrics.MeanAbsoluteError())
-    
+  
+mae_seg = tf.keras.metrics.MeanAbsoluteError()
+
 # accuracy = tf.keras.metrics.CategoricalAccuracy()
 # loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
 # optimizer = tf.keras.optimizers.Adam()
@@ -88,7 +90,7 @@ test_labels = test
 for entry in test_labels:
     #start = time.time()
     
-    x, y_true = dg.prepareEntryHeatmap(entry, "high")
+    x, y_true, y_true_seg = dg.prepareEntryHeatmap(entry, "high")
     x = np.expand_dims(x, axis=0)    
     
     y_pred = model.predict(x)
@@ -105,8 +107,10 @@ for entry in test_labels:
     
     # calculate metrics for each channel
     for i in range(y_true.shape[2]):
-        mae[i].update_state(y_true[:,:,i], y_pred[0,:,:,i])
-        print(f"mae {mae[i].result().numpy()}")
+        maee[i].update_state(y_true[:,:,i], y_pred[0][0,:,:,i])
+        print(f"mae {maee[i].result().numpy()}")
+    
+    maee_seg.update_state(y_true_seg, y_pred[1][0,:,:,0])
     
     #print()
     #print(time.time() - start)

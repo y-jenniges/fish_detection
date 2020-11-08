@@ -19,18 +19,6 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-"""group: 
-    0 - nothing, 
-    1 - fish, 
-    2 - crustacea, 
-    3- chaetognatha, 
-    4 - unidentified_object, 
-    5 - jellyfish
-bodyPart: 
-    'front'
-    'back'
-    'both'
-"""
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10

@@ -7,10 +7,34 @@ import cv2
 import os
 import json
 from PIL import Image, ImageEnhance, ImageOps
+"""
+Module contains helper functions for label and image loading, visualization
+options for heatmaps and vector fields. Also relevant functions for heatmap
+and vector field calculations are present.
+Some functions are taken from lecture "Anwendungen der Bildverarbeitung" 
+by Udo Frese, University Bremen, 2019
+"""
 
+# Label file helpers ---------------------------------------------------------#
+def filter_labels_for_animal_group(label_list, 
+                                   animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
+    """
+    Filters the labels for entries that contain the given animal group 
+    (in one-hot encoding).
 
-# Label file helpers ---------------------------------------------------------------#
-def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
+    Parameters
+    ----------
+    label_list : list of dicts (keys: filename, animals)
+        List of labels to filter.
+    animal_id : list of int, optional
+        One-hot encoded animal group. The default is 
+        [0.0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], i.e. fish heads.
+
+    Returns
+    -------
+    filtered_list : list of dicts (keys: filename, animals)
+        Filtered label list.
+    """
     filtered_list = []
 
     for entry in label_list:
@@ -21,6 +45,27 @@ def filter_labels_for_animal_group(label_list, animal_id=[0.0, 1, 0.0, 0.0, 0.0,
     return filtered_list
 
 def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
+    """
+    Loads labels and generates class weights. 
+
+    Parameters
+    ----------
+    label_root : str, optional
+        Path to label file folder. The default is "../data/maritime_dataset_25/labels/".
+
+    Returns
+    -------
+    all_test_labels : list of dicts (keys: filename, animals)
+        List of test labels.
+    train_labels_animals : list of dicts (keys: filename, animals)
+        Loaded training labels with animals.
+    train_labels_no_animals : list of dicts (keys: filename, animals)
+        Loaded training labels without animals.
+    validation_labels : list of dicts (keys: filename, animals)
+        Loaded validation labels.
+    class_weights : dict (one key per class)
+        Weights for every class.
+    """
     label_path = "training_labels_animals.json"
     with open(os.path.join(label_root, label_path) , 'r') as f:
         train_labels_animals = json.load(f)
@@ -69,17 +114,10 @@ def loadAndSplitLabels(label_root="../data/maritime_dataset_25/labels/"):
     return all_test_labels, train_labels_animals, train_labels_no_animals, validation_labels, class_weights
 
 # image helpers --------------------------------------------------------------------#
-def loadImage(fname, factor=64, pad=True, equalize=False):
-    "Loads an image as a h*w*3 numpy array"
+def loadImage(fname, factor=64, pad=True):
+    """Loads an image as a h*w*3 numpy array"""
     # load image in PIL format (either first equalized or not)
-    #img = np.asarray(Image.fromarray(equalizeImage(fname))) if equalize else img_to_array(load_img(fname), dtype="uint8")
-    if equalize:
-        #img = np.asarray(Image.fromarray(fname))
-        img = img_to_array(load_img(fname), dtype="uint8")
-        img = equalizePil(img)
-        img = adaptContrast(img, auto=True)
-    else:
-        img = img_to_array(load_img(fname), dtype="uint8")
+    img = img_to_array(load_img(fname), dtype="uint8")
 
     if pad:
         #print(f"image before {img.shape}")
@@ -94,82 +132,25 @@ def loadImage(fname, factor=64, pad=True, equalize=False):
     return img
 
 # Load the first image an d get the shape of that: All images have the same size
-def shapeOfFilename(fname, downsample_factor=2, image_factor=64):
-    "Returns the imageshape of fname (filename)."
+def shapeOfFilename(fname, downsample_factor=2, image_factor=32):
+    """Returns the imageshape of fname (filename) downsampled by 
+    downsample_factor. and padded using image_factor. """
     imageShape = downsample(loadImage(fname, image_factor),downsample_factor)
     return imageShape.shape
 
 def entropy(x):
-    '''Returns the average entropy of the probability distributions in x. The last axis of x
+    """Returns the average entropy of the probability distributions in x. The last axis of x
     is assumed to represent the different events with their probabilities. Over this axis the
     entropy is computed, all other axes create just a multitude of such distributions and over
     these axes the average is taken. If the last axis has dimension 1 this is assumed to be
-    a binary crossentropy.'''
+    a binary crossentropy."""
     tmp = x
     if tmp.shape[-1]==1: # If only one channel we view it as distribution on a binary values
         tmp = np.concatenate((tmp, 1-tmp),axis=-1)
     xlogx = -tmp*np.log(np.maximum(tmp, np.finfo(tmp.dtype).eps))
     return np.average(np.sum(xlogx,axis=-1))
 
-def equalizeImage(img_path):
-    image = cv2.imread(img_path)
-
-    # convert image from RGB to HSV
-    img_hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    
-    # Histogram equalisation on the V-channel
-    #img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
-    
-    # contrast limited adaptive histogram equalization (clahe)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(20,20))
-    img_hsv[:, :, 2] = clahe.apply(img_hsv[:, :, 2])
-        
-    # convert image back from HSV to RGB
-    image = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2RGB)
-        
-    # flip BGR to RGB
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
-    return image
-
-def adaptBrigthness(image, factor=1):
-    # convert to PIL format
-    img = Image.fromarray(image)
-    
-    # adapt brigthness
-    enhancer = ImageEnhance.Brightness(img)
-    im_output = enhancer.enhance(factor)
-    
-    # convert back to np.array
-    return np.asarray(im_output)
-
-# factor < 1 -> decrease contrast
-# facotr > 1 -> increase contrast
-def adaptContrast(image, factor=1, auto=False):
-    # convert to PIL format
-    img = Image.fromarray(image)
-    
-    # adapt contrast
-    if auto:
-        im_output = ImageOps.autocontrast(img)
-    else:
-        enhancer = ImageEnhance.Contrast(img)
-        im_output = enhancer.enhance(factor)
-    
-    # convert back to np.array
-    return np.asarray(im_output)
-
-def equalizePil(image):
-    # convert to PIL format
-    img = Image.fromarray(image)
-
-    # equalize
-    im_output = ImageOps.equalize(img)
-    
-    # convert back to np.array
-    return np.asarray(im_output)
-
-# heatmap helpers ------------------------------------------------------------------#
+# heatmap helpers ------------------------------------------------------------#
 # use this to test whether interpolate works
 def showInterpolate():
     "Helper function to check that interpolate works"
@@ -201,11 +182,11 @@ def gaussian (sigma, dim):
     cy=dim//2
     return np.exp(-((x-cx)**2+(y-cy)**2)/(2*sigma**2))
 
-# @todo needed here?
-def downsample (T, factor=64):
-  """T must be a tensor with at least 3 dimension, where the last three are interpreted as height, width, channels.
-     Downsamples the height and width dimension of T by the given factor. 
-     The length in these dimensions must be a multiple of factor."""
+def downsample (T, factor=32):
+  """T must be a tensor with at least 3 dimension, where the last three are 
+  interpreted as height, width, channels. Downsamples the height and width 
+  dimension of T by the given factor. The length in these dimensions must be 
+  a multiple of factor."""
   sh = T.shape
   assert sh[-3]%factor==0
   assert sh[-2]%factor==0
@@ -347,7 +328,6 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
         elif len(hm.shape) == 2:
             hmResized = np.repeat (hm, factor, axis=0) # y
             hmResized = np.repeat (hmResized, factor, axis=1) #x
-           # hmResized = np.repeat (hmResized, 3, axis=2) # factor for RGB
             hmResized = np.clip (hmResized*2, 0, 1)
             hmResized = hmResized[:, :, np.newaxis]
         
@@ -359,34 +339,27 @@ def showImageWithHeatmap (image, hm=None, gt=None, group=1, bodyPart="front", fi
     plt.imshow(img)
     plt.axis("off")
     
+    # draw groundtruth if it is available
     if gt is not None:            
         group_array = np.zeros(Globals.channels)
         if bodyPart=='front':
             group_array[group*2-1] = 1 
         elif bodyPart=='back' or bodyPart=='both':
-            group_array[group*2] = 1 
-            
+            group_array[group*2] = 1     
         
         if bodyPart=='both':
             group_array_front = np.copy(group_array)
             group_array_front[np.argwhere(group_array==1)-1] = 1
             group_array_front[np.argwhere(group_array==1)] = 0
-            
-            #print(f"group_array {group_array}\ngroup array front {group_array_front}")
-            
+
             x_front = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array_front)] 
             y_front = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array_front)]
             
             x_back = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array)]
             y_back = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
 
-            #print(f"x front {x_front}\ny front {y_front}\nx back {x_back}\ny back {y_back}")
-
             plt.scatter(x_front, y_front, s=20, marker='o', c='r')
-            plt.scatter(x_back, y_back, s=20, marker='x', c='b')
-            #plt.legend(loc='upper left')
-            #plt.show()
-         
+            plt.scatter(x_back, y_back, s=20, marker='x', c='b')         
         else:
             x = [animal['position'][0] for animal in gt if np.array_equal(animal['group'], group_array) ]
             y = [animal['position'][1] for animal in gt if np.array_equal(animal['group'], group_array)]
@@ -411,3 +384,5 @@ def sumHeatmaps(heatmaps):
         final_hm = np.clip(final_hm, 0, 1)
 
         return final_hm
+    else:
+        return None

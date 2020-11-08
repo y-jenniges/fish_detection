@@ -19,33 +19,19 @@ np.random.seed(0)
 #random.set_seed(2)
 set_random_seed(2)
 
-"""group: 
-    0 - nothing, 
-    1 - fish, 
-    2 - crustacea, 
-    3- chaetognatha, 
-    4 - unidentified_object, 
-    5 - jellyfish
-bodyPart: 
-    'front'
-    'back'
-    'both'
-"""
 # constants
 BATCH_SIZE = 2
 EPOCHS_1 = 10
-EPOCHS_2 = 50
+EPOCHS_2 = 100
 EPOCHS_3 = 20
 
 # output directory
-out_path = "../data/output/900/"
+out_path = "../data/output/901/"
 
 # load annotation files
 label_root = "../data/maritime_dataset_25/labels/"
 test_labels, train_labels, train_labels_no_animals, val_labels, class_weights = helpers.loadAndSplitLabels(label_root)
-
 weights = np.array(list(class_weights.values()))
-
 
 print(f"class weights {weights}")
 
