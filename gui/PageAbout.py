@@ -10,11 +10,11 @@ class PageAbout(QtWidgets.QWidget):
     Attributes
     ----------
     frame_top_bar : TopFrame
-        frame at the top of the window to display user ID and an icon
+        Frame at the top of the window to display user ID and an icon
     frame_control_bar : MenuFrame
-        frame below the top bar to display controls of the page and the menu
+        Frame below the top bar to display controls of the page and the menu
     label_about_text : string
-        text for the about page
+        Text for the about page
     """
     
     def __init__(self, parent=None):

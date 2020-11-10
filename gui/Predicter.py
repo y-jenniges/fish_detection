@@ -24,6 +24,13 @@ class Predicter():
     and groups on an image are predicted with a neural network. The 
     generated location heatmaps are then focused into single points. Then,
     heads and tails are matched. 
+    
+    Attributes
+    ----------
+    neural_network: keras model
+        Neural network used for the predictions.
+    class_weights:
+        Class weights used by the neural network.
     """
     
     def __init__(self, neural_network_path=None, class_weights=None):

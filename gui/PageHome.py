@@ -7,6 +7,11 @@ from PaintView import PhotoViewer
 class PageHome(QtWidgets.QWidget):
     """
     Class to create the home page of the software.
+    
+    Attributes
+    ----------
+    factor : float
+        Factor for the zoom slider. 
     """
 
     def __init__(self, models, parent=None):        
@@ -26,6 +31,7 @@ class PageHome(QtWidgets.QWidget):
         self.factor = 50*(self.slider_max - self.slider_min)/(self.slider_max)  
 
     def openZoomWidget(self):
+        """ Shows the widget containing the zoom slider. """
         # show the zoom widget if it is not already visible
         if self.widget_zoom.isVisible():
             self.btn_zoom.setIcon(getIcon(":/icons/icons/glass.png")) 
@@ -36,12 +42,15 @@ class PageHome(QtWidgets.QWidget):
             self.btn_zoom.setIcon(getIcon(":/icons/icons/glass_darkBlue.png")) 
             self.widget_zoom.show()
             self.placeZoomWidget()
-            self.photo_viewer.setArrowShortcutsActive(False) # arrows are needed for controlling slider and navigating in zoomed-in photo
-    
+            # arrows are needed for controlling slider and navigating in zoomed-in photo
+            self.photo_viewer.setArrowShortcutsActive(False) 
+            
     def onZoomValueChanged(self, value):
+        """ Zoom into the image according to the level of the zoom slider.  """
         # determine the zoom factor and transform the photo of the photo_viewer
         scale = 1 + value*self.factor/100
-        self.photo_viewer.imageArea.setTransform(self.photo_viewer.imageArea.transform().fromScale(scale, scale))
+        self.photo_viewer.imageArea.setTransform(
+            self.photo_viewer.imageArea.transform().fromScale(scale, scale))
 
         # if thevalue is smaller 1, make the photo fill the photo_viewer image area
         if value < 1:
@@ -49,14 +58,17 @@ class PageHome(QtWidgets.QWidget):
             self.photo_viewer.imageArea.fitInView()
   
     def on_add_clicked(self):
+        """ (De-)activate the add mode. """
         self.photo_viewer.imageArea.animal_painter.on_add_animal()
         self.updateAddRemoveIcons()
             
     def on_remove_clicked(self):
+        """ (De-)activate the remove mode. """
         self.photo_viewer.imageArea.animal_painter.on_remove_animal()
         self.updateAddRemoveIcons()
 
     def updateAddRemoveIcons(self):
+        """ Update the icond of add and remove mode according to their state.  """
         # adapt icon of the add button
         if self.photo_viewer.imageArea.animal_painter.is_add_mode_active:
             self.btn_add.setIcon(getIcon(":/icons/icons/plus_darkBlue.png"))
@@ -70,6 +82,10 @@ class PageHome(QtWidgets.QWidget):
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))        
  
     def on_filter_clicked(self):
+        """ !!! NOT IMPLEMENTED YET !!! 
+        
+        Opens a widget showinf options for image filters. 
+        """
         print("Filters are not implemented yet.")
         # img_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
         # img = img_to_array(load_img(img_path), dtype="uint8")
@@ -79,6 +95,8 @@ class PageHome(QtWidgets.QWidget):
         # self.photo_viewer.imageArea.setPhoto(QtGui.QPixmap.fromImage(qimage))
 
     def update_species_list(self, list_species):
+        """ Append given list of species names to the species data model if
+        no entry exists for them yet. """
         for i in range(len(list_species)):
             existing_items = self.models.model_species.findItems(list_species[i]["title"])
 
@@ -91,15 +109,13 @@ class PageHome(QtWidgets.QWidget):
                 self.models.model_species.appendRow(item)
 
     def showEvent(self, event):
-        print("home show event")
-        # redraw animals when opening the page
-        #self.photo_viewer.imageArea.animal_painter.redraw()
-        # reload current image
+        """" Reload the image when opening the home page. """
         if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list):
-            self.photo_viewer.loadImage(self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
+            self.photo_viewer.loadImage(
+                self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
 
     def _initUi(self):
-   
+        """ Initalize the UI of the home page. """
         # --- top bar  ----------------------------------------------------- #         
         # create the blue top bar
         self.frame_topBar = TopFrame(":/icons/icons/home_w.png", 
@@ -112,7 +128,7 @@ class PageHome(QtWidgets.QWidget):
        
         
         # main frame
-        self.frame_controlBar = self.createHomeControlBar()
+        self.frame_controlBar = self._createHomeControlBar()
         self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, 
                                             QtWidgets.QSizePolicy.Expanding) 
         
@@ -148,7 +164,8 @@ class PageHome(QtWidgets.QWidget):
         self.widget_zoom.setFixedSize(QtCore.QSize(200, 50))
         self.widget_zoom.setObjectName("widget_zoom")
         self.widget_zoom.setAutoFillBackground(True)
-        self.widget_zoom.setStyleSheet("background-color: rgb(200, 200, 200, 200); border: none; border-radius: 3px; ")
+        self.widget_zoom.setStyleSheet(
+            "background-color: rgb(200, 200, 200, 200); border: none; border-radius: 3px; ")
         
         self.slider_zoom = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.slider_zoom.setMaximum(100)
@@ -170,7 +187,8 @@ class PageHome(QtWidgets.QWidget):
         self.widget_zoom.hide()  
         self.placeZoomWidget()
 
-    def createHomeControlBar(self):
+    def _createHomeControlBar(self):
+        """ Creates the home bar UI containing the image manipulation options. """
         frame_controlBar = QtWidgets.QFrame(self)
         frame_controlBar.setMinimumSize(QtCore.QSize(0, 50))
         frame_controlBar.setMaximumSize(QtCore.QSize(16777215, 50))
@@ -187,7 +205,8 @@ class PageHome(QtWidgets.QWidget):
         # placeholder menu button to keep symmetry
         self.btn_menu2 = QtWidgets.QPushButton(frame_controlBar)
         self.btn_menu2.setEnabled(False)     
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_menu2.sizePolicy().hasHeightForWidth())  
@@ -199,7 +218,8 @@ class PageHome(QtWidgets.QWidget):
 
         # button for switching between left, right and both images
         self.btn_imgSwitch = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_imgSwitch.sizePolicy().hasHeightForWidth())
@@ -217,7 +237,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button for opening a widget displaying filters
         self.btn_filter = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_filter.sizePolicy().hasHeightForWidth())
@@ -230,7 +251,8 @@ class PageHome(QtWidgets.QWidget):
         
         # combo box for image remarks
         self.comboBox_imgRemark = QtWidgets.QComboBox(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBox_imgRemark.sizePolicy().hasHeightForWidth())
@@ -248,7 +270,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button for opening a widget for zooming into photo
         self.btn_zoom = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_zoom.sizePolicy().hasHeightForWidth())
@@ -261,7 +284,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button for activating the add-animal-mode
         self.btn_add = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_add.sizePolicy().hasHeightForWidth())
@@ -274,7 +298,8 @@ class PageHome(QtWidgets.QWidget):
 
         # button for switching to previous animal
         self.btn_previous = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_previous.sizePolicy().hasHeightForWidth())
@@ -288,7 +313,8 @@ class PageHome(QtWidgets.QWidget):
         # playeholder button to keep symmetry 
         self.btn_placeholder = QtWidgets.QPushButton(frame_controlBar)
         self.btn_placeholder.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_placeholder.sizePolicy().hasHeightForWidth())
@@ -300,7 +326,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button for switching to next animal
         self.btn_next = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_next.sizePolicy().hasHeightForWidth())
@@ -313,7 +340,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button to activate the remove-animals-mode
         self.btn_delete = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_delete.sizePolicy().hasHeightForWidth())
@@ -326,7 +354,8 @@ class PageHome(QtWidgets.QWidget):
         
         # button for undoing the last action
         self.btn_undo = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_undo.sizePolicy().hasHeightForWidth())
@@ -339,7 +368,8 @@ class PageHome(QtWidgets.QWidget):
     
         # button for the menu
         self.btn_menu = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_menu.sizePolicy().hasHeightForWidth())
@@ -359,7 +389,8 @@ class PageHome(QtWidgets.QWidget):
         # --- create dummies to keep the symmetry in the control bar ------------ #
         # dummy button for switching between left, right and both images
         self.btn_imgSwitch_dummy = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_imgSwitch_dummy.sizePolicy().hasHeightForWidth())
@@ -378,7 +409,8 @@ class PageHome(QtWidgets.QWidget):
         
         # dummy button for opening a widget displaying filters
         self.btn_filter_dummy = QtWidgets.QPushButton(frame_controlBar)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_filter_dummy.sizePolicy().hasHeightForWidth())
@@ -389,14 +421,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_filter_dummy.setObjectName("btn_filter_dummy")
         self.btn_filter_dummy.setEnabled(False)
         
-        # dummy combo box for image remarks
-        # self.comboBox_imgRemark_dummy = QtWidgets.QComboBox(frame_controlBar)
-        # self.comboBox_imgRemark_dummy.setFixedSize(QtCore.QSize(self.comboBox_imgRemark.width(), 40))
-        # self.comboBox_imgRemark_dummy.setEditable(True)
-        # self.comboBox_imgRemark_dummy.setObjectName("comboBox_imgRemark_dummy")
-        # self.comboBox_imgRemark_dummy.setStyleSheet("#comboBox_imgRemark_dummy{background-color:red;} #comboBox_imgRemark_dummy:down-arrow{ image:none;}")
-        # self.comboBox_imgRemark_dummy.setEnabled(False)
-
+        # dummy combo box for image remarks (necessary to keep symmetry)
         self.comboBox_imgRemark_dummy = QtWidgets.QComboBox(frame_controlBar)
         self.comboBox_imgRemark_dummy.setMinimumSize(QtCore.QSize(0, 40))
         self.comboBox_imgRemark_dummy.setMaximumSize(QtCore.QSize(16777215, 40))
@@ -404,14 +429,8 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark_dummy.setEnabled(False)
         self.comboBox_imgRemark_dummy.setStyleSheet("#comboBox_imgRemark_dummy{background-color:transparent; color:transparent;} #comboBox_imgRemark_dummy:down-arrow{ image:none;}")
         self.comboBox_imgRemark_dummy.setObjectName("comboBox_imgRemark_dummy")
-        # self.comboBox_imgRemark_dummy.addItem("")
-        # self.comboBox_imgRemark_dummy.addItem("")
-        # self.comboBox_imgRemark_dummy.addItem("")
-        # self.comboBox_imgRemark_dummy.addItem("")
-        # self.comboBox_imgRemark_dummy.addItem("")
-        # self.comboBox_imgRemark_dummy.addItem("")
 
-        # --- add widgets to layout of the control bar --------------------------------------- #
+        # --- add widgets to layout of the control bar ---------------------- #
         # add widgets to layout 
         self.layout_frame_controlBar.addWidget(self.btn_menu2)
         self.layout_frame_controlBar.addItem(spacerItem2)
@@ -442,6 +461,7 @@ class PageHome(QtWidgets.QWidget):
         return frame_controlBar
         
     def _initActions(self):
+        """ Define actions triggered by user interaction with the UI. """
         # connecting signals and slots
         self.btn_add.clicked.connect(self.on_add_clicked)
         self.btn_delete.clicked.connect(self.on_remove_clicked)
@@ -464,10 +484,12 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
         
     def _initModels(self):
+        """ Add data models to respective UI elements. """
         self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
         self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
 
     def setComboboxImageRemark(self, text):
+        """ Add a text to the image remark combobx and data model. """
         # if the remark is not in the combobox, add it. Else choose its index
         index = self.comboBox_imgRemark.findText(text) 
         
@@ -484,15 +506,19 @@ class PageHome(QtWidgets.QWidget):
         file_id = os.path.basename(cur_image_path)[:-6]
     
         # adapt the image remark in the data model
-        cur_indices = self.models.model_animals.data[self.models.model_animals.data['file_id']==file_id].index
+        cur_indices = self.models.model_animals.data[
+            self.models.model_animals.data['file_id']==file_id].index
         for idx in cur_indices:
             self.models.model_animals.data.loc[idx, 'image_remarks'] = text
     
     def onNewImage(self, remark):
+        """ Sets the text in the image remark combobox according to the 
+        newly loaded image. """
         # adapt image remark combobox
         self.setComboboxImageRemark(remark)
     
     def switchImageMode(self):
+        """ Switches the image mode depending on the current image mode """
         cur_mode = self.btn_imgSwitch.text()
         if cur_mode == "L": 
             self.displayRightImage()
@@ -502,38 +528,45 @@ class PageHome(QtWidgets.QWidget):
             self.displayLeftImage()
         
     def displayLeftImage(self):
-        print("on left image")
+        """ Display left image. """
         self.btn_imgSwitch.setText("L")
         self.photo_viewer.activateLRMode(False)
         self.photo_viewer.setImageEnding("*_L.jpg")
-        pass
 
     def displayRightImage(self):
+        """ Display right image. """
         self.btn_imgSwitch.setText("R")
         self.photo_viewer.activateLRMode(False)
         self.photo_viewer.setImageEnding("*_R.jpg")
-        pass
     
     def displayBothImages(self):
+        """ Display both images. 
+        
+        !!! NOT IMPLEMENTED YET !!!
+        """
         self.btn_imgSwitch.setText("LR")
         self.photo_viewer.activateLRMode(True)
-        pass
      
     def mousePressEvent(self, event):
+        """ On mouse press, update visibility of zoom slider widget. """
         super().mousePressEvent(event)          
         # hide the zoom widget if it is open and a click somewhere else is registered
         if self.widget_zoom.isVisible() and not self.widget_zoom.rect().contains(event.pos()):
             self.openZoomWidget()
 
     def resizeEvent(self, event):
+        """ Make sure that zoom slider widget is placed correctly when 
+        program is resized. """
         super().resizeEvent(event)
         self.placeZoomWidget()
   
     def placeZoomWidget(self):
+        """ Place the zoom widget under the zoom button. """
         # reset position of zoom widget
         self.widget_zoom.move(0,0)
         
-        # map the position of the zoom button to the local coordinate system of the zoom widget
+        # map the position of the zoom button to the local coordinate system 
+        # of the zoom widget
         pos = self.btn_zoom.mapToGlobal(self.btn_zoom.rect().topLeft())
         p = self.widget_zoom.mapFromGlobal(pos)
         

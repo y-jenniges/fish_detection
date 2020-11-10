@@ -5,6 +5,58 @@ import Helpers
 class Animal():
     """ 
     Class to represent an animal on an image. 
+    
+    Attributes
+    ----------
+    row_index : int
+        The index of the row in the result table that this animal 
+        represents.
+    position_head : QPoint, optional
+        The position of the animal head on the displayed image. It will be 
+        the center for the head visual, i.e. an 'o'. 
+    position_tail : QPoint
+        The position of the animal tail on the displayed image. It will be 
+        the center for the tail visual, i.e. a 'x'.
+    group : string
+        The group of the animal. Selectable from the Enum AnimalGroup.
+    species : string
+        The species of the animal.
+    remark : string
+        The remark to the animal.
+    length: int, optional
+        The length of the animal. 
+    original_pos_head : QPoint
+        The head position on the unscaled original image.
+    original_pos_tail : QPoint
+        The tail position on the unscaled original image.
+    pixmap_width : int
+        Width of the square pixmap for the head and tail visuals.         
+    pos_visual_head : QPoint
+        Position of the head visual.
+    pos_visual_tail 
+        Position of the tail visual.
+    rect_head : QRect
+        Geomatry of the head drawn by the head_item_visual
+    rect_tail : QRect
+        Geometry of the tail drawn by the tail_item_visual
+    line : QLineF
+        Geometry of the line drawn by the line_item_visual.        
+    is_head_drawn  : bool
+        Indicates if the head of the animal is already drawn.
+    is_tail_drawn : bool
+        Indicates if the tail of the animal is already drawn.
+    boundingBox : QRectF
+        Box surrdounding the animal and drawn when it becomes active.
+    boundingBox_visual:
+        Visual of the bounding box that can be drawn in the QGraphicsScene.
+    head_item_visual
+        Visual of the head that can be drawn in the QGraphicsScene.
+    tail_item_visual
+        Visual of the tail that can be drawn in the QGraphicsScene.
+    line_item_visual 
+        Visual of the line that can be drawn in the QGraphicsScene.
+    manually_corrected: bool
+        Indicates if the animal was manually adapted. 
     """
 
     # the input position refers to the center of the visual
@@ -25,16 +77,18 @@ class Animal():
             The index of the row in the result table that this animal 
             represents.
         position_head : QPoint, optional
-            The position of the animal head. It will be the center for the 
-            head visual, i.e. an 'o'. The default is QtCore.QPoint(-1,-1).
+            The position of the animal head on the displayed image. It will be 
+            the center for the head visual, i.e. an 'o'. The default is 
+            QtCore.QPoint(-1,-1).
         position_tail : QPoint, optional
-            The position of the animal tail. It will be the center for the 
-            tail visual, i.e. a 'x'. The default is QtCore.QPoint(-1,-1).
+            The position of the animal tail on the displayed image. It will be 
+            the center for the tail visual, i.e. a 'x'. The default is 
+            QtCore.QPoint(-1,-1).
         group : string, optional
             The group of the animal. Selectable from the Enum AnimalGroup.
             The default is AnimalGroup.UNIDENTIFIED.
         species : string, optional
-            The species of the animal. Selectable from the Enum AnimalSpecies.
+            The species of the animal.
             The default is AnimalSpecies.UNIDENTIFIED.
         remark : string, optional
             The remark to the animal. The default is "".
@@ -67,7 +121,7 @@ class Animal():
         self.length = length if length > 0 else 0
         #self.height = height if height > 0 else 0
       
-        # set the visual for the head, tail and line between them @todo pblic or private?
+        # set the visual for the head, tail and line between them 
         self.pos_visual_head = position_head - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2)
         self.pos_visual_tail = position_tail - QtCore.QPoint(
@@ -449,14 +503,13 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         """
         
         # check if model contains the species and adds it otherwise
-        if len(self.models.model_species.findItems(species)) > 0 and hasattr(self.parent(), "animal_painter"):
-        #if self.comboBox_species.findText(species) != -1 and hasattr(self.parent(), "animal__painter"):
+        if len(self.models.model_species.findItems(species)) > 0 and  \
+        hasattr(self.parent(), "animal_painter"):
             self.species = species
-            self.parent().animal_painter.setAnimalSpecies(species) #setAnimalGroup(group) 
+            self.parent().animal_painter.setAnimalSpecies(species) 
             self.focusNextChild()
         else:
             print("Given species was not in combobox")
-            #@todo add species to model
             
     def onGroupComboboxChanged(self, group):
         """
@@ -469,10 +522,10 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             The selected group of the animal. 
             Selectable from the Enum AnimalGroup.
         """
-        if len(self.models.model_group.findItems(group)) > -1 and hasattr(self.parent(), "animal_painter"):
-        #if self.comboBox_group.findText(group) != -1 and hasattr(self.parent(), "animal_painter"):
+        if len(self.models.model_group.findItems(group)) > -1 \
+        and hasattr(self.parent(), "animal_painter"):
             self.group = group
-            self.parent().animal_painter.setAnimalGroup(group) #setAnimalGroup(group) 
+            self.parent().animal_painter.setAnimalGroup(group) 
             self.focusNextChild()
         else:
             print("Given group was not in combobox")
@@ -528,7 +581,9 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # set group combobox
         index = self.comboBox_group.findText(self.group) 
         if index != -1:
-            self.comboBox_group.blockSignals(True) # blocking signal to avoid calling onGroupComboboxChanged and thus starting a loop
+            # blocking signal to avoid calling onGroupComboboxChanged and 
+            # thus starting a loop
+            self.comboBox_group.blockSignals(True) 
             self.comboBox_group.setCurrentIndex(index)
             self.comboBox_group.blockSignals(False)
 
@@ -584,7 +639,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         # combobox for animal group
         self.comboBox_group = QtWidgets.QComboBox(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBox_group.sizePolicy().hasHeightForWidth())
@@ -599,7 +655,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         # combobox for animal species
         self.comboBox_species = QtWidgets.QComboBox(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBox_species.sizePolicy().hasHeightForWidth())
@@ -617,7 +674,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         # combobox for animal remark
         self.comboBox_remark = QtWidgets.QComboBox(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBox_remark.sizePolicy().hasHeightForWidth())
@@ -629,7 +687,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_remark.setObjectName("comboBox_remark")
         
         self.spinBox_length = QtWidgets.QDoubleSpinBox(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+                                           QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.spinBox_length.sizePolicy().hasHeightForWidth())

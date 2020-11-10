@@ -1,7 +1,7 @@
 import os
 from PyQt5 import QtCore, QtWidgets, QtGui
 """
-Helper functions and classes
+GUI Helper functions and classes.
 """   
     
 def getIcon(ressource_path):
@@ -20,7 +20,9 @@ def getIcon(ressource_path):
 
     """
     icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(ressource_path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+    icon.addPixmap(QtGui.QPixmap(ressource_path), 
+                   QtGui.QIcon.Normal, 
+                   QtGui.QIcon.Off)
     
     return icon
 
@@ -46,6 +48,16 @@ def displayErrorMsg(text, information, windowTitle):
     msg.exec_()
 
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):
+    """ Used for displaying content in a list view: It shows an image and 
+    text beside it. 
+    
+    Attributes
+    ----------
+    listview : QListView
+        The view where content should be displayed.
+    item_height : int
+        Height of the image to display.
+    """
     def __init__(self, parent, listview):
         QtWidgets.QItemDelegate.__init__(self, parent)
         self.listview = listview
@@ -99,7 +111,8 @@ class ListViewDelegate(QtWidgets.QStyledItemDelegate):
                 painter.drawText(rect, QtCore.Qt.AlignRight, text)
                 
                 pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # keep resolution large
-                pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), QtCore.Qt.KeepAspectRatioByExpanding)
+                pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), 
+                                       QtCore.Qt.KeepAspectRatioByExpanding)
                 offset = (self.item_height - pixmap.height())/2
                 painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
                 
@@ -120,6 +133,16 @@ class ListViewDelegate(QtWidgets.QStyledItemDelegate):
         return s
 
 class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
+    """ Used for displaying content in a combobox: It shows an image and 
+    text beside it. 
+    
+    Attributes
+    ----------
+    combobox : QCombobox
+        The combobox where content should be displayed.
+    item_height : int
+        Height of the image to display.
+    """
     def __init__(self, parent, combobox):
         QtWidgets.QItemDelegate.__init__(self, parent)
         self.combobox = combobox
@@ -171,9 +194,7 @@ class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
             # draw icon (as pixmap) and text
             painter.drawText(rect, QtCore.Qt.AlignRight, "  " + text)
             
-            pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # keep resolution large
-            #pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), QtCore.Qt.KeepAspectRatioByExpanding)
-            #pixmap = icon.pixmap(QtCore.QSize(200, 200))
+            pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # to keep resolution large
             pixmap = pixmap.scaled(QtCore.QSize(140, 140), QtCore.Qt.KeepAspectRatio)
             offset = (self.item_height - pixmap.height())/2
             painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
@@ -191,6 +212,15 @@ class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
         return s
         
 class TextImageItemWidget (QtWidgets.QWidget):
+    """ Creates a widget containing an image and text. 
+    
+    Attributes
+    ----------
+    title : string
+        Text to display.
+    imagePath : string
+        Path to the image to display.
+    """
     def __init__ (self, imagePath, title=None, parent = None):
         super(TextImageItemWidget, self).__init__(parent)
          
@@ -203,7 +233,8 @@ class TextImageItemWidget (QtWidgets.QWidget):
         
         # create the line edit to display the text
         self.lineEdit_text = QtWidgets.QLineEdit(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lineEdit_text.sizePolicy().hasHeightForWidth())
@@ -221,7 +252,8 @@ class TextImageItemWidget (QtWidgets.QWidget):
         self.label_image.setPixmap(pixmap.scaled(QtCore.QSize(150,100), QtCore.Qt.KeepAspectRatio))      
     
         # a spacer between label and image
-        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, 
+                                       QtWidgets.QSizePolicy.Minimum)
 
         # define the layout
         horizontalLayout = QtWidgets.QHBoxLayout(self)
@@ -233,24 +265,33 @@ class TextImageItemWidget (QtWidgets.QWidget):
         self.lineEdit_text.editingFinished.connect(self.on_lineEdit_changed)
 
     def set_text(self, text):
+        """ Sets the title of the image, i.e. the displaed text. """
         self.lineEdit_text.setText(text)
         self.title = text
         
     def on_lineEdit_changed(self):
+        """ Adapt the title variable if changed in UI. """
         self.focusNextChild() # change focus
         self.title = self.lineEdit_text.text()
         
-        
-
-"""
-This class creates the blue frame which is at the top on every page. 
-"""       
+              
 class TopFrame(QtWidgets.QFrame):
-    """
-    @pixmap_path: path to the pixmap for the icon in the center of the frame (indicating the functionality of the page)
-    @frame_name: name of the created frame
-    """
+    """ This class creates the blue frame which is at the top on every page. """ 
+
     def __init__(self, pixmap_path, frame_name, parent=None):
+        """
+        Init function.
+
+        Parameters
+        ----------
+        pixmap_path : string
+            Path to the pixmap for the icon in the center of the frame 
+            (indicating the functionality of the page).
+        frame_name : string
+            Name of the frame to create.
+        parent : TYPE, optional
+            Prent object. The default is None.
+        """
         super(QtWidgets.QFrame, self).__init__(parent)
     
         self.setMinimumSize(QtCore.QSize(0, 30))
@@ -268,7 +309,8 @@ class TopFrame(QtWidgets.QFrame):
         # create a dummy button to keep the frame symmetric
         btn_user_about_2 = QtWidgets.QPushButton(self)
         btn_user_about_2.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(btn_user_about_2.sizePolicy().hasHeightForWidth())
@@ -281,7 +323,9 @@ class TopFrame(QtWidgets.QFrame):
         btn_user_about_2.setObjectName("btn_user_about_2")
         horizontalLayout_34.addWidget(btn_user_about_2)
         
-        # create a dummy label to keep the frame symmetric (it has to be a member variable such that the invisible text can be adapted. This will change the width of the label)
+        # create a dummy label to keep the frame symmetric (it has to be a 
+        # member variable such that the invisible text can be adapted. 
+        # This will change the width of the label)
         self.label_user_id_2 = QtWidgets.QLabel(self)
         self.label_user_id_2.setEnabled(True)
         self.label_user_id_2.setStyleSheet("color:transparent")
@@ -289,7 +333,8 @@ class TopFrame(QtWidgets.QFrame):
         self.label_user_id_2.setObjectName("label_user_id_2")
         horizontalLayout_34.addWidget(self.label_user_id_2)
         
-        spacerItem56 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem56 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_34.addItem(spacerItem56)
         
         # central icon on the frame (indicating the functionality of the page)
@@ -304,7 +349,8 @@ class TopFrame(QtWidgets.QFrame):
         icon.setObjectName("icon")
         horizontalLayout_34.addWidget(icon)
         
-        spacerItem57 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem57 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_34.addItem(spacerItem57)
         
         # label to display the Id of the current user
@@ -316,7 +362,8 @@ class TopFrame(QtWidgets.QFrame):
         
         # button to switch directly to the user settings
         self.btn_user = QtWidgets.QPushButton(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_user.sizePolicy().hasHeightForWidth())
@@ -330,11 +377,12 @@ class TopFrame(QtWidgets.QFrame):
         horizontalLayout_34.addWidget(self.btn_user)
 
 
-"""
-Frame that contains the menu button. It is similar on most pages, except the home page. 
-The latter includes controls instead of a text in this bar.
-"""
+
 class MenuFrame(QtWidgets.QFrame):
+    """
+    Frame that contains the menu button. It is similar on most pages, except the home page. 
+    The latter includes controls instead of a text in this bar.
+    """
 
     def __init__(self, central_text, frame_name, parent=None):
         super(QtWidgets.QFrame, self).__init__(parent)
@@ -354,7 +402,8 @@ class MenuFrame(QtWidgets.QFrame):
         # create dummy menu button to preserve the symmetry of the frame
         btn_menu_2 = QtWidgets.QPushButton(self)
         btn_menu_2.setEnabled(False)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(btn_menu_2.sizePolicy().hasHeightForWidth())
@@ -366,10 +415,12 @@ class MenuFrame(QtWidgets.QFrame):
         btn_menu_2.setObjectName("btn_menu_2")
         horizontalLayout_31.addWidget(btn_menu_2)
         
-        spacerItem58 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem58 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_31.addItem(spacerItem58)
         
-        spacerItem59 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem59 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_31.addItem(spacerItem59)
         
         # set central text, indicating the functionality of the page
@@ -385,15 +436,18 @@ class MenuFrame(QtWidgets.QFrame):
         self.label_settings_3.setObjectName("label_settings_3")
         horizontalLayout_31.addWidget(self.label_settings_3)
         
-        spacerItem60 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem60 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_31.addItem(spacerItem60)
         
-        spacerItem61 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem61 = QtWidgets.QSpacerItem(7, 20, QtWidgets.QSizePolicy.Fixed, 
+                                             QtWidgets.QSizePolicy.Minimum)
         horizontalLayout_31.addItem(spacerItem61)
         
         # create the menu button
         self.btn_menu = QtWidgets.QPushButton(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btn_menu.sizePolicy().hasHeightForWidth())

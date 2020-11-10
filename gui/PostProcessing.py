@@ -3,107 +3,67 @@
 import numpy as np
 import cv2
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing.image import load_img, img_to_array # check if t works, otherwise only keras
 from skimage.feature import peak_local_max
 from skimage.transform import resize
 from scipy.optimize import linear_sum_assignment
 
+""" Functions and classes necessary for post processing. """
 
-# def loadNn(path):
-#     if os.path.isfile(path):
-#         return tf.keras.models.load_model(path)
-#     else:
-#         return None
+def rectifyAndMatch(matcher, camera_config, left_image_path, right_image_path, objects_left):   
+    """
+    Function to rectify images and find corresponding animals on the right image.
 
-# def loadImage(fname, factor=64):
-#     "Loads an image as a h*w*3 numpy array in [-1, 1]"
-
-#     img = img_to_array(load_img(fname), dtype="uint8")
-    
-#     # if image is still large, downscale it by 25%
-#     #from PIL import Image, ImageEnhance, ImageOps
-#     #from skimage.transform import resize
-#     if img.shape[0] > 2500:
-#         img = resize(img, (img.shape[0]*0.25, img.shape[1]*0.25))
-
-#     print(f"image before {img.shape}")
-#     rest_x, rest_y = img.shape[0]%factor, img.shape[1]%factor
-#     if rest_x != 0:
-#         img = np.pad(img, ((0,factor-rest_x),(0, 0),(0,0)), 'constant', 
-#                      constant_values=0)
-#     if rest_y != 0:        
-#         img = np.pad(img, ((0,0),(0, factor-rest_y),(0,0)), 'constant', 
-#                      constant_values=0)
-       
-#     # image needs to be in [-1,1]
-#     img = np.asarray(img)
-#     img = 2.*img/np.max(img) - 1
-#     print(f"image after {img.shape}")
-#     return img
-
-# def applyNnToImage(model, image):
-#     # predicted heatmap
-#     X = np.expand_dims(image, axis=0)
-#     yHat = model.predict(X)
-#     return yHat
-
-# def applyThresholdToHm(image, threshold=50):
-#     img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
-#     return img_thr
-
-# def nonMaxSuppression(image, min_distance=20):
-#     coordinates = peak_local_max(image, min_distance=min_distance)
-#     return coordinates
-    
-# def resizeHm(img, hm):
-#     factor = img.shape[0]//hm.shape[0]
-    
-#     hmResized = np.repeat (hm, factor, axis=0) # y
-#     hmResized = np.repeat (hmResized, factor, axis=1) #x
-#     hmResized = np.clip (hmResized*2, 0, 1)
-#     hmResized = hmResized[:, :, np.newaxis]
+    Parameters
+    ----------
+    matcher : StereoCorrespondence
+        Object to perform the stereo matching.
+    camera_config : loaded json
+        Confugration of the camera.
+    left_image_path : string
+        Path to left image.
+    right_image_path : string
+        Path to right image.
+    objects_left : list<list<int>>
+        One entry depicts the group, head and tail positions of one animal
+        on the left image.
         
-#     # print(f"hmresized shape {hmResized.shape}")
-#     # if img.dtype =="uint8":
-#     #     img = img//2 + (128*exaggerate*hmResized).astype(np.uint8)
-#     # else:
-#     #     img = ((img+1)*64 + 128*exaggerate*hmResized).astype(np.uint8)
-#     #plt.imshow(hmResized)
+    Returns
+    -------
+    merged_objects : list<list<int>>
+        One entry depicts the group, head and tail positions of one animal
+        on the left and right image.
 
-# def findCoordinates(heatmap):
-#     thr = applyThresholdToHm(heatmap, 50)
-#     coordinates = nonMaxSuppression(thr, 20)
-    
-#     # remove coordinates whose x and y are closer than 5px
-#     df = pd.DataFrame(coordinates)
-#     df = df.sort_values(0, ignore_index=True)
-    
-#     final_coords = []
-#     final_coords.append(df.iloc[0])  
-#     for i in range(1, len(df)):
-#         if abs(df.iloc[i][0] - df.iloc[i-1][0]) > 5 \
-#         or abs(df.iloc[i][1] - df.iloc[i-1][1]) > 5:
-#              final_coords.append(df.iloc[i])  
-             
-#     final_coords = pd.DataFrame(final_coords).to_numpy()
-    
-#     return final_coords
-
-
-def rectifyAndMatch(matcher, camera_config, left_image_path, right_image_path, objects_left):    
+    """
     image_L = img_to_array(load_img(left_image_path), dtype="uint8")
     image_R = img_to_array(load_img(right_image_path), dtype="uint8")
     
     merged_objects, img_stereo_debug = \
         matcher.matchCorrespondences(image_L, image_R, objects_left, [])
         
-    plt.imshow(img_stereo_debug)
-    plt.show()
-    #undistortPoints with inverted matrices P and R as parameters (to get normal coordinates?)
     return merged_objects
 
 def measureLength(distance_measurer, camera_config, merged_objects):
+    """
+    Measures the length of an animal by stereo calculations performed by 
+    distance_measurer. 
+
+    Parameters
+    ----------
+    distance_measurer : DistanceMeasurer
+        Performs the length calculations.
+    camera_config : loaded json
+        Confugration of the camera.
+    merged_objects : list<list<int>>
+        One entry depicts the group, head and tail positions of one animal
+        on the left and right image.
+
+    Returns
+    -------
+    distances : list<float>
+        List of measurments of animal length.
+    """
     #calculate distances by triangulation 
     if len(merged_objects) != 0:
         #Stereo triangulation
@@ -118,7 +78,7 @@ def measureLength(distance_measurer, camera_config, merged_objects):
 
 
 class StereoCorrespondence():
-    """finder of corresponding objects in stereo image0 and image1
+    """ Finder of corresponding objects in stereo image0 and image1
     stereo rectifies the images by given calibrations.
     Get positions of objects in img0, also rectifies them and get the epilines 
     in img1.
@@ -128,7 +88,7 @@ class StereoCorrespondence():
 
     Implemented by Timo Jasper in his Bachelor thesis 'Erkennen und Vermessen 
     von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz' 
-    (2019)
+    (2019). Functions distortPoint and undistortPoint are added for this program.
     """
     def __init__(self, c_L, d_L, c_R, d_R, rotation, translation, img_size):
         self.c_L = np.array(c_L)
@@ -157,7 +117,7 @@ class StereoCorrespondence():
         self.map_R1, self.map_R2 = cv2.initUndistortRectifyMap(self.c_R, self.d_R, self.R2, self.P2, img_size, m1type=cv2.CV_32FC2)
        
     def distortPoint(self, point, lr="L"):
-        """Redistort undistorted point """
+        """Redistort undistorted point. """
         x = np.int64(point[0])
         y = np.int64(point[1])
         
@@ -174,7 +134,7 @@ class StereoCorrespondence():
         return [distorted_x, distorted_y]
     
     def undistortPoint(self, point, lr="L"):
-        """Undistort point """
+        """Undistort a point. """
         rectified = [0,0]
         if lr == "L":
             rectified = cv2.undistortPoints(np.expand_dims([point], 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
@@ -360,14 +320,17 @@ def applyNnToImage(model, image):
     return yHat
 
 def applyThresholdToHm(image, threshold=50):
+    """ Sets all pixels below the given threshold value to zero. """
     img_thr = cv2.threshold(image, threshold, 255, cv2.THRESH_TOZERO)[1]
     return img_thr
 
 def nonMaxSuppression(image, min_distance=20):
+    """ Finds local maxima. """
     coordinates = peak_local_max(image, min_distance=min_distance)
     return coordinates
     
 def resizeHm(img, hm):
+    """ Resizes a heatmap to the size of a given image. """
     factor = img.shape[0]//hm.shape[0]
     
     hmResized = np.repeat (hm, factor, axis=0) # y
@@ -378,6 +341,8 @@ def resizeHm(img, hm):
     return hmResized
 
 def findCoordinates(heatmap, threshold=50, radius=20):
+    """ Applies a threshold and performs non-maximum supproession to 
+    extract coordinates from heatmaps. """
     thr = applyThresholdToHm(heatmap, threshold)
     #plt.imshow(thr)
     #plt.show()
@@ -408,12 +373,24 @@ def findCoordinates(heatmap, threshold=50, radius=20):
     return final_coords
 
 def weightedEuclidean(x, y):
+    """ Euclidean distance formula weighted by a in x-direction and by b in 
+    y-direction. """
     a = 0.54 # put more weight on x-error
     b = 0.46 
     return np.sqrt(a*x*x + b*y*y)
 
 
 def findHeadTailMatches(heads, tails):
+    """ Finds matching heads and tails by optimizing distances using the 
+    weighted Euclidean distance measure.
+    
+    Parameters
+    -----------
+    heads: list<tuple<int>>
+        A list of animal head positions.
+    tails: list<tuple<int>>
+        A list of animal tail positions.
+    """
     ht_distances = []
     
     # calculate distance from every head to every tail
@@ -435,6 +412,25 @@ def findHeadTailMatches(heads, tails):
     return matches 
 
 def scaleMatchCoordinates(matches, input_res, output_res):
+    """
+    Scales coordinates from an image with input_resolution to an image with 
+    output_resolution
+
+    Parameters
+    ----------
+    matches : list<list<int>>
+        One entry depicts the group, head and tail positions of one animal
+        on the left and right image.
+    input_res : TYPE
+        Input resolution.
+    output_res : TYPE
+        Target resolution.
+
+    Returns
+    -------
+    ndarray
+        List with scaled coordinates.
+    """
     xfactor = output_res[0]/input_res[0]
     yfactor = output_res[1]/input_res[1]
     
@@ -444,9 +440,4 @@ def scaleMatchCoordinates(matches, input_res, output_res):
              [m[1][0]*xfactor, m[1][1]*yfactor]] # scale tail
         scaled_matches.append(m)
     
-    return np.array(scaled_matches)
-
-def exportAnimalsToCsv():
-    pass   
-    
-    
+    return np.array(scaled_matches)    

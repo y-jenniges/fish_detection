@@ -6,7 +6,7 @@ Implemented by Timo Jasper in his Bachelor thesis 'Erkennen und Vermessen
 von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz' (2019)
 """
 class DistanceMeasurer():
-    """calculator for distances between points in calibrated stereo-camera images"""
+    """ Calculator for distances between points in calibrated stereo-camera images"""
     def __init__(self, c_L, d_L, c_R, d_R, rotation, translation, img_size):
         self.c_L = np.array(c_L)
         self.d_L = np.array(d_L)
@@ -27,7 +27,7 @@ class DistanceMeasurer():
     
         
     def distances(self, img_points_L0, img_points_L1, img_points_R0, img_points_R1):
-        """ get points in image space with shape Nx2
+        """ Get points in image space with shape Nx2
         return distances of given points in image space
         if positions in one of the images are 0, return "NaN" as that distance
         """

@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-
+""" Second window of MarOMarker displaying the current data table. """
 
 class TableWindow(QtWidgets.QMainWindow):
     """

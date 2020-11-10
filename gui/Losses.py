@@ -1,18 +1,27 @@
-from keras import backend as K
+from tensorflow.keras import backend as K
+"""
+Module containing custom losses. 
+"""
 
 def weighted_categorical_crossentropy(weights):
     """
     A weighted version of keras.objectives.categorical_crossentropy
     
-    Variables:
-        weights: numpy array of shape (C,) where C is the number of classes
-    
     Usage:
-        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the normal weights, class 3 10x.
+        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the 
+        normal weights, class 3 10x.
         loss = weighted_categorical_crossentropy(weights)
         model.compile(loss=loss,optimizer='adam')
+    
     Taken from:
         https://gist.github.com/wassname/ce364fddfc8a025bfab4348cf5de852d
+        (last access: 08.10.2020)
+    
+    Parameters
+    ----------
+    weights: ndarray 
+        The numpy array has shape (C,) where C is the number of classes.
+        It contains one weight per class. 
     """
     
     weights = K.variable(weights)
@@ -20,9 +29,10 @@ def weighted_categorical_crossentropy(weights):
     def loss(y_true, y_pred):
         # scale predictions so that the class probas of each sample sum to 1
         y_pred /= K.sum(y_pred, axis=-1, keepdims=True)
+        
         # clip to prevent NaN's and Inf's
         y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
-        # calc
+    
         loss = y_true * K.log(y_pred) * weights
         loss = -K.sum(loss, -1)
         return loss

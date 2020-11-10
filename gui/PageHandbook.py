@@ -1,20 +1,22 @@
 from PyQt5 import QtWidgets
 from Helpers import TopFrame, MenuFrame
-import time
 
 
 class PageHandbook(QtWidgets.QWidget):
     """
-    Class to create the handbook page of the software.
+    !!! NOT IMPLEMENTED YET !!!
+    
+    Class to create the handbook page of the software. Here, knowledge about
+    species, their appearance, characteristics, etc. can be collected. 
     """
     def __init__(self, parent=None):
         super(QtWidgets.QWidget, self).__init__(parent)
            
         # init UI and actions
-        self.init_ui()
-        self.init_actions()
+        self._initUi()
+        self._initActions()
  
-    def init_ui(self):
+    def _initUi(self):
         # set widget property
         self.setObjectName("page_handbook")
         
@@ -40,5 +42,5 @@ class PageHandbook(QtWidgets.QWidget):
         self.layout_page_handbook.addWidget(self.frame_controlBar)
         self.layout_page_handbook.addWidget(self.frame_handbook)        
         
-    def init_actions(self):
+    def _initActions(self):
         pass

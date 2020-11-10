@@ -44,32 +44,16 @@ class Models():
     Attributes
     ----------
     model_group : QStandardItemModel
-        model for the possible groups an animal can belong to
+        Model for the possible groups an animal can belong to
     model_species : QStandardItemModel
-        model for the possible species an animal can belong to
+        Model for the possible species an animal can belong to
     model_animal_remarks : QStandardItemModel
-        model for the possible reamrks for animals
+        Model for the possible remarks for animals
     model_image_remarks : QStandardItemModel
-        model for the possible remarks for images
+        Model for the possible remarks for images
     model_animals : TableModel
-        model for the underlying data, i.e. the table containing information
+        Model for the underlying data, i.e. the table containing information
         about animals on images
-
-    Methods
-    -------
-    addImageRemark(remark):
-        add a renark to the image remark model
-    addAnimalRemark(remark):
-        add a remark to the animal remark model
-    addSpecies(species, page_settings):
-        add a species to the species model and adapt the species list on the
-        settings page
-    removeSpecies(row):
-        removes a row from the species model
-    saveCurrentValues(settings):
-        save some values in settings for restorage on program restart
-    restoreValues(settings):
-        restore the previously saved settings
     """
     
     def __init__ (self):  
@@ -121,7 +105,7 @@ class Models():
         Parameters
         ----------
         remark : string
-            remark to add
+            Remark to add
         """
         if remark is not None and str(remark) != "nan":
             same_remarks = self.model_image_remarks.findItems(str(remark))
@@ -139,7 +123,7 @@ class Models():
         Parameters
         ----------
         remark : string
-            remark to add
+            Remark to add
         """
         if remark is not None and str(remark) != "nan":
             same_remarks = self.model_animal_remarks.findItems(str(remark))
@@ -157,9 +141,9 @@ class Models():
         Parameters
         ----------
         species : string
-            species to add
+            Species to add
         image_path: string
-            path to the image showing the species. Default is ""
+            Path to the image showing the species. Default is ""
         """
         if species is not None and str(species) != "nan":
             same_species = self.model_species.findItems(str(species))
@@ -190,7 +174,7 @@ class Models():
         Parameters
         ----------
         row : int
-            row to remove
+            Row to remove
         """
         title = self.model_species.item(row).text()
 
@@ -208,7 +192,7 @@ class Models():
         Parameters
         ----------
         settings : QSettings
-            settings variable to store the values in
+            Settings variable to store the values in
         """
         settings.setValue("dictSpecies", self._dict_species)       
 
@@ -220,7 +204,7 @@ class Models():
         Parameters
         ----------
         settings : QSettings
-            settings variable to restore the values from
+            Settings variable to restore the values from
         """
         species = settings.value("dictSpecies")
         if species is not None:
@@ -234,35 +218,13 @@ class TableModel(QtCore.QAbstractTableModel):
     A custom data model for tables in the pandas DataFrame format.
     
     Adapted from: 
-        https://stackoverflow.com/questions/17697352/pyqt-implement-a-qabstracttablemodel-for-display-in-qtableview
+    https://stackoverflow.com/questions/17697352/pyqt-implement-a-qabstracttablemodel-for-display-in-qtableview
     (last access: 07.09.2020)
     
     Attributes
     ----------
     data : DataFrame
-        the current data table
-
-    Methods
-    -------
-    update(new_data):
-        sets the data to new_data
-    rowCount(parent=QModelIndex()):
-        returns the number of rows of the current data table
-    columnCount(parent=QModelIndex()):
-        returns the number of columns of the current data table
-    data(index, role=DisplayRole):
-        returns data at index for the given role
-    headerData(section, orientation, role=DisplayRole):
-        returns the names in the header of the table
-    insertRows(row, count, animals, image_path, image_remark, experiment_id, 
-               user_id, parent=QModelIndex()):
-        inserts count rows into the table before the given row
-    removeRows(row, count, parent=QModelIndex()):
-        removes count rows from the table starting with the given row
-    sort(column, order=AscendingOrder):
-        sorts the data by column in the given order
-    exportToCsv(output_dir, file_id=None, out_file_path=None):
-        exports the data to a CSV file
+        The current data table
     """
     
     def __init__(self, data, parent=None):
@@ -272,9 +234,9 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         data : DataFrame
-            the data to initalize the model with
+            The data to initalize the model with
         parent : optional
-            the default is None
+            The default is None
         """
         super(TableModel, self).__init__()
         self.data = data
@@ -286,7 +248,7 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         new_data : DataFrame
-            data table to override the old data
+            Data table to override the old data
         """
         self.data = new_data
         
@@ -301,12 +263,12 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         parent : optional
-            the default is QtCore.QModelIndex()
+            The default is QtCore.QModelIndex()
 
         Returns
         -------
         int
-            number of rows
+            Number of rows
         """
         if self.data is not None:
             return len(self.data.index) 
@@ -321,12 +283,12 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         parent : optional
-            the default is QtCore.QModelIndex()
+            The default is QtCore.QModelIndex()
 
         Returns
         -------
         int
-            number of columns
+            Number of columns
         """
         if self.data is not None:
             return len(self.data.columns.values) 
@@ -340,14 +302,14 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         index : QModelIndex
-            index of the data to be obtained
+            Index of the data to be obtained
         role : int, optional
-            the default is QtCore.Qt.DisplayRole
+            The default is QtCore.Qt.DisplayRole
 
         Returns
         -------
         object
-            requested data chunk
+            Requested data chunk
         """
         if role == QtCore.Qt.DisplayRole:
             i = index.row()
@@ -365,16 +327,16 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         section : int
-            column/row number for horizontal/vertical headers
+            Column/row number for horizontal/vertical headers
         orientation : Orientation
-            the orientation of the table, i.e. horizontal or vertical
+            The orientation of the table, i.e. horizontal or vertical
         role : int, optional
-            the default is QtCore.Qt.DisplayRole
+            The default is QtCore.Qt.DisplayRole
 
         Returns
         -------
         columns : list<string>
-            list of the column/row names (depending on the orienation)
+            List of the column/row names (depending on the orienation)
         """
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
@@ -401,30 +363,29 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         row : int
-            insert new rows before this one
+            Insert new rows before this one
         count : int
-            number of rows to be inserted
+            Number of rows to be inserted
         animals : list<Animal>
-            animal information to be stored in the CSV file
+            Animal information to be stored in the CSV file
         image_path : string
-            path to the current image
+            Path to the current image
         image_remark : string
-            remark for the current image
+            Remark for the current image
         experiment_id : string
             ID of the experiment the current image belongs to
         user_id : string
             ID of the currently working user
         parent : TYPE, optional
-            DESCRIPTION. The default is QtCore.QModelIndex().
+            Parent object. The default is QtCore.QModelIndex().
 
         Returns
         -------
         bool
-            returns True when rows are inserted
+            Returns True when rows are inserted
         """
         self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
-            print("new row")
             new_row = self._create_row(animals[i], image_path, image_remark, 
                                        experiment_id, user_id)
             self.data = self.data.append(new_row)    
@@ -458,12 +419,12 @@ class TableModel(QtCore.QAbstractTableModel):
         user_id : string
             ID of the currently working user
         parent : TYPE, optional
-            DESCRIPTION. The default is QtCore.QModelIndex().
+            Parent object. The default is QtCore.QModelIndex().
 
         Returns
         -------
         bool
-            returns True when rows are inserted
+            Returns True when rows are inserted
         """
         self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
@@ -483,11 +444,11 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         row : int
-            first row to be removed
+            First row to be removed
         count : int
-            number of rows to be removed
+            Number of rows to be removed
         parent : optional
-            the default is QtCore.QModelIndex()
+            The default is QtCore.QModelIndex()
         """
         self.beginRemoveRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
@@ -502,9 +463,9 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         column : string
-            column name
+            Column name
         order: SortOrder, optional
-            order to sort by. The default it AscendingOrder.
+            Order to sort by. The default it AscendingOrder.
         """
         asc = True if order==QtCore.Qt.AscendingOrder else False
         self.data = self.data.sort_values(by=[column], ascending=asc)
@@ -519,9 +480,9 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         output_dir : string
-            path to the output directory
+            Path to the output directory
         filename : string
-            name of the output file.
+            Name of the output file.
         file_id : string, optional
             ID of the current image. The default is None.
         """
@@ -560,6 +521,7 @@ class TableModel(QtCore.QAbstractTableModel):
             self.data.to_csv(path, sep=",", index=False)
     
     def getColumns(self):
+        """ Returns a list of the column names. """
         return ["file_id", "object_remarks", "group", "species", 
                 "LX1", "LY1", "LX2", "LY2", "LX3", "LY3", "LX4", "LY4", 
                 "RX1", "RY1", "RX2", "RY2", "RX3", "RY3", "RX4", "RY4",
@@ -567,6 +529,7 @@ class TableModel(QtCore.QAbstractTableModel):
                 "manually_corrected", "experiment_id", "user_id"]
     
     def loadFile(self, path):
+        """ Reads data from a file and updates the data model with it. """
         if os.path.isfile(path):
             data = pd.read_csv(path, sep=",")
             if (data.columns == self.getColumns()).all():
@@ -575,6 +538,7 @@ class TableModel(QtCore.QAbstractTableModel):
                 print("TableModel: Cannot load file due to incorrect columns.")
                 
     def isEmpty(self):
+        """ Displays an error message if data model is empty. """
         if self.data is None:
             Helpers.displayErrorMsg("No output directory or file", 
                             "Please select an output directory on data page.", 
@@ -592,11 +556,11 @@ class TableModel(QtCore.QAbstractTableModel):
         Parameters
         ----------
         animal : Animal
-            animal described in the new dataframe row
+            Animal described in the new dataframe row
         image_path : string
-            path to the image on which the animal is found
+            Path to the image on which the animal is found
         image_remark : string
-            remark to the image on which the animal is found
+            Remark to the image on which the animal is found
         experiment_id : string
             ID of the experiment during which the image was created
         user_id : string
@@ -605,7 +569,7 @@ class TableModel(QtCore.QAbstractTableModel):
         Returns
         -------
         new_row: DataFrame
-            new row for the data
+            New row for the data
         """
         # get file ID
         file_id = os.path.basename(image_path)[:-6]

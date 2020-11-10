@@ -14,22 +14,13 @@ class PageSettings(QtWidgets.QWidget):
     
     Attributes
     ----------
-    @todo 
-    frame_top_bar : TopFrame
-        frame at the top of the window to display user ID and an icon
-    frame_control_bar : MenuFrame
-        frame below the top bar to display controls of the page and the menu
-    label_about_text : string
-        text for the about page
-        
-    Methods
-    -------
-    info(additional=""):
-        Prints the person's name and age.
-        
+    userIdChanged : pyqtSignal
+    nn_model : keras model
+        Neural network model used for the predictions.
     """
     # create custom signals 
     userIdChanged = QtCore.pyqtSignal(str)
+    """ Signal emitted when the user ID is changed. """
         
     def __init__(self, models, parent=None):
         """
@@ -250,10 +241,10 @@ class PageSettings(QtWidgets.QWidget):
         self.tabWidget.setObjectName("tabWidget")
         
         # define tabs
-        self.tab_camera = self.createTabCamera() # tab for camera settings
-        self.tab_neuralNet = self.createTabNeuralNetwork() # tab for neural net
-        self.tab_species = self.createTabSpecies() # tab for species    
-        self.tab_user = self.createTabUser() # tab for user settings
+        self.tab_camera = self._createTabCamera() # tab for camera settings
+        self.tab_neuralNet = self._createTabNeuralNetwork() # tab for neural net
+        self.tab_species = self._createTabSpecies() # tab for species    
+        self.tab_user = self._createTabUser() # tab for user settings
         
         # add tabs to tab widget
         self.tabWidget.addTab(self.tab_camera, Helpers.getIcon(":/icons/icons/camera.png"), "")
@@ -270,7 +261,8 @@ class PageSettings(QtWidgets.QWidget):
         self.layout_page_settings.addWidget(self.frame_control_bar)
         self.layout_page_settings.addWidget(self.frame_settings)
     
-    def createTabCamera(self):
+    def _createTabCamera(self):
+        """ Creates the UI of the camera settings tab. """
         # --- main frame (whole tab) ---------------------------------------- #
         tab_camera = QtWidgets.QWidget(self)
         tab_camera.setObjectName("tab_camera")
@@ -529,7 +521,8 @@ class PageSettings(QtWidgets.QWidget):
         
         return tab_camera
         
-    def createTabNeuralNetwork(self):
+    def _createTabNeuralNetwork(self):
+        """ Creates the UI of the neural network settings tab. """
         # --- main frame (whole tab) ---------------------------------------- #
         tab_neuralNet = QtWidgets.QWidget(self)
         tab_neuralNet.setObjectName("tab_neuralNet")
@@ -626,7 +619,8 @@ class PageSettings(QtWidgets.QWidget):
         
         return tab_neuralNet
            
-    def createTabSpecies(self):
+    def _createTabSpecies(self):
+        """ Creates the UI of the species settings tab. """
         # --- main frame (whole tab) ---------------------------------------- #
         tab_species = QtWidgets.QWidget(self)
         tab_species.setObjectName("tab_species")
@@ -703,7 +697,8 @@ class PageSettings(QtWidgets.QWidget):
  
         return tab_species
 
-    def createTabUser(self):
+    def _createTabUser(self):
+        """ Creates the UI of the user settings tab. """
         # --- main frame (whole tab) ---------------------------------------- #
         tab_user = QtWidgets.QWidget(self)
         tab_user.setObjectName("tab_user")
@@ -800,8 +795,8 @@ class PageSettings(QtWidgets.QWidget):
         
         return tab_user
 
-
     def _initActions(self):
+        """ Initalizes the actions triggered by user interactions. """
         # camera tab      
         self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
         self.btn_load.clicked.connect(self.browse_config)
@@ -820,19 +815,22 @@ class PageSettings(QtWidgets.QWidget):
         
         # user tab
         self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
-        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())
-             
+        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())            
                 
 # --- actions in camera tab ------------------------------------------------- #        
     def camera_spinBox_changed(self):
+        """ Empties the config file path when one of the spinboxes is changed. """
         # remove file path (it is not valid for the new spinBox values anymore)
         self.lineEdit_config_path.setText("")
 
     def browse_config(self):
+        """ Opens an explorer window with the option to browse for CSV files. """
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
         self.apply_configFile(filename[0])
    
     def apply_configFile(self, path):
+        """ Check if the given path contains a valid config file and update 
+        the values on th GUI accordingly. """
         # check if path is valid
         if path != "" and os.path.isfile(path): 
             df = pd.read_csv(path)
@@ -856,12 +854,17 @@ class PageSettings(QtWidgets.QWidget):
                 msg = QtWidgets.QMessageBox()
                 msg.setIcon(QtWidgets.QMessageBox.Critical)
                 msg.setText("File Format Error")
-                msg.setInformativeText('The given CSV file is not in the required format. Please make sure that it has the following columns with the correct data types:\n   "y-offset" (int64) \n   "camera-distance" (float64) \n   "chip-distance" (int64)')
+                msg.setInformativeText(
+                    "The given CSV file is not in the required format. Please "+\
+                    "make sure that it has the following columns with the correct "+\
+                    "data types:\n   'y-offset' (int64) \n   'camera-distance' (float64) \n   'chip-distance' (int64)")
                 msg.setWindowTitle("Error")
                 msg.exec_()  
             
         
     def check_config_format(self, df_config):
+        """ Checks if the necessary columns are present in the given camera
+        config dataframe. """
         # check if the necessary columns are present in the dataframe
         if "y-offset" in df_config.columns \
         and "camera-distance" in df_config.columns \
@@ -871,21 +874,25 @@ class PageSettings(QtWidgets.QWidget):
             return False
         
     def save_config(self):
+        """ Opens a 'Save file' dialogue to save the current settings of the
+        camera configuration in a file. """
         # create the file dialog
         dialog = QtWidgets.QFileDialog()
-        filename = dialog.getSaveFileName(self, 'Save File', filter="*.csv")
+        filename = dialog.getSaveFileName(self, 'Save file', filter="*.csv")
         
         # fill the dataframe and write it
-        data = {"y-offset": [self.spinBox_offset.value()], "camera-distance": [self.spinBox_distance_cameras.value()], "chip-distance": [self.spinBox_distance_chip_lense.value()]}
+        data = {"y-offset": [self.spinBox_offset.value()], 
+                "camera-distance": [self.spinBox_distance_cameras.value()], 
+                "chip-distance": [self.spinBox_distance_chip_lense.value()]}
         df = pd.DataFrame(data)  
         df.to_csv(filename[0], index=False)
 
         # update the lineEdit
         self.lineEdit_config_path.setText(filename[0])
-        
-        
+          
 # --- actions in nn tab ----------------------------------------------------- #   
     def nn_path_changed(self, model_path):
+        """ Loads the neural network specified by the given path. """
         print("load model...")
         if not self.parent().parent().page_data.predicter.loadNeuralNet(model_path):
             # if loading of neural net was not successfull,
@@ -896,6 +903,7 @@ class PageSettings(QtWidgets.QWidget):
             self.lineEdit_nn.blockSignals(False)
                 
     def browse_for_nn(self):
+        """ Opens explorer to search for a neural network. """
         filename = QtWidgets.QFileDialog.getOpenFileName()
         path = filename[0]
         
@@ -905,14 +913,18 @@ class PageSettings(QtWidgets.QWidget):
         
 # --- actions in species tab ------------------------------------------------ #
     def browse_for_species_image(self):
+        """ Open a file dialogue to open an image of a species. It's title 
+        will be used as name for the species. """
         filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
         self.addSpecies(filename[0])
           
     def removeSpecies(self):
+        """ Remove a species from the data model. """
         row = self.listView_species.currentIndex().row()
         self.models.removeSpecies(row)
         
     def addSpecies(self, image_path, text=None):
+        """ Add a species to the data model. """
         # take text as title or the image name
         if text is None:
             text = os.path.basename(image_path).split('.')[0]
@@ -921,16 +933,19 @@ class PageSettings(QtWidgets.QWidget):
 
 # --- actions in user tab --------------------------------------------------- #  
     def user_id_changed(self):
+        """ Emit the userIdChanged signal when the user lineEdit is changed. """
         self.userIdChanged.emit(self.lineEdit_user_id.text())
 
 
 # --- functions for saving and restoring options ---------------------------- # 
     def saveCurrentValues(self, settings):       
+        """ Saves the current camera settings in the given settings object. """
         settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
         settings.setValue("nnPath", self.lineEdit_nn.text()) 
         settings.setValue("userId", self.lineEdit_user_id.text())
 
     def restoreValues(self, settings):
+        """ Restores settings from previous session. """
         self.apply_configFile(settings.value("cameraConfigPath"))
         self.lineEdit_nn.setText(settings.value("nnPath"))
         self.lineEdit_user_id.setText(settings.value("userId"))

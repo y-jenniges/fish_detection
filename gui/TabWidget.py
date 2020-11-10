@@ -1,5 +1,6 @@
 """
-This module implementaion was taken from 
+This module provides a custom tab widget that enables tabs on the side with 
+vertical text. The implementaion was taken from 
 https://www.manongdao.com/q-367474.html (last access: 11.08.2020)
 """
 from PyQt5 import QtCore, QtWidgets

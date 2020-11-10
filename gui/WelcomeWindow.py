@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 import Helpers
-
+""" Module for displaying content to first-time users. """
 
 class WelcomeWindow(QtWidgets.QMainWindow):
     """

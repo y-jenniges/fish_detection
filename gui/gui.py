@@ -1,3 +1,14 @@
+import time
+import os
+from PyQt5 import QtCore, QtGui, QtWidgets
+from Models import Models
+import PageHome
+import PageSettings
+import PageAbout
+import PageData
+#import PageHandbook
+from TableWindow import TableWindow
+from WelcomeWindow import WelcomeWindow
 """
 MarOMarker is a program for the semi-automatic annotation and 
 measurement of marine organisms on stereoscopic images. 
@@ -18,25 +29,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Cou can contact me by yvonne.jenniges@gmx.de
 """
-import time
-import os
-from PyQt5 import QtCore, QtGui, QtWidgets
-from Models import Models
-import PageHome
-import PageSettings
-import PageAbout
-import PageData
-#import PageHandbook
-from TableWindow import TableWindow
-from WelcomeWindow import WelcomeWindow
 
 
 class MarOMarker_MainWindow(QtWidgets.QMainWindow):
     """ 
     Main window class for MarOMarker. 
-    Remark: The stylesheets are partly taken and adapted from QT stylesheet 
-    examples accessible at https://doc.qt.io/qt-5/stylesheet-examples.html
-    (last access 15.10.2020)
+    
+    Remark: 
+        The stylesheets are partly taken and adapted from QT stylesheet 
+        examples accessible at https://doc.qt.io/qt-5/stylesheet-examples.html
+        (last access 15.10.2020)
+        
+    Attributes
+    -----------
+    settings : QSettings
+        Used to store program settings for the next session. 
+    models : Models
+        Data models necessary for the workflow. 
+    page_home : PageHome
+        Home page of the software. 
+    page_data : PageData
+        Data page of the software.
+    page_settings : PageSettings
+        Settings page of the software.
+    page_about : PageAbout
+        About page of the software.
     """
     
     def __init__(self):
@@ -570,12 +587,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         Parameters
         ----------
         isInProgress : bool, optional
-            indicates if the image editing is finished or not. The default is True.
+            Indicates if the image editing is finished or not. The default is True.
 
         Returns
         -------
         name : string
-            name of the result file.
+            Name of the result file.
 
         """
         if hasattr(self, 'page_data'):
@@ -604,11 +621,11 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_data.outputDirectoryChanged.connect(self.onOutDirChanged)
     
         # connect menu buttons
-        self.appendMainMenuToButton(self.page_home.btn_menu)
-        self.appendMainMenuToButton(self.page_data.frame_controlBar.btn_menu)
-        self.appendMainMenuToButton(self.page_settings.frame_control_bar.btn_menu)
-        self.appendMainMenuToButton(self.page_about.frame_control_bar.btn_menu)
-        #self.appendMainMenuToButton(self.page_handbook.frame_controlBar.btn_menu)
+        self._appendMainMenuToButton(self.page_home.btn_menu)
+        self._appendMainMenuToButton(self.page_data.frame_controlBar.btn_menu)
+        self._appendMainMenuToButton(self.page_settings.frame_control_bar.btn_menu)
+        self._appendMainMenuToButton(self.page_about.frame_control_bar.btn_menu)
+        #self._appendMainMenuToButton(self.page_handbook.frame_controlBar.btn_menu)
 
     def updateUserIds(self, value):    
         """
@@ -659,11 +676,11 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """ Directs to about page. """
         self.stackedWidget.setCurrentIndex(3)
         
-    def onExitButton(self):
+    def _onExitButton(self):
         """ Closes the program. """
         self.close()
         
-    def appendMainMenuToButton(self, btn):
+    def _appendMainMenuToButton(self, btn):
         """
         Appends the menu to a given button. 
 
@@ -679,7 +696,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         menu.addAction("Settings", self.directToSettingsPage)
         #menu.addAction("Handbook", self.directToHandbookPage)
         menu.addAction("About", self.directToABoutPage)
-        menu.addAction("Exit", self.onExitButton)
+        menu.addAction("Exit", self._onExitButton)
         
         # set the menu style
         menu.setStyleSheet("QMenu{background-color: rgb(200, 200, 200); "
