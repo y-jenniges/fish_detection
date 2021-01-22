@@ -47,11 +47,8 @@ Please make sure that you select a date AND and output directory when starting
 a session. There is no error message yet preventing from usage if one of the 
 settings is not set. This might cause a program crash.
 
-As neural network, you can use one of the following (located in Output/):  \
-  - highRes_allAnimals_0
-  - highRes_allAnimals_1
-  - highRes_allAnimals_weighted_0
-  - highRes_allAnimals_weighted_1
+As neural network, you can use one of the highRes networks.
+
 
 ### Example Usage 
 The folder **MarOMarker/example_usage** contains the files used for the final 
