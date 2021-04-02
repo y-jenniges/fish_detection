@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import math
 from Animal import Animal, AnimalSpecificationsWidget
-from Models import AnimalGroup
+from Models import AnimalGroup, AnimalSpecies
 from Helpers import getIcon, displayErrorMsg
 
       
@@ -635,6 +635,10 @@ class AnimalPainter():
         # coordinates)
         self.original_img_width = 0
         self.original_img_height = 0
+        
+        # remember the group and species of the most recently adapted animal
+        self._previous_group = AnimalGroup.UNIDENTIFIED
+        self._previous_species = AnimalSpecies.UNIDENTIFIED
     
     def setAnimalRemark(self, remark):
         """ Sets the remark of the currently active animal. """
@@ -645,12 +649,16 @@ class AnimalPainter():
         """ Sets the species of the currently active animal. """
         if self.cur_animal is not None:
             self.cur_animal.setSpecies(species)
+            self._previous_species = species
             
     def setAnimalGroup(self, group):
         """ Sets the group of the currently active animal and adapts the 
         visuals accordingly. """
         if self.cur_animal is not None:
             self.cur_animal.setGroup(group) 
+            
+            # use this group for animals that are added after this animal
+            self._previous_group = group
             
             # update drawing
             self.cur_animal.head_item_visual.setPixmap(self.cur_animal._pixmap_head)
@@ -664,6 +672,7 @@ class AnimalPainter():
             self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
+            
      
     def redraw(self):
         """ Redraws all animals on the current image. """
@@ -912,17 +921,27 @@ class AnimalPainter():
                     self.imageArea._scene.removeItem(animal.tail_item_visual)
                     self.imageArea._scene.removeItem(animal.line_item_visual)
                     
-                    # remove animal from list and data model if on left image
-                    if self.image_ending == "*_L.jpg":
+                    # if the animal has left and right coordinates, only 
+                    # delete coordinates of the current image (left OR right)
+                    if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 and \
+                        self.models.model_animals.data.loc[animal.row_index, "LX1"] != -1:
+                        
+                        if self.image_ending == "*_L.jpg":
+                            self.models.model_animals.data.loc[animal.row_index, "LX1"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "LY1"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "LX2"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1                        
+                        elif self.image_ending == "*.R,jpg":
+                            self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
+                            self.models.model_animals.data.loc[animal.row_index, "RY2"] = -1
+                    else:  
+                        # if animal has only left OR right coordinates, remove
+                        # complete data row
                         pos = self.models.model_animals.data.index.get_loc(animal.row_index)
-                        self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())
-                    elif self.image_ending == "*_R.jpg":
-                        # if animal is on right image, just modify entry
-                        self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
-                        self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
-                        self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
-                        self.models.model_animals.data.loc[animal.row_index, "RY2"] = -1
-
+                        self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())                        
+                        
                     self.animal_list.remove(animal) 
                     break
 
@@ -962,18 +981,18 @@ class AnimalPainter():
                     experiment_id = self.imageArea.parent().parent().parent().parent().page_data.lineEdit_exp_id.text()
                     user_id = self.imageArea.parent().parent().parent().parent().page_settings.lineEdit_user_id.text()
                     
-                    # if animal is on left image, create new row
-                    if self.image_ending == "*_L.jpg":
-                        self.models.model_animals.insertRows(
-                            int(self.cur_animal.row_index), int(1), 
-                            [self.cur_animal], cur_image_path, 
-                            image_remark, experiment_id, user_id)
-                    elif self.image_ending == "*_R.jpg":
-                        # if on right image, adapt current row
-                        self.models.model_animals.data.loc[self.cur_animal.row_index, "RX1"] = self.cur_animal.original_pos_head.x()
-                        self.models.model_animals.data.loc[self.cur_animal.row_index, "RY1"] = self.cur_animal.original_pos_head.y()
-                        self.models.model_animals.data.loc[self.cur_animal.row_index, "RX2"] = self.cur_animal.original_pos_tail.x()
-                        self.models.model_animals.data.loc[self.cur_animal.row_index, "RY2"] = self.cur_animal.original_pos_tail.y()
+                    # add new data row and use coordinates of the animal as left
+                    # or right image coordinates (depending on image_spec)
+                    if self.image_ending == "*_R.jpg":
+                        image_spec = "R"
+                    else: 
+                        image_spec = "L"
+                    
+                    self.models.model_animals.insertRows(
+                    int(self.cur_animal.row_index), int(1), 
+                    [self.cur_animal], cur_image_path, 
+                    image_remark, experiment_id, user_id, [image_spec])
+                    
                 else:                    
                     # create a new animal
                     idx = self.models.model_animals.data.index.max()
@@ -983,7 +1002,8 @@ class AnimalPainter():
                                              row_index=idx+1,
                                              position_head=pos)
                     
-                    self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
+                    self.cur_animal.setGroup(self._previous_group)
+                    self.cur_animal.setSpecies(self._previous_species)
                               
                     # calculate position in original format
                     self.cur_animal.original_pos_head = QtCore.QPoint(original_x, original_y)
@@ -1000,7 +1020,8 @@ class AnimalPainter():
                                          row_index=idx+1,
                                          position_head=pos)
                 
-                self.cur_animal.setGroup(AnimalGroup.UNIDENTIFIED)
+                self.cur_animal.setGroup(self._previous_group)
+                self.cur_animal.setSpecies(self._previous_species)
                 
                 # calculate position in original format
                 self.cur_animal.original_pos_head = QtCore.QPoint(original_x, original_y)
