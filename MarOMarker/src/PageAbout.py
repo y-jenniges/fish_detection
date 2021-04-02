@@ -53,15 +53,15 @@ class PageAbout(QtWidgets.QWidget):
         self._frame_logos.setObjectName("frame_logos")
         
         # uni Bremen logo
-        # self._label_logo_uni = QtWidgets.QLabel(self._frame_logos)
-        # self._label_logo_uni.setMaximumSize(QtCore.QSize(400, 16777215))
-        # self._label_logo_uni.setText("")
-        # self._label_logo_uni.setPixmap(QtGui.QPixmap(
-        #     ":/logos/logos/logo_uniBremen.png"))
-        # self._label_logo_uni.setScaledContents(True)
-        # self._label_logo_uni.setAlignment(QtCore.Qt.AlignCenter)
-        # self._label_logo_uni.setWordWrap(False)
-        # self._label_logo_uni.setObjectName("label_logo_uni")
+        self._label_logo_uni = QtWidgets.QLabel(self._frame_logos)
+        self._label_logo_uni.setMaximumSize(QtCore.QSize(400, 16777215))
+        self._label_logo_uni.setText("")
+        self._label_logo_uni.setPixmap(QtGui.QPixmap(
+            ":/logos/logos/logo_uniBremen.png"))
+        self._label_logo_uni.setScaledContents(True)
+        self._label_logo_uni.setAlignment(QtCore.Qt.AlignCenter)
+        self._label_logo_uni.setWordWrap(False)
+        self._label_logo_uni.setObjectName("label_logo_uni")
         
         # awi logo
         self._label_logo_awi = QtWidgets.QLabel(self._frame_logos)
@@ -90,7 +90,7 @@ class PageAbout(QtWidgets.QWidget):
         self._layout_logo_frame.setObjectName("layout_logo_frame")
         
         # add logos to layout
-        #self._layout_logo_frame.addWidget(self._label_logo_uni)
+        self._layout_logo_frame.addWidget(self._label_logo_uni)
         self._layout_logo_frame.addWidget(self._label_logo_awi)
         self._layout_logo_frame.addWidget(self._label_logo_ifam)
            
