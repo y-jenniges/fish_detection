@@ -354,7 +354,7 @@ class TableModel(QtCore.QAbstractTableModel):
         return columns
     
     def insertRows(self, row, count, animals, image_path, image_remark, 
-                   experiment_id, user_id, parent=QtCore.QModelIndex()):
+                   experiment_id, user_id, image_spec, parent=QtCore.QModelIndex()):
         """
         Inserts count rows into the dataframe before the given row. The rows
         are filled using the image path, remarks, experiment ID, user ID 
@@ -378,7 +378,10 @@ class TableModel(QtCore.QAbstractTableModel):
             ID of the currently working user
         parent : TYPE, optional
             Parent object. The default is QtCore.QModelIndex().
-
+        image_spec: list of strings
+            Specifies if the animals are drawn on left or right image. Use "L" 
+            for left image, "R" for right image
+            
         Returns
         -------
         bool
@@ -387,7 +390,7 @@ class TableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(QtCore.QModelIndex(), row, row + count - 1)
         for i in range(count):
             new_row = self._create_row(animals[i], image_path, image_remark, 
-                                       experiment_id, user_id)
+                                       experiment_id, user_id, image_spec[i])
             self.data = self.data.append(new_row)    
         self.endInsertRows()
 
@@ -548,7 +551,7 @@ class TableModel(QtCore.QAbstractTableModel):
             return False
     
     def _create_row(self, animal, image_path, image_remark, experiment_id, 
-                    user_id): 
+                    user_id, image_spec="L"): 
         """
         Creates a new row for the dataframe given the arguments of this 
         function.
@@ -565,6 +568,9 @@ class TableModel(QtCore.QAbstractTableModel):
             ID of the experiment during which the image was created
         user_id : string
             ID of the user who worked on the given image
+        image_spec: string
+            Specifies if the animal is drawn on left or right image. Default
+            is "L" for left image (use "R" for right image)
 
         Returns
         -------
@@ -586,32 +592,68 @@ class TableModel(QtCore.QAbstractTableModel):
         else:
             species = animal.species.title()
 
-        new_row = pd.DataFrame({"file_id": file_id, 
-                                "object_remarks": animal.remark, 
-                                "group": group, 
-                                "species": species,
-                                "LX1": animal.original_pos_head.x(),
-                                "LY1": animal.original_pos_head.y(),
-                                "LX2": animal.original_pos_tail.x(),
-                                "LY2": animal.original_pos_tail.y(),
-                                "LX3": -1, 
-                                "LY3": -1,
-                                "LX4": -1,
-                                "LY4": -1,
-                                "RX1": -1,
-                                "RY1": -1,
-                                "RX2": -1,
-                                "RY2": -1,
-                                "RX3": -1, 
-                                "RY3": -1,
-                                "RX4": -1,
-                                "RY4": -1,
-                                "length": -1,
-                                "height": -1,
-                                "image_remarks": image_remark,
-                                "status": "checked",
-                                "manually_corrected": "True",
-                                "experiment_id": experiment_id,
-                                "user_id": user_id
-                                }, index=[animal.row_index])
+        # create a new row (depending on whether the animal is on the left or 
+        # right image)
+        if image_spec == "L":
+            new_row = pd.DataFrame({"file_id": file_id, 
+                                    "object_remarks": animal.remark, 
+                                    "group": group, 
+                                    "species": species,
+                                    "LX1": animal.original_pos_head.x(),
+                                    "LY1": animal.original_pos_head.y(),
+                                    "LX2": animal.original_pos_tail.x(),
+                                    "LY2": animal.original_pos_tail.y(),
+                                    "LX3": -1, 
+                                    "LY3": -1,
+                                    "LX4": -1,
+                                    "LY4": -1,
+                                    "RX1": -1,
+                                    "RY1": -1,
+                                    "RX2": -1,
+                                    "RY2": -1,
+                                    "RX3": -1, 
+                                    "RY3": -1,
+                                    "RX4": -1,
+                                    "RY4": -1,
+                                    "length": -1,
+                                    "height": -1,
+                                    "image_remarks": image_remark,
+                                    "status": "checked",
+                                    "manually_corrected": "True",
+                                    "experiment_id": experiment_id,
+                                    "user_id": user_id
+                                    }, index=[animal.row_index])
+        elif image_spec=="R":
+            new_row = pd.DataFrame({"file_id": file_id, 
+                                    "object_remarks": animal.remark, 
+                                    "group": group, 
+                                    "species": species,
+                                    "LX1": -1,
+                                    "LY1": -1,
+                                    "LX2": -1,
+                                    "LY2": -1,
+                                    "LX3": -1, 
+                                    "LY3": -1,
+                                    "LX4": -1,
+                                    "LY4": -1,
+                                    "RX1": animal.original_pos_head.x(),
+                                    "RY1": animal.original_pos_head.y(),
+                                    "RX2": animal.original_pos_tail.x(),
+                                    "RY2": animal.original_pos_tail.y(),
+                                    "RX3": -1, 
+                                    "RY3": -1,
+                                    "RX4": -1,
+                                    "RY4": -1,
+                                    "length": -1,
+                                    "height": -1,
+                                    "image_remarks": image_remark,
+                                    "status": "checked",
+                                    "manually_corrected": "True",
+                                    "experiment_id": experiment_id,
+                                    "user_id": user_id
+                                    }, index=[animal.row_index])        
+        else: 
+            print("TableModel: Could not insert current animal due to invalid \
+                  image specification. Either use 'L' or 'R'.")
+                  
         return new_row
