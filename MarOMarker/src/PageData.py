@@ -9,7 +9,7 @@ from Predicter import Predicter
 from DistanceMeasurer import DistanceMeasurer
 
 
-IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
+#IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
 #IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
 #IMAGE_DIRECTORY_ROOT = "G:/Universität/UniBremen/Semester4/Data/moreTestData/"
 #IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Desktop/usability-test/input_images/"
@@ -182,27 +182,32 @@ class PageData(QtWidgets.QWidget):
     def updateImageDir(self):
         """ Function to update the image directory according to the input 
         from the calender widget """
-        date = self.calendarWidget.selectedDate().toString("yyyy_MM")
-        directory = IMAGE_DIRECTORY_ROOT + date + "/" #+ "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
-        print(directory)
-        # enable frame to manipulate data properties
-        self.frame_data_information.setEnabled(True) # @todo always enabled
-        
-        # if directory does not exist, clear the image directory
-        if not os.path.isdir(directory):
-            self.lineEdit_img_dir.setText("")
-        else:
-            self.lineEdit_img_dir.setText(directory)
-            self.onImageDirEditChanged(directory)
-        
-        # update the number of images
-        self.updateNumImages() 
-
-        # adapt experiment id  
-        new_exp_id = "Spitzbergen " \
-            + str(self.calendarWidget.selectedDate().year())     
-        self.lineEdit_exp_id.setText(new_exp_id) 
-        self.onExpIdEditChanged()
+        try:
+            img_root_dir = self.parent().parent().page_settings.lineEdit_root_dir.text()
+            date = self.calendarWidget.selectedDate().toString("yyyy_MM")
+            directory = img_root_dir + "/" + date + "/" #+ "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
+            print(img_root_dir)
+            print(directory)
+            # enable frame to manipulate data properties
+            self.frame_data_information.setEnabled(True) # @todo always enabled
+            
+            # if directory does not exist, clear the image directory
+            if not os.path.isdir(directory):
+                self.lineEdit_img_dir.setText("")
+            else:
+                self.lineEdit_img_dir.setText(directory)
+                self.onImageDirEditChanged(directory)
+            
+            # update the number of images
+            self.updateNumImages() 
+    
+            # adapt experiment id  
+            new_exp_id = "Spitzbergen " \
+                + str(self.calendarWidget.selectedDate().year())     
+            self.lineEdit_exp_id.setText(new_exp_id) 
+            self.onExpIdEditChanged()
+        except:
+            print("PageData: Cannot update image directory yet.")
         
     def onCalenderSelectionChanged(self):
         """ Function to handle a change of the calender widget selection. """
@@ -910,6 +915,7 @@ class PageData(QtWidgets.QWidget):
             
             # create a thread for the neural network  @todo
             print("activated, net not none")
+            
             # get image path list from photo viewer
             img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             

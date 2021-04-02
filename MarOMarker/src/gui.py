@@ -275,7 +275,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.label_distance_chip_lense.setText(_translate("MainWindow", "Distance between chip and lense"))
         self.page_settings.label_unit_chip_lense.setText(_translate("MainWindow", "pixel"))
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_camera), _translate("MainWindow", "Camera"))
-        self.page_settings.label_nn.setText(_translate("MainWindow", "Neural Network"))
+        self.page_settings.label_nn.setText(_translate("MainWindow", "Neural network"))
         self.page_settings.lineEdit_nn.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
         self.page_settings.lineEdit_nn.setPlaceholderText(_translate("MainWindow", "Path to neural network model..."))
         self.page_settings.btn_browse_nn.setText(_translate("MainWindow", "Browse"))
@@ -287,6 +287,9 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_user), _translate("MainWindow", "User"))       
         self.page_settings.btn_add_species.setText(_translate("MainWindow", "Add"))
         self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
+        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_other), _translate("MainWindow", "Other"))
+        self.page_settings.label_root_dir.setText("Image root directory")
+        self.page_settings.btn_browse_root_dir.setText(_translate("MainWindow", "Browse"))
         
         self.page_settings.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
         

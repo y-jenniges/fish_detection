@@ -47,6 +47,9 @@ class PageSettings(QtWidgets.QWidget):
         # init UI and actions on it
         self._initUi()
         self._initActions()
+        
+        # default image root directory
+        self.lineEdit_root_dir.setText("T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1")
                 
     def _initUi(self):  
         """
@@ -106,6 +109,7 @@ class PageSettings(QtWidgets.QWidget):
             "#frame_user_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
             "#frame_species_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
             "#frame_nn_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
+            "#frame_other_options{background-color:rgb(230, 230, 230);border-radius:3px;}\n"
             "\n"
             "\n"
             "/*-------------------------- labels ------------------------*/\n"
@@ -120,18 +124,18 @@ class PageSettings(QtWidgets.QWidget):
             "    font: 10pt \"Century Gothic\";\n"
             "}\n"
             "\n"
-            "#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species{\n"
+            "#btn_load, #btn_save, #btn_browse_nn, #btn_add_species, #btn_remove_species, #btn_browse_root_dir{\n"
             "    background-color:rgb(200, 200, 200);\n"
             "}\n"
             "\n"
             "\n"
             "#btn_load:hover, #btn_save:hover, \n"
-            "#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover{\n"
+            "#btn_browse_nn:hover, #btn_add_species:hover, #btn_remove_species:hover, #btn_browse_root_dir:hover{\n"
             "  background-color: rgb(0, 203, 221);\n"
             "}\n"
             "\n"
             "#btn_load:pressed, #btn_save:pressed,\n"
-            "#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed{\n"
+            "#btn_browse_nn:pressed, #btn_add_species:pressed, #btn_remove_species:pressed, #btn_browse_root_dir:pressed{\n"
             "background-color: rgb(0, 160, 174);\n"
             "}\n"
             "\n"
@@ -245,12 +249,14 @@ class PageSettings(QtWidgets.QWidget):
         self.tab_neuralNet = self._createTabNeuralNetwork() # tab for neural net
         self.tab_species = self._createTabSpecies() # tab for species    
         self.tab_user = self._createTabUser() # tab for user settings
+        self.tab_other = self._createTabOther() # tab for other options
         
         # add tabs to tab widget
         self.tabWidget.addTab(self.tab_camera, Helpers.getIcon(":/icons/icons/camera.png"), "")
         self.tabWidget.addTab(self.tab_neuralNet, Helpers.getIcon(":/icons/icons/nn.png"), "")
         self.tabWidget.addTab(self.tab_species, Helpers.getIcon(":/icons/icons/fish.png"), "")
         self.tabWidget.addTab(self.tab_user, Helpers.getIcon(":/icons/icons/user_b.png"), "")
+        self.tabWidget.addTab(self.tab_other, Helpers.getIcon("icons/other_settings.png"), "")
         
         # add tab widget to layout of main settings frame
         self.layout_settings_frame.addWidget(self.tabWidget)
@@ -795,6 +801,104 @@ class PageSettings(QtWidgets.QWidget):
         
         return tab_user
 
+    def _createTabOther(self):
+        """ Creates the UI of the other settings tab. """
+        # --- main frame (whole tab) ---------------------------------------- #
+        tab_other = QtWidgets.QWidget(self)
+        tab_other.setObjectName("tab_other")
+        
+        # main layout
+        layout = QtWidgets.QGridLayout(tab_other)
+        layout.setObjectName("layout")
+        
+        # spacers
+        spacerItem39 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
+        spacerItem40 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for other options --- ----------------------------------- #
+        frame_other_options = QtWidgets.QFrame(tab_other)
+        frame_other_options.setStyleSheet("")
+        frame_other_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_other_options.setObjectName("frame_other_options")
+        
+        # layout
+        layout_other_options = QtWidgets.QVBoxLayout(frame_other_options)
+        layout_other_options.setContentsMargins(11, 11, 11, 11)
+        layout_other_options.setSpacing(7)
+        layout_other_options.setObjectName("layout_other_options")
+        
+        # vertical spacer
+        spacerItem37 = QtWidgets.QSpacerItem(20, 40, 
+                                             QtWidgets.QSizePolicy.Minimum, 
+                                             QtWidgets.QSizePolicy.Expanding)
+        
+        
+        # --- frame for root directoy options ------------------------------- #
+        frame_root_dir_options = QtWidgets.QFrame(frame_other_options)
+        frame_root_dir_options.setMinimumSize(QtCore.QSize(0, 30))
+        frame_root_dir_options.setMaximumSize(QtCore.QSize(16777215, 60))
+        frame_root_dir_options.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        frame_root_dir_options.setFrameShadow(QtWidgets.QFrame.Raised)
+        frame_root_dir_options.setObjectName("frame_root_dir_options")
+        
+        # layout
+        layout_root_dir = QtWidgets.QHBoxLayout(frame_root_dir_options)
+        layout_root_dir.setContentsMargins(0, 0, 0, 0)
+        layout_root_dir.setObjectName("layout_root_dir")
+        
+        # label to display name of parameter "Image root directory"
+        self.label_root_dir = QtWidgets.QLabel(frame_root_dir_options)
+        self.label_root_dir.setObjectName("label_root_dir")
+
+        # horizontal spacer
+        spacerItem36 = QtWidgets.QSpacerItem(40, 20, 
+                                             QtWidgets.QSizePolicy.Expanding, 
+                                             QtWidgets.QSizePolicy.Minimum)
+        
+        # line edit for root directory path
+        self.lineEdit_root_dir = QtWidgets.QLineEdit(frame_root_dir_options)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                           QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_root_dir.sizePolicy().hasHeightForWidth())
+        self.lineEdit_root_dir.setSizePolicy(sizePolicy)
+        self.lineEdit_root_dir.setMinimumSize(QtCore.QSize(400, 40))
+        self.lineEdit_root_dir.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.lineEdit_root_dir.setMaxLength(32767)
+        self.lineEdit_root_dir.setEchoMode(QtWidgets.QLineEdit.Normal)
+        self.lineEdit_root_dir.setCursorPosition(0)
+        self.lineEdit_root_dir.setReadOnly(True)
+        self.lineEdit_root_dir.setObjectName("lineEdit_root_dir")
+        
+        # button for browsing for an image root directory
+        self.btn_browse_root_dir = QtWidgets.QPushButton(frame_root_dir_options)
+        self.btn_browse_root_dir.setMinimumSize(QtCore.QSize(70, 40))
+        self.btn_browse_root_dir.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.btn_browse_root_dir.setObjectName("btn_browse_root_dir")
+        
+        # add widgets to layout
+        layout_root_dir.addWidget(self.label_root_dir)
+        layout_root_dir.addItem(spacerItem36)
+        layout_root_dir.addWidget(self.lineEdit_root_dir)        
+        layout_root_dir.addWidget(self.btn_browse_root_dir)
+       
+        
+        # --- adding widgets to content (root dir options) and main frame --- #
+        layout_other_options.addWidget(frame_root_dir_options)
+        layout_other_options.addItem(spacerItem37)
+        
+        layout.addWidget(frame_other_options, 0, 0, 1, 1)
+        layout.addItem(spacerItem39, 0, 1, 1, 1)
+        layout.addItem(spacerItem40, 1, 0, 1, 1)
+        
+        return tab_other
+    
     def _initActions(self):
         """ Initalizes the actions triggered by user interactions. """
         # camera tab      
@@ -815,7 +919,11 @@ class PageSettings(QtWidgets.QWidget):
         
         # user tab
         self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
-        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())            
+        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())      
+        
+        # other tab
+        self.btn_browse_root_dir.clicked.connect(self.browse_for_root_dir)
+        #self.lineEdit_root_dir.textChanged.connect(self.root_dir_changed)
                 
 # --- actions in camera tab ------------------------------------------------- #        
     def camera_spinBox_changed(self):
@@ -936,6 +1044,20 @@ class PageSettings(QtWidgets.QWidget):
         """ Emit the userIdChanged signal when the user lineEdit is changed. """
         self.userIdChanged.emit(self.lineEdit_user_id.text())
 
+# --- actions in other tab -------------------------------------------------- #  
+    #def root_dir_changed(self, root_dir):
+    #    """ Loads the image root directory specified by the given path. """
+       # self.root_dir = root_dir
+            
+    def browse_for_root_dir(self):
+        """ Open file explorer to browse for a root directory for the images. 
+        It is used by the calendar widget to find the correct image directory 
+        according to the selected date. """
+        folderpath = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select folder as root image directory')
+        
+        # check if path is valid
+        if folderpath != "" :    
+            self.lineEdit_root_dir.setText(folderpath)
 
 # --- functions for saving and restoring options ---------------------------- # 
     def saveCurrentValues(self, settings):       
@@ -943,10 +1065,12 @@ class PageSettings(QtWidgets.QWidget):
         settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
         settings.setValue("nnPath", self.lineEdit_nn.text()) 
         settings.setValue("userId", self.lineEdit_user_id.text())
+        settings.setValue("imageRootDirectory", self.lineEdit_root_dir.text())
 
     def restoreValues(self, settings):
         """ Restores settings from previous session. """
         self.apply_configFile(settings.value("cameraConfigPath"))
         self.lineEdit_nn.setText(settings.value("nnPath"))
         self.lineEdit_user_id.setText(settings.value("userId"))
+        self.lineEdit_root_dir.setText(settings.value("imageRootDirectory"))
         
