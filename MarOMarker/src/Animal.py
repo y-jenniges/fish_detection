@@ -1,3 +1,4 @@
+from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import AnimalGroup, AnimalSpecies
 import Helpers
@@ -440,6 +441,15 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
         self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxReturnPressed)
         
+        self.btn_group_fish.clicked.connect(partial(self._set_combobox_group_idx, 0))
+        self.btn_group_crustacea.clicked.connect(partial(self._set_combobox_group_idx, 1))
+        self.btn_group_chaetognatha.clicked.connect(partial(self._set_combobox_group_idx, 2))
+        self.btn_group_jellyfish.clicked.connect(partial(self._set_combobox_group_idx, 3))
+        self.btn_group_unidentified.clicked.connect(partial(self._set_combobox_group_idx, 4))
+    
+    def _set_combobox_group_idx(self, idx):
+        self.comboBox_group.setCurrentIndex(idx)
+        
     def _initModels(self):
         """ Function to set the data models on class widgets. """
         self.comboBox_group.setModel(self.models.model_group)
@@ -636,7 +646,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.label_remark = QtWidgets.QLabel("Remark", self)
         self.label_length = QtWidgets.QLabel("Length", self)
         #self.label_height = QtWidgets.QLabel("Height")
-        
+                
         # combobox for animal group
         self.comboBox_group = QtWidgets.QComboBox(self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
@@ -712,18 +722,112 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # self.spinBox_heigth.setMaximum(9999.99)
         # self.spinBox_heigth.setObjectName("spinBox_heigth")
             
+        
+         # align buttons in a horizontal layout
+        button_layout = QtWidgets.QHBoxLayout(self)
+        button_layout.setObjectName("button_layout")
+        button_layout.setContentsMargins(0, 0, 0, 0)
+ 
+        # frame for group buttons
+        self.frame_group_btns = QtWidgets.QFrame(self)
+        self.frame_group_btns.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.frame_group_btns.setLayout(button_layout)
+        
+        # icon size for group buttons
+        icon_group_size = QtCore.QSize(30, 30)
+        
+        # fish button @todo : add abbreviation to buttons icons
+        self.btn_group_fish = QtWidgets.QPushButton(self.frame_group_btns)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_group_fish.sizePolicy().hasHeightForWidth())
+        self.btn_group_fish.setSizePolicy(sizePolicy)
+        self.btn_group_fish.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_group_fish.setIcon(Helpers.getIcon("animal_markings/square_blue.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_fish.setIconSize(icon_group_size)
+        self.btn_group_fish.setObjectName("btn_group_fish")
+        self.btn_group_fish.setToolTip("Fish")
+        
+        # crustacea button
+        self.btn_group_crustacea = QtWidgets.QPushButton(self.frame_group_btns)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_group_crustacea.sizePolicy().hasHeightForWidth())
+        self.btn_group_crustacea.setSizePolicy(sizePolicy)
+        self.btn_group_crustacea.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_group_crustacea.setIcon(Helpers.getIcon("animal_markings/square_red.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_crustacea.setIconSize(icon_group_size)
+        self.btn_group_crustacea.setObjectName("btn_group_crustacea")
+        self.btn_group_crustacea.setToolTip("Crustacea")
+        
+        # chateognatha button
+        self.btn_group_chaetognatha = QtWidgets.QPushButton(self.frame_group_btns)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_group_chaetognatha.sizePolicy().hasHeightForWidth())
+        self.btn_group_chaetognatha.setSizePolicy(sizePolicy)
+        self.btn_group_chaetognatha.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_group_chaetognatha.setIcon(Helpers.getIcon("animal_markings/square_orange.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_chaetognatha.setIconSize(icon_group_size)
+        self.btn_group_chaetognatha.setObjectName("btn_group_chaetognatha")
+        self.btn_group_chaetognatha.setToolTip("Chaetognatha")
+        
+        # jellfish button
+        self.btn_group_jellyfish = QtWidgets.QPushButton("J")
+        self.btn_group_jellyfish = QtWidgets.QPushButton(self.frame_group_btns)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_group_jellyfish.sizePolicy().hasHeightForWidth())
+        self.btn_group_jellyfish.setSizePolicy(sizePolicy)
+        self.btn_group_jellyfish.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_group_jellyfish.setIcon(Helpers.getIcon("animal_markings/square_black.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_jellyfish.setIconSize(icon_group_size)
+        self.btn_group_jellyfish.setObjectName("btn_group_jellyfish")
+        self.btn_group_jellyfish.setToolTip("Jellyfish")
+        
+        # unidentified button
+        self.btn_group_unidentified = QtWidgets.QPushButton("U") 
+        self.btn_group_unidentified = QtWidgets.QPushButton(self.frame_group_btns)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_group_unidentified.sizePolicy().hasHeightForWidth())
+        self.btn_group_unidentified.setSizePolicy(sizePolicy)
+        self.btn_group_unidentified.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_group_unidentified.setIcon(Helpers.getIcon("animal_markings/square_gray.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_unidentified.setIconSize(icon_group_size)
+        self.btn_group_unidentified.setObjectName("btn_group_unidentified")
+        self.btn_group_unidentified.setToolTip("Unidentified")
+        
+        # add buttons to layout
+        button_layout.addWidget(self.btn_group_fish)
+        button_layout.addWidget(self.btn_group_crustacea)
+        button_layout.addWidget(self.btn_group_chaetognatha)
+        button_layout.addWidget(self.btn_group_jellyfish)
+        button_layout.addWidget(self.btn_group_unidentified)
+        
         # add widgets to layout
         layout.addWidget(self.label_group, 0, 0, 1, 1)
-        layout.addWidget(self.comboBox_group, 0, 1, 1, 1)
+        layout.addWidget(self.frame_group_btns, 0, 1, 1, 1)
+        layout.addWidget(self.comboBox_group, 1, 1, 1, 1)
         
-        layout.addWidget(self.label_species, 1, 0, 1, 1)
-        layout.addWidget(self.comboBox_species, 1, 1, 1, 1)
+        layout.addWidget(self.label_species, 2, 0, 1, 1)
+        layout.addWidget(self.comboBox_species, 2, 1, 1, 1)
         
-        layout.addWidget(self.label_remark, 2, 0, 1, 1)
-        layout.addWidget(self.comboBox_remark, 2, 1, 1, 1)
+        layout.addWidget(self.label_remark, 3, 0, 1, 1)
+        layout.addWidget(self.comboBox_remark, 3, 1, 1, 1)
         
-        layout.addWidget(self.label_length, 3, 0, 1, 1)
-        layout.addWidget(self.spinBox_length, 3, 1, 1, 1)
+        layout.addWidget(self.label_length, 4, 0, 1, 1)
+        layout.addWidget(self.spinBox_length, 4, 1, 1, 1)
            
         # layout.addWidget(self.label_height, 4, 0, 1, 1)
         # layout.addWidget(self.spinBox_heigth, 4, 1, 1, 1)
