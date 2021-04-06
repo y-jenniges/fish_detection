@@ -230,39 +230,39 @@ class Animal():
         if self.group == AnimalGroup.UNIDENTIFIED \
         or self.group == "Unidentified" \
         or self.group == "AnimalGroup.UNIDENTIFIED":
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_gray.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
               
         elif self.group == AnimalGroup.FISH or self.group == "Fish" \
         or self.group == "AnimalGroup.FISH":
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_blue.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_blue.png")  
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_blue.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_blue.png")  
             self.color = QtGui.QColor(0, 112, 192)
             
         elif self.group == AnimalGroup.CRUSTACEA or self.group == "Crustacea" \
         or self.group == "AnimalGroup.CRUSTACEA":
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_red.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_red.png") 
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_red.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_red.png") 
             self.color = QtGui.QColor(255, 0, 0)
             
         elif self.group == AnimalGroup.CHAETOGNATHA \
         or self.group == "Chaetognatha" \
         or self.group == "AnimalGroup.CHAETOGNATHA":
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_orange.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_orange.png")  
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_orange.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_orange.png")  
             self.color = QtGui.QColor(255, 192, 0)
             
         elif self.group == AnimalGroup.JELLYFISH or self.group == "Jellyfish" \
         or self.group == "AnimalGroup.JELLYFISH":
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_black.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_black.png") 
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_black.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_black.png") 
             self.color = QtGui.QColor(0, 0, 0)
             
         else:
             print("Animal: Unknown animal group! Using unidentified colour.")
-            self._pixmap_head = QtGui.QPixmap("animal_markings/o_gray.png")        
-            self._pixmap_tail = QtGui.QPixmap("animal_markings/x_gray.png")  
+            self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_gray.png")        
+            self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
      
         # scale pixmaps
@@ -745,7 +745,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(self.btn_group_fish.sizePolicy().hasHeightForWidth())
         self.btn_group_fish.setSizePolicy(sizePolicy)
         self.btn_group_fish.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_group_fish.setIcon(Helpers.getIcon("animal_markings/square_blue.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_fish.setIcon(Helpers.getIcon(":/animal_markings/animal_markings/square_blue.png"))# ":/icons/icons/filter.png"))
         self.btn_group_fish.setIconSize(icon_group_size)
         self.btn_group_fish.setObjectName("btn_group_fish")
         self.btn_group_fish.setToolTip("Fish")
@@ -759,7 +759,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(self.btn_group_crustacea.sizePolicy().hasHeightForWidth())
         self.btn_group_crustacea.setSizePolicy(sizePolicy)
         self.btn_group_crustacea.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_group_crustacea.setIcon(Helpers.getIcon("animal_markings/square_red.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_crustacea.setIcon(Helpers.getIcon(":/animal_markings/animal_markings/square_red.png"))# ":/icons/icons/filter.png"))
         self.btn_group_crustacea.setIconSize(icon_group_size)
         self.btn_group_crustacea.setObjectName("btn_group_crustacea")
         self.btn_group_crustacea.setToolTip("Crustacea")
@@ -773,7 +773,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(self.btn_group_chaetognatha.sizePolicy().hasHeightForWidth())
         self.btn_group_chaetognatha.setSizePolicy(sizePolicy)
         self.btn_group_chaetognatha.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_group_chaetognatha.setIcon(Helpers.getIcon("animal_markings/square_orange.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_chaetognatha.setIcon(Helpers.getIcon(":/animal_markings/animal_markings/square_orange.png"))# ":/icons/icons/filter.png"))
         self.btn_group_chaetognatha.setIconSize(icon_group_size)
         self.btn_group_chaetognatha.setObjectName("btn_group_chaetognatha")
         self.btn_group_chaetognatha.setToolTip("Chaetognatha")
@@ -788,7 +788,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(self.btn_group_jellyfish.sizePolicy().hasHeightForWidth())
         self.btn_group_jellyfish.setSizePolicy(sizePolicy)
         self.btn_group_jellyfish.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_group_jellyfish.setIcon(Helpers.getIcon("animal_markings/square_black.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_jellyfish.setIcon(Helpers.getIcon(":/animal_markings/animal_markings/square_black.png"))# ":/icons/icons/filter.png"))
         self.btn_group_jellyfish.setIconSize(icon_group_size)
         self.btn_group_jellyfish.setObjectName("btn_group_jellyfish")
         self.btn_group_jellyfish.setToolTip("Jellyfish")
@@ -803,7 +803,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(self.btn_group_unidentified.sizePolicy().hasHeightForWidth())
         self.btn_group_unidentified.setSizePolicy(sizePolicy)
         self.btn_group_unidentified.setMaximumSize(QtCore.QSize(40, 40))
-        self.btn_group_unidentified.setIcon(Helpers.getIcon("animal_markings/square_gray.png"))# ":/icons/icons/filter.png"))
+        self.btn_group_unidentified.setIcon(Helpers.getIcon(":/animal_markings/animal_markings/square_gray.png"))# ":/icons/icons/filter.png"))
         self.btn_group_unidentified.setIconSize(icon_group_size)
         self.btn_group_unidentified.setObjectName("btn_group_unidentified")
         self.btn_group_unidentified.setToolTip("Unidentified")

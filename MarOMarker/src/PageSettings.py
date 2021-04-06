@@ -256,7 +256,7 @@ class PageSettings(QtWidgets.QWidget):
         self.tabWidget.addTab(self.tab_neuralNet, Helpers.getIcon(":/icons/icons/nn.png"), "")
         self.tabWidget.addTab(self.tab_species, Helpers.getIcon(":/icons/icons/fish.png"), "")
         self.tabWidget.addTab(self.tab_user, Helpers.getIcon(":/icons/icons/user_b.png"), "")
-        self.tabWidget.addTab(self.tab_other, Helpers.getIcon("icons/other_settings.png"), "")
+        self.tabWidget.addTab(self.tab_other, Helpers.getIcon(":/icons/icons/other_settings.png"), "")
         
         # add tab widget to layout of main settings frame
         self.layout_settings_frame.addWidget(self.tabWidget)

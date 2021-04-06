@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/other_settings.png</file>
     <file>icons/arrow_down_navi.png</file>
     <file>icons/process_arrow_down.png</file>
     <file>icons/process_arrow.png</file>
@@ -8,7 +9,6 @@
     <file>icons/plus_darkBlue.png</file>
     <file>icons/fish_white.png</file>
     <file>icons/book.png</file>
-    <file>icons/thunfish.png</file>
     <file>icons/nn.png</file>
     <file>icons/arrow_left_big_blue.png</file>
     <file>icons/arrow_right_big_blue.png</file>
@@ -42,6 +42,16 @@
     <file>icons/arrow_down.png</file>
   </qresource>
   <qresource prefix="animal_markings">
+    <file>animal_markings/x_black.png</file>
+    <file>animal_markings/x_blue.png</file>
+    <file>animal_markings/x_gray.png</file>
+    <file>animal_markings/x_orange.png</file>
+    <file>animal_markings/x_red.png</file>
+    <file>animal_markings/o_black.png</file>
+    <file>animal_markings/o_blue.png</file>
+    <file>animal_markings/o_gray.png</file>
+    <file>animal_markings/o_orange.png</file>
+    <file>animal_markings/o_red.png</file>
     <file>animal_markings/square_black.png</file>
     <file>animal_markings/square_blue.png</file>
     <file>animal_markings/square_gray.png</file>
