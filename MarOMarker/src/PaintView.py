@@ -316,14 +316,16 @@ class PhotoViewer(QtWidgets.QWidget):
         self.shortcut_next_image = QtWidgets.QShortcut(
             QtGui.QKeySequence("right"), self.btn_next_image, 
             self.on_next_image) 
+        self.shortcut_deselect_animal = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Escape"), self.imageArea, 
+            self.imageArea.animal_painter.deselectAnimal) 
 
     # enable or disable arrow key shortcuts
     def setArrowShortcutsActive(self, are_active):
         """ Function to en-/disable arrow shortcuts for switching between images. """
         self.shortcut_previous_image.setEnabled(are_active)
         self.shortcut_next_image.setEnabled(are_active)
-              
-        
+                  
     def _initUi(self):
         """ Builds the UI. """
         # --- left frame ---------------------------------------------------- # 
@@ -881,6 +883,11 @@ class AnimalPainter():
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
 
+    def deselectAnimal(self):
+        """ Deselects the current animal. """
+        self.cur_animal = None
+        self.updateBoundingBoxes()  
+        
     def mousePressEvent(self, event):
         """ Handles the painting options on the image: Enables dragging of
         head/tail visuals, as well as removing/adding animals on click. """

@@ -263,7 +263,11 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # texts for settings page
         self.page_settings.frame_top_bar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         self.page_settings.frame_top_bar.label_user_id.setText(_translate("MainWindow", "yj"))     
-        self.page_settings.frame_control_bar.label_settings_3.setText(_translate("MainWindow", "Settings"))     
+        self.page_settings.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
+        self.page_settings.frame_control_bar.label_settings_3.setText(_translate("MainWindow", "Settings"))  
+        
+        # --- camera tab
+        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_camera), _translate("MainWindow", "Camera"))
         self.page_settings.lineEdit_config_path.setToolTip(_translate("MainWindow", "Select a camera configuration file using the \"Load\" button on the right"))
         self.page_settings.lineEdit_config_path.setPlaceholderText(_translate("MainWindow", "Path to camera configuration file..."))    
         self.page_settings.btn_load.setText(_translate("MainWindow", "Load"))
@@ -274,25 +278,31 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.label_unit_ditance_cameras.setText(_translate("MainWindow", "mm"))
         self.page_settings.label_distance_chip_lense.setText(_translate("MainWindow", "Distance between chip and lense"))
         self.page_settings.label_unit_chip_lense.setText(_translate("MainWindow", "pixel"))
-        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_camera), _translate("MainWindow", "Camera"))
+        
+        # --- neural network tab
+        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_neuralNet), _translate("MainWindow", "Neural Network"))
         self.page_settings.label_nn.setText(_translate("MainWindow", "Neural network"))
-        self.page_settings.lineEdit_nn.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
+        self.page_settings.lineEdit_nn.setToolTip(_translate("MainWindow", "Browse for the neural network to use for the predictions."))
         self.page_settings.lineEdit_nn.setPlaceholderText(_translate("MainWindow", "Path to neural network model..."))
         self.page_settings.btn_browse_nn.setText(_translate("MainWindow", "Browse"))
-        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_neuralNet), _translate("MainWindow", "Neural Network"))
+        
+        # --- species tab
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_species), _translate("MainWindow", "Species"))
-        self.page_settings.label_user_id.setText(_translate("MainWindow", "ID"))
-        self.page_settings.lineEdit_user_id.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
-        self.page_settings.lineEdit_user_id.setPlaceholderText(_translate("MainWindow", "User ID..."))
-        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_user), _translate("MainWindow", "User"))       
         self.page_settings.btn_add_species.setText(_translate("MainWindow", "Add"))
         self.page_settings.btn_remove_species.setText(_translate("MainWindow", "Remove"))
+        
+        # --- user tab
+        self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_user), _translate("MainWindow", "User"))       
+        self.page_settings.lineEdit_user_id.setToolTip(_translate("MainWindow", "Enter your user ID (first letter of first name + first letter of last name)"))
+        self.page_settings.lineEdit_user_id.setPlaceholderText(_translate("MainWindow", "User ID..."))
+        self.page_settings.label_user_id.setText(_translate("MainWindow", "ID"))
+        
+        # --- other tab
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_other), _translate("MainWindow", "Other"))
         self.page_settings.label_root_dir.setText("Image root directory")
+        self.page_settings.lineEdit_root_dir.setToolTip(_translate("MainWindow", "Directory containing folders named YYYY_MM (which in turn contain the images)"))
         self.page_settings.btn_browse_root_dir.setText(_translate("MainWindow", "Browse"))
-        
-        self.page_settings.frame_top_bar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
-        
+                
         # texts for the handbook page
         # self.page_handbook.frame_topBar.label_user_id_2.setText(_translate("MainWindow", "yj"))
         # self.page_handbook.frame_topBar.label_user_id.setText(_translate("MainWindow", "yj"))
