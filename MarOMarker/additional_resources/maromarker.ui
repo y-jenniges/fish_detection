@@ -20,7 +20,7 @@
    <string>MarOMarker</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="ressources.qrc">
+   <iconset resource="../src/ressources.qrc">
     <normaloff>:/icons/icons/fish.png</normaloff>:/icons/icons/fish.png</iconset>
   </property>
   <property name="toolButtonStyle">
@@ -424,7 +424,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/home_w.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/home_w.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -481,7 +481,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -648,7 +648,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/filter.png</normaloff>:/icons/icons/filter.png</iconset>
              </property>
              <property name="iconSize">
@@ -751,7 +751,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/glass.png</normaloff>:/icons/icons/glass.png</iconset>
              </property>
              <property name="iconSize">
@@ -786,7 +786,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
              </property>
              <property name="iconSize">
@@ -821,7 +821,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/arrow_left_small.png</normaloff>:/icons/icons/arrow_left_small.png</iconset>
              </property>
              <property name="iconSize">
@@ -890,7 +890,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/arrow_right_small.png</normaloff>:/icons/icons/arrow_right_small.png</iconset>
              </property>
              <property name="iconSize">
@@ -925,7 +925,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/bin_closed.png</normaloff>:/icons/icons/bin_closed.png</iconset>
              </property>
              <property name="iconSize">
@@ -960,7 +960,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/undo.png</normaloff>:/icons/icons/undo.png</iconset>
              </property>
              <property name="iconSize">
@@ -1043,7 +1043,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -1151,7 +1151,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/arrow_left_big.png</normaloff>:/icons/icons/arrow_left_big.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -1363,7 +1363,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/arrow_right_big.png</normaloff>:/icons/icons/arrow_right_big.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -1405,7 +1405,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/open_image.png</normaloff>:/icons/icons/open_image.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -1564,7 +1564,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/home_w.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/home_w.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -1621,7 +1621,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -1788,7 +1788,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/filter.png</normaloff>:/icons/icons/filter.png</iconset>
              </property>
              <property name="iconSize">
@@ -1891,7 +1891,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/glass.png</normaloff>:/icons/icons/glass.png</iconset>
              </property>
              <property name="iconSize">
@@ -1942,7 +1942,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
              </property>
              <property name="iconSize">
@@ -1993,7 +1993,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/arrow_left_small.png</normaloff>:/icons/icons/arrow_left_small.png</iconset>
              </property>
              <property name="iconSize">
@@ -2094,7 +2094,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/arrow_right_small.png</normaloff>:/icons/icons/arrow_right_small.png</iconset>
              </property>
              <property name="iconSize">
@@ -2145,7 +2145,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/bin_closed.png</normaloff>:/icons/icons/bin_closed.png</iconset>
              </property>
              <property name="iconSize">
@@ -2196,7 +2196,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/undo.png</normaloff>:/icons/icons/undo.png</iconset>
              </property>
              <property name="iconSize">
@@ -2389,7 +2389,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -2497,7 +2497,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/arrow_left_big.png</normaloff>:/icons/icons/arrow_left_big.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -2650,7 +2650,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/arrow_right_big.png</normaloff>:/icons/icons/arrow_right_big.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -2692,7 +2692,7 @@ QDoubleSpinBox::down-button:pressed {
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="ressources.qrc">
+                 <iconset resource="../src/ressources.qrc">
                   <normaloff>:/icons/icons/open_image.png</normaloff>:/icons/icons/open_image.png</iconset>
                 </property>
                 <property name="iconSize">
@@ -2845,7 +2845,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/data_w.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/data_w.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -2914,7 +2914,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -3099,7 +3099,7 @@ QDoubleSpinBox::down-button:pressed {
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -3398,7 +3398,7 @@ border-radius:3px;</string>
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
+                        <pixmap resource="../src/ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -3476,7 +3476,7 @@ border-radius:3px;</string>
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
+                        <pixmap resource="../src/ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -3706,7 +3706,7 @@ border-radius:3px;</string>
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
+                        <pixmap resource="../src/ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -3822,7 +3822,7 @@ border-radius:3px;</string>
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
+                        <pixmap resource="../src/ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -4009,7 +4009,7 @@ border-radius:3px;</string>
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap resource="ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
+                        <pixmap resource="../src/ressources.qrc">:/icons/icons/process_arrow_down.png</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -5048,7 +5048,7 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/settings.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/settings.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -5108,7 +5108,7 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -5299,7 +5299,7 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -5356,7 +5356,7 @@ QDoubleSpinBox::down-arrow:off { /* off state when value in min */
              </property>
              <widget class="QWidget" name="tab_camera">
               <attribute name="icon">
-               <iconset resource="ressources.qrc">
+               <iconset resource="../src/ressources.qrc">
                 <normaloff>:/icons/icons/camera.png</normaloff>:/icons/icons/camera.png</iconset>
               </attribute>
               <attribute name="title">
@@ -6004,7 +6004,7 @@ QSlider::sub-page:horizontal {
              </widget>
              <widget class="QWidget" name="tab_neuralNet">
               <attribute name="icon">
-               <iconset resource="ressources.qrc">
+               <iconset resource="../src/ressources.qrc">
                 <normaloff>:/icons/icons/nn.png</normaloff>:/icons/icons/nn.png</iconset>
               </attribute>
               <attribute name="title">
@@ -6279,7 +6279,7 @@ QSlider::sub-page:horizontal {
              </widget>
              <widget class="QWidget" name="tab_species">
               <attribute name="icon">
-               <iconset resource="ressources.qrc">
+               <iconset resource="../src/ressources.qrc">
                 <normaloff>:/icons/icons/fish.png</normaloff>:/icons/icons/fish.png</iconset>
               </attribute>
               <attribute name="title">
@@ -6469,7 +6469,7 @@ border-radius:3px;</string>
              </widget>
              <widget class="QWidget" name="tab_user">
               <attribute name="icon">
-               <iconset resource="ressources.qrc">
+               <iconset resource="../src/ressources.qrc">
                 <normaloff>:/icons/icons/user_b.png</normaloff>:/icons/icons/user_b.png</iconset>
               </attribute>
               <attribute name="title">
@@ -6858,7 +6858,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/book.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/book.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -6918,7 +6918,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -7109,7 +7109,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -7269,7 +7269,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="ressources.qrc">:/icons/icons/fish_white.png</pixmap>
+              <pixmap resource="../src/ressources.qrc">:/icons/icons/fish_white.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -7329,7 +7329,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/user_w.png</normaloff>:/icons/icons/user_w.png</iconset>
              </property>
              <property name="iconSize">
@@ -7520,7 +7520,7 @@ border-radius:3px;</string>
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="ressources.qrc">
+              <iconset resource="../src/ressources.qrc">
                <normaloff>:/icons/icons/menu.png</normaloff>:/icons/icons/menu.png</iconset>
              </property>
              <property name="iconSize">
@@ -7631,7 +7631,7 @@ September 2020</string>
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="ressources.qrc">:/logos/logos/logo_uniBremen.png</pixmap>
+                 <pixmap resource="../src/ressources.qrc">:/logos/logos/logo_uniBremen.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -7656,7 +7656,7 @@ September 2020</string>
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="ressources.qrc">:/logos/logos/logo_awi.png</pixmap>
+                 <pixmap resource="../src/ressources.qrc">:/logos/logos/logo_awi.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -7678,7 +7678,7 @@ September 2020</string>
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="ressources.qrc">:/logos/logos/logo_ifam.png</pixmap>
+                 <pixmap resource="../src/ressources.qrc">:/logos/logos/logo_ifam.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -7713,6 +7713,7 @@ September 2020</string>
   </widget>
  </widget>
  <resources>
+  <include location="../src/ressources.qrc"/>
   <include location="ressources.qrc"/>
  </resources>
  <connections/>
