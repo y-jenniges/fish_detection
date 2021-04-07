@@ -325,6 +325,11 @@ class PhotoViewer(QtWidgets.QWidget):
         """ Function to en-/disable arrow shortcuts for switching between images. """
         self.shortcut_previous_image.setEnabled(are_active)
         self.shortcut_next_image.setEnabled(are_active)
+    
+    def setEscShortcutActive(self, is_active):
+        """ Function to en-/disable the esscape shortcut to deselect the 
+        current animal. """
+        self.shortcut_deselect_animal.setEnabled(is_active)
                   
     def _initUi(self):
         """ Builds the UI. """
@@ -879,10 +884,11 @@ class AnimalPainter():
                                     "Error")
             else:
                 self.is_add_mode_active = False
+                self.setEscShortcutActive(True)
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
-
+            
     def deselectAnimal(self):
         """ Deselects the current animal. """
         self.cur_animal = None
@@ -1000,6 +1006,9 @@ class AnimalPainter():
                     [self.cur_animal], cur_image_path, 
                     image_remark, experiment_id, user_id, [image_spec])
                     
+                    # reactivate esc shortcut after tail is drawn
+                    self.imageArea.parent().setEscShortcutActive(True)
+                    
                 else:                    
                     # create a new animal
                     idx = self.models.model_animals.data.index.max()
@@ -1017,7 +1026,10 @@ class AnimalPainter():
                     
                     # do the actual drawing of the head
                     self.drawAnimalHead(self.cur_animal)
- 
+                    
+                    # deactivate esc shortcut to prevent creation of incomplete animals
+                    self.imageArea.parent().setEscShortcutActive(False) 
+
             else:                
                 # create a new animal
                 idx = self.models.model_animals.data.index.max()
