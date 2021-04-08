@@ -89,7 +89,6 @@ class PageData(QtWidgets.QWidget):
         
         self.onCalenderSelectionChanged()
         
-
     def onImageDirEditChanged(self, text=None, updateVisuals=True):
         """ Function to handle when the user changes the img_dir line edit """
         if text is None: text = self.lineEdit_img_dir.text()
@@ -904,12 +903,78 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
         self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
     
+    def onNnFinished(self):
+        # get prediction parameters
+        df = self.predicter.df
+        img_list = self.predicter.image_list
+        exp_id = self.predicter.exp_id
+        user_id = self.predicter.user_id
+        
+        # insert data into data model
+        row = len(self.models.model_animals.data)
+        count = len(df)
+
+        for path in img_list:
+                # insert data into model
+                self.models.model_animals.insertDfRows(row=row, 
+                                                       count=count, 
+                                                       df=df,
+                                                       image_path=path, 
+                                                       image_remark="", 
+                                                       experiment_id=exp_id, 
+                                                       user_id=user_id)
+
+        print("data inserted into model")
+    
+    def onNnProgress(self, i):
+        # update label displaying number of predicted images
+        self.label_nn_activation_number.setText(str(i))
+        
     def onNnActivated(self):
         """
         Handles the activation of the "run neural network" button.
         It gets the current image list from the photo viewer that it applies 
         the neural network to. It appends the new data to the data model.
         """
+        # --------------- new
+        # if self.predicter is not None:
+        #     # get image path list from photo viewer
+        #     img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+            
+        #     file_ids = []
+        #     # determine file IDs
+        #     for path in img_list:
+        #         file_ids.append(os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L"))
+                
+        #     # get experiment and user ID
+        #     exp_id = self.lineEdit_exp_id.text()
+        #     user_id = self.frame_topBar.label_user_id.text()
+            
+        #     # create a QThread and worker object
+        #     self.thread = QtCore.QThread()
+        #     #self.worker = Worker()
+            
+        #     # move worker to the thread
+        #     self.predicter.moveToThread(self.thread)
+            
+        #     # prepare prediction inputs
+        #     self.predicter.setInputsForPrediction(img_list, file_ids, exp_id, user_id)
+            
+        #     # connect signals and slots from thread to worker and vice versa
+        #     self.thread.started.connect(self.predicter.predictImageList)
+        #     self.thread.finished.connect(self.thread.deleteLater)
+            
+        #     self.predicter.finished.connect(self.thread.quit)
+        #     #self.predicter.finished.connect(self.predicter.deleteLater)    
+        #     self.predicter.progress.connect(self.onNnProgress)
+        
+        #     # start prediction           
+        #     self.thread.start()
+               
+        # --------------- new
+        
+        
+        
         # if neural netowk is not None
         if self.predicter.neural_network is not None:
             
@@ -926,7 +991,7 @@ class PageData(QtWidgets.QWidget):
 				
                 print("iterate over pathes")
 			
-                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
+                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
                 
                 print(file_id)
 				
@@ -939,8 +1004,11 @@ class PageData(QtWidgets.QWidget):
                 
                 print(exp_id)
                 print(user_id)
+                
+                # @todo idea here: make predicter class inherit from QThread??
 				
-                # start image prections
+                # start image predictions
+                #self.predicter.start()
                 df = self.predicter.predictImage(path, file_id, exp_id, user_id)
                 
                 print("predicted")
@@ -954,12 +1022,12 @@ class PageData(QtWidgets.QWidget):
                 
                 # insert data into model
                 self.models.model_animals.insertDfRows(row=row, 
-                                                       count=count, 
-                                                       df=df,
-                                                       image_path=path, 
-                                                       image_remark="", 
-                                                       experiment_id=exp_id, 
-                                                       user_id=user_id)
+                                                      count=count, 
+                                                      df=df,
+                                                      image_path=path, 
+                                                      image_remark="", 
+                                                      experiment_id=exp_id, 
+                                                      user_id=user_id)
 
                 print("data inserted into model")
 
@@ -1002,7 +1070,7 @@ class PageData(QtWidgets.QWidget):
             if os.path.isfile(right_image) and os.path.isfile(left_image):
                 file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
                 
-                # get animals on current image
+                # get animals on current image into necessary format
                 cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
                 
                 animals_left = []
@@ -1064,14 +1132,17 @@ class PageData(QtWidgets.QWidget):
         # iterate over images and measure length
         for path in img_list:                
             # get animals on current image
-            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L")
+            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
             cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
             
             animals = []
             for i in range(len(cur_entries)):
-                # measure length only if there are valid coordinates for right image
+                
+                # measure length only if there are valid coordinates for right image and left image
                 if cur_entries.iloc[i]["RX1"] > 0 and cur_entries.iloc[i]["RY1"] > 0 \
-                and cur_entries.iloc[i]["RX2"] > 0 and cur_entries.iloc[i]["RY2"] > 0:
+                and cur_entries.iloc[i]["RX2"] > 0 and cur_entries.iloc[i]["RY2"] > 0 \
+                and cur_entries.iloc[i]["LX1"] > 0 and cur_entries.iloc[i]["LY1"] > 0 \
+                and cur_entries.iloc[i]["LX2"] > 0 and cur_entries.iloc[i]["LY2"] > 0:
 
                     # undistort points
                     head_L = self.matcher.undistortPoint([cur_entries.iloc[i]["LY1"], cur_entries.iloc[i]["LX1"]], "L")
