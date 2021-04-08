@@ -68,7 +68,8 @@ def measureLength(distance_measurer, camera_config, merged_objects):
     """
     #calculate distances by triangulation 
     if len(merged_objects) != 0:
-        #Stereo triangulation
+        
+        # stereo triangulation
         merged_pos = np.empty((len(merged_objects),8), dtype=np.float)
         for i in range(len(merged_objects)):
             merged_pos[i] = np.array(merged_objects[i][1:], dtype=np.float)

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from PyQt5 import QtCore
 import tensorflow as tf
 #import matplotlib.pyplot as plt
 #import matplotlib.cm as cm
@@ -18,7 +19,12 @@ CLASS_WEIGHTS = np.array([ 1,  1.04084507,  1.04084507,  1,  1,
         8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
        12.52542373])
 
-class Predicter():
+#class PredictionWorker(QtCore.QObject):
+    # @todo since i do not want to delete the predicter on page data again and again, so only outsource the list prediction if possible...
+    # otherwise, i can only click predict button once, then predicter is deleted and cant be called again (but this also looses the loaded NN)
+
+class Predicter(QtCore.QObject):
+#class Predicter():
     """
     Class that handles the complete prediction process. First, animal posisions
     and groups on an image are predicted with a neural network. The 
@@ -27,11 +33,21 @@ class Predicter():
     
     Attributes
     ----------
+    finished : pyqtSignal
+    progress : pyqtSignal
     neural_network: keras model
         Neural network used for the predictions.
     class_weights:
         Class weights used by the neural network.
     """
+    
+    # define custom signals
+    finished = QtCore.pyqtSignal() 
+    """ Signal emitted when the predicter finished predicting an image list. """
+    
+    progress = QtCore.pyqtSignal(int)
+    """ Signal emitted for every image from an image list that is already predicted. """
+    
     
     def __init__(self, neural_network_path=None, class_weights=None):
         """
@@ -44,6 +60,8 @@ class Predicter():
         class_weights : list<float>, optional
             Class weights for the neural network. The default is None.
         """
+        super().__init__()
+        
         self.neural_network = None
         
         if class_weights is not None:
@@ -125,7 +143,7 @@ class Predicter():
             # load image
             image = pp.loadImage(img_path, factor=32)
             print("predicter: image loaded")
-            img = pp.loadImage(img_path, factor=32, rescale_range=False)
+            #img = pp.loadImage(img_path, factor=32, rescale_range=False) # for plotting purposes only
     
             print("predicter: image and img loaded")
     
@@ -215,27 +233,94 @@ class Predicter():
             
         return df
         
-    def predictImageList(self, image_pathes):
+    def predictImageList(self, image_pathes=None, file_ids=None, experiment_id="", user_id=""):
         """
         Predicts a list of images.
 
         Parameters
         ----------
         image_pathes : list<string>
-            Pathes to images to predict.
+            Pathes to images to predict. Length n. 
 
+        image_pathes : list<string>
+            File IDs for the files contained in image_pathes -> length n.
+            
+        experiment_id: string
+            ID of the current experiment. Default is "".
+            
+        user_id: string
+            ID of the active user. Deafult is "".
+        
         Returns
         -------
         df : DataFrame
             Prediction information wrapped in a dataframe..
         """
+        
         df = pd.DataFrame(columns=["file_id", "object_remarks", "group", "species", 
                 "LX1", "LY1", "LX2", "LY2", "LX3", "LY3", "LX4", "LY4", 
                 "RX1", "RY1", "RX2", "RY2", "RX3", "RY3", "RX4", "RY4",
                 "length", "height", "image_remarks", "status",
                 "manually_corrected", "experiment_id", "user_id"]) 
-        for path in image_pathes:
-            df.append(self.predictImage(path))
+        
+        # check if image path list ist specified
+        if image_pathes is not None:
+            local_img_pathes = image_pathes 
+        elif self.image_pathes is not None:
+            local_img_pathes = self.image_pathes
+        else:
+            print("Predicter: Please specify a list of image pathes.")
+            return
+        
+        # check if file ID list is specified
+        if file_ids is not None:
+            local_file_ids = file_ids 
+        elif self.file_ids is not None:
+            local_file_ids = self.file_ids
+        else:
+            print("Predicter: Please specify a list of file IDs.")
+            return 
+  
+        # predict each image and append the results to a dataframe
+        for i in range(len(local_img_pathes)):
+            path = local_img_pathes[i]
+            file_id = local_file_ids[i]
+            prediction = self.predictImage(path, file_id, experiment_id, user_id)
+            df.append(prediction, file_id, experiment_id, user_id)
+            self.progress.emit(i+1)
+        
+        self.df = df
+        
+        self.finished.emit()
         
         return df
+    
+    def setInputsForPrediction(self, image_pathes, file_ids, experiment_id="", user_id=""):
+        """
+        Set all necessary inputs for prediction. Use this functionality, if you
+        want to run the neural network predictions in a separate worker thread.
+
+        Parameters
+        ----------
+        image_pathes : list<string>
+            Pathes to images to predict. Length n. 
+
+        image_pathes : list<string>
+            File IDs for the files contained in image_pathes -> length n.
+            
+        experiment_id: string
+            ID of the current experiment. Default is "".
+            
+        user_id: string
+            ID of the active user. Deafult is "".
+
+        Returns
+        -------
+        None.
+
+        """
+        self.image_pathes = image_pathes
+        self.file_ids = file_ids
+        self.experiment_id = experiment_id
+        self.user_id = user_id
             
