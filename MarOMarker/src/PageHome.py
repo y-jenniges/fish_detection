@@ -59,24 +59,24 @@ class PageHome(QtWidgets.QWidget):
   
     def on_add_clicked(self):
         """ (De-)activate the add mode. """
-        self.photo_viewer.imageArea.animal_painter.on_add_animal()
+        self.photo_viewer.on_add_animal()
         self.updateAddRemoveIcons()
             
     def on_remove_clicked(self):
         """ (De-)activate the remove mode. """
-        self.photo_viewer.imageArea.animal_painter.on_remove_animal()
+        self.photo_viewer.on_remove_animal()
         self.updateAddRemoveIcons()
 
     def updateAddRemoveIcons(self):
         """ Update the icond of add and remove mode according to their state.  """
         # adapt icon of the add button
-        if self.photo_viewer.imageArea.animal_painter.is_add_mode_active:
+        if self.photo_viewer.isAddModeActive():
             self.btn_add.setIcon(getIcon(":/icons/icons/plus_darkBlue.png"))
         else:
             self.btn_add.setIcon(getIcon(":/icons/icons/plus.png"))
             
-        # adapt icon of the renive button
-        if self.photo_viewer.imageArea.animal_painter.is_remove_mode_active:
+        # adapt icon of the remove button
+        if self.photo_viewer.isRemoveModeActive():
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_open_darkBlue.png"))
         else:
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))        
@@ -135,9 +135,8 @@ class PageHome(QtWidgets.QWidget):
         # --- photo viewer  ------------------------------------------------ #        
         self.photo_viewer = PhotoViewer(self.models, imageDirectory="", 
                                         imagePrefix="", outputDir="", 
-                                        imageEnding="*_L.jpg", parent=self)
+                                        parent=self)
         self.photo_viewer.setObjectName("photo_viewer")
-        
         
         # --- main widget -------------------------------------------------- #  
         # set main widget properties
@@ -530,22 +529,17 @@ class PageHome(QtWidgets.QWidget):
     def displayLeftImage(self):
         """ Display left image. """
         self.btn_imgSwitch.setText("L")
-        self.photo_viewer.activateLRMode(False)
-        self.photo_viewer.setImageEnding("*_L.jpg")
+        self.photo_viewer.activateImageMode("L")
 
     def displayRightImage(self):
         """ Display right image. """
         self.btn_imgSwitch.setText("R")
-        self.photo_viewer.activateLRMode(False)
-        self.photo_viewer.setImageEnding("*_R.jpg")
+        self.photo_viewer.activateImageMode("R")
     
     def displayBothImages(self):
-        """ Display both images. 
-        
-        !!! NOT IMPLEMENTED YET !!!
-        """
+        """ Display both images. """
         self.btn_imgSwitch.setText("LR")
-        self.photo_viewer.activateLRMode(True)
+        self.photo_viewer.activateImageMode("LR")
      
     def mousePressEvent(self, event):
         """ On mouse press, update visibility of zoom slider widget. """
