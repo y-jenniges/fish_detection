@@ -467,7 +467,7 @@ class PageData(QtWidgets.QWidget):
                                           "label_check_match_number")
         frame_process_arrow5 = self._createFrameProcessArrow(self.scrollAreaWidgetContents)
         
-        self.frame_check_match.setEnabled(False) # @todo functionality needs to be implemented
+        #self.frame_check_match.setEnabled(False) # @todo functionality needs to be implemented
         
         # length measurement row
         self.label_length_measurement = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -1048,6 +1048,7 @@ class PageData(QtWidgets.QWidget):
         navigating to the home screen. """ 
         # navigate to home screen
         self.parent().parent().directToHomePage()
+        self.parent().parent().page_home.displayLeftImage()
     
     def onRectifyMatch(self):
         """
@@ -1117,8 +1118,9 @@ class PageData(QtWidgets.QWidget):
         Directs to LR screen (showing left and right images) if  at least one
         match is already calculated. 
         """
-        # check matching on LR screen
-        print("Not implemented yet.")
+        # navigate to LR screen
+        self.parent().parent().directToHomePage()
+        self.parent().parent().page_home.displayBothImages()
     
     def onCalcLength(self):
         """ Gets current image list from photo viewer and calculates the 
