@@ -21,9 +21,6 @@ class PhotoViewer(QtWidgets.QWidget):
         Directory where the images are stored. 
     image_prefix : string
         Images will be displayed only if they start with this prefix.
-    image_ending : string
-        It is either '\*_L.jpg' or '\*_R.jpg'. Indicates if the left or right 
-        image is currently being edited.
     output_dir : string
         Directory where the output file is stored.
     cur_image_index : int
@@ -38,7 +35,7 @@ class PhotoViewer(QtWidgets.QWidget):
     """ Signal that is emitted when a new image is loaded. """
     
     def __init__(self, models, imageDirectory, imagePrefix, outputDir="", 
-                 imageEnding="*_L.jpg", parent=None):
+                parent=None):
         """
         Init function.
 
@@ -52,8 +49,6 @@ class PhotoViewer(QtWidgets.QWidget):
             DESCRIPTION.
         outputDir : string, optional
             DESCRIPTION. The default is "".
-        imageEnding : string, optional
-            DESCRIPTION. The default is "*_L.jpg".
         parent : TYPE, optional
             The parent object. The default is None.
         """
@@ -65,13 +60,11 @@ class PhotoViewer(QtWidgets.QWidget):
         # image directory and prefix (needed for retrieving the image_list)
         self.image_directory = imageDirectory
         self.image_prefix = imagePrefix
-        self.image_ending = imageEnding
         self.output_dir = outputDir
 
-        # list of image pathes and the current image index
+        # list of image pathes and the current image index (load per default L image)
         self.cur_image_index = 0
-        images_with_prefix = glob.glob(imageDirectory + imagePrefix 
-                                       + imageEnding)
+        images_with_prefix = glob.glob(imageDirectory + imagePrefix + "*_L.jpg")
         
         self.image_list = []
         if hasattr(self.parent().parent().parent(), 'page_data'):
@@ -135,23 +128,73 @@ class PhotoViewer(QtWidgets.QWidget):
         self.image_prefix = text
         self.updateImageList()
         
-    def setImageEnding(self, text):
+    def setImageEnding(self, text, imageArea=None):
         """ Adapt image ending in animal_painter and in self. Must be either
         '\*_L.jpg' or '\*_R.jpg'. """
         assert(text == "*_L.jpg" or text == "*_R.jpg")
-        self.image_ending = text
+
+        if imageArea:
+            imageArea.animal_painter.image_ending = text
+        else:
+            self.imageArea.animal_painter.image_ending = text
+            
         self.updateImageList()
-        self.imageArea.animal_painter.image_ending = text
 
-    def activateLRMode(self, activateLRMode=False):
-        """ !!! NOT IMPLEMENTED YET !!! """
-        pass
+    def on_add_animal(self):
+        # if LR view is active, both image areas need to be activated
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            self.imageAreaLR.imageAreaL.animal_painter.on_add_animal()
+            self.imageAreaLR.imageAreaR.animal_painter.on_add_animal()
+        else:
+            self.imageArea.animal_painter.on_add_animal()
 
-    def updateImageList(self):
+    def on_remove_animal(self):
+        # if LR view is active, both image areas need to be activated
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal()
+            self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal()
+        else:
+            self.imageArea.animal_painter.on_remove_animal()
+            
+    def activateImageMode(self, mode):
+        """
+        Showing either the left, right or both images in the GUI depending on
+        the mode.
+
+        Parameters
+        ----------
+        mode : string
+            Can be either 'L', 'R' or 'LR'.
+        """
+        if mode == "L":
+            self.stackedWidget_imagearea.setCurrentIndex(0)
+            self.setImageEnding("*_L.jpg")
+        elif mode == "R":
+            self.stackedWidget_imagearea.setCurrentIndex(0)
+            self.setImageEnding("*_R.jpg")
+        elif mode == "LR":
+            self.stackedWidget_imagearea.setCurrentIndex(1)
+            self.setImageEnding("*_L.jpg")
+        else:
+            print("PhotoViewer: Unknown mode.")
+
+    def updateImageList(self, imageArea=None):
         """ Recalculate image list, i.e. filter the image directory for images
         with the correct prefix and date. """
+        if not imageArea: imageArea = self.imageArea
+        
+        # if LR view is active, @todo then what??
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            self._updateSingleImageList(self.imageAreaLR.imageAreaR)
+            self._updateSingleImageList(self.imageAreaLR.imageAreaL)
+        else:
+            self._updateSingleImageList(self.imageArea)
+
+
+    def _updateSingleImageList(self, imageArea):
         images_with_prefix = glob.glob(self.image_directory 
-                                       + self.image_prefix + self.image_ending)
+                             + self.image_prefix + imageArea.animal_painter.image_ending)
+        
         if hasattr(self.parent().parent().parent(), 'page_data'):
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
@@ -166,36 +209,73 @@ class PhotoViewer(QtWidgets.QWidget):
         """ Resizes image and animal positions when resize event occurs. """
         super().resizeEvent(event)
 
+        path = self.image_list[self.cur_image_index]
+        
+        # if LR view is active, both image areas needs to be scaled
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            if path.endswith("_L.jpg"):
+                pathL = path
+                pathR = path.replace("_L.jpg", "_R.jpg")
+            else:
+                pathL = path.replace("_R.jpg", "_L.jpg")
+                pathR = path
+             
+            self._resizeView(pathL, self.imageAreaLR.imageAreaL)
+            self._resizeView(pathR, self.imageAreaLR.imageAreaR)
+        else:
+            self._resizeView(path, self.imageArea)
+        
+    def _resizeView(self, path, imageArea):
         if self.cur_image_index < len(self.image_list):
             # reload photo
-            path = self.image_list[self.cur_image_index]
             photo = QtGui.QPixmap(path).scaled(QtCore.QSize(
-                self.imageArea.width(), self.imageArea.height()))
-            self.imageArea.setPhoto(photo)
+                imageArea.width(), imageArea.height()))
+            imageArea.setPhoto(photo)
+            
             self.updateImageCountVisual()
         
-        self.imageArea.animal_painter.redraw()
-
+        imageArea.animal_painter.redraw()
+        
     def loadImage(self, path):
+        # if LR view is active, update both image views, else only the current one
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            # check if the path is for L or R image
+            if path.endswith("_L.jpg"):
+                pathL = path
+                pathR = path.replace("_L.jpg", "_R.jpg")
+            else:
+                pathL = path.replace("_R.jpg", "_L.jpg")
+                pathR = path
+            
+            self.loadSingleImage(pathL, self.imageAreaLR.imageAreaL)
+            self.loadSingleImage(pathR, self.imageAreaLR.imageAreaR)
+        else:
+            self.loadSingleImage(path)        
+
+    def loadSingleImage(self, path, imageArea=None):
         """ Loads an image from a path and draws available animals from 
         output file. """
+        
+        if not imageArea:
+            imageArea = self.imageArea
+        
         if path:
             image = QtGui.QImage(path)
             photo = QtGui.QPixmap().fromImage(image).scaled(QtCore.QSize(
-                self.imageArea.width(), self.imageArea.height()))
-            self.imageArea.animal_painter.setOriginalWidthHeight(
+                imageArea.width(), imageArea.height()))
+            imageArea.animal_painter.setOriginalWidthHeight(
                 width=image.width(), height = image.height())
         else:
             photo = None
         
-        self.imageArea.setPhoto(photo)
+        imageArea.setPhoto(photo)
         self.updateImageCountVisual()
         
         # clear visuals
-        self.imageArea.animal_painter.removeAll()
+        imageArea.animal_painter.removeAll()
         
         # update animal list
-        self.imageArea.animal_painter.animal_list.clear()
+        imageArea.animal_painter.animal_list.clear()
         
         # find current image in result file and draw all animals from it
         if self.models.model_animals.data is not None and path is not None:
@@ -205,8 +285,7 @@ class PhotoViewer(QtWidgets.QWidget):
                     os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")]
             
             # draw animals
-            self.imageArea.animal_painter.drawAnimalsFromList(
-                cur_file_entries, self.image_ending)       
+            imageArea.animal_painter.drawAnimalsFromList(cur_file_entries)
             
             # load current image remark
             if len(cur_file_entries) > 0: 
@@ -216,9 +295,9 @@ class PhotoViewer(QtWidgets.QWidget):
             
         # reset current animal, hide specs widget and update bounding boxes 
         # (none should be drawn since cur_animal is None)
-        self.imageArea.animal_painter.cur_animal = None
-        self.imageArea.animal_painter.widget_animal_specs.hide()
-        self.imageArea.animal_painter.updateBoundingBoxes()    
+        imageArea.animal_painter.cur_animal = None
+        imageArea.animal_painter.widget_animal_specs.hide()
+        imageArea.animal_painter.updateBoundingBoxes()    
     
     def exportToCsv(self, file_id):
         """ Updates the current CSV table. """
@@ -227,11 +306,14 @@ class PhotoViewer(QtWidgets.QWidget):
         res_file_name = main_window.getResultFileName()
         self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id)
     
-    def on_next_image(self):
+    def on_next_image(self, imageArea=None):
         """ Loads the next image and draws animals accordingly. """
+        if not imageArea:
+            imageArea = self.imageArea
+            
         if not self.models.model_animals.isEmpty(): 
             # only go to next image if cur animal is none or complete
-            cur_animal = self.imageArea.animal_painter.cur_animal
+            cur_animal = imageArea.animal_painter.cur_animal
 
             if cur_animal is not None and \
             ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
@@ -261,11 +343,14 @@ class PhotoViewer(QtWidgets.QWidget):
                 # update the previous image in the csv file
                 self.exportToCsv(cur_file_id)
     
-    def on_previous_image(self):
+    def on_previous_image(self, imageArea=None):
         """ Loads the previous image and draws animals accordingly. """
+        if not imageArea:
+            imageArea = self.imageArea
+            
         if not self.models.model_animals.isEmpty(): 
             # only go to previous image if cur animal is none or complete
-            cur_animal = self.imageArea.animal_painter.cur_animal
+            cur_animal = imageArea.animal_painter.cur_animal
 
             if cur_animal is not None and \
             ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
@@ -303,6 +388,26 @@ class PhotoViewer(QtWidgets.QWidget):
         cur_image = self.cur_image_index
         self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
 
+    def isAddModeActive(self):
+        if self.imageArea.animal_painter.is_add_mode_active:
+            return True
+        elif self.imageAreaLR.imageAreaL.animal_painter.is_add_mode_active:
+            return True
+        elif self.imageAreaLR.imageAreaR.animal_painter.is_add_mode_active:
+            return True
+        else:
+            return False
+            
+    def isRemoveModeActive(self):
+        if self.imageArea.animal_painter.is_remove_mode_active:
+            return True
+        elif self.imageAreaLR.imageAreaL.animal_painter.is_remove_mode_active:
+            return True
+        elif self.imageAreaLR.imageAreaR.animal_painter.is_remove_mode_active:
+            return True
+        else:
+            return False
+        
     def _initActions(self):
         """ Initalizes the actions connected to UI elements. """ 
         # connect buttons
@@ -316,33 +421,25 @@ class PhotoViewer(QtWidgets.QWidget):
         self.shortcut_next_image = QtWidgets.QShortcut(
             QtGui.QKeySequence("right"), self.btn_next_image, 
             self.on_next_image) 
-        self.shortcut_deselect_animal = QtWidgets.QShortcut(
-            QtGui.QKeySequence("Escape"), self.imageArea, 
-            self.imageArea.animal_painter.deselectAnimal) 
 
     # enable or disable arrow key shortcuts
     def setArrowShortcutsActive(self, are_active):
         """ Function to en-/disable arrow shortcuts for switching between images. """
         self.shortcut_previous_image.setEnabled(are_active)
         self.shortcut_next_image.setEnabled(are_active)
-    
-    def setEscShortcutActive(self, is_active):
-        """ Function to en-/disable the esscape shortcut to deselect the 
-        current animal. """
-        self.shortcut_deselect_animal.setEnabled(is_active)
-                  
+                      
     def _initUi(self):
         """ Builds the UI. """
         # --- left frame ---------------------------------------------------- # 
         # frame
-        frame_left = QtWidgets.QFrame(self)
-        frame_left.setMinimumSize(QtCore.QSize(60, 0))
-        frame_left.setMaximumSize(QtCore.QSize(60, 16777215))
-        frame_left.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_left.setObjectName("frame_left")
+        self.frame_left = QtWidgets.QFrame(self)
+        self.frame_left.setMinimumSize(QtCore.QSize(60, 0))
+        self.frame_left.setMaximumSize(QtCore.QSize(60, 16777215))
+        self.frame_left.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_left.setObjectName("frame_left")
   
         # layout
-        layout_frame_left = QtWidgets.QVBoxLayout(frame_left)
+        layout_frame_left = QtWidgets.QVBoxLayout(self.frame_left)
         layout_frame_left.setContentsMargins(5, 5, 5, 0)
         layout_frame_left.setObjectName("layout_frame_left")
         
@@ -355,7 +452,7 @@ class PhotoViewer(QtWidgets.QWidget):
                                             QtWidgets.QSizePolicy.Expanding)
  
         # button for previous image
-        self.btn_previous_image = QtWidgets.QPushButton(frame_left)
+        self.btn_previous_image = QtWidgets.QPushButton(self.frame_left)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
                                            QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -370,7 +467,7 @@ class PhotoViewer(QtWidgets.QWidget):
         self.btn_previous_image.setObjectName("btn_previous_image")
 
         # label to display image count
-        self.label_imgCount = QtWidgets.QLabel(frame_left)
+        self.label_imgCount = QtWidgets.QLabel(self.frame_left)
         self.label_imgCount.setMinimumSize(QtCore.QSize(0, 40))
         self.label_imgCount.setMaximumSize(QtCore.QSize(16777215, 40))
         self.label_imgCount.setAlignment(QtCore.Qt.AlignCenter)
@@ -384,16 +481,30 @@ class PhotoViewer(QtWidgets.QWidget):
         layout_frame_left.addWidget(self.label_imgCount)
         
         
-        # --- image area ---------------------------------------------------- # 
-        self.imageArea = ImageArea(self.models, self)
+        # --- stacked widget to display L, R or LR image(s) ----------------- # 
+        self.stackedWidget_imagearea = QtWidgets.QStackedWidget(self)
+        self.stackedWidget_imagearea.setLineWidth(0)
+        self.stackedWidget_imagearea.setObjectName("stackedWidget")
         
+        # image area to display left image OR right image
+        self.imageArea = ImageArea(self.models, self)
+        self.stackedWidget_imagearea.addWidget(self.imageArea)   
+        
+        # image area to display left and right images
+        self.imageAreaLR = ImageAreaLR(self.models, self)
+        self.stackedWidget_imagearea.addWidget(self.imageAreaLR)
+             
+        # initially display the view with only one image
+        self.stackedWidget_imagearea.setCurrentIndex(0)
+
+
         # --- right frame --------------------------------------------------- # 
         # frame
-        frame_right = QtWidgets.QFrame(self)
-        frame_right.setMinimumSize(QtCore.QSize(60, 0))
-        frame_right.setMaximumSize(QtCore.QSize(60, 16777215))
-        frame_right.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_right.setObjectName("frame_right")
+        self.frame_right = QtWidgets.QFrame(self)
+        self.frame_right.setMinimumSize(QtCore.QSize(60, 0))
+        self.frame_right.setMaximumSize(QtCore.QSize(60, 16777215))
+        self.frame_right.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_right.setObjectName("frame_right")
         
         # vertical spacers
         spacerItem9 = QtWidgets.QSpacerItem(20, 40, 
@@ -404,14 +515,14 @@ class PhotoViewer(QtWidgets.QWidget):
                                              QtWidgets.QSizePolicy.Expanding)
         
         # button for previous image
-        self.btn_next_image = QtWidgets.QPushButton(frame_right)      
+        self.btn_next_image = QtWidgets.QPushButton(self.frame_right)      
         self.btn_next_image.setIcon(getIcon(
             ":/icons/icons/arrow_right_big.png"))
         self.btn_next_image.setIconSize(QtCore.QSize(20, 40))
         self.btn_next_image.setObjectName("btn_next_image")
         
         # button for opening image in separate window
-        # self.btn_openImg = QtWidgets.QPushButton(frame_right)
+        # self.btn_openImg = QtWidgets.QPushButton(self.frame_right)
         # self.btn_openImg.setMinimumSize(QtCore.QSize(40, 40))
         # self.btn_openImg.setMaximumSize(QtCore.QSize(40, 40))
         # self.btn_openImg.setIcon(getIcon(":/icons/icons/open_image.png"))
@@ -419,7 +530,7 @@ class PhotoViewer(QtWidgets.QWidget):
         # self.btn_openImg.setObjectName("btn_openImg")
         
         # layout
-        layout_frame_right = QtWidgets.QVBoxLayout(frame_right)
+        layout_frame_right = QtWidgets.QVBoxLayout(self.frame_right)
         layout_frame_right.setContentsMargins(5, 5, 5, 0)
         layout_frame_right.setObjectName("layout_frame_right")
         
@@ -437,12 +548,75 @@ class PhotoViewer(QtWidgets.QWidget):
         self.layout.setObjectName("layout")
         
         # adding widgets to main layout 
-        self.layout.addWidget(frame_left)
-        self.layout.addWidget(self.imageArea)
-        self.layout.addWidget(frame_right)
+        self.layout.addWidget(self.frame_left)
+        self.layout.addWidget(self.stackedWidget_imagearea)
+        self.layout.addWidget(self.frame_right)
 
         # set main layout
         self.layout = self.layout
+        
+class ImageAreaLR(QtWidgets.QWidget):
+    def __init__(self, models, parent=None):
+        super(ImageAreaLR, self).__init__(parent)
+        
+        self.models = models
+        self._initUi()
+        self._initActions()
+        
+        if parent:
+            self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
+            self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
+        
+    # def setArrowShortcutsActive(self, are_active):
+    #     """ Function to en-/disable arrow shortcuts for switching between images. """
+    #     self.parent().parent().setArrowShortcutsActive(are_active)
+    #     #self.shortcut_previous_image.setEnabled(are_active)
+    #     #self.shortcut_next_image.setEnabled(are_active)
+        
+    def _initUi(self):
+        print("Drawing LR image area...")
+        
+        # -- frame for the two images displayed below each other ------------ #
+        layout_imageFrame = QtWidgets.QVBoxLayout(self)
+        layout_imageFrame.setContentsMargins(0, 0, 0, 0)
+        layout_imageFrame.setSpacing(0)
+        layout_imageFrame.setObjectName("layout_imageFrame")
+        
+        self.imageAreaL = ImageArea(self.models, self)
+        self.imageAreaR = ImageArea(self.models, self)
+        
+        layout_imageFrame.addWidget(self.imageAreaL)
+        layout_imageFrame.addWidget(self.imageAreaR)
+        
+        frame_image = QtWidgets.QFrame(self)
+        #frame_image.setMinimumSize(QtCore.QSize(60, 0))
+        #frame_image.setMaximumSize(QtCore.QSize(60, 16777215))
+        frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_image.setLayout(layout_imageFrame)
+
+        
+        # -- frame for more options ----------------------------------------- #
+        frame_options = QtWidgets.QFrame(self)
+        #frame_options.setMinimumSize(QtCore.QSize(60, 0))
+        #frame_options.setMaximumSize(QtCore.QSize(60, 16777215))
+        frame_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        #frame_options.setLayout(layout_imageFrame)
+        
+        # main layout
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.layout.setObjectName("layout")
+        
+        # adding widgets to main layout 
+        self.layout.addWidget(frame_image)
+        self.layout.addWidget(frame_options)
+        
+        # set main layout
+        self.setLayout(self.layout)
+    
+    def _initActions(self):
+        print("no actions yet")
         
 
 class ImageArea(QtWidgets.QGraphicsView):
@@ -534,18 +708,29 @@ class ImageArea(QtWidgets.QGraphicsView):
             elif event.angleDelta().y() <= 0:
                 factor = 0.9
                 self._zoom -= 1
+        
+            # find the photo viewer in the parent tree
+            parent = None
+            if isinstance(self.parent().parent().parent().parent(), PhotoViewer):
+                parent = self.parent().parent().parent().parent()
+            elif isinstance(self.parent(), PhotoViewer):
+                parent = self.parent()
+            else:
+                print("ImageArea: Could not find PhotoViewer as parent and \
+                      could therefore not (de-) activate arrow shortcuts.")
+                return
             
             # scale the view if zoom is positive, else set it to zero and fit 
             # the photo in the view
             if self._zoom > 0:
                 self.scale(factor, factor)
-                self.parent().setArrowShortcutsActive(False)
+                parent.setArrowShortcutsActive(False)
             elif self._zoom == 0:
                 self._fitInView()
-                self.parent().setArrowShortcutsActive(True)
+                parent.setArrowShortcutsActive(True)
             else:
                 self._zoom = 0
-                self.parent().setArrowShortcutsActive(True)
+                parent.setArrowShortcutsActive(True)
                     
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):
@@ -562,6 +747,16 @@ class ImageArea(QtWidgets.QGraphicsView):
         """ Passes the mouse release event to the animal_painter. """
         self.animal_painter.mouseReleaseEvent(event)
         super().mouseReleaseEvent(event) 
+                
+    def enterEvent(self, event):
+        """ Defines behaviour when cursor enters image area. """
+        self.animal_painter.shortcut_deselect_animal.setEnabled(True)
+        print("enter event")
+        
+    def leaveEvent(self, event):
+        """ Defines behaviour when cursor leaves image area. """
+        self.animal_painter.shortcut_deselect_animal.setEnabled(False)
+        print("leave event")
 
 
 class AnimalPainter():
@@ -646,6 +841,10 @@ class AnimalPainter():
         # remember the group and species of the most recently adapted animal
         self._previous_group = AnimalGroup.UNIDENTIFIED
         self._previous_species = AnimalSpecies.UNIDENTIFIED
+        
+        # setup shortcuts
+        self.shortcut_deselect_animal = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Escape"), self.imageArea, self.deselectAnimal) 
     
     def setAnimalRemark(self, remark):
         """ Sets the remark of the currently active animal. """
@@ -884,7 +1083,6 @@ class AnimalPainter():
                                     "Error")
             else:
                 self.is_add_mode_active = False
-                self.setEscShortcutActive(True)
         else:
             self.is_remove_mode_active = False
             self.is_add_mode_active = True
@@ -899,6 +1097,15 @@ class AnimalPainter():
         head/tail visuals, as well as removing/adding animals on click. """
         # convert event position to scene corrdinates
         pos = self.imageArea.mapToScene(event.pos()).toPoint()
+        
+        # find photo viewer parent
+        if isinstance(self.imageArea.parent().parent(), PhotoViewer):
+            parent = self.imageArea.parent().parent()
+        elif isinstance(self.imageArea.parent().parent().parent().parent(), PhotoViewer):
+            parent = self.imageArea.parent().parent().parent().parent()
+        else:
+            print("AnimalPainter: Could not find PhotoViewer parent.")
+            return
         
         # enable dragging for current animal (when add mode is not active and 
         # the current animal is completey drawn)
@@ -989,10 +1196,10 @@ class AnimalPainter():
                     # add animal to list
                     self.animal_list.append(self.cur_animal)
                     
-                    cur_image_path = self.imageArea.parent().image_list[self.imageArea.parent().cur_image_index]
-                    image_remark = self.imageArea.parent().parent().comboBox_imgRemark.currentText()
-                    experiment_id = self.imageArea.parent().parent().parent().parent().page_data.lineEdit_exp_id.text()
-                    user_id = self.imageArea.parent().parent().parent().parent().page_settings.lineEdit_user_id.text()
+                    cur_image_path = parent.image_list[parent.cur_image_index]
+                    image_remark = parent.parent().comboBox_imgRemark.currentText()
+                    experiment_id = parent.parent().parent().parent().page_data.lineEdit_exp_id.text()
+                    user_id = parent.parent().parent().parent().page_settings.lineEdit_user_id.text()
                     
                     # add new data row and use coordinates of the animal as left
                     # or right image coordinates (depending on image_spec)
@@ -1007,7 +1214,8 @@ class AnimalPainter():
                     image_remark, experiment_id, user_id, [image_spec])
                     
                     # reactivate esc shortcut after tail is drawn
-                    self.imageArea.parent().setEscShortcutActive(True)
+                    #parent.setEscShortcutActive(True)
+                    self.shortcut_deselect_animal.setEnabled(True)
                     
                 else:                    
                     # create a new animal
@@ -1028,8 +1236,8 @@ class AnimalPainter():
                     self.drawAnimalHead(self.cur_animal)
                     
                     # deactivate esc shortcut to prevent creation of incomplete animals
-                    self.imageArea.parent().setEscShortcutActive(False) 
-
+                    #parent.setEscShortcutActive(False) 
+                    self.shortcut_deselect_animal.setEnabled(False)
             else:                
                 # create a new animal
                 idx = self.models.model_animals.data.index.max()
@@ -1048,7 +1256,7 @@ class AnimalPainter():
                 # do the actual drawing of the head
                 self.drawAnimalHead(self.cur_animal)
 
-        self.updateBoundingBoxes()                     
+        self.updateBoundingBoxes()                
 
     def mouseMoveEvent(self, event):
         """ When moving the mouse, adapt head/tail visual position when they
@@ -1154,7 +1362,7 @@ class AnimalPainter():
             self.models.model_animals.data.loc[self.cur_animal.row_index, end+"Y2"] = self.cur_animal.original_pos_tail.y()
 
 
-    def drawAnimalsFromList(self, animal_list, image_ending="_L"):
+    def drawAnimalsFromList(self, animal_list):
         """
         Draws animals from a dataframe on the current image. 
 
@@ -1167,16 +1375,13 @@ class AnimalPainter():
             RX1, RY1 (head position on right image), 
             RX2, RY2 (tail position on right image),
             group, species, object_remarks
-        image_ending : string, optional
-            Indicates wether to draw animals from left or right image. 
-            The default is "_L".
-        """
+        """        
         for i in range(len(animal_list)):  
             # get the head and tail position form the list
-            if image_ending=="*_L.jpg":
+            if self.image_ending=="*_L.jpg":
                 original_pos_h = QtCore.QPoint(int(animal_list["LX1"].iloc[i]), int(animal_list["LY1"].iloc[i]))
                 original_pos_t = QtCore.QPoint(int(animal_list["LX2"].iloc[i]), int(animal_list["LY2"].iloc[i]))
-            elif image_ending == "*_R.jpg":
+            elif self.image_ending == "*_R.jpg":
                 original_pos_h = QtCore.QPoint(int(animal_list["RX1"].iloc[i]), int(animal_list["RY1"].iloc[i]))
                 original_pos_t = QtCore.QPoint(int(animal_list["RX2"].iloc[i]), int(animal_list["RY2"].iloc[i]))   
             else:
