@@ -566,13 +566,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         if parent:
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
-        
-    # def setArrowShortcutsActive(self, are_active):
-    #     """ Function to en-/disable arrow shortcuts for switching between images. """
-    #     self.parent().parent().setArrowShortcutsActive(are_active)
-    #     #self.shortcut_previous_image.setEnabled(are_active)
-    #     #self.shortcut_next_image.setEnabled(are_active)
-        
+                
     def _initUi(self):
         print("Drawing LR image area...")
         
@@ -585,7 +579,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL = ImageArea(self.models, self)
         self.imageAreaR = ImageArea(self.models, self)
         
+        spacer = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)  
+        
         layout_imageFrame.addWidget(self.imageAreaL)
+        layout_imageFrame.addItem(spacer)
         layout_imageFrame.addWidget(self.imageAreaR)
         
         frame_image = QtWidgets.QFrame(self)
