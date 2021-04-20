@@ -263,9 +263,9 @@ class Predicter(QtCore.QObject):
                 "length", "height", "image_remarks", "status",
                 "manually_corrected", "experiment_id", "user_id"]) 
         
-        # check if image path list ist specified
+        # check if image path list is specified
         if image_pathes is not None:
-            local_img_pathes = image_pathes 
+            local_img_pathes = image_pathes
         elif self.image_pathes is not None:
             local_img_pathes = self.image_pathes
         else:

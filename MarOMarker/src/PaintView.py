@@ -25,9 +25,10 @@ class PhotoViewer(QtWidgets.QWidget):
         Directory where the output file is stored.
     cur_image_index : int
         Index of the current image in image_list.
-    image_list : list<string>
+    image_list : [list<string>, list<string>]
         List containing all image pathes that have the given prefix, are of the
-        selected date and have the desired image ending.
+        selected date. First entry contains all left image pathes and second
+        entry all right image pathes.
     newImageLoaded: pyqtSignal
     """    
     
@@ -64,14 +65,16 @@ class PhotoViewer(QtWidgets.QWidget):
 
         # list of image pathes and the current image index (load per default L image)
         self.cur_image_index = 0
-        images_with_prefix = glob.glob(imageDirectory + imagePrefix + "*_L.jpg")
+        l_images_with_prefix = glob.glob(imageDirectory + imagePrefix + "*_L.jpg")
+        r_images_with_prefix = glob.glob(imageDirectory + imagePrefix + "*_R.jpg")
         
         self.image_list = []
         if hasattr(self.parent().parent().parent(), 'page_data'):
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
             
-            self.image_list = [x for x in images_with_prefix if date in x]
+            self.image_list.append([x for x in l_images_with_prefix if date in x])
+            self.image_list.append([x for x in r_images_with_prefix if date in x])
             
         # load result file if one already exists
         self.loadResFile()
@@ -140,22 +143,30 @@ class PhotoViewer(QtWidgets.QWidget):
             
         self.updateImageList()
 
-    def on_add_animal(self):
+    def on_add_animal(self, activate_add, is_remove_active):
         # if LR view is active, both image areas need to be activated
-        if self.stackedWidget_imagearea.currentIndex() == 1:
-            self.imageAreaLR.imageAreaL.animal_painter.on_add_animal()
-            self.imageAreaLR.imageAreaR.animal_painter.on_add_animal()
-        else:
-            self.imageArea.animal_painter.on_add_animal()
+        #if self.stackedWidget_imagearea.currentIndex() == 1:
+        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(activate_add, is_remove_active)
+        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_add_animal(activate_add, is_remove_active)
+        #else:
+        c, f = self.imageArea.animal_painter.on_add_animal(activate_add, is_remove_active)
+        
+        is_add_activatable = a and b and c
+        is_remove_active = d and e and f
+        return is_add_activatable, is_remove_active
 
-    def on_remove_animal(self):
+    def on_remove_animal(self, activate_remove, is_add_active):
         # if LR view is active, both image areas need to be activated
-        if self.stackedWidget_imagearea.currentIndex() == 1:
-            self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal()
-            self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal()
-        else:
-            self.imageArea.animal_painter.on_remove_animal()
-            
+        #if self.stackedWidget_imagearea.currentIndex() == 1:
+        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(activate_remove, is_add_active)
+        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal(activate_remove, is_add_active)
+        #else:
+        c, f = self.imageArea.animal_painter.on_remove_animal(activate_remove, is_add_active)
+        
+        is_remove_activatable = a and b and c
+        is_add_active = d and e and f
+        return is_remove_activatable, is_add_active
+        
     def activateImageMode(self, mode):
         """
         Showing either the left, right or both images in the GUI depending on
@@ -190,43 +201,43 @@ class PhotoViewer(QtWidgets.QWidget):
         else:
             self._updateSingleImageList(self.imageArea)
 
-
     def _updateSingleImageList(self, imageArea):
-        images_with_prefix = glob.glob(self.image_directory 
-                             + self.image_prefix + imageArea.animal_painter.image_ending)
+        l_images_with_prefix = glob.glob(self.image_directory 
+                             + self.image_prefix + "*_L.jpg")
+        r_images_with_prefix = glob.glob(self.image_directory 
+                             + self.image_prefix + "*_R.jpg")
         
         if hasattr(self.parent().parent().parent(), 'page_data'):
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
-            self.image_list = [x for x in images_with_prefix if date in x]
+            self.image_list = [] # clear image list
+            self.image_list.append([x for x in l_images_with_prefix if date in x])
+            self.image_list.append([x for x in r_images_with_prefix if date in x])
         
         if not self.image_list:
-            self.loadImage(path=None)
+            self.loadImageFromPath(path=None)
         else:
-            self.loadImage(self.image_list[self.cur_image_index])
+            self.loadImageFromIndex(self.cur_image_index)
 
     def resizeEvent(self, event):
         """ Resizes image and animal positions when resize event occurs. """
         super().resizeEvent(event)
 
-        path = self.image_list[self.cur_image_index]
+        pathL = self.image_list[0][self.cur_image_index]
+        pathR = self.image_list[1][self.cur_image_index]
         
         # if LR view is active, both image areas needs to be scaled
         if self.stackedWidget_imagearea.currentIndex() == 1:
-            if path.endswith("_L.jpg"):
-                pathL = path
-                pathR = path.replace("_L.jpg", "_R.jpg")
-            else:
-                pathL = path.replace("_R.jpg", "_L.jpg")
-                pathR = path
-             
             self._resizeView(pathL, self.imageAreaLR.imageAreaL)
             self._resizeView(pathR, self.imageAreaLR.imageAreaR)
         else:
-            self._resizeView(path, self.imageArea)
-        
+            if self.imageArea.animal_painter.image_ending == "*_L.jpg":
+                self._resizeView(pathL, self.imageArea)
+            else:
+                self._resizeView(pathR, self.imageArea)
+                
     def _resizeView(self, path, imageArea):
-        if self.cur_image_index < len(self.image_list):
+        if self.cur_image_index < len(self.image_list[0]):
             # reload photo
             photo = QtGui.QPixmap(path).scaled(QtCore.QSize(
                 imageArea.width(), imageArea.height()))
@@ -236,7 +247,22 @@ class PhotoViewer(QtWidgets.QWidget):
         
         imageArea.animal_painter.redraw()
         
-    def loadImage(self, path):
+    def loadImageFromIndex(self, index):
+        """ Loads image at index in the image list into all views 
+        (i.e. L, R and LR). """
+        pathL = self.image_list[0][index]
+        pathR = self.image_list[1][index]
+        
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            if self.imageArea.animal_painter.image_ending == "*_L.jpg":
+                self.loadSingleImage(pathL, self.imageArea)
+            else:
+                self.loadSingleImage(pathR, self.imageArea)
+        elif self.stackedWidget_imagearea.currentIndex() == 1:
+            self.loadSingleImage(pathL, self.imageAreaLR.imageAreaL)
+            self.loadSingleImage(pathR, self.imageAreaLR.imageAreaR)
+        
+    def loadImageFromPath(self, path, imageArea=None):
         # if LR view is active, update both image views, else only the current one
         if self.stackedWidget_imagearea.currentIndex() == 1:
             # check if the path is for L or R image
@@ -253,8 +279,8 @@ class PhotoViewer(QtWidgets.QWidget):
             self.loadSingleImage(path)        
 
     def loadSingleImage(self, path, imageArea=None):
-        """ Loads an image from a path and draws available animals from 
-        output file. """
+        """ Loads an image from a path to the given imageArea and draws 
+        available animals from output file. """
         
         if not imageArea:
             imageArea = self.imageArea
@@ -306,50 +332,40 @@ class PhotoViewer(QtWidgets.QWidget):
         res_file_name = main_window.getResultFileName()
         self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id)
     
+    # def getCurrentImageArea(self):
+    #     if self.stackedWidget_imagearea.currentIndex() == 0:
+    #         #if self.imageArea.animal_painter.image_ending == "*_L.jpg":
+    #         return [self.imageArea]
+    #         # , "*_L.jpg"
+    #         # else:
+    #         #     return self.imageArea, "*_R.jpg"
+    #     elif self.stackedWidget_imagearea.currentIndex() == 1:
+    #         return [self.imageAreaLR.imageAreaL, self.imageAreaLR.imageAreaR]
+        
+    #     return None
+    
     def on_next_image(self, imageArea=None):
         """ Loads the next image and draws animals accordingly. """
-        if not imageArea:
-            imageArea = self.imageArea
-            
-        if not self.models.model_animals.isEmpty(): 
-            # only go to next image if cur animal is none or complete
-            cur_animal = imageArea.animal_painter.cur_animal
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            self.switchImage(self.cur_image_index+1, self.imageArea)
+        elif self.stackedWidget_imagearea.currentIndex() == 1:
+            self.switchImage(self.cur_image_index+1, self.imageAreaLR.imageAreaL)
+            self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR)
 
-            if cur_animal is not None and \
-            ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
-             (not cur_animal.is_head_drawn and cur_animal.is_tail_drawn)):
-                displayErrorMsg("Error", 
-                                "Please draw head and tail before switching the image.", 
-                                "Error")  
-            # only go to next image if there is one and the add mode is inactive
-            elif self.cur_image_index < len(self.image_list) -1:
-                cur_file_id = os.path.basename(
-                    self.image_list[self.cur_image_index]).rstrip(".jpg"). \
-                    rstrip(".png").rstrip("_L").rstrip("_R")
-                
-                # set current image to status "checked"
-                cur_file_indices = self.models.model_animals.data[
-                    self.models.model_animals.data['file_id'] ==  cur_file_id].index
-                
-                for idx in cur_file_indices:
-                    self.models.model_animals.data.loc[idx, "status"] = "checked"
-                
-                # get the new image and load it
-                path = self.image_list[self.cur_image_index+1]
-                self.cur_image_index = self.cur_image_index + 1    
-                self.cur_animal = None
-                self.loadImage(path)
-                
-                # update the previous image in the csv file
-                self.exportToCsv(cur_file_id)
-    
     def on_previous_image(self, imageArea=None):
         """ Loads the previous image and draws animals accordingly. """
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            self.switchImage(self.cur_image_index-1, self.imageArea)
+        elif self.stackedWidget_imagearea.currentIndex() == 1:
+            self.switchImage(self.cur_image_index-1, self.imageAreaLR.imageAreaL)
+            self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR)
+            
+    def switchImage(self, newIndex, imageArea=None):
         if not imageArea:
             imageArea = self.imageArea
             
         if not self.models.model_animals.isEmpty(): 
-            # only go to previous image if cur animal is none or complete
+            # only go to another image if cur animal is none or complete
             cur_animal = imageArea.animal_painter.cur_animal
 
             if cur_animal is not None and \
@@ -358,11 +374,11 @@ class PhotoViewer(QtWidgets.QWidget):
                 displayErrorMsg("Error", 
                                 "Please draw head and tail before switching the image.", 
                                 "Error")  
-            # only go to previous image if there is one and the add mode is inactive
-            elif self.cur_image_index > 0:
+            # only go to new image if the given index is valid
+            elif newIndex in range(len(self.image_list[0])):
                 # current file_id
                 cur_file_id = os.path.basename(
-                    self.image_list[self.cur_image_index]).strip(".jpg"). \
+                    self.image_list[0][newIndex]).strip(".jpg"). \
                     strip(".png").strip("_L").strip("_R")
                 
                 # set current image to status "checked"
@@ -372,41 +388,48 @@ class PhotoViewer(QtWidgets.QWidget):
                 for idx in cur_file_indices:
                     self.models.model_animals.data.loc[idx, "status"] = "checked"
                     
-                # load image
-                path = self.image_list[self.cur_image_index-1]
-                self.cur_image_index = self.cur_image_index - 1
+                # get the new image and load it
+                self.cur_image_index = newIndex
                 self.cur_animal = None
-                self.loadImage(path) 
+                self.loadImageFromIndex(newIndex) 
                 
                 # update the previous image in the csv file
-                self.exportToCsv(cur_file_id)
+                self.exportToCsv(cur_file_id)        
 
     def updateImageCountVisual(self):
         """ Updates the display of the total number of images and the current 
         image index """
-        num_images = len(self.image_list)
-        cur_image = self.cur_image_index
-        self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
+        if self.image_list:
+            num_images = len(self.image_list[0])
+            cur_image = self.cur_image_index
+            self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
 
     def isAddModeActive(self):
-        if self.imageArea.animal_painter.is_add_mode_active:
-            return True
-        elif self.imageAreaLR.imageAreaL.animal_painter.is_add_mode_active:
-            return True
-        elif self.imageAreaLR.imageAreaR.animal_painter.is_add_mode_active:
-            return True
+        # check if single image dsipaly is active or both (i.e. L/R or LR view)
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            # if L (or R) is active, check its imageArea
+            if self.imageArea.animal_painter.is_add_mode_active:
+                return True
         else:
-            return False
+            # if LR mode is active, check if add mode is active for one of the
+            # image areas
+            if self.imageAreaLR.imageAreaL.animal_painter.is_add_mode_active:
+                return True
+            elif self.imageAreaLR.imageAreaR.animal_painter.is_add_mode_active:
+                return True       
+        return False
             
     def isRemoveModeActive(self):
-        if self.imageArea.animal_painter.is_remove_mode_active:
-            return True
-        elif self.imageAreaLR.imageAreaL.animal_painter.is_remove_mode_active:
-            return True
-        elif self.imageAreaLR.imageAreaR.animal_painter.is_remove_mode_active:
-            return True
+        # check if single image dsipaly is active or both (i.e. L/R or LR view)
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            if self.imageArea.animal_painter.is_remove_mode_active:
+                return True
         else:
-            return False
+            if self.imageAreaLR.imageAreaL.animal_painter.is_remove_mode_active:
+                return True
+            elif self.imageAreaLR.imageAreaR.animal_painter.is_remove_mode_active:
+                return True
+        return False
         
     def _initActions(self):
         """ Initalizes the actions connected to UI elements. """ 
@@ -748,12 +771,10 @@ class ImageArea(QtWidgets.QGraphicsView):
     def enterEvent(self, event):
         """ Defines behaviour when cursor enters image area. """
         self.animal_painter.shortcut_deselect_animal.setEnabled(True)
-        print("enter event")
         
     def leaveEvent(self, event):
         """ Defines behaviour when cursor leaves image area. """
         self.animal_painter.shortcut_deselect_animal.setEnabled(False)
-        print("leave event")
 
 
 class AnimalPainter():
@@ -776,10 +797,6 @@ class AnimalPainter():
     
     cur_animal : Animal
         Currently active animal.    
-    is_add_mode_active  : bool
-        Indicates if the add mode is active.
-    is_remove_mode_active: bool
-        Indicates if the remove mode is active.
     imageArea : ImageArea
         A canvas to paint the object on and that provides mouse events to 
         the AnimalPainter.
@@ -819,10 +836,6 @@ class AnimalPainter():
         # current animal
         self.cur_animal  = None
         self.widget_animal_specs = AnimalSpecificationsWidget(models, imageArea)
-        
-        # variables to control what interactions are possible
-        self.is_add_mode_active = False
-        self.is_remove_mode_active = False
         
         # the QGraphicsView to paint on
         self.imageArea = imageArea
@@ -1047,42 +1060,51 @@ class AnimalPainter():
                 self.cur_animal = self.animal_list[len(self.animal_list)-1]
                 self.updateBoundingBoxes()                 
 
-    def on_remove_animal(self):
+    def on_remove_animal(self, activate_remove, is_add_active):
         """ Handles the activation state of the remove mode. """
-        if(self.is_remove_mode_active):
-            self.is_remove_mode_active = False           
-        elif self.is_add_mode_active:
+        if not activate_remove:
+        #if(self.is_remove_mode_active):
+            return False, is_add_active
+            #self.is_remove_mode_active = False           
+        elif is_add_active:
+        #elif self.is_add_mode_active:
             # only deactivate add mode is animal is drawn completely
             if not self.cur_animal \
             or (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
-                self.is_add_mode_active = False
-                self.is_remove_mode_active = True    
+                return True, False
+                #self.is_add_mode_active = False
+                #self.is_remove_mode_active = True    
             else:
                 displayErrorMsg("Error", 
                                 "Please draw head and tail before switching off the Add-mode.", 
                                 "Error")           
         else:
-            self.is_add_mode_active = False
-            self.is_remove_mode_active = True          
+            return True, False
+            #self.is_add_mode_active = False
+            #self.is_remove_mode_active = True          
 
-    def on_add_animal(self): 
+    def on_add_animal(self, activate_add, is_remove_active): 
         """ Handles the activation state of the add mode. """
-        if(self.is_add_mode_active):
+        # if add mode is to be turned off
+        if not activate_add:
+        #if(self.is_add_mode_active):
             # the add mode can only be deactivated when head and tail are drawn 
             # or none of them is drawn
             if self.cur_animal is not None:
                 if (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn) \
                     or (not self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
-                    self.is_add_mode_active = False
+                        return False, is_remove_active
                 else:
                     displayErrorMsg("Error", 
                                     "Please draw head and tail before switching off the Add-mode.", 
                                     "Error")
             else:
-                self.is_add_mode_active = False
+                return False, is_remove_active
+                #self.is_add_mode_active = False
         else:
-            self.is_remove_mode_active = False
-            self.is_add_mode_active = True
+            return True, False
+            #self.is_remove_mode_active = False
+            #self.is_add_mode_active = True
             
     def deselectAnimal(self):
         """ Deselects the current animal. """
@@ -1104,9 +1126,13 @@ class AnimalPainter():
             print("AnimalPainter: Could not find PhotoViewer parent.")
             return
         
+        # get states of add and remove modes from home page
+        is_add_mode_active = parent.parent().is_add_animal_active
+        is_remove_mode_active = parent.parent().is_remove_animal_active
+        
         # enable dragging for current animal (when add mode is not active and 
         # the current animal is completey drawn)
-        if self.cur_animal is not None and not self.is_add_mode_active:
+        if self.cur_animal is not None and not is_add_mode_active:
             if(self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
                 if (2 * QtGui.QVector2D(pos - self.cur_animal.rect_head.center()).length()
                     < self.cur_animal.rect_head.width()):
@@ -1115,7 +1141,7 @@ class AnimalPainter():
                 if(self.cur_animal.rect_tail.contains(pos)):
                     self.drag_position_tail = pos - self.cur_animal.position_tail
          
-        if(self.is_remove_mode_active):
+        if(is_remove_mode_active):
             # remove mode
             for animal in self.animal_list:
                 if(animal.boundingBox.contains(pos)):
@@ -1148,7 +1174,7 @@ class AnimalPainter():
                             self.models.model_animals.data.loc[animal.row_index, "LY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LX2"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1                        
-                        elif self.image_ending == "*.R,jpg":
+                        elif self.image_ending == "*_R.jpg":
                             self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
@@ -1165,7 +1191,7 @@ class AnimalPainter():
         # if user is not removing and not adding animals, switch the current 
         # animal to what the user clicks on
         # if the user clicks on no organism, there is no current animal
-        elif(not self.is_remove_mode_active and not self.is_add_mode_active):
+        elif(not is_remove_mode_active and not is_add_mode_active):
             is_click_on_animal = False 
             for animal in self.animal_list:
                 if(animal.boundingBox.contains(pos)):
@@ -1175,7 +1201,7 @@ class AnimalPainter():
             
             if not is_click_on_animal: self.cur_animal = None
                             
-        elif(self.is_add_mode_active):
+        elif(is_add_mode_active):
             # calculate click position in original format
             original_x = round(pos.x()*self.original_img_width/self.imageArea.width())
             original_y = round(pos.y()*self.original_img_height/self.imageArea.height())
@@ -1193,7 +1219,7 @@ class AnimalPainter():
                     # add animal to list
                     self.animal_list.append(self.cur_animal)
                     
-                    cur_image_path = parent.image_list[parent.cur_image_index]
+                    cur_image_path = parent.image_list[0][parent.cur_image_index]
                     image_remark = parent.parent().comboBox_imgRemark.currentText()
                     experiment_id = parent.parent().parent().parent().page_data.lineEdit_exp_id.text()
                     user_id = parent.parent().parent().parent().page_settings.lineEdit_user_id.text()

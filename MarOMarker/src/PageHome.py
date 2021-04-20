@@ -20,6 +20,10 @@ class PageHome(QtWidgets.QWidget):
         # data models
         self.models = models
         
+        # variables to indicate if add/remove modes are active
+        self.is_add_animal_active = False # @todo
+        self.is_remove_animal_active = False
+        
         # init UI and actions
         self._initUi()
         self._initActions()
@@ -59,24 +63,34 @@ class PageHome(QtWidgets.QWidget):
   
     def on_add_clicked(self):
         """ (De-)activate the add mode. """
-        self.photo_viewer.on_add_animal()
+        if self.is_add_animal_active:          
+            self.is_add_animal_active, self.is_remove_animal_active = self.photo_viewer.on_add_animal(False, self.is_remove_animal_active)
+        else:
+            self.is_add_animal_active, self.is_remove_animal_active = self.photo_viewer.on_add_animal(True, self.is_remove_animal_active)         
+        
         self.updateAddRemoveIcons()
             
     def on_remove_clicked(self):
         """ (De-)activate the remove mode. """
-        self.photo_viewer.on_remove_animal()
+        # self.photo_viewer.on_remove_animal()
+        # self.updateAddRemoveIcons()
+        if self.is_remove_animal_active:          
+            self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(False, self.is_add_animal_active)
+        else:
+            self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(True, self.is_add_animal_active)
+        
         self.updateAddRemoveIcons()
 
     def updateAddRemoveIcons(self):
         """ Update the icond of add and remove mode according to their state.  """
         # adapt icon of the add button
-        if self.photo_viewer.isAddModeActive():
+        if self.is_add_animal_active:
             self.btn_add.setIcon(getIcon(":/icons/icons/plus_darkBlue.png"))
         else:
             self.btn_add.setIcon(getIcon(":/icons/icons/plus.png"))
             
         # adapt icon of the remove button
-        if self.photo_viewer.isRemoveModeActive():
+        if self.is_remove_animal_active:
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_open_darkBlue.png"))
         else:
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))        
@@ -110,9 +124,10 @@ class PageHome(QtWidgets.QWidget):
 
     def showEvent(self, event):
         """" Reload the image when opening the home page. """
-        if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list):
-            self.photo_viewer.loadImage(
-                self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
+        if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list[0]):
+            #self.photo_viewer.loadImage(
+            #@todo#    self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
+            self.photo_viewer.loadImageFromIndex(self.photo_viewer.cur_image_index)
 
     def _initUi(self):
         """ Initalize the UI of the home page. """
@@ -501,7 +516,7 @@ class PageHome(QtWidgets.QWidget):
             self.comboBox_imgRemark.setCurrentIndex(index)
         
         # get the current photo ID
-        cur_image_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
+        cur_image_path = self.photo_viewer.image_list[0][self.photo_viewer.cur_image_index]
         file_id = os.path.basename(cur_image_path)[:-6]
     
         # adapt the image remark in the data model

@@ -987,7 +987,7 @@ class PageData(QtWidgets.QWidget):
             print("916: img_list created")
             print(img_list)
 			
-            for path in img_list:
+            for path in img_list[0]:
 				
                 print("iterate over pathes")
 			
@@ -1060,16 +1060,16 @@ class PageData(QtWidgets.QWidget):
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             
         # iterate over left images, rectify and match   
-        for path in img_list:
-            right_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_L") + "_R.jpg"
-            left_image = path.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R") + "_L.jpg"
+        for i in range(len(img_list[0])):
+            right_image = img_list[1][i]#.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_L") + "_R.jpg"
+            left_image = img_list[0][i]#.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R") + "_L.jpg"
             print(right_image)
             print(left_image)
             print()
             
             # only continue if both images exists
             if os.path.isfile(right_image) and os.path.isfile(left_image):
-                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+                file_id = os.path.basename(left_image).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
                 
                 # get animals on current image into necessary format
                 cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
@@ -1085,7 +1085,7 @@ class PageData(QtWidgets.QWidget):
                 # rectify and match images
                 merged_objects = pp.rectifyAndMatch(self.matcher, 
                                                     self.camera_config, 
-                                                    path, 
+                                                    left_image, 
                                                     right_image, 
                                                     animals_left)
                 
@@ -1132,7 +1132,7 @@ class PageData(QtWidgets.QWidget):
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             
         # iterate over images and measure length
-        for path in img_list:                
+        for path in img_list[0]:                
             # get animals on current image
             file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
             cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
