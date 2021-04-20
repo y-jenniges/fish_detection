@@ -12,6 +12,10 @@ class PageHome(QtWidgets.QWidget):
     ----------
     factor : float
         Factor for the zoom slider. 
+    is_add_animal_active : bool
+        Indicates if the add mode is active.
+    is_remove_animal_active : bool
+        Indicates if the remove mode is active.
     """
 
     def __init__(self, models, parent=None):        
@@ -21,7 +25,7 @@ class PageHome(QtWidgets.QWidget):
         self.models = models
         
         # variables to indicate if add/remove modes are active
-        self.is_add_animal_active = False # @todo
+        self.is_add_animal_active = False
         self.is_remove_animal_active = False
         
         # init UI and actions
@@ -125,8 +129,6 @@ class PageHome(QtWidgets.QWidget):
     def showEvent(self, event):
         """" Reload the image when opening the home page. """
         if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list[0]):
-            #self.photo_viewer.loadImage(
-            #@todo#    self.photo_viewer.image_list[self.photo_viewer.cur_image_index])
             self.photo_viewer.loadImageFromIndex(self.photo_viewer.cur_image_index)
 
     def _initUi(self):
