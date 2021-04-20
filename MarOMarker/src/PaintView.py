@@ -144,24 +144,60 @@ class PhotoViewer(QtWidgets.QWidget):
         self.updateImageList()
 
     def on_add_animal(self, activate_add, is_remove_active):
-        # if LR view is active, both image areas need to be activated
-        #if self.stackedWidget_imagearea.currentIndex() == 1:
-        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(activate_add, is_remove_active)
-        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_add_animal(activate_add, is_remove_active)
-        #else:
-        c, f = self.imageArea.animal_painter.on_add_animal(activate_add, is_remove_active)
+        """
+        Delegates query to (de-)activate the add mode to the correct 
+        animal painters.
+
+        Parameters
+        ----------
+        activate_add : bool
+            Whether to activate the add mode or deactivate it.
+        is_remove_active : bool
+            Whether the remove mode is active or not.
+
+        Returns
+        -------
+        is_add_activatable : bool
+            Whether it is possible to activate the add mode.
+        is_remove_active : bool
+            Wheter the remove mode needs to be active or not.
+        """
+        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(
+            activate_add, is_remove_active)
+        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_add_animal(
+            activate_add, is_remove_active)
+        c, f = self.imageArea.animal_painter.on_add_animal(
+            activate_add, is_remove_active)
         
         is_add_activatable = a and b and c
         is_remove_active = d and e and f
         return is_add_activatable, is_remove_active
 
     def on_remove_animal(self, activate_remove, is_add_active):
-        # if LR view is active, both image areas need to be activated
-        #if self.stackedWidget_imagearea.currentIndex() == 1:
-        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(activate_remove, is_add_active)
-        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal(activate_remove, is_add_active)
-        #else:
-        c, f = self.imageArea.animal_painter.on_remove_animal(activate_remove, is_add_active)
+        """
+        Delegates query to (de-)activate the remove mode to the correct 
+        animal painters.
+
+        Parameters
+        ----------
+        activate_remove : bool
+            Whether to activate the remove mode or deactivate it.
+        is_add_active : bool
+            Whether the add mode is active or not.
+
+        Returns
+        -------
+        is_remove_activatable : bool
+            Whether it is possible to activate the remove mode.
+        is_add_active : bool
+            Wheter the add mode needs to be active or not.
+        """
+        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(
+            activate_remove, is_add_active)
+        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal(
+            activate_remove, is_add_active)
+        c, f = self.imageArea.animal_painter.on_remove_animal(
+            activate_remove, is_add_active)
         
         is_remove_activatable = a and b and c
         is_add_active = d and e and f
@@ -187,21 +223,11 @@ class PhotoViewer(QtWidgets.QWidget):
             self.stackedWidget_imagearea.setCurrentIndex(1)
             self.setImageEnding("*_L.jpg")
         else:
-            print("PhotoViewer: Unknown mode.")
+            print("PhotoViewer: Unknown image mode.")
 
-    def updateImageList(self, imageArea=None):
+    def updateImageList(self):
         """ Recalculate image list, i.e. filter the image directory for images
         with the correct prefix and date. """
-        if not imageArea: imageArea = self.imageArea
-        
-        # if LR view is active, @todo then what??
-        if self.stackedWidget_imagearea.currentIndex() == 1:
-            self._updateSingleImageList(self.imageAreaLR.imageAreaR)
-            self._updateSingleImageList(self.imageAreaLR.imageAreaL)
-        else:
-            self._updateSingleImageList(self.imageArea)
-
-    def _updateSingleImageList(self, imageArea):
         l_images_with_prefix = glob.glob(self.image_directory 
                              + self.image_prefix + "*_L.jpg")
         r_images_with_prefix = glob.glob(self.image_directory 
@@ -210,7 +236,8 @@ class PhotoViewer(QtWidgets.QWidget):
         if hasattr(self.parent().parent().parent(), 'page_data'):
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
-            self.image_list = [] # clear image list
+            # clear and refill image list
+            self.image_list = [] 
             self.image_list.append([x for x in l_images_with_prefix if date in x])
             self.image_list.append([x for x in r_images_with_prefix if date in x])
         
@@ -331,19 +358,7 @@ class PhotoViewer(QtWidgets.QWidget):
         output_dir = main_window.page_data.lineEdit_output_dir.text()
         res_file_name = main_window.getResultFileName()
         self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id)
-    
-    # def getCurrentImageArea(self):
-    #     if self.stackedWidget_imagearea.currentIndex() == 0:
-    #         #if self.imageArea.animal_painter.image_ending == "*_L.jpg":
-    #         return [self.imageArea]
-    #         # , "*_L.jpg"
-    #         # else:
-    #         #     return self.imageArea, "*_R.jpg"
-    #     elif self.stackedWidget_imagearea.currentIndex() == 1:
-    #         return [self.imageAreaLR.imageAreaL, self.imageAreaLR.imageAreaR]
         
-    #     return None
-    
     def on_next_image(self, imageArea=None):
         """ Loads the next image and draws animals accordingly. """
         if self.stackedWidget_imagearea.currentIndex() == 0:
@@ -405,6 +420,14 @@ class PhotoViewer(QtWidgets.QWidget):
             self.label_imgCount.setText(str(cur_image+1) + "/" + str(num_images))
 
     def isAddModeActive(self):
+        """
+        Check if add mode is active in one of the image areas.
+
+        Returns
+        -------
+        bool
+            If the add mode is active or not.
+        """
         # check if single image dsipaly is active or both (i.e. L/R or LR view)
         if self.stackedWidget_imagearea.currentIndex() == 0:
             # if L (or R) is active, check its imageArea
@@ -420,6 +443,14 @@ class PhotoViewer(QtWidgets.QWidget):
         return False
             
     def isRemoveModeActive(self):
+        """
+        Check if remove mode is active in one of the image areas.
+
+        Returns
+        -------
+        bool
+            If the remove mode is active or not.
+        """
         # check if single image dsipaly is active or both (i.e. L/R or LR view)
         if self.stackedWidget_imagearea.currentIndex() == 0:
             if self.imageArea.animal_painter.is_remove_mode_active:
@@ -577,12 +608,22 @@ class PhotoViewer(QtWidgets.QWidget):
 
         # set main layout
         self.layout = self.layout
+       
         
 class ImageAreaLR(QtWidgets.QWidget):
+    """
+    A QWidget that handles the LR view, i.e. displays left and right images.
+    
+    Attributes
+    ----------
+    _models: Models
+        Underlying data models containing the animal information.
+    """
     def __init__(self, models, parent=None):
         super(ImageAreaLR, self).__init__(parent)
         
-        self.models = models
+        self._models = models
+        
         self._initUi()
         self._initActions()
         
@@ -590,17 +631,71 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
                 
-    def _initUi(self):
-        print("Drawing LR image area...")
+    def redrawLeftAnimal(self, animal):
+        """ Given the right animal, redraw its matching left animal. """
+        self.redrawAnimalMatch(animal, True)
         
+    def redrawRightAnimal(self, animal):
+        """ Given the left animal, redraw its matching right animal. """
+        self.redrawAnimalMatch(animal, False)
+
+    def redrawAnimalMatch(self, animal, draw_left=False):
+        """
+        Redraws the animal that is matched to the given animal (if existant). 
+
+        Parameters
+        ----------
+        animal : Animal
+            The animal whose counterpart is to be redrawn.
+        draw_left : bool, optional
+            Describes which animal to draw. The default is the right animal 
+            corresponding to False.
+        """
+        if draw_left:
+            coord = "L"
+            imageArea = self.imageAreaL
+        else:
+            coord = "R"
+            imageArea = self.imageAreaR
+        
+        # check if animal is in data model    
+        if animal.row_index in self._models.model_animals.data.index:
+            
+            # check if animal has a match on right image
+            if self._models.model_animals.data.loc[animal.row_index, coord+'X1'] != -1:
+                
+                # get right animal coordinates from data model
+                position_head = QtCore.QPoint(self._models.model_animals.data.loc[animal.row_index, coord+'X1'], self._models.model_animals.data.loc[animal.row_index, coord+'Y1'])
+                position_tail = QtCore.QPoint(self._models.model_animals.data.loc[animal.row_index, coord+'X2'], self._models.model_animals.data.loc[animal.row_index, coord+'Y2'])
+                
+                # check if any animal instance exists that has the same R coordinates
+                for other_animal in imageArea.animal_painter.animal_list:
+                    if other_animal.original_pos_head == position_head and other_animal.original_pos_tail == position_tail:
+                        
+                        # update properties of right animal
+                        other_animal.setGroup(animal.group)
+                        other_animal.setSpecies(animal.species)
+                        other_animal.setRemark(animal.remark)
+                        
+                        # remove right animal visuals
+                        imageArea.animal_painter.removeAnimal(other_animal, False)
+                        
+                        # redraw the visuals
+                        imageArea.animal_painter.drawAnimalHead(other_animal)
+                        imageArea.animal_painter.drawAnimalTailLineBoundingBox(other_animal)      
+                        imageArea.animal_painter.updateBoundingBoxes()
+                        break        
+        
+    def _initUi(self):
+        """ Defines and draws the UI elements. """
         # -- frame for the two images displayed below each other ------------ #
         layout_imageFrame = QtWidgets.QVBoxLayout(self)
         layout_imageFrame.setContentsMargins(0, 0, 0, 0)
         layout_imageFrame.setSpacing(0)
         layout_imageFrame.setObjectName("layout_imageFrame")
         
-        self.imageAreaL = ImageArea(self.models, self)
-        self.imageAreaR = ImageArea(self.models, self)
+        self.imageAreaL = ImageArea(self._models, self)
+        self.imageAreaR = ImageArea(self._models, self)
         
         spacer = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)  
         
@@ -636,8 +731,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.setLayout(self.layout)
     
     def _initActions(self):
-        print("no actions yet")
-        
+        """ Defines the actions possible on the ImageAreaLR. """
+        self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
+        self.imageAreaR.animal_painter.propertyChanged.connect(self.redrawLeftAnimal)
+
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
@@ -777,7 +874,7 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.animal_painter.shortcut_deselect_animal.setEnabled(False)
 
 
-class AnimalPainter():
+class AnimalPainter(QtCore.QObject):
     """
     Class providing the logic for adding/removing/moving and jumping between 
     animals. It needs a QGraphicsView that it can paint on and that delegates 
@@ -808,8 +905,11 @@ class AnimalPainter():
     original_img_height : int
         Height of the original image. Necessary for rescaling calculations.
     """
+    # define custom signals
+    propertyChanged = QtCore.pyqtSignal(Animal)
+    """ Signal emitted when the group or species of an animal is changed. """
     
-    def __init__(self, models, imageArea):
+    def __init__(self, models, imageArea, parent=None):
         """
         Init function.
 
@@ -823,6 +923,8 @@ class AnimalPainter():
             A QGraphicsView providing a photo to paint on and that passes the
             mouse events to AnimalPainter.
         """
+        super(AnimalPainter, self).__init__(parent)
+        
         # data models
         self.models = models
         
@@ -859,13 +961,17 @@ class AnimalPainter():
     def setAnimalRemark(self, remark):
         """ Sets the remark of the currently active animal. """
         if self.cur_animal is not None:
-            self.cur_animal.setRemark(remark)          
+            self.cur_animal.setRemark(remark)   
+            
+            self.propertyChanged.emit(self.cur_animal)  
     
     def setAnimalSpecies(self, species):
         """ Sets the species of the currently active animal. """
         if self.cur_animal is not None:
             self.cur_animal.setSpecies(species)
             self._previous_species = species
+            
+            self.propertyChanged.emit(self.cur_animal)  
             
     def setAnimalGroup(self, group):
         """ Sets the group of the currently active animal and adapts the 
@@ -889,6 +995,7 @@ class AnimalPainter():
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
+            self.propertyChanged.emit(self.cur_animal)   
      
     def redraw(self):
         """ Redraws all animals on the current image. """
@@ -898,13 +1005,13 @@ class AnimalPainter():
         # redraw animals
         for animal in self.animal_list:
             # update positions
-            self.imageArea.animal_painter.updateAnimalPosition(animal)
+            self.updateAnimalPosition(animal)
             
             # redraw animals
-            self.imageArea.animal_painter.drawAnimalHead(animal)
-            self.imageArea.animal_painter.drawAnimalTailLineBoundingBox(animal)
+            self.drawAnimalHead(animal)
+            self.drawAnimalTailLineBoundingBox(animal)
                     
-        self.imageArea.animal_painter.updateBoundingBoxes()
+        self.updateBoundingBoxes() 
     
     def removeAll(self):
         """ Removes visuals of all animals. """
@@ -916,6 +1023,19 @@ class AnimalPainter():
             
             animal.is_head_drawn = False
             animal.is_tail_drawn = False
+          
+    def removeAnimal(self, animal, remove_from_list=False):
+        """ Removes given animal visually and from list. """
+        self.removeHeadVisual(animal)
+        self.removeTailVisual(animal)
+        self.removeLineVisual(animal)
+        self.removeBoundingBoxVisual(animal)
+            
+        animal.is_head_drawn = False
+        animal.is_tail_drawn = False
+        
+        if remove_from_list:
+            self.animal_list.remove(animal)
      
     def placeSpecsWidget(self):
         """ Function to move the specs widget with the bounding box of the 
@@ -1448,6 +1568,6 @@ class AnimalPainter():
                 self.animal_list.append(self.cur_animal)   
                 
                 # update bounding boxes
-                self.imageArea.animal_painter.updateBoundingBoxes()      
+                self.updateBoundingBoxes()      
      
  
