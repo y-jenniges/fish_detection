@@ -481,8 +481,8 @@ class PageHome(QtWidgets.QWidget):
         # connecting signals and slots
         self.btn_add.clicked.connect(self.on_add_clicked)
         self.btn_delete.clicked.connect(self.on_remove_clicked)
-        self.btn_next.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_next_animal)
-        self.btn_previous.clicked.connect(self.photo_viewer.imageArea.animal_painter.on_previous_animal)
+        self.btn_next.clicked.connect(self.photo_viewer.on_next_animal)
+        self.btn_previous.clicked.connect(self.photo_viewer.on_previous_animal)
         self.btn_zoom.clicked.connect(self.openZoomWidget)
         self.btn_imgSwitch.clicked.connect(self.switchImageMode)
         self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
@@ -491,8 +491,8 @@ class PageHome(QtWidgets.QWidget):
         self.btn_filter.clicked.connect(self.on_filter_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
-        self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.imageArea.animal_painter.on_previous_animal)
-        self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.imageArea.animal_painter.on_next_animal)
+        self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
+        self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.on_next_animal)
         self.shortcut_add_animal = QtWidgets.QShortcut(QtGui.QKeySequence("+"), self.btn_add, self.on_add_clicked)
         self.shortcut_remove_animal = QtWidgets.QShortcut(QtGui.QKeySequence("-"), self.btn_delete, self.on_remove_clicked)
         self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)

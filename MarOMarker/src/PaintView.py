@@ -202,7 +202,27 @@ class PhotoViewer(QtWidgets.QWidget):
         is_remove_activatable = a and b and c
         is_add_active = d and e and f
         return is_remove_activatable, is_add_active
-        
+          
+    def on_next_animal(self):
+        """ Delegates the query to make the next animal active to the correct 
+        animal painter by checking for the active image area. """
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            self.imageArea.animal_painter.on_next_animal()
+        elif self.imageAreaLR.last_active == "*_L.jpg":
+            self.imageAreaLR.imageAreaL.animal_painter.on_next_animal()
+        elif self.imageAreaLR.last_active == "*_R.jpg":
+            self.imageAreaLR.imageAreaR.animal_painter.on_next_animal()
+            
+    def on_previous_animal(self):
+        """ Delegates the query to make the previous animal active to the correct 
+        animal painter by checking for the active image area. """
+        if self.stackedWidget_imagearea.currentIndex() == 0:
+            self.imageArea.animal_painter.on_previous_animal()
+        elif self.imageAreaLR.last_active == "*_L.jpg":
+            self.imageAreaLR.imageAreaL.animal_painter.on_previous_animal()
+        elif self.imageAreaLR.last_active == "*_R.jpg":
+            self.imageAreaLR.imageAreaR.animal_painter.on_previous_animal()    
+    
     def activateImageMode(self, mode):
         """
         Showing either the left, right or both images in the GUI depending on
@@ -627,6 +647,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         self._initUi()
         self._initActions()
         
+        # if the left or  right image was lastly active (needed for iterating
+        # through animals)
+        self.last_active = "*_L.jpg"
+        
         if parent:
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
@@ -868,6 +892,10 @@ class ImageArea(QtWidgets.QGraphicsView):
     def enterEvent(self, event):
         """ Defines behaviour when cursor enters image area. """
         self.animal_painter.shortcut_deselect_animal.setEnabled(True)
+
+        # tell imageAreaLR that this imageArea is active
+        if isinstance(self.parent().parent(), ImageAreaLR): 
+            self.parent().parent().last_active = self.animal_painter.image_ending
         
     def leaveEvent(self, event):
         """ Defines behaviour when cursor leaves image area. """
