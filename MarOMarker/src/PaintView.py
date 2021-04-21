@@ -700,6 +700,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         matching_animal = self.findAnimalMatch(cur_animal, image)
         
         # select matching animal and update bounding boxes
+        #if matching_animal:
         otherImageArea.animal_painter.cur_animal = matching_animal
         otherImageArea.animal_painter.updateBoundingBoxes()  
     
@@ -844,6 +845,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         self.imageAreaL.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
+
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
@@ -1479,7 +1481,7 @@ class AnimalPainter(QtCore.QObject):
                     # reactivate esc shortcut after tail is drawn
                     #parent.setEscShortcutActive(True)
                     self.shortcut_deselect_animal.setEnabled(True)
-                    
+                                       
                 else:                    
                     # create a new animal
                     idx = self.models.model_animals.data.index.max()
@@ -1501,6 +1503,9 @@ class AnimalPainter(QtCore.QObject):
                     # deactivate esc shortcut to prevent creation of incomplete animals
                     #parent.setEscShortcutActive(False) 
                     self.shortcut_deselect_animal.setEnabled(False)
+                    
+                     # since a new animal is selected, emit signal
+                    self.animalSelectionChanged.emit() 
             else:                
                 # create a new animal
                 idx = self.models.model_animals.data.index.max()
@@ -1518,6 +1523,9 @@ class AnimalPainter(QtCore.QObject):
                 
                 # do the actual drawing of the head
                 self.drawAnimalHead(self.cur_animal)
+                
+                # since a new animal is selected, emit signal
+                self.animalSelectionChanged.emit() 
 
         self.updateBoundingBoxes()                
 
