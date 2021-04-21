@@ -208,20 +208,16 @@ class PhotoViewer(QtWidgets.QWidget):
         animal painter by checking for the active image area. """
         if self.stackedWidget_imagearea.currentIndex() == 0:
             self.imageArea.animal_painter.on_next_animal()
-        elif self.imageAreaLR.last_active == "*_L.jpg":
-            self.imageAreaLR.imageAreaL.animal_painter.on_next_animal()
-        elif self.imageAreaLR.last_active == "*_R.jpg":
-            self.imageAreaLR.imageAreaR.animal_painter.on_next_animal()
+        elif self.stackedWidget_imagearea.currentIndex() == 1:
+            self.imageAreaLR.on_next_animal()
             
     def on_previous_animal(self):
         """ Delegates the query to make the previous animal active to the correct 
         animal painter by checking for the active image area. """
         if self.stackedWidget_imagearea.currentIndex() == 0:
             self.imageArea.animal_painter.on_previous_animal()
-        elif self.imageAreaLR.last_active == "*_L.jpg":
-            self.imageAreaLR.imageAreaL.animal_painter.on_previous_animal()
-        elif self.imageAreaLR.last_active == "*_R.jpg":
-            self.imageAreaLR.imageAreaR.animal_painter.on_previous_animal()    
+        elif self.stackedWidget_imagearea.currentIndex() == 1:
+            self.imageAreaLR.on_previous_animal()  
     
     def activateImageMode(self, mode):
         """
@@ -654,16 +650,115 @@ class ImageAreaLR(QtWidgets.QWidget):
         if parent:
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
+    
+    def on_next_animal(self):
+        """ Delegates the query to make next animal active to the lastly active
+        image area (L or R). Also adapts the selection to have a matching pair 
+        in both image areas active. """
+        if self.last_active == "*_L.jpg":
+            imageArea = self.imageAreaL
+        elif self.last_active == "*_R.jpg":
+            imageArea = self.imageAreaR
+        
+        # switch to next animal
+        imageArea.animal_painter.on_next_animal()
+        
+        # update visuals on both image areas (so that both animals of a match
+        # are selected
+        self.redrawSelection()
+    
+    def on_previous_animal(self):
+        """ Delegates the query to make next animal active to the lastly active
+        image area (L or R). Also adapts the selection to have a matching pair 
+        in both image areas active. """
+        if self.last_active == "*_L.jpg":
+            imageArea = self.imageAreaL
+        elif self.last_active == "*_R.jpg":
+            imageArea = self.imageAreaR
+        
+        # switch to next animal
+        imageArea.animal_painter.on_previous_animal()
+        
+        # update visuals on both image areas (so that both animals of a match
+        # are selected
+        self.redrawSelection()
+    
+    def redrawSelection(self):   
+        """ Finds the current animal (on the lastly active image area) and
+        updates the bounding boxes of it and of its match on the right image. """
+        if self.last_active == "*_L.jpg":
+            imageArea = self.imageAreaL
+            otherImageArea = self.imageAreaR
+            image = "L"
+        elif self.last_active == "*_R.jpg":
+            imageArea = self.imageAreaR
+            otherImageArea = self.imageAreaL
+            image = "R"
+            
+        # find matching animal
+        cur_animal = imageArea.animal_painter.cur_animal
+        matching_animal = self.findAnimalMatch(cur_animal, image)
+        
+        # select matching animal and update bounding boxes
+        otherImageArea.animal_painter.cur_animal = matching_animal
+        otherImageArea.animal_painter.updateBoundingBoxes()  
+    
+    def findAnimalMatch(self, animal, image="L"):
+        """ Determines which animal object belongs to the given animal by 
+        checking the data table and comparing head and tail coordinates.
+
+        Parameters
+        ----------
+        animal : Animal
+            Animal to find the match of.
+        image : string
+            Depicts whether the given animal is on the left ro right image.
+
+        Returns
+        -------
+        matching_animal : Animal
+            The matching animal. If none exists yet, None is returned.
+        """
+        if not animal: return
+        
+        if image == "R":
+            coord = "L"
+            imageArea = self.imageAreaL
+        else:
+            coord = "R"
+            imageArea = self.imageAreaR
+            
+        # check if animal is in data model    
+        if animal.row_index in self._models.model_animals.data.index:
+            
+            # check if animal has a match on right (left) image
+            if self._models.model_animals.data.loc[animal.row_index, coord+'X1'] != -1:
                 
+                # get right (left) animal coordinates from data model
+                position_head = QtCore.QPoint(
+                    self._models.model_animals.data.loc[animal.row_index, coord+'X1'], 
+                    self._models.model_animals.data.loc[animal.row_index, coord+'Y1'])
+                position_tail = QtCore.QPoint(
+                    self._models.model_animals.data.loc[animal.row_index, coord+'X2'], 
+                    self._models.model_animals.data.loc[animal.row_index, coord+'Y2'])
+                
+                # check if any animal instance exists that has the same R (L) coordinates
+                for matching_animal in imageArea.animal_painter.animal_list:
+                    if matching_animal.original_pos_head == position_head  \
+                    and matching_animal.original_pos_tail == position_tail:
+                            return matching_animal
+        return None
+        
+        
     def redrawLeftAnimal(self, animal):
         """ Given the right animal, redraw its matching left animal. """
-        self.redrawAnimalMatch(animal, True)
+        self.redrawAnimalMatch(animal, "R")
         
     def redrawRightAnimal(self, animal):
         """ Given the left animal, redraw its matching right animal. """
-        self.redrawAnimalMatch(animal, False)
+        self.redrawAnimalMatch(animal, "L")
 
-    def redrawAnimalMatch(self, animal, draw_left=False):
+    def redrawAnimalMatch(self, animal, image="L"):
         """
         Redraws the animal that is matched to the given animal (if existant). 
 
@@ -671,44 +766,32 @@ class ImageAreaLR(QtWidgets.QWidget):
         ----------
         animal : Animal
             The animal whose counterpart is to be redrawn.
-        draw_left : bool, optional
-            Describes which animal to draw. The default is the right animal 
-            corresponding to False.
+        image : string, optional
+            Describes on which image the animal is located, i.e. on the right 
+            ('R') or the left ('L') image. 
         """
-        if draw_left:
-            coord = "L"
+        if image == "R":
             imageArea = self.imageAreaL
         else:
-            coord = "R"
             imageArea = self.imageAreaR
+
+        # find matching animal
+        matching_animal = self.findAnimalMatch(animal, image)
         
-        # check if animal is in data model    
-        if animal.row_index in self._models.model_animals.data.index:
+        # if there is a matching animal, redraw it on the image area
+        if matching_animal:
+            # update properties of matching animal
+            matching_animal.setGroup(animal.group)
+            matching_animal.setSpecies(animal.species)
+            matching_animal.setRemark(animal.remark)
             
-            # check if animal has a match on right image
-            if self._models.model_animals.data.loc[animal.row_index, coord+'X1'] != -1:
-                
-                # get right animal coordinates from data model
-                position_head = QtCore.QPoint(self._models.model_animals.data.loc[animal.row_index, coord+'X1'], self._models.model_animals.data.loc[animal.row_index, coord+'Y1'])
-                position_tail = QtCore.QPoint(self._models.model_animals.data.loc[animal.row_index, coord+'X2'], self._models.model_animals.data.loc[animal.row_index, coord+'Y2'])
-                
-                # check if any animal instance exists that has the same R coordinates
-                for other_animal in imageArea.animal_painter.animal_list:
-                    if other_animal.original_pos_head == position_head and other_animal.original_pos_tail == position_tail:
-                        
-                        # update properties of right animal
-                        other_animal.setGroup(animal.group)
-                        other_animal.setSpecies(animal.species)
-                        other_animal.setRemark(animal.remark)
-                        
-                        # remove right animal visuals
-                        imageArea.animal_painter.removeAnimal(other_animal, False)
-                        
-                        # redraw the visuals
-                        imageArea.animal_painter.drawAnimalHead(other_animal)
-                        imageArea.animal_painter.drawAnimalTailLineBoundingBox(other_animal)      
-                        imageArea.animal_painter.updateBoundingBoxes()
-                        break        
+            # remove matching animal visuals
+            imageArea.animal_painter.removeAnimal(matching_animal, False)
+            
+            # redraw the visuals
+            imageArea.animal_painter.drawAnimalHead(matching_animal)
+            imageArea.animal_painter.drawAnimalTailLineBoundingBox(matching_animal)      
+            imageArea.animal_painter.updateBoundingBoxes()                      
         
     def _initUi(self):
         """ Defines and draws the UI elements. """
@@ -758,7 +841,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         """ Defines the actions possible on the ImageAreaLR. """
         self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
         self.imageAreaR.animal_painter.propertyChanged.connect(self.redrawLeftAnimal)
-
+        
+        self.imageAreaL.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
+        self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
@@ -932,10 +1017,15 @@ class AnimalPainter(QtCore.QObject):
         Width of the original image. Necessary for rescaling calculations.
     original_img_height : int
         Height of the original image. Necessary for rescaling calculations.
+    propertyChanged : pyqtSignal
+    animalSelectionChanged : pyqtSignal
     """
     # define custom signals
     propertyChanged = QtCore.pyqtSignal(Animal)
     """ Signal emitted when the group or species of an animal is changed. """
+    
+    animalSelectionChanged = QtCore.pyqtSignal()
+    """ Signal emitted when animal selection changed. """
     
     def __init__(self, models, imageArea, parent=None):
         """
@@ -1348,6 +1438,8 @@ class AnimalPainter(QtCore.QObject):
                     break
             
             if not is_click_on_animal: self.cur_animal = None
+            
+            self.animalSelectionChanged.emit()
                             
         elif(is_add_mode_active):
             # calculate click position in original format
