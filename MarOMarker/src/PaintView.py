@@ -85,7 +85,25 @@ class PhotoViewer(QtWidgets.QWidget):
         self._initActions()
 
     def on_match_activated(self, is_active):
+        #@todo
         print(f"match was clicked, photo viewer will go to match mode {is_active}")
+        
+        if is_active:
+        # redraw the animals (make more transparent, add IDs to bounding boxes)
+            self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
+            self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
+        else:
+            self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesNormal
+            self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesNormal
+            
+        self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes()
+        self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes()
+        # draw bounding boxes of all animals that have a match
+        
+        
+        #self.imageAreaLR.on_match_activated(is_active) ?? delegate to image area LR??
+        
+        # change behaviour of animal painters for mouse clicks (disable add/remove?)
 
     def loadResFile(self):
         """ Loads the output file and updates data models with unseen remarks and
@@ -1075,6 +1093,9 @@ class AnimalPainter(QtCore.QObject):
         self.original_img_width = 0
         self.original_img_height = 0
         
+        # function to update the bounding boxes
+        self.updateBoundingBoxes = self.updateBoundingBoxesNormal
+        
         # remember the group and species of the most recently adapted animal
         self._previous_group = AnimalGroup.UNIDENTIFIED
         self._previous_species = AnimalSpecies.UNIDENTIFIED
@@ -1328,13 +1349,16 @@ class AnimalPainter(QtCore.QObject):
         
         return count, tl, tr, bl, br
                  
-    def updateBoundingBoxes(self):
+    def updateBoundingBoxesNormal(self):
         """ Removes bounding box visuals for all animals and draws only the 
         one of the current animal. """
         # remove bounding of other animals
         for animal in self.animal_list:
             self.imageArea._scene.removeItem(animal.boundingBox_visual)
             animal.boundingBox_visual = None
+            
+            # set colour to full opacity
+            animal.color.setAlpha(255)
 
         # draw the current animal bounding box
         if self.cur_animal is not None and self.cur_animal in self.animal_list:
@@ -1346,7 +1370,46 @@ class AnimalPainter(QtCore.QObject):
             self.widget_animal_specs.show()
         else:
             self.widget_animal_specs.hide()
+    
+    def updateBoundingBoxesMatchMode(self):
+        #@todo
+        for animal in self.animal_list:
+            # remove old bounding box from scene
+            self.imageArea._scene.removeItem(animal.boundingBox_visual)
+            animal.boundingBox_visual = None
+                    
+            # only draw a bounding box if it is the current animal or if the animal has amatch
             
+            
+            # only drawbounding boxes of animal that are annotated on both images
+            if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 \
+            and self.models.model_animals.data.loc[animal.row_index, "LX1"] != -1:
+                # current animal that has a match
+                if animal == self.cur_animal:
+                    # set colour to full opacity
+                    animal.color.setAlpha(255)
+                    
+                    # draw the new bounding box
+                    animal.boundingBox_visual = self.imageArea._scene.addRect(
+                        animal.boundingBox, QtGui.QPen(animal.color, 5, QtCore.Qt.SolidLine))
+                else:
+                    # for all other animals with match, set a more transparent color
+                    animal.color.setAlpha(70)
+                         
+                    # add new bounding box to scene
+                    animal.boundingBox_visual = self.imageArea._scene.addRect(
+                        animal.boundingBox, QtGui.QPen(animal.color, 5, QtCore.Qt.SolidLine))
+            
+            # draw bounding box of current animal (without match) a bit thinner
+            # than animals that have a match
+            elif animal == self.cur_animal:
+                # set colour to full opacity
+                    animal.color.setAlpha(255)
+                    
+                    # draw the new bounding box
+                    animal.boundingBox_visual = self.imageArea._scene.addRect(
+                        animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
+        
     def drawAnimalHead(self, animal):
         """ Draws the head of a given animal. """
         if animal != None:
