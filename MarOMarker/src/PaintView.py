@@ -1158,7 +1158,7 @@ class AnimalPainter(QtCore.QObject):
         if remove_from_list:
             self.animal_list.remove(animal)
      
-    def placeSpecsWidget(self):#@todo
+    def placeSpecsWidget(self):
         """ Function to move the specs widget with the bounding box of the 
         current animal (and prevent it from getting out of the borders of 
         the image) """
@@ -1172,217 +1172,123 @@ class AnimalPainter(QtCore.QObject):
             
             # move the specs to the bottom left corner of the animal bounding box
             self.widget_animal_specs.move(pos)
-        
-            # get corners of specs widget in scene coordinates
-            top_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topLeft())).toPoint()
-            top_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topRight())).toPoint()
-            bottom_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomLeft())).toPoint()
-            bottom_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomRight())).toPoint()
-                    
             
-            self.imageArea._scene.addEllipse(QtCore.QPointF(top_left).x(), QtCore.QPointF(top_left).y(), 5, 5, QtGui.QPen(QtCore.Qt.red))
-            self.imageArea._scene.addEllipse(QtCore.QPointF(top_right).x(), QtCore.QPointF(top_right).y(), 5, 5, QtGui.QPen(QtCore.Qt.red))
-            self.imageArea._scene.addEllipse(QtCore.QPointF(bottom_left).x(), QtCore.QPointF(bottom_left).y(), 5, 5, QtGui.QPen(QtCore.Qt.red))
-            self.imageArea._scene.addEllipse(QtCore.QPointF(bottom_right).x(), QtCore.QPointF(bottom_right).y(), 5, 5, QtGui.QPen(QtCore.Qt.red))
-           
-            
-            # # search for a position until all 4 corners are visible
-            # new_pos = QtCore.QPoint(0, 0)
-            # visible_corners = self.checkVisibleCorners()
-            # max_iterations = 100 
-            
-            # for i in range(max_iterations):
-
-            #     if visible_corners[0] != 4:
-            #         print("search pos")
-                    
-            #         # if the widget is in a corner, display specs on a visible corner
-            #         if visible_corners[0] == 1 or visible_corners[0] == 3:
-                        
-            #             # specs are in bottom right corner
-            #             if visible_corners[1] or (visible_corners[1] and visible_corners[2] and visible_corners[3]):
-            #                 delta_x = -self.widget_animal_specs.width()
-            #                 delta_y_min = -self.cur_animal.boundingBox_visual.rect().height()
-            #                 delta_y_max = -self.cur_animal.boundingBox_visual.rect().height() - self.widget_animal_specs.height()
-                            
-            #                 new_pos = pos + QtCore.QPoint(delta_x, delta_y_max)
-                            
-                           
-            #                 # we can move the boy from delta_y to delta_y-self.widget_animal_specs.height()
-            #                 # left_pos = pos + QtCore.QPoint(-self.widget_animal_specs.width(),
-            #                 #                                -self.cur_animal.boundingBox_visual.rect().height())
-            #                 # corner_pos =
-                            
-            #             # specs are in bottom left corner
-            #             elif visible_corners[2] or (visible_corners[1] and visible_corners[2] and visible_corners[4]):
-            #                 new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               -self.widget_animal_specs.height()-self.cur_animal.boundingBox_visual.rect().height())
-                        
-            #             # specs are in top right corner
-            #             elif visible_corners[3] or (visible_corners[1] and visible_corners[3] and visible_corners[4]):
-            #                 new_pos = pos + QtCore.QPoint(-self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               0)
-            #             # specs are in top left corner    
-            #             elif visible_corners[4] or (visible_corners[2] and visible_corners[3] and visible_corners[4]):
-            #                 new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               0)
-            #         # if 2 corners of the widget are visible
-            #         elif visible_corners[0] == 2:
-                        
-            #             # if top edge is not visible, display specs below animal
-            #             if not visible_corners[1] and not visible_corners[2]:
-            #                new_pos = pos + QtCore.QPoint(0, 
-            #                                               + self.widget_animal_specs.height() 
-            #                                               + self.cur_animal.boundingBox_visual.rect().height())
-            #             # if bottom edge is not visible, display specs above animal
-            #             elif not visible_corners[3] and not visible_corners[4]:
-            #                 new_pos = pos + QtCore.QPoint(0, 
-            #                                               - self.widget_animal_specs.height() 
-            #                                               - self.cur_animal.boundingBox_visual.rect().height())
-                            
-            #             # if left edge is not visible, display specs right of animal
-            #             elif not visible_corners[1] and not visible_corners[3]:
-            #                new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                              -self.cur_animal.boundingBox_visual.rect().height())
-                           
-            #             # if right edge is not visible, display specs left of animal
-            #             elif not visible_corners[2] and not visible_corners[4]:
-            #                 new_pos = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 
-            #                                               -self.cur_animal.boundingBox_visual.rect().height())
-                    
-            #         # if no corner is visible, determine closest scene corner and 
-            #         # display specs on opposite corner
-            #         elif visible_corners[0] == 0:
-            #             distances = np.array([
-            #                 (self.imageArea.rect().bottomLeft() - pos).manhattanLength(),
-            #                 (self.imageArea.rect().bottomRight() - pos).manhattanLength(),
-            #                 (self.imageArea.rect().topLeft()- pos).manhattanLength(),
-            #                 (self.imageArea.rect().topRight() - pos).manhattanLength()
-            #                 ])
-                        
-            #             min_distance = np.argmin(distances)
-                        
-            #             # if pos is closest to bottom left corner, draw specs on top right
-            #             if min_distance == 0:
-            #                 new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               -self.widget_animal_specs.height()-self.cur_animal.boundingBox_visual.rect().height())
-                        
-            #             # if pos is closest to bottom right corner, draw specs on top left
-            #             elif min_distance == 1: 
-            #                 new_pos = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 
-            #                                               -self.widget_animal_specs.height()-self.cur_animal.boundingBox_visual.rect().height())
-                        
-            #             # if pos is closest to top left corner, draw specs on bottom right
-            #             elif min_distance == 2:
-            #                 new_pos = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               0)
-                        
-            #             # if pos is closest to top right corner, draw specs on bottom left
-            #             elif min_distance == 3:
-            #                 new_pos = pos + QtCore.QPoint(-self.cur_animal.boundingBox_visual.rect().width(), 
-            #                                               0)
-                            
-            #         visible_corners = self.checkVisibleCorners(corners=[bottom_left - QtCore.QPoint(0, self.widget_animal_specs.height()), 
-            #                                                             bottom_left - QtCore.QPoint(self.widget_animal_specs.width(), self.widget_animal_specs.height()),
-            #                                                             bottom_left,
-            #                                                             bottom_left + QtCore.QPoint(self.widget_animal_specs.width(), 0)])   
-            #     else:
-            #         break
-            #     # update visible corners
-            #     #visible_corners = self.checkVisibleCorners()
-            #     # else:
-            #     #     break
-            
-            # # when a position is found, draw the widget there
-            # if new_pos != QtCore.QPoint(0, 0): self.widget_animal_specs.move(new_pos)
-            
-            
-            
-            # # if the lower edge of the specs is not visible, display specs above animal
-            # if not self.imageArea.rect().contains(bottom_left) \
-            #     and not self.imageArea.rect().contains(bottom_right):
-            #     new_pos = pos + QtCore.QPoint(
-            #         0, -self.widget_animal_specs.height() - self.cur_animal.boundingBox_visual.rect().height())
-            #     self.widget_animal_specs.move(new_pos)
-                
-            # # if the left edge of the specs is not visible, display specs right of animal
-            # elif not self.imageArea.rect().contains(bottom_left) and not self.imageArea.rect().contains(top_left):
-            #     new_pos = pos + QtCore.QPoint(
-            #         self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
-            #     self.widget_animal_specs.move(new_pos)   
-    
-            # # # if the top edge of the specs is not visible, display specs below of animal (as usual)
-            # # elif not self.imageArea.rect().contains(top_left) and not self.imageArea.rect().contains(top_right):
-            # #     pass
-        
-            # # if the right edge of the specs is not visible, display specs left of animal
-            # elif not self.imageArea.rect().contains(bottom_right) \
-            #     and not self.imageArea.rect().contains(top_right):
-            #     new_pos = pos + QtCore.QPoint(
-            #         -self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
-            #     self.widget_animal_specs.move(new_pos)
-            
-            # 8 possible placements of specs that are checkes one after the other
+            # 8 possible placements of specs that are checked one after the other
             # 1. specs below animal
             top_left = pos + QtCore.QPoint(0, 0)
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("below")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, None)
+            if result: return
             
             # 2. specs left of animal
             top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("left")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
             
             # 3. specs above animal
             top_left = pos + QtCore.QPoint(0, -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("above")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
             
             # 4. specs right of animal
             top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("right")
-                return
-            
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
+
             # 5. specs on top left corner
             top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("top left corner")
-                return
-            
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
+                       
             # 6. specs on top right corner
             top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("top right corner")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
             
             # 7. specs on bottom left corner
             top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 0)
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("bottom left corner")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
             
             # 8. specs on bottom right corner
             top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 0)
-            if self.checkVisibleCorners(top_left)[0] == 4: 
-                self.widget_animal_specs.move(top_left)
-                print("bottom right corner")
-                return
+            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+            if result: return
             
-            
+            # if none of the methods was chosen, check which yields most
+            # visibility (i.e. maximum visible area) of the specs widget
+            max_area_index = visibility_areas[:,0].argmax()
+            top_left = visibility_areas[max_area_index, 1]
+            self.widget_animal_specs.move(top_left)
+               
+    def checkVisibility(self, top_left, visibility_areas=None):
+        """
+        Checks which corners of the specs widget, i.e. a QRect specified by it's 
+        top left corner position) are visible and how much area of the specs is 
+        visible in the current image area.
+
+        Parameters
+        ----------
+        top_left : QPoint
+            Top left corner position of the animal specification widget.
+        visibility_areas : np.array<int, QPoint>, optional
+            List of top left corners specifying the specs widget, as well as the
+            corresponding visible area. If given, the new position and area will 
+            be stacked on this array. The default is None. 
+
+        Returns
+        -------
+        bool
+            Whether all 4 corners of the specs widget are visible.
+        visibility_areas : np.array<int, QPoint>
+            The area of the specs widget that is visible in the image area and 
+            the top left corner of the specs widget specifying its position.
+        """
+        # determine which area of the specs is visible
+        rect = QtCore.QRect(top_left, QtCore.QSize(self.widget_animal_specs.width(), self.widget_animal_specs.height()))
+        intersection_rect = rect.intersected(self.imageArea.rect())
+        area = intersection_rect.width()*intersection_rect.height()
+        visibility_area = np.array([area, top_left])     
+        
+        # stack visibility areas if some are given
+        if visibility_areas is None: 
+            visibility_areas = visibility_area
+        else:
+            visibility_areas = np.vstack((visibility_areas, visibility_area))
+        
+        # check which and how many corners are visible for the given top left corner
+        if self.checkVisibleCorners(top_left)[0] == 4: 
+            self.widget_animal_specs.move(top_left)
+            return True, visibility_areas
+        
+        return False, visibility_areas
             
     def checkVisibleCorners(self, top_left=None):
+        """
+        Checks which corners of the specs widget (specified by it's top left 
+        corner) are visible on the image area.
+
+        Parameters
+        ----------
+        top_left : QPoint, optional
+            Top left corner position of the specs widget. If not given, its
+            current position is assumed. The default is None.
+
+        Returns
+        -------
+        count : int
+            Number of visible corners.
+        tl : bool
+            Whether the top left corner is visible.
+        tr : bool
+            Whether the top right corner is visible.
+        bl : bool
+            Whether the bottom left corner is visible.
+        br : bool
+            Whether the bottom right corner is visible.
+        """
         
+        # if top left corner is not specified, get the coordinates from the 
+        # specs widget in the scene
         if not top_left:
             # get corners of specs widget in scene coordinates
             top_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().topLeft())).toPoint()
@@ -1390,16 +1296,19 @@ class AnimalPainter(QtCore.QObject):
             bottom_left = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomLeft())).toPoint()
             bottom_right = self.imageArea.mapToScene(self.widget_animal_specs.mapToParent(self.widget_animal_specs.rect().bottomRight())).toPoint()
         else:
+            # calculate positions of the corners given the top left one
             bottom_left = top_left + QtCore.QPoint(0, self.widget_animal_specs.height())
             top_right = top_left + QtCore.QPoint(self.widget_animal_specs.width(), self.widget_animal_specs.height())
             bottom_right = top_left + QtCore.QPoint(self.widget_animal_specs.width(), 0)
        
+        # init return variables
         count = 0
         tl = False
         tr = False
         bl = False
         br = False
         
+        # check which corners are visible
         if self.imageArea.rect().contains(top_left): 
             count = count +1
             tl = True
