@@ -92,6 +92,8 @@ class PhotoViewer(QtWidgets.QWidget):
         # redraw the animals (make more transparent, add IDs to bounding boxes)
             self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
             self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
+            # self.imageAreaLR.imageAreaL.animal_painter.cur_animal = None
+            # self.imageAreaLR.imageAreaR.animal_painter.cur_animal = None
         else:
             self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesNormal
             self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesNormal
@@ -1160,12 +1162,13 @@ class AnimalPainter(QtCore.QObject):
         self.updateBoundingBoxes() 
     
     def removeAll(self):
-        """ Removes visuals of all animals. """
+        """ Removes visuals of all animals. """#@todo maybe use removeAnimal instead?
         for animal in self.animal_list:
             self.removeHeadVisual(animal)
             self.removeTailVisual(animal)
             self.removeLineVisual(animal)
             self.removeBoundingBoxVisual(animal)
+            self.removeIdVisual(animal)
             
             animal.is_head_drawn = False
             animal.is_tail_drawn = False
@@ -1176,7 +1179,8 @@ class AnimalPainter(QtCore.QObject):
         self.removeTailVisual(animal)
         self.removeLineVisual(animal)
         self.removeBoundingBoxVisual(animal)
-            
+        self.removeIdVisual(animal)
+        
         animal.is_head_drawn = False
         animal.is_tail_drawn = False
         
@@ -1359,6 +1363,10 @@ class AnimalPainter(QtCore.QObject):
             
             # set colour to full opacity
             animal.color.setAlpha(255)
+            
+            # remove ID
+            self.imageArea._scene.removeItem(animal.id_visual)
+            animal.id_visual = None
 
         # draw the current animal bounding box
         if self.cur_animal is not None and self.cur_animal in self.animal_list:
@@ -1377,14 +1385,16 @@ class AnimalPainter(QtCore.QObject):
             # remove old bounding box from scene
             self.imageArea._scene.removeItem(animal.boundingBox_visual)
             animal.boundingBox_visual = None
+            
+            # remove ID
+            self.imageArea._scene.removeItem(animal.id_visual)
+            animal.id_visual = None
+           
                     
-            # only draw a bounding box if it is the current animal or if the animal has amatch
-            
-            
-            # only drawbounding boxes of animal that are annotated on both images
+            # only drawbounding boxes of animals that are annotated on both images
             if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 \
             and self.models.model_animals.data.loc[animal.row_index, "LX1"] != -1:
-                # current animal that has a match
+                # current animal (that has a match)
                 if animal == self.cur_animal:
                     # set colour to full opacity
                     animal.color.setAlpha(255)
@@ -1399,6 +1409,9 @@ class AnimalPainter(QtCore.QObject):
                     # add new bounding box to scene
                     animal.boundingBox_visual = self.imageArea._scene.addRect(
                         animal.boundingBox, QtGui.QPen(animal.color, 5, QtCore.Qt.SolidLine))
+                
+                # only draw IDs for animals with a match
+                self.drawAnimalId(animal) # @todo
             
             # draw bounding box of current animal (without match) a bit thinner
             # than animals that have a match
@@ -1409,7 +1422,36 @@ class AnimalPainter(QtCore.QObject):
                     # draw the new bounding box
                     animal.boundingBox_visual = self.imageArea._scene.addRect(
                         animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
+            
+            
+
+                
+    
+    def drawAnimalId(self, animal):
         
+        if animal != None:
+            # the animal ID is its row index in the data table
+            animal_id = animal.row_index
+            
+            # get top left corner of bounding box
+            top_left = animal.boundingBox_visual.rect().topLeft()
+            
+            # draw ID
+            font = QtGui.QFont("Century Gothic", 12, QtGui.QFont.Bold) 
+            
+            
+            animal.id_visual = self.imageArea._scene.addSimpleText(
+                str(animal_id), font)#, QtGui.QPen(animal.color))#, QtGui.QFont())#2, QtCore.Qt.SolidLine))
+            animal.color.setAlpha(255)
+            animal.id_visual.setBrush(animal.color)
+            animal.id_visual.setPen(QtCore.Qt.black)
+            
+            
+            animal.id_visual.setPos(top_left \
+                                    - QtCore.QPoint( \
+                                        0, 
+                                        2*font.pointSize()))
+
     def drawAnimalHead(self, animal):
         """ Draws the head of a given animal. """
         if animal != None:
@@ -1419,6 +1461,10 @@ class AnimalPainter(QtCore.QObject):
      
     def drawAnimalLine(self, animal):
         """ Draws the line between head an tail of a given animal. """
+        # set colour to full opacity
+        animal.color.setAlpha(255)
+        
+        # draw line
         animal.line_item_visual = self.imageArea._scene.addLine(
             animal.line, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
      
@@ -1455,6 +1501,11 @@ class AnimalPainter(QtCore.QObject):
         self.imageArea._scene.removeItem(animal.boundingBox_visual)
         animal.boundingBox_visual = None  
       
+    def removeIdVisual(self, animal):
+        """ Removes the ID visual on the image of a given animal. """
+        self.imageArea._scene.removeItem(animal.id_visual)
+        animal.id_visual = None
+        
     def on_next_animal(self):
         """ Makes the next animal in the animal_list active. """
         # if no animal ist selected, then select first one
@@ -1835,7 +1886,7 @@ class AnimalPainter(QtCore.QObject):
             RX1, RY1 (head position on right image), 
             RX2, RY2 (tail position on right image),
             group, species, object_remarks
-        """        
+        """                
         for i in range(len(animal_list)):  
             # get the head and tail position form the list
             if self.image_ending=="*_L.jpg":
@@ -1863,7 +1914,7 @@ class AnimalPainter(QtCore.QObject):
         
                 length = float(animal_list["length"].iloc[i])
                 
-                # create a new animal
+                # create a new animal #@todo do i need cur_animal here or is a local animal sufficient?
                 self.cur_animal = Animal(self.models,
                                          row_index=animal_list.index[i],
                                          position_head=pos_h, 

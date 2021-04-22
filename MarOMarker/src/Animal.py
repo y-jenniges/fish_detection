@@ -151,6 +151,7 @@ class Animal():
         self.head_item_visual = None
         self.tail_item_visual = None
         self.line_item_visual = None
+        self.id_visual = None
         
         # indicate if this animal was manually corrected
         self.manually_corrected = False
