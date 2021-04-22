@@ -84,6 +84,9 @@ class PhotoViewer(QtWidgets.QWidget):
         self._initUi()
         self._initActions()
 
+    def on_match_activated(self, is_active):
+        print(f"match was clicked, photo viewer will go to match mode {is_active}")
+
     def loadResFile(self):
         """ Loads the output file and updates data models with unseen remarks and
         species. """ 
@@ -942,11 +945,12 @@ class ImageArea(QtWidgets.QGraphicsView):
             parent = None
             if isinstance(self.parent().parent().parent().parent(), PhotoViewer):
                 parent = self.parent().parent().parent().parent()
-            elif isinstance(self.parent(), PhotoViewer):
-                parent = self.parent()
+            elif isinstance(self.parent().parent(), PhotoViewer):
+                parent = self.parent().parent()
             else:
                 print("ImageArea: Could not find PhotoViewer as parent and \
                       could therefore not (de-) activate arrow shortcuts.")
+                print(self.parent())
                 return
             
             # scale the view if zoom is positive, else set it to zero and fit 

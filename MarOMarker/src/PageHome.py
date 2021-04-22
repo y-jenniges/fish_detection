@@ -16,6 +16,8 @@ class PageHome(QtWidgets.QWidget):
         Indicates if the add mode is active.
     is_remove_animal_active : bool
         Indicates if the remove mode is active.
+    is_match_animal_acitve : bool
+        Indicated if the match mode is active.
     """
 
     def __init__(self, models, parent=None):        
@@ -24,9 +26,10 @@ class PageHome(QtWidgets.QWidget):
         # data models
         self.models = models
         
-        # variables to indicate if add/remove modes are active
+        # variables to indicate if add/remove/match modes are active
         self.is_add_animal_active = False
         self.is_remove_animal_active = False
+        self.is_match_animal_active = False
         
         # init UI and actions
         self._initUi()
@@ -76,8 +79,6 @@ class PageHome(QtWidgets.QWidget):
             
     def on_remove_clicked(self):
         """ (De-)activate the remove mode. """
-        # self.photo_viewer.on_remove_animal()
-        # self.updateAddRemoveIcons()
         if self.is_remove_animal_active:          
             self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(False, self.is_add_animal_active)
         else:
@@ -368,6 +369,34 @@ class PageHome(QtWidgets.QWidget):
         self.btn_delete.setIconSize(QtCore.QSize(30, 30))
         self.btn_delete.setObjectName("btn_delete")
         
+        # button to activate the animal match mode
+        self.btn_match = QtWidgets.QPushButton(frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_match.sizePolicy().hasHeightForWidth())
+        self.btn_match.setSizePolicy(sizePolicy)
+        self.btn_match.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_match.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+        self.btn_match.setIconSize(QtCore.QSize(40, 40))
+        self.btn_match.setObjectName("btn_match")
+        
+        # dummy button for match button to keep symmetry
+        self.btn_match_dummy = QtWidgets.QPushButton(frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_match_dummy.sizePolicy().hasHeightForWidth())
+        self.btn_match_dummy.setSizePolicy(sizePolicy)
+        self.btn_match_dummy.setMinimumSize(QtCore.QSize(40, 40))
+        self.btn_match_dummy.setMaximumSize(QtCore.QSize(40, 40))
+        self.btn_match_dummy.setIconSize(QtCore.QSize(30, 30))
+        self.btn_match_dummy.setObjectName("btn_match_dummy")
+        self.btn_match_dummy.setEnabled(False)
+        
         # button for undoing the last action
         self.btn_undo = QtWidgets.QPushButton(frame_controlBar)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
@@ -454,6 +483,8 @@ class PageHome(QtWidgets.QWidget):
         self.layout_frame_controlBar.addWidget(self.btn_filter)
         self.layout_frame_controlBar.addWidget(self.comboBox_imgRemark)
         self.layout_frame_controlBar.addItem(spacerItem11) 
+        self.layout_frame_controlBar.addWidget(self.btn_match)
+        self.layout_frame_controlBar.addItem(spacerItem7)
         self.layout_frame_controlBar.addWidget(self.btn_zoom)
         self.layout_frame_controlBar.addItem(spacerItem7)
         self.layout_frame_controlBar.addWidget(self.btn_add)
@@ -467,6 +498,8 @@ class PageHome(QtWidgets.QWidget):
         self.layout_frame_controlBar.addWidget(self.btn_delete)
         self.layout_frame_controlBar.addItem(spacerItem7)
         self.layout_frame_controlBar.addWidget(self.btn_undo)
+        self.layout_frame_controlBar.addItem(spacerItem7)
+        self.layout_frame_controlBar.addWidget(self.btn_match_dummy)
         self.layout_frame_controlBar.addItem(spacerItem11)
         self.layout_frame_controlBar.addWidget(self.comboBox_imgRemark_dummy)
         self.layout_frame_controlBar.addWidget(self.btn_filter_dummy)
@@ -489,16 +522,29 @@ class PageHome(QtWidgets.QWidget):
         self.photo_viewer.newImageLoaded.connect(self.onNewImage)
         self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
         self.btn_filter.clicked.connect(self.on_filter_clicked)
+        self.btn_match.clicked.connect(self.on_match_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
         self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
         self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.on_next_animal)
         self.shortcut_add_animal = QtWidgets.QShortcut(QtGui.QKeySequence("+"), self.btn_add, self.on_add_clicked)
+        self.shortcut_match_animal = QtWidgets.QShortcut(QtGui.QKeySequence("m"), self.btn_match, self.on_match_clicked)
         self.shortcut_remove_animal = QtWidgets.QShortcut(QtGui.QKeySequence("-"), self.btn_delete, self.on_remove_clicked)
         self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
-        
+      
+    def on_match_clicked(self):
+        print("on match clicked")
+        if self.is_match_animal_active:
+            self.is_match_animal_active = False
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+        else:
+            self.is_match_animal_active = True
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
+            
+        self.photo_viewer.on_match_activated(self.is_match_animal_active)
+            
     def _initModels(self):
         """ Add data models to respective UI elements. """
         self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
@@ -546,16 +592,22 @@ class PageHome(QtWidgets.QWidget):
     def displayLeftImage(self):
         """ Display left image. """
         self.btn_imgSwitch.setText("L")
+        self.btn_match.setIcon(QtGui.QIcon())
+        self.btn_match.setEnabled(False)
         self.photo_viewer.activateImageMode("L")
 
     def displayRightImage(self):
         """ Display right image. """
         self.btn_imgSwitch.setText("R")
+        self.btn_match.setIcon(QtGui.QIcon())
+        self.btn_match.setEnabled(False)
         self.photo_viewer.activateImageMode("R")
     
     def displayBothImages(self):
         """ Display both images. """
         self.btn_imgSwitch.setText("LR")
+        self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+        self.btn_match.setEnabled(True)
         self.photo_viewer.activateImageMode("LR")
      
     def mousePressEvent(self, event):
