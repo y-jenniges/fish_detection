@@ -520,8 +520,9 @@ class TableModel(QtCore.QAbstractTableModel):
             if self.data is None:
                 self.data = pd.DataFrame(columns=self.getColumns())
             
-            # write a completely new file
-            self.data.to_csv(path, sep=",", index=False)
+            # write a completely new file (if a path was selected)
+            if path != "":
+                self.data.to_csv(path, sep=",", index=False)
     
     def getColumns(self):
         """ Returns a list of the column names. """
