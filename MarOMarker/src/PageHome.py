@@ -543,7 +543,7 @@ class PageHome(QtWidgets.QWidget):
             self.is_match_animal_active = True
             self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
             
-        self.photo_viewer.on_match_activated(self.is_match_animal_active)
+        self.photo_viewer.imageAreaLR.on_match_activated(self.is_match_animal_active)
             
     def _initModels(self):
         """ Add data models to respective UI elements. """

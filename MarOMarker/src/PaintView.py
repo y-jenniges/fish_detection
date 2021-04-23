@@ -84,28 +84,6 @@ class PhotoViewer(QtWidgets.QWidget):
         self._initUi()
         self._initActions()
 
-    def on_match_activated(self, is_active):
-        #@todo
-        print(f"match was clicked, photo viewer will go to match mode {is_active}")
-        
-        if is_active:
-        # redraw the animals (make more transparent, add IDs to bounding boxes)
-            self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
-            self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
-        else:
-            self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesNormal
-            self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesNormal
-        
-        # draw bounding boxes and IDs of all animals that have a match
-        self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes()
-        self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes()
-        
-        
-        
-        #self.imageAreaLR.on_match_activated(is_active) ?? delegate to image area LR??
-        
-        # change behaviour of animal painters for mouse clicks (disable add/remove?)
-
     def loadResFile(self):
         """ Loads the output file and updates data models with unseen remarks and
         species. """ 
@@ -729,26 +707,16 @@ class ImageAreaLR(QtWidgets.QWidget):
         # update specs widget @todo
         self.updateSpecsWidget()
         
-    def updateSpecsWidget(self):#@todo
-        # check if the match mode is active 
-        if isinstance(self.parent().parent(), PhotoViewer):
-            parent = self.parent().parent().parent()
+    def updateSpecsWidget(self):
+        """ Updates the specs widget (on the side) with the currently active
+        animal (either on left or right image). """
+        # check if L or R view has an acitve current animal and update the specs widget
+        if self.imageAreaL.animal_painter.cur_animal is not None:
+            self.widget_animal_specs.setAnimal(self.imageAreaL.animal_painter.cur_animal)
+        elif self.imageAreaR.animal_painter.cur_animal is not None:
+            self.widget_animal_specs.setAnimal(self.imageAreaR.animal_painter.cur_animal)
         else:
-            print("ImageAreaLR: Could not find PageHome parent.")
-            return
-
-        is_match_animal_active = parent.is_match_animal_active
-        
-        if is_match_animal_active:
-            pass
-        else:
-            # check if L or R view has an acitve current animal and update the specs widget
-            if self.imageAreaL.animal_painter.cur_animal is not None:
-                self.widget_animal_specs.setAnimal(self.imageAreaL.animal_painter.cur_animal)
-            elif self.imageAreaR.animal_painter.cur_animal is not None:
-                self.widget_animal_specs.setAnimal(self.imageAreaR.animal_painter.cur_animal)
-            else:
-                self.widget_animal_specs.setAnimal(None)
+            self.widget_animal_specs.setAnimal(None)
     
     def findAnimalMatch(self, animal, image="L"):
         """ Determines which animal object belongs to the given animal by 
@@ -840,7 +808,28 @@ class ImageAreaLR(QtWidgets.QWidget):
             imageArea.animal_painter.drawAnimalTailLineBoundingBox(matching_animal)      
             imageArea.animal_painter.updateBoundingBoxes()     
 
-        self.updateSpecsWidget()                 
+        self.updateSpecsWidget()     
+            
+    def on_match_activated(self, is_active):
+        #@todo
+        print(f"match was clicked, photo viewer will go to match mode {is_active}")
+        
+        if is_active:
+        # redraw the animals (make more transparent, add IDs to bounding boxes)
+            self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
+            self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
+        else:
+            self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesNormal
+            self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesNormal
+        
+        # draw bounding boxes and IDs of all animals that have a match
+        self.imageAreaL.animal_painter.updateBoundingBoxes()
+        self.imageAreaR.animal_painter.updateBoundingBoxes() 
+        
+        # update specs widget  @todo needed here?
+        self.updateSpecsWidget()
+        
+        # change behaviour of animal painters for mouse clicks (disable add/remove?)
         
     def _initUi(self):
         """ Defines and draws the UI elements. """
@@ -955,9 +944,6 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         
         self.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
-        
-        #self.imageArea.animal_painter.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
-        #self.imageAreaR.animal_painter.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
         
 
 class ImageArea(QtWidgets.QGraphicsView):
@@ -1470,6 +1456,10 @@ class AnimalPainter(QtCore.QObject):
         """ Draws boundingg boxes as needed in the match mode (i.e. draws a 
         (more transparent) bounding box and an ID for every animal that has a 
         match). """
+        
+        # hide specs widget
+        self.widget_animal_specs.hide()
+    
         for animal in self.animal_list:
             # remove old bounding box from scene
             self.imageArea._scene.removeItem(animal.boundingBox_visual)
