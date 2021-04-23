@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import math
 import numpy as np
+from functools import partial
 from Animal import Animal, AnimalSpecificationsWidget
 from Models import AnimalGroup, AnimalSpecies
 from Helpers import getIcon, displayErrorMsg
@@ -648,6 +649,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         # through animals)
         self.last_active = "*_L.jpg"
         
+        # the currently selected animal that needs to be matched and on which 
+        # image it is
+        self.animal_to_match = [None, "L"]
+        
         if parent:
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
@@ -935,6 +940,136 @@ class ImageAreaLR(QtWidgets.QWidget):
         # redraw matching animal
         self.redrawAnimalMatch(painter.cur_animal, image)
     
+    def handleMatching(self, image="L"):#@todo
+        # image: on which image the selection occrued
+        
+        # find parent home page
+        if hasattr(self.parent().parent().parent(), "is_match_animal_active"):
+            parent = self.parent().parent().parent()
+        else:
+            return
+        
+        # check if the match mode is active
+        if parent.is_match_animal_active:
+            # check on which image area the selected animal is located
+            if image == "L":
+                imageArea = self.imageAreaL
+            else:
+                imageArea = self.imageAreaR
+             
+            # determine selected animal
+            animal = imageArea.animal_painter.cur_animal
+            
+            # check if there has already been one animal selected and waits for its match
+            if self.animal_to_match[0] is None:           
+                # set animal to match
+                self.animal_to_match = [animal, image]
+                print("set animal to match")
+
+            else:
+                # an animal waits for its match
+                # if the new selection occured on the same image as the 
+                # waiting match, the new selection will be waiting for a match now
+                if image == self.animal_to_match[1]:
+                    self.animal_to_match = [animal, image]
+                    self.imageAreaL.animal_painter.updateBoundingBoxes()
+                    self.imageAreaR.animal_painter.updateBoundingBoxes()
+                    print("switch animal to match")
+                    return
+                
+                # match the active and the lastly selected animal
+                if animal is not None:
+                    if image == "L":
+                        match_successfull = self.matchAnimals(animal, self.animal_to_match[0])
+                    elif image == "R":
+                        match_successfull = self.matchAnimals(self.animal_to_match[0], animal) 
+                    
+                    if match_successfull:
+                        # set the animal waiting to be matched to None
+                        self.animal_to_match[0] = None
+                
+                # update the visuals, i.e. IDs, bounding boxes on both images
+                self.imageAreaL.animal_painter.updateBoundingBoxes()
+                self.imageAreaR.animal_painter.updateBoundingBoxes()
+                
+    def matchAnimals(self, animal_L, animal_R):
+        print("match called")
+        # if group, species, remark, length, other props are different, then what?
+        if str(animal_L.group) != str(animal_R.group):
+            print(f"animals do not have the same group {animal_L.group, animal_R.group}")
+            return False
+        
+        if str(animal_L.species) != str(animal_R.species):
+            print(f"animals do not have the same species {animal_L.species, animal_R.species}")
+            return False
+            
+        if str(animal_L.remark) != str(animal_R.remark):
+            print(f"animals do not have the same remark {animal_L.remark, animal_R.remark}")
+            return False
+            
+        if str(animal_L.length) != str(animal_R.length):
+            print(f"animals do not have the same length {animal_L.length, animal_R.length}")
+            return False
+        
+        
+        # remove old matches - there are 4 cases
+        # left animal has no right coordinates, right animal has no left coordinates
+        if self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
+        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
+            # move the right corrdinates to the left animal
+            self._models.model_animals.data.loc[animal_L.row_index, "RX1"] = self._models.model_animals.data.loc[animal_R.row_index, "RX1"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RY1"] = self._models.model_animals.data.loc[animal_R.row_index, "RY1"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RX2"] = self._models.model_animals.data.loc[animal_R.row_index, "RX2"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RY2"] = self._models.model_animals.data.loc[animal_R.row_index, "RY2"]
+        
+            # remove right animal entry from data model
+            pos = self._models.model_animals.data.index.get_loc(animal_R.row_index)
+            self._models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())        
+                  
+            # update row index of right animal instance
+            animal_R.row_index = animal_L.row_index
+        
+        # left animal has right coordinates, right animal doesnt have left coordinates
+        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
+        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
+            # find animal that represents curent right coordinates  
+            cur_right_animal = self.findMatch(animal_L, "L")
+            
+            # add a data row for that animal
+            cur_right_animal.row_index = 
+            
+            # merge the new right animal coordinates to the left animal
+            self._models.model_animals.data.loc[animal_L.row_index, "RX1"] = self._models.model_animals.data.loc[animal_R.row_index, "RX1"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RY1"] = self._models.model_animals.data.loc[animal_R.row_index, "RY1"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RX2"] = self._models.model_animals.data.loc[animal_R.row_index, "RX2"]
+            self._models.model_animals.data.loc[animal_L.row_index, "RY2"] = self._models.model_animals.data.loc[animal_R.row_index, "RY2"]
+        
+            # remove new right animal entry from data model
+            pos = self._models.model_animals.data.index.get_loc(animal_R.row_index)
+            self._models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())        
+                  
+            # update row index of new right animal 
+            animal_R.row_index = animal_L.row_index
+            
+            
+            # create #@todo
+            
+        # left animal has no right coordinates, right animal has left coordinates
+        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
+        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
+        
+        # left animal has right coordinates, right animal has left coordinates
+        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
+        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
+            
+        # match animals
+        
+        
+        
+        
+        
+        return True
+    
     def _initActions(self):
         """ Defines the actions possible on the ImageAreaLR. """
         self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
@@ -944,6 +1079,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         
         self.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
+        
+        self.imageAreaL.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "L"))
+        self.imageAreaR.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "R"))
         
 
 class ImageArea(QtWidgets.QGraphicsView):
