@@ -56,6 +56,8 @@ class Animal():
         Visual of the tail that can be drawn in the QGraphicsScene.
     line_item_visual 
         Visual of the line that can be drawn in the QGraphicsScene.
+    id_visual
+        Visual of the ID that can be drawn in the QGraphicsScene.
     manually_corrected: bool
         Indicates if the animal was manually adapted. 
     """
@@ -394,7 +396,16 @@ class Animal():
 
 
 class AnimalSpecificationsWidget(QtWidgets.QWidget):
-    """ A widget to provide all information about the current animal. """
+    """ A widget to provide all information about the current animal. 
+    
+    Attributes
+    ----------
+    propertyChanged : pyqtSignal
+    """
+    
+    # custom signals
+    propertyChanged = QtCore.pyqtSignal(Animal)
+    """ Signal emitted when the group, species or remark is changed. """
     
     def __init__ (self, models, parent = None):
         """
@@ -410,12 +421,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             The default is None.
         """
         super(QtWidgets.QWidget, self).__init__(parent)
-        
-        # @todo replace by an instance of an animal
-        self.group = AnimalGroup.UNIDENTIFIED.name.title()
-        self.species = AnimalSpecies.UNIDENTIFIED.name.title()
-        self.remark = ""
-        self.length = 0
+        # init empty animal
+        self.animal = None
         
         self.models = models
         
@@ -423,6 +430,9 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self._initActions()
         self._initModels()
        
+        # set an empty animal as default
+        self.setAnimal(self.animal)
+
         # setting visuals to initial values and hiding widget
         self.updateVisuals()
         self.hide()
@@ -478,6 +488,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             # set current combobox image to the new entry and switch focus
             self.comboBox_remark.setCurrentIndex(index)
             self.focusNextChild()
+            
+            #self.propertyChanged.emit()
 
     # @todo would editfinsihed not be enough?   
     def onRemarkComboboxEdited(self):
@@ -495,13 +507,19 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.focusNextChild()
+            #self.propertyChanged.emit()
      
     # @todo why to i need this?
     def onRemarkComboboxChanged(self, remark):
         """ Function handling when the animal remark combobox gets changed, 
         i.e. the editing is not finished yet. """
-        self.parent().animal_painter.setAnimalRemark(str(remark))
-        
+        if self.animal is not None:
+            self.animal.remark = remark
+            self.propertyChanged.emit(self.animal)
+            
+            if hasattr(self.parent(), "animal_painter"):
+                self.parent().animal_painter.setAnimalRemark(str(remark))
+                
     def onSpeciesComboboxChanged(self, species):
         """ Function called when the species combobox is changed. 
         It sets the species of the current animal. 
@@ -512,15 +530,15 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             The selected species of the animal. 
             Selectable from the Enum AnimalSpecies.
         """
-        
-        # check if model contains the species and adds it otherwise
-        if len(self.models.model_species.findItems(species)) > 0 and  \
-        hasattr(self.parent(), "animal_painter"):
-            self.species = species
-            self.parent().animal_painter.setAnimalSpecies(species) 
-            self.focusNextChild()
-        else:
-            print("Given species was not in combobox")
+        if self.animal is not None:
+            self.animal.species = species
+            self.propertyChanged.emit(self.animal)
+            
+            # check if model contains the species and adds it otherwise
+            if len(self.models.model_species.findItems(species)) > 0 and  \
+            hasattr(self.parent(), "animal_painter"):
+                self.parent().animal_painter.setAnimalSpecies(species) 
+                self.focusNextChild()
             
     def onGroupComboboxChanged(self, group):
         """
@@ -533,13 +551,14 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             The selected group of the animal. 
             Selectable from the Enum AnimalGroup.
         """
-        if len(self.models.model_group.findItems(group)) > -1 \
-        and hasattr(self.parent(), "animal_painter"):
-            self.group = group
-            self.parent().animal_painter.setAnimalGroup(group) 
-            self.focusNextChild()
-        else:
-            print("Given group was not in combobox")
+        if self.animal is not None:
+            self.animal.group = group
+            self.propertyChanged.emit(self.animal)
+            
+            if len(self.models.model_group.findItems(group)) > -1 \
+            and hasattr(self.parent(), "animal_painter"):
+                self.parent().animal_painter.setAnimalGroup(group) 
+                self.focusNextChild()
      
     def onLengthSpinboxChanged(self, value):
         """
@@ -551,46 +570,86 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         value : float
             New value for animal length.
         """
-        self.length = value
-        self.parent().animal_painter.cur_animal.length = value
-        self.focusNextChild()
+        if self.animal is not None:
+            self.animal.length = value
+            self.parent().animal_painter.cur_animal.length = value
+            self.focusNextChild()
         
     def setAnimal(self, animal):
         """
-        Copies a given animal into the specifications window.
+        Copies a given animal into the specifications window or resets the 
+        specs window and disables it when no animal is provided.
 
         Parameters
         ----------
         animal : Animal
             Animal to copy.
         """
-        # set group
-        if animal.group in AnimalGroup.__members__.values(): 
-            self.group = animal.group.name.title()
-        else:
-            self.group = animal.group
-            
-        # set species
-        if animal.species in AnimalSpecies.__members__.values(): 
-            self.species = animal.species.name.title()
-        else:
-            self.species = animal.species
-
-        # set remark
-        if animal.remark is not None:
-            self.remark = str(animal.remark)
-        else:
-            self.remark = ""
+        self.animal = animal
         
-        # set length
-        self.length = animal.length
-        self.updateVisuals()
+        if animal is not None:
+            # enable widget
+            self.setEnabled(True)
+            
+            # set group
+            if animal.group in AnimalGroup.__members__.values(): 
+                self.animal.group = animal.group.name.title()
+            else:
+                self.animal.group = animal.group
+                
+            # set species
+            if animal.species in AnimalSpecies.__members__.values(): 
+                self.animal.species = animal.species.name.title()
+            else:
+                self.animal.species = animal.species
     
+            # set remark
+            if animal.remark is not None:
+                self.animal.remark = str(animal.remark)
+            else:
+                self.animal.remark = ""
+            
+            # set length
+            self.animal.length = animal.length
+            self.updateVisuals()
+        
+        else:
+            # group = AnimalGroup.UNIDENTIFIED.name.title()
+            # self.comboBox_group.blockSignals(True) 
+            # self.comboBox_group.setCurrentIndex(self.comboBox_group.findText(group))
+            # self.comboBox_group.blockSignals(False)
+            
+            # species = AnimalSpecies.UNIDENTIFIED.name.title()
+            # self.comboBox_species.blockSignals(True)
+            # self.comboBox_species.setCurrentIndex(self.comboBox_species.findText(species))
+            # self.comboBox_species.blockSignals(False) 
+            
+            # # set remark to empty
+            # self.comboBox_remark.setCurrentIndex(0)
+            
+            # # set length to 0
+            # self.spinBox_length.setValue(0)
+            
+            self.updateVisuals()
+            self.setEnabled(False)
+            
     def updateVisuals(self):
         """ Sets the visuals of the specifications widget to the currently
         set animal. """
+        
+        if self.animal is None:
+            group = AnimalGroup.UNIDENTIFIED.name.title()
+            species = AnimalSpecies.UNIDENTIFIED.name.title()
+            remark = ""
+            length = 0
+        else:
+            group = self.animal.group
+            species = self.animal.species
+            remark = self.animal.remark
+            length = self.animal.length
+        
         # set group combobox
-        index = self.comboBox_group.findText(self.group) 
+        index = self.comboBox_group.findText(group) 
         if index != -1:
             # blocking signal to avoid calling onGroupComboboxChanged and 
             # thus starting a loop
@@ -599,35 +658,35 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_group.blockSignals(False)
 
         # set species combobox
-        index = self.comboBox_species.findText(self.species) 
+        index = self.comboBox_species.findText(species) 
         if index != -1:
             self.comboBox_species.blockSignals(True)
             self.comboBox_species.setCurrentIndex(index)
             self.comboBox_species.blockSignals(False)       
         
         # set remark combobox
-        index = self.comboBox_remark.findText(self.remark) 
-        if len(self.models.model_animal_remarks.findItems(self.remark)) != 0 or \
-        len(self.models.model_animal_remarks.findItems(self.remark.title())):
+        index = self.comboBox_remark.findText(remark) 
+        if len(self.models.model_animal_remarks.findItems(remark)) != 0 or \
+        len(self.models.model_animal_remarks.findItems(remark.title())):
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(index)
             self.comboBox_remark.blockSignals(False)  
-        elif self.remark == "nan":
+        elif remark == "nan":
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(0)
             self.comboBox_remark.blockSignals(False)            
-        elif self.remark != "" and self.remark is not None:
+        elif remark != "" and remark is not None:
             print("adding new remark entry----------------------")
-            item = QtGui.QStandardItem(str(self.remark).title())
+            item = QtGui.QStandardItem(str(remark).title())
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
             #self.model_remarks.appendRow(item)
 
         # set length spinbox
-        if self.length is not None and self.length != -1: 
+        if length is not None and length != -1: 
             self.spinBox_length.blockSignals(True)
-            self.spinBox_length.setValue(self.length) 
+            self.spinBox_length.setValue(length) 
             self.spinBox_length.blockSignals(False)
         else: 
             self.spinBox_length.setValue(0)

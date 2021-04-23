@@ -723,9 +723,32 @@ class ImageAreaLR(QtWidgets.QWidget):
         matching_animal = self.findAnimalMatch(cur_animal, image)
         
         # select matching animal and update bounding boxes
-        #if matching_animal:
         otherImageArea.animal_painter.cur_animal = matching_animal
         otherImageArea.animal_painter.updateBoundingBoxes()  
+        
+        # update specs widget @todo
+        self.updateSpecsWidget()
+        
+    def updateSpecsWidget(self):#@todo
+        # check if the match mode is active 
+        if isinstance(self.parent().parent(), PhotoViewer):
+            parent = self.parent().parent().parent()
+        else:
+            print("ImageAreaLR: Could not find PageHome parent.")
+            return
+
+        is_match_animal_active = parent.is_match_animal_active
+        
+        if is_match_animal_active:
+            pass
+        else:
+            # check if L or R view has an acitve current animal and update the specs widget
+            if self.imageAreaL.animal_painter.cur_animal is not None:
+                self.widget_animal_specs.setAnimal(self.imageAreaL.animal_painter.cur_animal)
+            elif self.imageAreaR.animal_painter.cur_animal is not None:
+                self.widget_animal_specs.setAnimal(self.imageAreaR.animal_painter.cur_animal)
+            else:
+                self.widget_animal_specs.setAnimal(None)
     
     def findAnimalMatch(self, animal, image="L"):
         """ Determines which animal object belongs to the given animal by 
@@ -815,7 +838,9 @@ class ImageAreaLR(QtWidgets.QWidget):
             # redraw the visuals
             imageArea.animal_painter.drawAnimalHead(matching_animal)
             imageArea.animal_painter.drawAnimalTailLineBoundingBox(matching_animal)      
-            imageArea.animal_painter.updateBoundingBoxes()                      
+            imageArea.animal_painter.updateBoundingBoxes()     
+
+        self.updateSpecsWidget()                 
         
     def _initUi(self):
         """ Defines and draws the UI elements. """
@@ -835,18 +860,47 @@ class ImageAreaLR(QtWidgets.QWidget):
         layout_imageFrame.addWidget(self.imageAreaR)
         
         frame_image = QtWidgets.QFrame(self)
-        #frame_image.setMinimumSize(QtCore.QSize(60, 0))
-        #frame_image.setMaximumSize(QtCore.QSize(60, 16777215))
         frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_image.setLayout(layout_imageFrame)
 
         
         # -- frame for more options ----------------------------------------- #
+        # layout for frame that should contain the specifications widget
+        layout_specs = QtWidgets.QGridLayout(self)
+        layout_specs.setObjectName("layout_specs")
+        layout_specs.setAlignment(QtCore.Qt.AlignCenter)
+        
+        # frame to contain the specs widget
+        frame_specs = QtWidgets.QFrame(self)
+        frame_specs.setStyleSheet("QFrame{background-color:rgb(200, 200, 200);  border-radius: 3px; border: none;} ")
+        frame_specs.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_specs.setLayout(layout_specs)
+            
+        # specification widget
+        self.widget_animal_specs = AnimalSpecificationsWidget(self._models, self.imageAreaL)
+        self.widget_animal_specs.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;} QComboBox QAbstractItemView {background-color:white;border:None;selection-background-color: rgb(0, 203, 221);}")
+        self.widget_animal_specs.show()
+        
+        # add specs widget to specs layout
+        layout_specs.addWidget(self.widget_animal_specs) 
+        
+        # layout for the options frame
+        layout_options = QtWidgets.QVBoxLayout(self)
+        layout_options.setContentsMargins(7, 7, 7, 7)
+        layout_options.setSpacing(0)
+        layout_options.setObjectName("layout_options")
+        
+        # spacer
+        spacer1 = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)  
+        
+        # add widgets to options frame
+        layout_options.addWidget(frame_specs)
+        layout_options.addItem(spacer1)
+        
+        # put options layout into a frame
         frame_options = QtWidgets.QFrame(self)
-        #frame_options.setMinimumSize(QtCore.QSize(60, 0))
-        #frame_options.setMaximumSize(QtCore.QSize(60, 16777215))
         frame_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        #frame_options.setLayout(layout_imageFrame)
+        frame_options.setLayout(layout_options)
         
         # main layout
         self.layout = QtWidgets.QHBoxLayout(self)
@@ -861,6 +915,37 @@ class ImageAreaLR(QtWidgets.QWidget):
         # set main layout
         self.setLayout(self.layout)
     
+    def updateDrawnAnimal(self, animal):
+        """ Given the animal stored in the specs widget (on the side), this 
+        function updates the corresponding animal on left and right image. """
+        print("update drawn animal")
+        if self.imageAreaL.animal_painter.cur_animal is not None:
+            painter = self.imageAreaL.animal_painter
+            image = "L"
+            print("l case")
+        elif self.imageAreaR.animal_painter.cur_animal is not None:
+            painter = self.imageAreaR.animal_painter
+            image = "R"
+            print("r case")
+        else:
+            return
+        
+        # update properties of current animal
+        painter.cur_animal.setGroup(animal.group)
+        painter.cur_animal.setSpecies(animal.species)
+        painter.cur_animal.setRemark(animal.remark)
+        
+        # remove animal visuals
+        painter.removeAnimal(painter.cur_animal, False)
+        
+        # redraw the visuals
+        painter.drawAnimalHead(painter.cur_animal)
+        painter.drawAnimalTailLineBoundingBox(painter.cur_animal)      
+        painter.updateBoundingBoxes() 
+        
+        # redraw matching animal
+        self.redrawAnimalMatch(painter.cur_animal, image)
+    
     def _initActions(self):
         """ Defines the actions possible on the ImageAreaLR. """
         self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
@@ -868,7 +953,12 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         self.imageAreaL.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
-
+        
+        self.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
+        
+        #self.imageArea.animal_painter.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
+        #self.imageAreaR.animal_painter.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
+        
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
