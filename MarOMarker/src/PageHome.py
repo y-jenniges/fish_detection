@@ -606,7 +606,10 @@ class PageHome(QtWidgets.QWidget):
     def displayBothImages(self):
         """ Display both images. """
         self.btn_imgSwitch.setText("LR")
-        self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+        if self.is_match_animal_active:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
+        else:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
         self.btn_match.setEnabled(True)
         self.photo_viewer.activateImageMode("LR")
      
