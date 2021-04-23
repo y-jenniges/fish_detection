@@ -92,15 +92,14 @@ class PhotoViewer(QtWidgets.QWidget):
         # redraw the animals (make more transparent, add IDs to bounding boxes)
             self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
             self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
-            # self.imageAreaLR.imageAreaL.animal_painter.cur_animal = None
-            # self.imageAreaLR.imageAreaR.animal_painter.cur_animal = None
         else:
             self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxesNormal
             self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxesNormal
-            
+        
+        # draw bounding boxes and IDs of all animals that have a match
         self.imageAreaLR.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaLR.imageAreaR.animal_painter.updateBoundingBoxes()
-        # draw bounding boxes of all animals that have a match
+        
         
         
         #self.imageAreaLR.on_match_activated(is_active) ?? delegate to image area LR??
@@ -1143,6 +1142,10 @@ class AnimalPainter(QtCore.QObject):
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
+            # redraw ID
+            self.imageArea._scene.removeItem(self.cur_animal.id_visual)
+            self.drawAnimalId(self.cur_animal)
+            
             self.propertyChanged.emit(self.cur_animal)   
      
     def redraw(self):
@@ -1161,17 +1164,11 @@ class AnimalPainter(QtCore.QObject):
                     
         self.updateBoundingBoxes() 
     
-    def removeAll(self):
-        """ Removes visuals of all animals. """#@todo maybe use removeAnimal instead?
+    def removeAll(self, remove_from_list=False):
+        """ Removes visuals of all animals and its storage in the list if 
+        desired. """
         for animal in self.animal_list:
-            self.removeHeadVisual(animal)
-            self.removeTailVisual(animal)
-            self.removeLineVisual(animal)
-            self.removeBoundingBoxVisual(animal)
-            self.removeIdVisual(animal)
-            
-            animal.is_head_drawn = False
-            animal.is_tail_drawn = False
+            self.removeAnimal(animal, remove_from_list)
           
     def removeAnimal(self, animal, remove_from_list=False):
         """ Removes given animal visually and from list. """
@@ -1380,7 +1377,9 @@ class AnimalPainter(QtCore.QObject):
             self.widget_animal_specs.hide()
     
     def updateBoundingBoxesMatchMode(self):
-        #@todo
+        """ Draws boundingg boxes as needed in the match mode (i.e. draws a 
+        (more transparent) bounding box and an ID for every animal that has a 
+        match). """
         for animal in self.animal_list:
             # remove old bounding box from scene
             self.imageArea._scene.removeItem(animal.boundingBox_visual)
@@ -1389,8 +1388,7 @@ class AnimalPainter(QtCore.QObject):
             # remove ID
             self.imageArea._scene.removeItem(animal.id_visual)
             animal.id_visual = None
-           
-                    
+                           
             # only drawbounding boxes of animals that are annotated on both images
             if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 \
             and self.models.model_animals.data.loc[animal.row_index, "LX1"] != -1:
@@ -1422,35 +1420,42 @@ class AnimalPainter(QtCore.QObject):
                     # draw the new bounding box
                     animal.boundingBox_visual = self.imageArea._scene.addRect(
                         animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
-            
-            
 
-                
-    
     def drawAnimalId(self, animal):
+        """ Draws the IDs of a given animal if the match mode is active. """
+        # find page home (as parent of photoviewer)
+        if isinstance(self.imageArea.parent().parent().parent().parent(), PhotoViewer):
+            parent = self.imageArea.parent().parent().parent().parent().parent()
+        elif isinstance(self.imageArea.parent().parent().parent().parent().parent().parent(), PhotoViewer):
+            parent = self.imageArea.parent().parent().parent().parent().parent().parent().parent()
+        else:
+            print("AnimalPainter: Could not find PageHome parent.")
+            return
         
-        if animal != None:
-            # the animal ID is its row index in the data table
-            animal_id = animal.row_index
-            
-            # get top left corner of bounding box
-            top_left = animal.boundingBox_visual.rect().topLeft()
-            
-            # draw ID
-            font = QtGui.QFont("Century Gothic", 12, QtGui.QFont.Bold) 
-            
-            
-            animal.id_visual = self.imageArea._scene.addSimpleText(
-                str(animal_id), font)#, QtGui.QPen(animal.color))#, QtGui.QFont())#2, QtCore.Qt.SolidLine))
-            animal.color.setAlpha(255)
-            animal.id_visual.setBrush(animal.color)
-            animal.id_visual.setPen(QtCore.Qt.black)
-            
-            
-            animal.id_visual.setPos(top_left \
-                                    - QtCore.QPoint( \
-                                        0, 
-                                        2*font.pointSize()))
+        # only draw IDs if match mode is active
+        if parent.is_match_animal_active:
+            if animal != None:
+                # the animal ID is its row index in the data table
+                animal_id = animal.row_index
+                
+                # get top left corner of bounding box
+                top_left = animal.boundingBox_visual.rect().topLeft()
+                
+                # draw ID
+                font = QtGui.QFont("Century Gothic", 12, QtGui.QFont.Bold) 
+                
+                # create text visual
+                animal.id_visual = self.imageArea._scene.addSimpleText(str(animal_id), font)
+                
+                # draw the ID in the animal's colour (full opacity)
+                animal.color.setAlpha(255)
+                animal.id_visual.setBrush(animal.color)
+                
+                # draw a black outline around the ID for better visibility
+                animal.id_visual.setPen(QtCore.Qt.black)
+                
+                # move the ID visual to the top left position of the bounding box
+                animal.id_visual.setPos(top_left - QtCore.QPoint(0, 2*font.pointSize()))
 
     def drawAnimalHead(self, animal):
         """ Draws the head of a given animal. """
@@ -1541,33 +1546,55 @@ class AnimalPainter(QtCore.QObject):
                 self.updateBoundingBoxes()                 
 
     def on_remove_animal(self, activate_remove, is_add_active):
-        """ Handles the activation state of the remove mode. """
+        """ Handles the activation state of the remove mode. 
+
+        Parameters
+        ----------
+        activate_remove : bool
+            Whether to activate the remove mode or deactivate it.
+        is_add_active : bool
+            Whether the add mode is active or not.
+
+        Returns
+        -------
+        is_remove_activatable : bool
+            Whether it is possible to activate the remove mode.
+        is_add_active : bool
+            Wheter the add mode needs to be active or not.
+        """ 
         if not activate_remove:
-        #if(self.is_remove_mode_active):
-            return False, is_add_active
-            #self.is_remove_mode_active = False           
+            return False, is_add_active       
         elif is_add_active:
-        #elif self.is_add_mode_active:
             # only deactivate add mode is animal is drawn completely
             if not self.cur_animal \
             or (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
-                return True, False
-                #self.is_add_mode_active = False
-                #self.is_remove_mode_active = True    
+                return True, False   
             else:
                 displayErrorMsg("Error", 
                                 "Please draw head and tail before switching off the Add-mode.", 
                                 "Error")           
         else:
-            return True, False
-            #self.is_add_mode_active = False
-            #self.is_remove_mode_active = True          
+            return True, False       
 
     def on_add_animal(self, activate_add, is_remove_active): 
-        """ Handles the activation state of the add mode. """
+        """ Handles the activation state of the add mode. 
+        
+        Parameters
+        ----------
+        activate_add : bool
+            Whether to activate the add mode or deactivate it.
+        is_remove_active : bool
+            Whether the remove mode is active or not.
+
+        Returns
+        -------
+        is_add_activatable : bool
+            Whether it is possible to activate the add mode.
+        is_remove_active : bool
+            Wheter the remove mode needs to be active or not.
+        """
         # if add mode is to be turned off
         if not activate_add:
-        #if(self.is_add_mode_active):
             # the add mode can only be deactivated when head and tail are drawn 
             # or none of them is drawn
             if self.cur_animal is not None:
@@ -1580,11 +1607,8 @@ class AnimalPainter(QtCore.QObject):
                                     "Error")
             else:
                 return False, is_remove_active
-                #self.is_add_mode_active = False
         else:
             return True, False
-            #self.is_remove_mode_active = False
-            #self.is_add_mode_active = True
             
     def deselectAnimal(self):
         """ Deselects the current animal. """
@@ -1609,6 +1633,7 @@ class AnimalPainter(QtCore.QObject):
         # get states of add and remove modes from home page
         is_add_mode_active = parent.parent().is_add_animal_active
         is_remove_mode_active = parent.parent().is_remove_animal_active
+        is_match_animal_active = parent.parent().is_match_animal_active
         
         # enable dragging for current animal (when add mode is not active and 
         # the current animal is completey drawn)
@@ -1628,7 +1653,7 @@ class AnimalPainter(QtCore.QObject):
                     # get index of animal in list
                     index = self.animal_list.index(animal)
                          
-                    # if the current animal is to be removed, find a new current animal
+                    # if the current animal is to be removed
                     if(animal == self.cur_animal):
                         # if the index is not the last one, set the next animal as current animal
                         if index != len(self.animal_list)-1:
@@ -1637,35 +1662,36 @@ class AnimalPainter(QtCore.QObject):
                             self.cur_animal = self.animal_list[index-1]
                         else:
                             self.cur_animal = None
-                    
-                    # remove animal visuals from scene
-                    self.imageArea._scene.removeItem(animal.boundingBox_visual)
-                    self.imageArea._scene.removeItem(animal.head_item_visual)
-                    self.imageArea._scene.removeItem(animal.tail_item_visual)
-                    self.imageArea._scene.removeItem(animal.line_item_visual)
-                    
+                            
+                    # remove animal visuals from scene and from animal list
+                    self.removeAnimal(animal, True)
+                                        
                     # if the animal has left and right coordinates, only 
                     # delete coordinates of the current image (left OR right)
                     if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 and \
                         self.models.model_animals.data.loc[animal.row_index, "LX1"] != -1:
-                        
+   
                         if self.image_ending == "*_L.jpg":
                             self.models.model_animals.data.loc[animal.row_index, "LX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LX2"] = -1
-                            self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1                        
+                            self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1     
+                            
                         elif self.image_ending == "*_R.jpg":
                             self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY2"] = -1
+                        
+                        # if the match mode is active, we need to update the ID and bounding box of the matching animal too
+                        if is_match_animal_active:
+                            self.imageArea.parent().parent().imageAreaR.animal_painter.updateBoundingBoxes()
+                            self.imageArea.parent().parent().imageAreaL.animal_painter.updateBoundingBoxes()
                     else:  
                         # if animal has only left OR right coordinates, remove
                         # complete data row
                         pos = self.models.model_animals.data.index.get_loc(animal.row_index)
                         self.models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())                        
-                        
-                    self.animal_list.remove(animal) 
                     break
 
         # if user is not removing and not adding animals, switch the current 
@@ -1914,26 +1940,26 @@ class AnimalPainter(QtCore.QObject):
         
                 length = float(animal_list["length"].iloc[i])
                 
-                # create a new animal #@todo do i need cur_animal here or is a local animal sufficient?
-                self.cur_animal = Animal(self.models,
-                                         row_index=animal_list.index[i],
-                                         position_head=pos_h, 
-                                         position_tail=pos_t,
-                                         group=str(animal_list["group"].iloc[i]),
-                                         species=str(animal_list["species"].iloc[i]),
-                                         remark=animal_remark,
-                                         length=length)
+                # create a new animal 
+                animal = Animal(self.models,
+                         row_index=animal_list.index[i],
+                         position_head=pos_h, 
+                         position_tail=pos_t,
+                         group=str(animal_list["group"].iloc[i]),
+                         species=str(animal_list["species"].iloc[i]),
+                         remark=animal_remark,
+                         length=length)
                 
                 # set the position in the original image     
-                self.cur_animal.original_pos_head = original_pos_h
-                self.cur_animal.original_pos_tail = original_pos_t
+                animal.original_pos_head = original_pos_h
+                animal.original_pos_tail = original_pos_t
             
                 # do the actual drawing of the head
-                self.drawAnimalHead(self.cur_animal)
-                self.drawAnimalTailLineBoundingBox(self.cur_animal)
+                self.drawAnimalHead(animal)
+                self.drawAnimalTailLineBoundingBox(animal)
                 
                 # append animal to list
-                self.animal_list.append(self.cur_animal)   
+                self.animal_list.append(animal)  
                 
                 # update bounding boxes
                 self.updateBoundingBoxes()      
