@@ -1127,10 +1127,11 @@ class PageData(QtWidgets.QWidget):
         length of animals whose coordinates are valid. """
         
         # @todo check if the coordinate rectification is correct
+        print("calc length")
         
         # get list of images to process (images of the current day)            
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-            
+                
         # iterate over images and measure length
         for path in img_list[0]:                
             # get animals on current image
@@ -1170,10 +1171,22 @@ class PageData(QtWidgets.QWidget):
                         if animal.row_index == idx:
                             print(f"length {distances[0]} set on animal")
                             animal.setLength(distances[0])
+                            
+                    for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaL.animal_painter.animal_list:
+                        if animal.row_index == idx:
+                            print(f"length {distances[0]} set on animal")
+                            animal.setLength(distances[0])
+                        
+                    for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaR.animal_painter.animal_list:
+                        if animal.row_index == idx:
+                            print(f"length {distances[0]} set on animal")
+                            animal.setLength(distances[0])
                 
             # update label displaying number of rectified and matched images
             num_imgs = int(self.label_length_measurement_number.text()) + 1
             self.label_length_measurement_number.setText(str(num_imgs))
+            
+        return 
 
 # --- functions for saving and restoring options --------------------------- # 
     def saveCurrentValues(self, settings):     
