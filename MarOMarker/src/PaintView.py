@@ -984,9 +984,13 @@ class ImageAreaLR(QtWidgets.QWidget):
                     elif image == "R":
                         match_successfull = self.matchAnimals(self.animal_to_match[0], animal) 
                     
-                    if match_successfull:
-                        # set the animal waiting to be matched to None
-                        self.animal_to_match[0] = None
+                    #if match_successfull:
+                    # set the animal waiting to be matched to None #@todo do i need this?
+                    self.animal_to_match[0] = None
+                    
+                    if not match_successfull:
+                        self.imageAreaL.animal_painter.cur_animal = None
+                        self.imageAreaR.animal_painter.cur_animal = None
                 
                 # update the visuals, i.e. IDs, bounding boxes on both images
                 self.redrawSelection()
@@ -997,6 +1001,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         answer = dlg.exec_()
         
         if answer == -1:
+            print("handling differnt group: return false")
             return False
         elif answer == 0:
             animal_R.setGroup(animal_L.group)

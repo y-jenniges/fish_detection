@@ -128,8 +128,10 @@ class MismatchDialog(QtWidgets.QDialog):
     def on_btn_c(self):
         self.done(2)
     
-    def cancel(self):
-        self.done(-1)
+    def closeEvent(self, event):
+        print("close event")
+        if self.result not in range(3):
+            self.setResult(-1)
         
         
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):
