@@ -202,6 +202,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.btn_next.setToolTip(_translate("MainWindow", "Next animal (shortcut: d)"))
         self.page_home.btn_delete.setToolTip(_translate("MainWindow", "Remove animal mode (shortcut: -)"))
         self.page_home.btn_undo.setToolTip(_translate("MainWindow", "Undo last action"))
+        self.page_home.btn_match.setToolTip(_translate("MainWindow", "Activate match mode (shortcut: m)"))
         self.page_home.photo_viewer.btn_previous_image.setToolTip(_translate("MainWindow", "Previous image (shortcut: left arrow)"))
         self.page_home.photo_viewer.btn_next_image.setToolTip(_translate("MainWindow", "Next image (shortcut: right arrow)"))
         #self.page_home.photo_viewer.btn_openImg.setToolTip(_translate("MainWindow", "Open image in separate window"))
