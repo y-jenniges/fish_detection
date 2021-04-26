@@ -138,12 +138,15 @@ class StereoCorrespondence():
     
     def undistortPoint(self, point, lr="L"):
         """Undistort a point. """
+        # make sure that the point is a numpy array of float
+        point = np.array(point).astype(np.float)
+        
         rectified = [0,0]
         if lr == "L":
             rectified = cv2.undistortPoints(np.expand_dims([point], 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
         elif lr == "R":
             rectified = cv2.undistortPoints(np.expand_dims([point], 1), self.c_R, self.d_R, R=self.R2, P=self.P2)
-        #print(rectified)
+        
         return rectified[0][0]
     
     def templateMatching(self, template, img, position, epiline_thresh, template_radius):
