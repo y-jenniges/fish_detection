@@ -47,6 +47,91 @@ def displayErrorMsg(text, information, windowTitle):
     msg.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png')) 
     msg.exec_()
 
+class MismatchDialog(QtWidgets.QDialog):
+    def __init__(self, title, text, btn_a_text, btn_b_text, btn_c_text=None, parent=None):
+        super().__init__(parent=parent)
+
+        
+        self._initUi(title, text, btn_a_text, btn_b_text, btn_c_text)
+        self._initActions()
+    
+    def _initUi(self, title, text, btn_a_text, btn_b_text, btn_c_text):  
+        self.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;}\n"
+                           "QPushButton{\n"
+                            "    font:12pt 'Century Gothic';"
+                            "    background-color:rgb(200, 200, 200);\n"
+                            "    outline:none;\n"
+                            "    border: none; \n"
+                            "    border-width: 0px;\n"
+                            "    border-radius: 3px;\n"
+                            "}\n"
+                            "QPushButton:hover {\n"
+                            "    background-color: rgb(0, 203, 221);\n"
+                            "}\n"
+                            "QPushButton:pressed {\n"
+                            "    background-color: rgb(0, 160, 174);\n"
+                            "}\n")
+        self.setWindowTitle(title)
+        
+        message = QtWidgets.QLabel(text)
+        
+        # button box
+        self.btn_a = QtWidgets.QPushButton(btn_a_text)
+        self.btn_a.setMinimumSize(QtCore.QSize(40, 40))
+        
+        self.btn_b = QtWidgets.QPushButton(btn_b_text)
+        self.btn_b.setMinimumSize(QtCore.QSize(40, 40))
+        
+        self.btn_cancel = QtWidgets.QPushButton("Cancel")
+        self.btn_cancel.setMinimumSize(QtCore.QSize(40, 40))
+        
+        # layout for the buttons
+        self.layout_btns = QtWidgets.QHBoxLayout()
+        self.layout_btns.addWidget(self.btn_a)
+        self.layout_btns.addWidget(self.btn_b)
+        
+        # only add button c if there is a text for it
+        if btn_c_text is not None and btn_c_text != "":
+            self.btn_c = QtWidgets.QPushButton(btn_c_text)
+            self.btn_c.setMinimumSize(QtCore.QSize(40, 40))
+            self.layout_btns.addWidget(self.btn_c)
+        else:
+            self.btn_c = None
+        
+        self.layout_btns.addWidget(self.btn_cancel)
+        
+        # a frame for the butons
+        self.frame_btns = QtWidgets.QFrame(self)
+        self.frame_btns.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_btns.setLayout(self.layout_btns)
+
+        # layout for the dialog
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.addWidget(message)
+        self.layout.addWidget(self.frame_btns)
+        self.setLayout(self.layout)
+    
+    def _initActions(self):
+        self.btn_a.clicked.connect(self.on_btn_a)
+        self.btn_b.clicked.connect(self.on_btn_b)
+        self.btn_cancel.clicked.connect(self.close)
+        
+        if self.btn_c is not None:
+            self.btn_c.clicked.connect(self.on_btn_c)
+        
+    def on_btn_a(self):
+        self.done(0)
+        
+    def on_btn_b(self):
+        self.done(1)
+    
+    def on_btn_c(self):
+        self.done(2)
+    
+    def cancel(self):
+        self.done(-1)
+        
+        
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):
     """ Used for displaying content in a list view: It shows an image and 
     text beside it. 
