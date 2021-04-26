@@ -1,6 +1,6 @@
 import enum
 import os
-#import numpy as np
+import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
 import Helpers
@@ -239,7 +239,7 @@ class TableModel(QtCore.QAbstractTableModel):
             The default is None
         """
         super(TableModel, self).__init__()
-        self.data = data
+        self.update(data)
 
     def update(self, new_data):
         """
@@ -251,6 +251,15 @@ class TableModel(QtCore.QAbstractTableModel):
             Data table to override the old data
         """
         self.data = new_data
+        
+        if self.data is not None:
+            # make sure that the remarks columns are string
+            self.data["object_remarks"] = self.data["object_remarks"].astype(np.unicode_)
+            self.data["image_remarks"] = self.data["image_remarks"].astype(np.unicode_)
+            
+            # make sure, the remarks columns have empty strings instead of nan
+            self.data["object_remarks"] = self.data["object_remarks"].str.lower().replace("nan", "")
+            self.data["image_remarks"] = self.data["image_remarks"].str.lower().replace("nan", "")
         
         # adapt layout according to new table structure
         self.layoutChanged.emit() 
@@ -579,7 +588,7 @@ class TableModel(QtCore.QAbstractTableModel):
             New row for the data
         """
         # get file ID
-        file_id = os.path.basename(image_path)[:-6]
+        file_id = os.path.basename(image_path)[:-6] # @Todo rather use the strip methods
         
         # get animal group
         if isinstance(animal.group, AnimalGroup):
