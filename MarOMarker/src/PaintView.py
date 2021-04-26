@@ -9,7 +9,7 @@ import numpy as np
 from functools import partial
 from Animal import Animal, AnimalSpecificationsWidget
 from Models import AnimalGroup, AnimalSpecies
-from Helpers import getIcon, displayErrorMsg
+from Helpers import getIcon, displayErrorMsg, MismatchDialog
 
       
 class PhotoViewer(QtWidgets.QWidget):
@@ -797,9 +797,11 @@ class ImageAreaLR(QtWidgets.QWidget):
 
         # find matching animal
         matching_animal = self.findAnimalMatch(animal, image)
+        print(matching_animal)
         
         # if there is a matching animal, redraw it on the image area
         if matching_animal:
+            print(matching_animal.group)
             # update properties of matching animal
             matching_animal.setGroup(animal.group)
             matching_animal.setSpecies(animal.species)
@@ -916,11 +918,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         if self.imageAreaL.animal_painter.cur_animal is not None:
             painter = self.imageAreaL.animal_painter
             image = "L"
-            print("l case")
         elif self.imageAreaR.animal_painter.cur_animal is not None:
             painter = self.imageAreaR.animal_painter
             image = "R"
-            print("r case")
         else:
             return
         
@@ -989,87 +989,196 @@ class ImageAreaLR(QtWidgets.QWidget):
                         self.animal_to_match[0] = None
                 
                 # update the visuals, i.e. IDs, bounding boxes on both images
-                self.imageAreaL.animal_painter.updateBoundingBoxes()
-                self.imageAreaR.animal_painter.updateBoundingBoxes()
-                
+                self.redrawSelection()
+     
+    def handleDifferentGroup(self, animal_L, animal_R):
+        text = "You are about to match two animals that have a different group. \nWhich group do you want to keep?"
+        dlg = MismatchDialog("Groups do not match", text, animal_L.group, animal_R.group, None, self)
+        answer = dlg.exec_()
+        
+        if answer == -1:
+            return False
+        elif answer == 0:
+            animal_R.setGroup(animal_L.group)
+            self.imageAreaR.animal_painter.redrawAnimal(animal_R)
+        elif answer == 1:
+            animal_L.setGroup(animal_R.group)
+            self.imageAreaL.animal_painter.redrawAnimal(animal_L)
+            
+        return True
+        
+    def handleDifferentSpecies(self, animal_L, animal_R):
+        text = "You are about to match two animals that have a different species. \nWhich species do you want to keep?"
+        dlg = MismatchDialog("Species do not match", text, animal_L.species, animal_R.species, None, self)
+        answer = dlg.exec_()
+        
+        if answer == -1:
+            return False
+        elif answer == 0:
+            animal_R.setSpecies(animal_L.species)
+        elif answer == 1:
+            animal_L.setSpecies(animal_R.species)
+    
+        return True
+    
+    def handleDifferentRemark(self, animal_L, animal_R):
+        text = "You are about to match two animals that have different remarks. \nWhich remark do you want to keep?"
+        dlg = MismatchDialog("Remarks do not match", text, animal_L.remark, animal_R.remark, "Merge remarks", self)
+        answer = dlg.exec_()
+        
+        if answer == -1:
+            return False
+        elif answer == 0:
+            animal_R.setRemark(animal_L.remark)
+        elif answer == 1:
+            animal_L.setRemark(animal_R.remark)
+        elif answer == 2:
+            animal_R.setRemark(animal_L.remark + ", " + animal_R.remark)
+            animal_L.setRemark(animal_L.remark + ", " + animal_R.remark)
+            
+        return True
+    
+    # def handleDifferentLength(self, animal_L, animal_R):
+    #     pass
+    
     def matchAnimals(self, animal_L, animal_R):
         print("match called")
         # if group, species, remark, length, other props are different, then what?
         if str(animal_L.group) != str(animal_R.group):
             print(f"animals do not have the same group {animal_L.group, animal_R.group}")
-            return False
-        
+            if not self.handleDifferentGroup(animal_L, animal_R): return False
+                   
         if str(animal_L.species) != str(animal_R.species):
             print(f"animals do not have the same species {animal_L.species, animal_R.species}")
-            return False
+            if not self.handleDifferentSpecies(animal_L, animal_R): return False
             
         if str(animal_L.remark) != str(animal_R.remark):
             print(f"animals do not have the same remark {animal_L.remark, animal_R.remark}")
-            return False
+            if not self.handleDifferentRemark(animal_L, animal_R): return False
             
-        if str(animal_L.length) != str(animal_R.length):
-            print(f"animals do not have the same length {animal_L.length, animal_R.length}")
-            return False
-        
-        
-        # remove old matches - there are 4 cases
+        # if str(animal_L.length) != str(animal_R.length): # länge muss sowieso neu berechnet werden bei einer match änderung
+        #     print(f"animals do not have the same length {animal_L.length, animal_R.length}")
+        #     if not self.handleDifferentLength(animal_L, animal_R): return False
+
+        # remove old matches - there are 4 cases (for this we need to adapt the data model and the animal instances)
         # left animal has no right coordinates, right animal has no left coordinates
         if self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
         and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
-            # move the right corrdinates to the left animal
-            self._models.model_animals.data.loc[animal_L.row_index, "RX1"] = self._models.model_animals.data.loc[animal_R.row_index, "RX1"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RY1"] = self._models.model_animals.data.loc[animal_R.row_index, "RY1"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RX2"] = self._models.model_animals.data.loc[animal_R.row_index, "RX2"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RY2"] = self._models.model_animals.data.loc[animal_R.row_index, "RY2"]
-        
-            # remove right animal entry from data model
-            pos = self._models.model_animals.data.index.get_loc(animal_R.row_index)
-            self._models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())        
-                  
-            # update row index of right animal instance
-            animal_R.row_index = animal_L.row_index
+            self.match(animal_L, animal_R)
         
         # left animal has right coordinates, right animal doesnt have left coordinates
         elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
         and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
-            # find animal that represents curent right coordinates  
-            cur_right_animal = self.findMatch(animal_L, "L")
+            # find old animal that represents curent right coordinates  
+            cur_right_animal = self.findAnimalMatch(animal_L, "L")
             
-            # add a data row for that animal
-            cur_right_animal.row_index = 
+            # create separate data row for olf right animal
+            self.createSeparateDataRow(cur_right_animal, image="R")
             
-            # merge the new right animal coordinates to the left animal
-            self._models.model_animals.data.loc[animal_L.row_index, "RX1"] = self._models.model_animals.data.loc[animal_R.row_index, "RX1"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RY1"] = self._models.model_animals.data.loc[animal_R.row_index, "RY1"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RX2"] = self._models.model_animals.data.loc[animal_R.row_index, "RX2"]
-            self._models.model_animals.data.loc[animal_L.row_index, "RY2"] = self._models.model_animals.data.loc[animal_R.row_index, "RY2"]
-        
-            # remove new right animal entry from data model
-            pos = self._models.model_animals.data.index.get_loc(animal_R.row_index)
-            self._models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())        
-                  
-            # update row index of new right animal 
-            animal_R.row_index = animal_L.row_index
-            
-            
-            # create #@todo
+            # replace right animal
+            self.match(animal_L, animal_R)
             
         # left animal has no right coordinates, right animal has left coordinates
         elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
-        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
+        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:           
+            # find old animal that represents curent left coordinates  
+            cur_left_animal = self.findAnimalMatch(animal_R, "R")
+            
+            # create separate data row for old right animal
+            self.createSeparateDataRow(cur_left_animal, image="L")
+            
+            # replace right animal
+            self.match(animal_L, animal_R)
+    
         
         # left animal has right coordinates, right animal has left coordinates
-        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
+        elif self._models.model_animals.data.loc[animal_R.row_index, "RX1"] != -1 \
         and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
+            # find old animal that represents curent right coordinates  
+            cur_right_animal = self.findAnimalMatch(animal_L, "L")
+            cur_left_animal = self.findAnimalMatch(animal_R, "R")
             
-        # match animals
+             # create separate data rows for old left and right animal
+            self.createSeparateDataRow(cur_right_animal, image="R")
+            self.createSeparateDataRow(cur_left_animal, image="L")
+            
+            # replace animals
+            self.match(animal_L, animal_R)
         
-        
-        
-        
+        # recalculate length of animals (this changes when different animals are matched)
+        self.parent().parent().parent().parent().parent().page_data.onCalcLength()
         
         return True
     
+    def createSeparateDataRow(self, animal, image="L"):  
+        """
+        Adds a row at the end of the data table for the given animal.
+
+        Parameters
+        ----------
+        animal : Annimal
+            The animal to create a data row for.
+        image : string
+            Either "L" or "R", depending on which image the animal is located. 
+            The default is "L".
+        """
+        # get experiment settings
+        image_path = self._models.model_animals.data.loc[animal.row_index, "file_id"] + "_R.jpg"  
+        image_remark = self._models.model_animals.data.loc[animal.row_index, "image_remarks"]
+        experiment_id = self._models.model_animals.data.loc[animal.row_index, "experiment_id"]
+        user_id = self._models.model_animals.data.loc[animal.row_index, "user_id"]
+        
+        # add a data row for the animal
+        animal.row_index = self._models.model_animals.data.index.max() + 1
+        
+        self._models.model_animals.insertRows(animal.row_index, int(1), 
+                                              [animal], image_path, image_remark, 
+                                              experiment_id, user_id, image)
+            
+    def match(self, animal_L, animal_R):
+        """
+        Adapting match information in the data table and updating the indeces
+        of the given animals.
+
+        Parameters
+        ----------
+        animal_L : Animal
+            Animal on left image.
+        animal_R : Animal
+            Animal on right image.
+        """
+
+        if animal_L is not None:
+            animal = animal_L
+            match = animal_R
+            image = "R" # adapt right coordinates
+        elif animal_R is not None:
+            animal = animal_R
+            match = animal_L
+            image = "L" # adapt left coordinates
+        else:
+            return
+             
+        # in case no match is given, set the coordinates to adapt to default (-1)
+        if match is None:
+            self._models.model_animals.data.loc[animal.row_index, image+"X1"] = -1
+            self._models.model_animals.data.loc[animal.row_index, image+"Y1"] = -1
+            self._models.model_animals.data.loc[animal.row_index, image+"X2"] = -1
+            self._models.model_animals.data.loc[animal.row_index, image+"Y2"] = -1
+        else:
+            # merge the new animal coordinates to the original animal
+            self._models.model_animals.data.loc[animal.row_index, image+"X1"] = self._models.model_animals.data.loc[match.row_index, image+"X1"]
+            self._models.model_animals.data.loc[animal.row_index, image+"Y1"] = self._models.model_animals.data.loc[match.row_index, image+"Y1"]
+            self._models.model_animals.data.loc[animal.row_index, image+"X2"] = self._models.model_animals.data.loc[match.row_index, image+"X2"]
+            self._models.model_animals.data.loc[animal.row_index, image+"Y2"] = self._models.model_animals.data.loc[match.row_index, image+"Y2"]
+    
+            # remove new animal entry from data model
+            pos = self._models.model_animals.data.index.get_loc(match.row_index)
+            self._models.model_animals.removeRows(pos, 1, QtCore.QModelIndex())        
+                  
+            # update row index of new right animal 
+            match.row_index = animal.row_index
+        
     def _initActions(self):
         """ Defines the actions possible on the ImageAreaLR. """
         self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
@@ -1833,6 +1942,15 @@ class AnimalPainter(QtCore.QObject):
         self.cur_animal = None
         self.updateBoundingBoxes()  
         
+    def redrawAnimal(self, animal):
+        """ Redraws the given animal. """
+        # remove visuals of the animal
+        self.removeAnimal(animal, False)
+        
+        # redraw visuals of animal
+        self.drawAnimalHead(animal)
+        self.drawAnimalTailLineBoundingBox(animal)
+        
     def mousePressEvent(self, event):
         """ Handles the painting options on the image: Enables dragging of
         head/tail visuals, as well as removing/adding animals on click. """
@@ -1903,8 +2021,7 @@ class AnimalPainter(QtCore.QObject):
                         
                         # if the match mode is active, we need to update the ID and bounding box of the matching animal too
                         if is_match_animal_active:
-                            self.imageArea.parent().parent().imageAreaR.animal_painter.updateBoundingBoxes()
-                            self.imageArea.parent().parent().imageAreaL.animal_painter.updateBoundingBoxes()
+                            self.imageArea.parent().parent().redrawSelection()
                     else:  
                         # if animal has only left OR right coordinates, remove
                         # complete data row
