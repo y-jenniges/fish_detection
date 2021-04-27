@@ -75,6 +75,11 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.is_add_animal_active, self.is_remove_animal_active = self.photo_viewer.on_add_animal(True, self.is_remove_animal_active)         
         
+        if self.is_add_animal_active or self.is_remove_animal_active:
+            self.is_match_animal_active = False
+            self.photo_viewer.imageAreaLR.on_match_activated(False)
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
+        
         self.updateAddRemoveIcons()
             
     def on_remove_clicked(self):
@@ -84,6 +89,11 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(True, self.is_add_animal_active)
         
+        if self.is_add_animal_active or self.is_remove_animal_active:
+            self.is_match_animal_active = False
+            self.photo_viewer.imageAreaLR.on_match_activated(False)
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
+            
         self.updateAddRemoveIcons()
 
     def updateAddRemoveIcons(self):
@@ -538,10 +548,16 @@ class PageHome(QtWidgets.QWidget):
         print("on match clicked")
         if self.is_match_animal_active:
             self.is_match_animal_active = False
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
         else:
             self.is_match_animal_active = True
             self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
+            
+            # deactivate other modes
+            self.is_add_animal_active = False
+            self.is_remove_animal_active = False
+            
+            self.updateAddRemoveIcons()
             
         self.photo_viewer.imageAreaLR.on_match_activated(self.is_match_animal_active)
             
