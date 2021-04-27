@@ -887,13 +887,22 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.updateSpecsWidget()     
             
     def on_match_activated(self, is_active):
-        #@todo
-        print(f"match was clicked, photo viewer will go to match mode {is_active}")
-        
+        """
+        Changes bounding box style when match mode is activated.
+
+        Parameters
+        ----------
+        is_active : bool
+            State of the match mode.
+        """   
         if is_active:
-        # redraw the animals (make more transparent, add IDs to bounding boxes)
+            # redraw the animals (make more transparent, add IDs to bounding boxes)
             self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
             self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
+            
+            # reset current animals
+            self.imageAreaL.animal_painter.cur_animal = None
+            self.imageAreaR.animal_painter.cur_animal = None
             
             self.is_match_mode_active = True
         else:
@@ -910,10 +919,8 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaR.animal_painter.updateBoundingBoxes() 
         
-        # update specs widget  @todo needed here?
+        # update specs widget  #@todo needed here?
         self.updateSpecsWidget()
-        
-        # change behaviour of animal painters for mouse clicks (disable add/remove?)
         
     def _initUi(self):
         """ Defines and draws the UI elements. """
@@ -1016,9 +1023,16 @@ class ImageAreaLR(QtWidgets.QWidget):
         # redraw matching animal
         self.redrawAnimalMatch(painter.cur_animal, image)
     
-    def handleMatching(self, image="L"):#@todo
-        # image: on which image the selection occrued
+    def handleMatching(self, image="L"):
+        """ When the match mode is active, this function enables a different
+        clicking strategy, i.e. 1st click selects animal, 2nd click matches
+        the animal. 
         
+        Parameters
+        ----------
+        image : string
+            Either 'L' or 'R'. Depicts on which image the selection occured.
+        """
         # find parent home page
         if hasattr(self.parent().parent().parent(), "is_match_animal_active"):
             parent = self.parent().parent().parent()
@@ -1058,8 +1072,7 @@ class ImageAreaLR(QtWidgets.QWidget):
                     elif image == "R":
                         match_successfull = self.matchAnimals(self.animal_to_match[0], animal) 
                     
-                    #if match_successfull:
-                    # set the animal waiting to be matched to None #@todo do i need this?
+                    # set the animal waiting to be matched to None 
                     self.animal_to_match[0] = None
                     
                     if not match_successfull:
@@ -1814,7 +1827,7 @@ class AnimalPainter(QtCore.QObject):
         (more transparent) bounding box and an ID for every animal that has a 
         match). """
         
-        # hide specs widget
+        # hide specs widget in the scene
         self.widget_animal_specs.hide()
     
         for animal in self.animal_list:
@@ -1851,12 +1864,14 @@ class AnimalPainter(QtCore.QObject):
             # draw bounding box of current animal (without match) a bit thinner
             # than animals that have a match
             elif animal == self.cur_animal:
+                print("current animal but without match")
+                
                 # set colour to full opacity
-                    animal.color.setAlpha(255)
-                    
-                    # draw the new bounding box
-                    animal.boundingBox_visual = self.imageArea._scene.addRect(
-                        animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
+                animal.color.setAlpha(255)
+                
+                # draw the new bounding box
+                animal.boundingBox_visual = self.imageArea._scene.addRect(
+                    animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
 
     def drawAnimalIdRemoveBtn(self, animal):
         """ Draws the ID the of a given animal and a button to remove its
