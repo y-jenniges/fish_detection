@@ -704,12 +704,14 @@ class ImageAreaLR(QtWidgets.QWidget):
         # find matching animal
         cur_animal = imageArea.animal_painter.cur_animal
         matching_animal = self.findAnimalMatch(cur_animal, image)
+        imageArea.animal_painter.placeSpecsWidget()
         
         # select matching animal and update bounding boxes
         otherImageArea.animal_painter.cur_animal = matching_animal
         otherImageArea.animal_painter.updateBoundingBoxes()  
+        otherImageArea.animal_painter.placeSpecsWidget()  
         
-        # update specs widget @todo
+        # update specs widget 
         self.updateSpecsWidget()
         
     def updateSpecsWidget(self):
@@ -1856,11 +1858,11 @@ class AnimalPainter(QtCore.QObject):
             # only go to next animal if there is another one
             if index < len(self.animal_list)-1:
                 self.cur_animal = self.animal_list[index+1]
-                self.updateBoundingBoxes()
             else:
-                # else, go to first image
+                # else, go to first animal
                 self.cur_animal = self.animal_list[0]
-                self.updateBoundingBoxes()
+                
+            self.updateBoundingBoxes()
                    
     def on_previous_animal(self):
         """ Makes the previous animal in the animal_list active. """
@@ -1875,11 +1877,11 @@ class AnimalPainter(QtCore.QObject):
             # only go to previous animal, if there is one
             if index > 0:
                 self.cur_animal = self.animal_list[index-1]
-                self.updateBoundingBoxes() 
             else:
-                # else, go to last image
+                # else, go to last animal
                 self.cur_animal = self.animal_list[len(self.animal_list)-1]
-                self.updateBoundingBoxes()                 
+            
+            self.updateBoundingBoxes()   
 
     def on_remove_animal(self, activate_remove, is_add_active):
         """ Handles the activation state of the remove mode. 
