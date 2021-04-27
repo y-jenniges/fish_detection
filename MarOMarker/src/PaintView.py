@@ -1204,7 +1204,15 @@ class ImageAreaLR(QtWidgets.QWidget):
         self._models.model_animals.insertRows(animal.row_index, int(1), 
                                               [animal], image_path, image_remark, 
                                               experiment_id, user_id, image)
-            
+        
+        imageArea = self.imageAreaL if image=="L" else self.imageAreaR
+        
+        # remove the button to remove a match 
+        for btn, ani in imageArea.animal_painter.btns_remove_match:
+            if animal == ani:
+                imageArea._scene.removeItem(btn)
+                imageArea.animal_painter.btns_remove_match.remove([btn, ani])
+                
     def match(self, animal_L, animal_R):
         """
         Adapting match information in the data table and updating the indeces
