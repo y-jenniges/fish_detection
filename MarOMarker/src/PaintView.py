@@ -660,15 +660,33 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
     
-    def on_right_mouse_click(self, click_position, image):
+    def on_right_mouse_click(self, image, click_position):
+        """
+        Initiates the process of removing a match when the right mouse 
+        button is clicked and the match mode is active.
+
+        Parameters
+        ----------
+        image : string
+            Either 'L' or 'R'. Depicts on which image the click occured.
+        click_position : QPoint
+            Position where the click occured.
+
+        Returns
+        -------
+        None.
+
+        """
         if self.is_match_mode_active:
             if image == "L": 
                 imageArea = self.imageAreaL
             else:
                 imageArea = self.imageAreaR
                 
+            print(click_position)
+            print(image)
             for animal in imageArea.animal_painter.animal_list:
-                if(animal.boundingBox.contains(click_position)):
+                if animal.boundingBox.contains(click_position):
                     # find the match of the current animal
                     match = self.findAnimalMatch(animal, image)
                     
@@ -677,18 +695,23 @@ class ImageAreaLR(QtWidgets.QWidget):
                         self.on_remove_match(animal, match)
                     elif image == "R":
                         self.on_remove_match(match, animal)
-        
-    
+
     def on_remove_match(self, animal_L, animal_R):
         """ Creates a separate data row for the right animal and removes the 
-        right coordinates from the left animal"""
+        right coordinates from the left animal. """
         # create data row for the right animal and update index
         self.createSeparateDataRow(animal_R, "R")   
         
         # remove right coordinates from left animal 
         self.match(animal_L, None)
         
-        #@todo do i need to remove/update the visuals here?
+        # reset current animals
+        self.imageAreaL.animal_painter.cur_animal = None
+        self.imageAreaR.animal_painter.cur_animal = None
+        
+        # redraw animals
+        self.imageAreaL.animal_painter.updateBoundingBoxes()
+        self.imageAreaR.animal_painter.updateBoundingBoxes()
         
     def on_next_animal(self):
         """ Delegates the query to make next animal active to the lastly active
@@ -1229,6 +1252,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "L"))
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "R"))
         
+        self.imageAreaL.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "L"))
+        self.imageAreaR.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "R"))
+
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
@@ -1248,7 +1274,13 @@ class ImageArea(QtWidgets.QGraphicsView):
         Indicates if an image is currently displayed.
     animal_painter : AnimalPainter
         The painter to delegate the mouse events to.
+    rightMouseButtonClicked: pyqtSignal
     """
+    
+    # custom signals
+    rightMouseButtonClicked = QtCore.pyqtSignal(QtCore.QPoint)
+    """ Signal emitted when the right mouse button is pressed. """
+    
     def __init__(self, models, parent=None):
         super(ImageArea, self).__init__(parent)
         
@@ -1347,14 +1379,12 @@ class ImageArea(QtWidgets.QGraphicsView):
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):
         """ Passes the mouse press event to the animal_painter. """
-        #if event.button() == QtCore.Qt.LeftButton:
-        self.animal_painter.mousePressEvent(event)  
-        if event.button() == QtCore.Qt.RightButton:
-            print("right mouse button click detected") 
+        if event.button() == QtCore.Qt.LeftButton:
+            self.animal_painter.mousePressEvent(event)  
+        elif event.button() == QtCore.Qt.RightButton:
+            self.rightMouseButtonClicked.emit(event.pos())
         super().mousePressEvent(event)
         
-       
-
     def mouseMoveEvent(self, event):
         """ Passes the mouse move event to the animal_painter. """
         self.animal_painter.mouseMoveEvent(event)  
