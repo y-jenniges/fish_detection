@@ -682,19 +682,18 @@ class ImageAreaLR(QtWidgets.QWidget):
                 imageArea = self.imageAreaL
             else:
                 imageArea = self.imageAreaR
-                
-            print(click_position)
-            print(image)
+
             for animal in imageArea.animal_painter.animal_list:
                 if animal.boundingBox.contains(click_position):
                     # find the match of the current animal
                     match = self.findAnimalMatch(animal, image)
                     
-                    # remove the match
-                    if image == "L":
-                        self.on_remove_match(animal, match)
-                    elif image == "R":
-                        self.on_remove_match(match, animal)
+                    if match is not None:
+                        # remove the match
+                        if image == "L":
+                            self.on_remove_match(animal, match)
+                        elif image == "R":
+                            self.on_remove_match(match, animal)
 
     def on_remove_match(self, animal_L, animal_R):
         """ Creates a separate data row for the right animal and removes the 
@@ -1584,63 +1583,63 @@ class AnimalPainter(QtCore.QObject):
         current animal (and prevent it from getting out of the borders of 
         the image) """
         if self.cur_animal is not None:
-            #if self.cur_animal.boundingBox_visual is not None:
-            # reset position of specs widget
-            self.widget_animal_specs.move(0,0)
-        
-            # get position of current bounding box from scene
-            pos = self.imageArea.mapFromScene(
-                self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
+            if self.cur_animal.boundingBox_visual is not None:
+                # reset position of specs widget
+                self.widget_animal_specs.move(0,0)
             
-            # move the specs to the bottom left corner of the animal bounding box
-            self.widget_animal_specs.move(pos)
-            
-            # 8 possible placements of specs that are checked one after the other
-            # 1. specs below animal
-            top_left = pos + QtCore.QPoint(0, 0)
-            result, visibility_areas = self.checkVisibility(top_left, None)
-            if result: return
-            
-            # 2. specs left of animal
-            top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-            
-            # 3. specs above animal
-            top_left = pos + QtCore.QPoint(0, -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-            
-            # 4. specs right of animal
-            top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-
-            # 5. specs on top left corner
-            top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-                       
-            # 6. specs on top right corner
-            top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-            
-            # 7. specs on bottom left corner
-            top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 0)
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-            
-            # 8. specs on bottom right corner
-            top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 0)
-            result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
-            if result: return
-            
-            # if none of the methods was chosen, check which yields most
-            # visibility (i.e. maximum visible area) of the specs widget
-            max_area_index = visibility_areas[:,0].argmax()
-            top_left = visibility_areas[max_area_index, 1]
-            self.widget_animal_specs.move(top_left)
+                # get position of current bounding box from scene
+                pos = self.imageArea.mapFromScene(
+                    self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
+                
+                # move the specs to the bottom left corner of the animal bounding box
+                self.widget_animal_specs.move(pos)
+                
+                # 8 possible placements of specs that are checked one after the other
+                # 1. specs below animal
+                top_left = pos + QtCore.QPoint(0, 0)
+                result, visibility_areas = self.checkVisibility(top_left, None)
+                if result: return
+                
+                # 2. specs left of animal
+                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                
+                # 3. specs above animal
+                top_left = pos + QtCore.QPoint(0, -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                
+                # 4. specs right of animal
+                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+    
+                # 5. specs on top left corner
+                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                           
+                # 6. specs on top right corner
+                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                
+                # 7. specs on bottom left corner
+                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 0)
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                
+                # 8. specs on bottom right corner
+                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 0)
+                result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
+                if result: return
+                
+                # if none of the methods was chosen, check which yields most
+                # visibility (i.e. maximum visible area) of the specs widget
+                max_area_index = visibility_areas[:,0].argmax()
+                top_left = visibility_areas[max_area_index, 1]
+                self.widget_animal_specs.move(top_left)
                
     def checkVisibility(self, top_left, visibility_areas=None):
         """
