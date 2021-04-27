@@ -649,6 +649,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         # through animals)
         self.last_active = "*_L.jpg"
         
+        # indicates if match mode is active 
+        self.is_match_mode_active = False
+        
         # the currently selected animal that needs to be matched and on which 
         # image it is
         self.animal_to_match = [None, "L"]
@@ -657,6 +660,36 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
     
+    def on_right_mouse_click(self, click_position, image):
+        if self.is_match_mode_active:
+            if image == "L": 
+                imageArea = self.imageAreaL
+            else:
+                imageArea = self.imageAreaR
+                
+            for animal in imageArea.animal_painter.animal_list:
+                if(animal.boundingBox.contains(click_position)):
+                    # find the match of the current animal
+                    match = self.findAnimalMatch(animal, image)
+                    
+                    # remove the match
+                    if image == "L":
+                        self.on_remove_match(animal, match)
+                    elif image == "R":
+                        self.on_remove_match(match, animal)
+        
+    
+    def on_remove_match(self, animal_L, animal_R):
+        """ Creates a separate data row for the right animal and removes the 
+        right coordinates from the left animal"""
+        # create data row for the right animal and update index
+        self.createSeparateDataRow(animal_R, "R")   
+        
+        # remove right coordinates from left animal 
+        self.match(animal_L, None)
+        
+        #@todo do i need to remove/update the visuals here?
+        
     def on_next_animal(self):
         """ Delegates the query to make next animal active to the lastly active
         image area (L or R). Also adapts the selection to have a matching pair 
@@ -704,6 +737,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         # find matching animal
         cur_animal = imageArea.animal_painter.cur_animal
         matching_animal = self.findAnimalMatch(cur_animal, image)
+        imageArea.animal_painter.updateBoundingBoxes()  
         imageArea.animal_painter.placeSpecsWidget()
         
         # select matching animal and update bounding boxes
@@ -711,7 +745,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         otherImageArea.animal_painter.updateBoundingBoxes()  
         otherImageArea.animal_painter.placeSpecsWidget()  
         
-        # update specs widget 
+        # update specs widget content
         self.updateSpecsWidget()
         
     def updateSpecsWidget(self):
@@ -827,9 +861,13 @@ class ImageAreaLR(QtWidgets.QWidget):
         # redraw the animals (make more transparent, add IDs to bounding boxes)
             self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesMatchMode
             self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesMatchMode
+            
+            self.is_match_mode_active = True
         else:
             self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesNormal
             self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesNormal
+            
+            self.is_match_mode_active = False
         
         # draw bounding boxes and IDs of all animals that have a match
         self.imageAreaL.animal_painter.updateBoundingBoxes()
@@ -1044,10 +1082,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             animal_L.setRemark(animal_L.remark + ", " + animal_R.remark)
             
         return True
-    
-    # def handleDifferentLength(self, animal_L, animal_R):
-    #     pass
-    
+        
     def matchAnimals(self, animal_L, animal_R):
         print("match called")
         # if group, species, remark, length, other props are different, then what?
@@ -1062,11 +1097,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         if str(animal_L.remark) != str(animal_R.remark):
             print(f"animals do not have the same remark {animal_L.remark, animal_R.remark}")
             if not self.handleDifferentRemark(animal_L, animal_R): return False
-            
-        # if str(animal_L.length) != str(animal_R.length): # länge muss sowieso neu berechnet werden bei einer match änderung
-        #     print(f"animals do not have the same length {animal_L.length, animal_R.length}")
-        #     if not self.handleDifferentLength(animal_L, animal_R): return False
-
+        
         # remove old matches - there are 4 cases (for this we need to adapt the data model and the animal instances)
         # left animal has no right coordinates, right animal has no left coordinates
         if self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
@@ -1096,7 +1127,6 @@ class ImageAreaLR(QtWidgets.QWidget):
             
             # replace right animal
             self.match(animal_L, animal_R)
-    
         
         # left animal has right coordinates, right animal has left coordinates
         elif self._models.model_animals.data.loc[animal_R.row_index, "RX1"] != -1 \
@@ -1317,8 +1347,13 @@ class ImageArea(QtWidgets.QGraphicsView):
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):
         """ Passes the mouse press event to the animal_painter. """
-        self.animal_painter.mousePressEvent(event)       
+        #if event.button() == QtCore.Qt.LeftButton:
+        self.animal_painter.mousePressEvent(event)  
+        if event.button() == QtCore.Qt.RightButton:
+            print("right mouse button click detected") 
         super().mousePressEvent(event)
+        
+       
 
     def mouseMoveEvent(self, event):
         """ Passes the mouse move event to the animal_painter. """
@@ -1519,6 +1554,7 @@ class AnimalPainter(QtCore.QObject):
         current animal (and prevent it from getting out of the borders of 
         the image) """
         if self.cur_animal is not None:
+            #if self.cur_animal.boundingBox_visual is not None:
             # reset position of specs widget
             self.widget_animal_specs.move(0,0)
         
@@ -1743,7 +1779,7 @@ class AnimalPainter(QtCore.QObject):
                         animal.boundingBox, QtGui.QPen(animal.color, 5, QtCore.Qt.SolidLine))
                 
                 # only draw IDs for animals with a match
-                self.drawAnimalId(animal) # @todo
+                self.drawAnimalId(animal) 
             
             # draw bounding box of current animal (without match) a bit thinner
             # than animals that have a match
