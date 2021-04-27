@@ -545,7 +545,8 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
       
     def on_match_clicked(self):
-        print("on match clicked")
+        """ Handles click on match mode button. """
+        # update match mode state and icon
         if self.is_match_animal_active:
             self.is_match_animal_active = False
             self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
@@ -557,6 +558,7 @@ class PageHome(QtWidgets.QWidget):
             self.is_add_animal_active = False
             self.is_remove_animal_active = False
             
+            # update icons
             self.updateAddRemoveIcons()
             
         self.photo_viewer.imageAreaLR.on_match_activated(self.is_match_animal_active)
