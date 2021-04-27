@@ -1846,9 +1846,9 @@ class AnimalPainter(QtCore.QObject):
     def on_next_animal(self):
         """ Makes the next animal in the animal_list active. """
         # if no animal ist selected, then select first one
-        if self.cur_animal is None and len(self.animal_list) >0:
+        if self.cur_animal is None and len(self.animal_list) > 0:
             self.cur_animal = self.animal_list[0]          
-            
+                    
         # only switch animals if the current one is in the list (and not None)
         if self.cur_animal in self.animal_list:
             index = self.animal_list.index(self.cur_animal)
@@ -1864,6 +1864,10 @@ class AnimalPainter(QtCore.QObject):
                    
     def on_previous_animal(self):
         """ Makes the previous animal in the animal_list active. """
+        # if no animal is selected, then select last one
+        if self.cur_animal is None and len(self.animal_list) > 0:
+            self.cur_animal = self.animal_list[-1] 
+            
         # only switch animals if the current one is in the list (and not None)
         if self.cur_animal in self.animal_list:
             index = self.animal_list.index(self.cur_animal)
