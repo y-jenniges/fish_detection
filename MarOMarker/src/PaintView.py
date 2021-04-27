@@ -712,6 +712,17 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaR.animal_painter.updateBoundingBoxes()
         
+        # remove cancel button, redraw cancel button when group changes
+        for btn, ani in self.imageAreaL.animal_painter.btns_remove_match:
+            if animal_L == ani:
+                self.imageAreaL._scene.removeItem(btn)
+                self.imageAreaL.animal_painter.btns_remove_match.remove([btn, ani])
+                
+        for btn, ani in self.imageAreaR.animal_painter.btns_remove_match:
+            if animal_R == ani:
+                self.imageAreaR._scene.removeItem(btn)
+                self.imageAreaR.animal_painter.btns_remove_match.remove([btn, ani])
+        
     def on_next_animal(self):
         """ Delegates the query to make next animal active to the lastly active
         image area (L or R). Also adapts the selection to have a matching pair 
@@ -889,6 +900,10 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.imageAreaL.animal_painter.updateBoundingBoxes = self.imageAreaL.animal_painter.updateBoundingBoxesNormal
             self.imageAreaR.animal_painter.updateBoundingBoxes = self.imageAreaR.animal_painter.updateBoundingBoxesNormal
             
+            # remove 'remove match' buttons
+            self.imageAreaL.animal_painter.removeAllRemoveMatchBtns()
+            self.imageAreaR.animal_painter.removeAllRemoveMatchBtns()
+            
             self.is_match_mode_active = False
         
         # draw bounding boxes and IDs of all animals that have a match
@@ -976,7 +991,6 @@ class ImageAreaLR(QtWidgets.QWidget):
     def updateDrawnAnimal(self, animal):
         """ Given the animal stored in the specs widget (on the side), this 
         function updates the corresponding animal on left and right image. """
-        print("update drawn animal")
         if self.imageAreaL.animal_painter.cur_animal is not None:
             painter = self.imageAreaL.animal_painter
             image = "L"
@@ -1026,7 +1040,6 @@ class ImageAreaLR(QtWidgets.QWidget):
             if self.animal_to_match[0] is None:           
                 # set animal to match
                 self.animal_to_match = [animal, image]
-                print("set animal to match")
 
             else:
                 # an animal waits for its match
@@ -1036,7 +1049,6 @@ class ImageAreaLR(QtWidgets.QWidget):
                     self.animal_to_match = [animal, image]
                     self.imageAreaL.animal_painter.updateBoundingBoxes()
                     self.imageAreaR.animal_painter.updateBoundingBoxes()
-                    print("switch animal to match")
                     return
                 
                 # match the active and the lastly selected animal
@@ -1106,7 +1118,6 @@ class ImageAreaLR(QtWidgets.QWidget):
         return True
         
     def matchAnimals(self, animal_L, animal_R):
-        print("match called")
         # if group, species, remark, length, other props are different, then what?
         if str(animal_L.group) != str(animal_R.group):
             print(f"animals do not have the same group {animal_L.group, animal_R.group}")
@@ -1253,7 +1264,19 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         self.imageAreaL.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "L"))
         self.imageAreaR.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "R"))
-
+        
+        self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
+        self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
+   
+        
+    def on_remove_match_btn(self, image, animal):
+        print("on_remove_match_btn")
+        match = self.findAnimalMatch(animal, image)
+        #@todo when removing one animal match by btn, the matching cross is not deleted
+        if image == "L":
+            self.on_remove_match(animal, match)
+        elif image == "R":
+            self.on_remove_match(match, animal)
 
 class ImageArea(QtWidgets.QGraphicsView):
     """
@@ -1439,6 +1462,7 @@ class AnimalPainter(QtCore.QObject):
         Height of the original image. Necessary for rescaling calculations.
     propertyChanged : pyqtSignal
     animalSelectionChanged : pyqtSignal
+    removeMatchBtnClicked: pyqtSignal
     """
     # define custom signals
     propertyChanged = QtCore.pyqtSignal(Animal)
@@ -1446,6 +1470,9 @@ class AnimalPainter(QtCore.QObject):
     
     animalSelectionChanged = QtCore.pyqtSignal()
     """ Signal emitted when animal selection changed. """
+    
+    removeMatchBtnClicked = QtCore.pyqtSignal(Animal)
+    """ Signal emitted when a remove animal match button was clicked. """
     
     def __init__(self, models, imageArea, parent=None):
         """
@@ -1468,6 +1495,9 @@ class AnimalPainter(QtCore.QObject):
         
         # list with all animals on the current image
         self.animal_list = []
+        
+        # list of buttons and their corresponding animal to remove a match
+        self.btns_remove_match = []
         
         # dragging offset when moving the markings for head and/or tail
         self.drag_position_head = QtCore.QPoint()
@@ -1538,7 +1568,7 @@ class AnimalPainter(QtCore.QObject):
             
             # redraw ID
             self.imageArea._scene.removeItem(self.cur_animal.id_visual)
-            self.drawAnimalId(self.cur_animal)
+            self.drawAnimalIdRemoveBtn(self.cur_animal)
             
             self.propertyChanged.emit(self.cur_animal)   
      
@@ -1808,7 +1838,7 @@ class AnimalPainter(QtCore.QObject):
                         animal.boundingBox, QtGui.QPen(animal.color, 5, QtCore.Qt.SolidLine))
                 
                 # only draw IDs for animals with a match
-                self.drawAnimalId(animal) 
+                self.drawAnimalIdRemoveBtn(animal) 
             
             # draw bounding box of current animal (without match) a bit thinner
             # than animals that have a match
@@ -1820,8 +1850,9 @@ class AnimalPainter(QtCore.QObject):
                     animal.boundingBox_visual = self.imageArea._scene.addRect(
                         animal.boundingBox, QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine))
 
-    def drawAnimalId(self, animal):
-        """ Draws the IDs of a given animal if the match mode is active. """
+    def drawAnimalIdRemoveBtn(self, animal):
+        """ Draws the ID the of a given animal and a button to remove its
+        match if the match mode is active. """
         # find page home (as parent of photoviewer)
         if isinstance(self.imageArea.parent().parent().parent().parent(), PhotoViewer):
             parent = self.imageArea.parent().parent().parent().parent().parent()
@@ -1834,28 +1865,100 @@ class AnimalPainter(QtCore.QObject):
         # only draw IDs if match mode is active
         if parent.is_match_animal_active:
             if animal != None:
-                # the animal ID is its row index in the data table
-                animal_id = animal.row_index
-                
-                # get top left corner of bounding box
-                top_left = animal.boundingBox_visual.rect().topLeft()
-                
-                # draw ID
-                font = QtGui.QFont("Century Gothic", 12, QtGui.QFont.Bold) 
-                
-                # create text visual
-                animal.id_visual = self.imageArea._scene.addSimpleText(str(animal_id), font)
-                
-                # draw the ID in the animal's colour (full opacity)
-                animal.color.setAlpha(255)
-                animal.id_visual.setBrush(animal.color)
-                
-                # draw a black outline around the ID for better visibility
-                animal.id_visual.setPen(QtCore.Qt.black)
-                
-                # move the ID visual to the top left position of the bounding box
-                animal.id_visual.setPos(top_left - QtCore.QPoint(0, 2*font.pointSize()))
+                self.drawAnimalId(animal)
+                self.drawRemoveMatchBtn(animal)
+                #self.drawRemoveMatchBtns()
+        
+    def drawRemoveMatchBtn(self, animal):
+        """ Draws the button to remove a match on a given animal. """
+        if animal is None:
+            return
+        elif animal.boundingBox_visual is None: 
+            return
+        
+        # if button is already drawn, remove it before drawing a new button
+        for btn, ani in self.btns_remove_match:
+            if animal == ani:
+                self.imageArea._scene.removeItem(btn)
+                self.btns_remove_match.remove([btn, ani])
+        
+        # get animal color as string
+        c = animal.color
+        color = "(" + str(c.red()) + "," + str(c.green()) + "," + str(c.blue()) + ", 70)"
+       
+        # define button
+        btn = QtWidgets.QPushButton(self.parent())
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(btn.sizePolicy().hasHeightForWidth())
+        btn.setSizePolicy(sizePolicy)
+        btn.setMinimumSize(QtCore.QSize(20, 20))
+        btn.setMaximumSize(QtCore.QSize(20, 20))
+        btn.setIcon(getIcon("icons/x_white.png"))
+        btn.setIconSize(QtCore.QSize(15, 15))
+        btn.setObjectName("btn")
+        btn.setStyleSheet("QPushButton{\n"
+                        "    background-color:rgb"+ color +";\n"
+                        "    outline:none;\n"
+                        "    border: none; \n"
+                        "    border-width: 0px;\n"
+                        "    border-radius: 0px;\n"
+                        "}\n"
+                        "QPushButton:hover {\n"
+                        "    background-color: rgb(0, 203, 221);\n"
+                        "}\n"
+                        "QPushButton:pressed {\n"
+                        "    background-color: rgb(0, 160, 174);\n"
+                        "}\n")
 
+        # get top left corner of bounding box and move button there
+        top_right = animal.boundingBox_visual.rect().topRight()   
+        btn.move((top_right - QtCore.QPoint(20-2.5, 20+2.5)).toPoint())
+        
+        # init action
+        btn.clicked.connect(partial(self.remove_match, animal))
+
+        # add btn to scene and to list
+        proxy = self.imageArea._scene.addWidget(btn)
+        self.btns_remove_match.append([proxy, animal])
+     
+    def removeAllRemoveMatchBtns(self):
+        # remove old buttons from scene
+        for btn, ani in self.btns_remove_match:
+            self.imageArea._scene.removeItem(btn)
+            
+        # clear list
+        self.btns_remove_match = []
+        
+    def remove_match(self, animal):
+        self.removeMatchBtnClicked.emit(animal)
+
+    def drawAnimalId(self, animal):
+        """ Draws the ID of a given animal. """
+        # the animal ID is its row index in the data table
+        animal_id = animal.row_index
+        
+        # get top left corner of bounding box
+        top_left = animal.boundingBox_visual.rect().topLeft()
+        
+        # draw ID
+        font = QtGui.QFont("Century Gothic", 12, QtGui.QFont.Bold) 
+        
+        # create text visual
+        animal.id_visual = self.imageArea._scene.addSimpleText(str(animal_id), font)
+        
+        # draw the ID in the animal's colour (full opacity)
+        animal.color.setAlpha(255)
+        animal.id_visual.setBrush(animal.color)
+        
+        # draw a black outline around the ID for better visibility
+        animal.id_visual.setPen(QtCore.Qt.black)
+        
+        # move the ID visual to the top left position of the bounding box
+        animal.id_visual.setPos(top_left - QtCore.QPoint(0, 2*font.pointSize()))
+        
     def drawAnimalHead(self, animal):
         """ Draws the head of a given animal. """
         if animal != None:
