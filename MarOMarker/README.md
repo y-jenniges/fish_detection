@@ -10,7 +10,8 @@ format. It is located in the folder **documentation**. For opening the main page
 open **documentation/build/index.html**.
 If you change code, please maintain the comments in the code and update the 
 documentation. 
-For building the docs, navigate to the documentation directory and run
+For building the docs, navigate to the documentation directory and run (possibly first 
+**make clean** to clean up old build, then)
 **make html**.
 
 

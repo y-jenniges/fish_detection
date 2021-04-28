@@ -431,21 +431,9 @@ class AnimalPainter(QtCore.QObject):
     def drawAnimalIdRemoveBtn(self, animal):
         """ Draws the ID the of a given animal and a button to remove its
         match if the match mode is active. """
-        # find page home (as parent of photoviewer)
-        if isinstance(self.imageArea.parent().parent().parent().parent(), PhotoViewer.PhotoViewer):
-            parent = self.imageArea.parent().parent().parent().parent().parent()
-        elif isinstance(self.imageArea.parent().parent().parent().parent().parent().parent(), PhotoViewer.PhotoViewer):
-            parent = self.imageArea.parent().parent().parent().parent().parent().parent().parent()
-        else:
-            print("AnimalPainter: Could not find PageHome parent.")
-            return
-        
-        # only draw IDs if match mode is active
-        if parent.is_match_animal_active:
-            if animal != None:
-                self.drawAnimalId(animal)
-                self.drawRemoveMatchBtn(animal)
-                #self.drawRemoveMatchBtns()
+        if animal != None:
+            self.drawAnimalId(animal)
+            self.drawRemoveMatchBtn(animal)
         
     def drawRemoveMatchBtn(self, animal):
         """ Draws the button to remove a match on a given animal. """

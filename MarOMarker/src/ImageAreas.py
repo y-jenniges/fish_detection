@@ -5,7 +5,6 @@ from functools import partial
 from Animal import AnimalSpecificationsWidget
 from AnimalPainter import AnimalPainter
 from Helpers import MismatchDialog
-import PhotoViewer
 
 
 class ImageArea(QtWidgets.QGraphicsView):
@@ -26,12 +25,15 @@ class ImageArea(QtWidgets.QGraphicsView):
         Indicates if an image is currently displayed.
     animal_painter : AnimalPainter
         The painter to delegate the mouse events to.
-    rightMouseButtonClicked: pyqtSignal
+    rightMouseButtonClicked : pyqtSignal
+    onWheelZoom : pyqtSignal
     """
     
     # custom signals
     rightMouseButtonClicked = QtCore.pyqtSignal(QtCore.QPoint)
     """ Signal emitted when the right mouse button is pressed. """
+    
+    onWheelZoom = QtCore.pyqtSignal(int)
     
     def __init__(self, models, parent=None):
         super(ImageArea, self).__init__(parent)
@@ -103,30 +105,17 @@ class ImageArea(QtWidgets.QGraphicsView):
             elif event.angleDelta().y() <= 0:
                 factor = 0.9
                 self._zoom -= 1
-        
-            # find the photo viewer in the parent tree
-            parent = None
-            if isinstance(self.parent().parent().parent().parent(), PhotoViewer):
-                parent = self.parent().parent().parent().parent()
-            elif isinstance(self.parent().parent(), PhotoViewer):
-                parent = self.parent().parent()
-            else:
-                print("ImageArea: Could not find PhotoViewer as parent and \
-                      could therefore not (de-) activate arrow shortcuts.")
-                print(self.parent())
-                return
             
             # scale the view if zoom is positive, else set it to zero and fit 
             # the photo in the view
             if self._zoom > 0:
                 self.scale(factor, factor)
-                parent.setArrowShortcutsActive(False)
             elif self._zoom == 0:
                 self.fitInView()
-                parent.setArrowShortcutsActive(True)
             else:
                 self._zoom = 0
-                parent.setArrowShortcutsActive(True)
+                
+            self.onWheelZoom.emit(self._zoom)
                     
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):

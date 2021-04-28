@@ -31,19 +31,21 @@ Cou can contact me by yvonne.jenniges@gmx.de
 	:caption: Contents:
 
 	PageAbout
-	Animal
 	PageData
+	PageHandbook
+	PageHome
+	PageSettings
+	Animal
+	AnimalPainter
 	DistanceMeasurer
 	gui
 	Helpers
-	PageHandbook
-	PageHome
-	Models
+	ImageAreas
 	Losses
-	PaintView
+	Models
+	PhotoViewer
 	PostProcessing
 	Predicter
-	PageSettings
 	TableWindow
 	TabWidget
 	WelcomeWindow

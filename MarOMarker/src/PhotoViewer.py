@@ -473,12 +473,25 @@ class PhotoViewer(QtWidgets.QWidget):
             elif self.imageAreaLR.imageAreaR.animal_painter.is_remove_mode_active:
                 return True
         return False
+      
+    def on_wheel_zoom(self, zoom):
+        """ When wheel zoom is used on the image, arrow key shortcuts are needed
+        for navigating on image and not to switch to next image. The shortcuts
+        are handled here. """
+        if zoom > 0:
+            self.setArrowShortcutsActive(False)
+        else:
+            self.setArrowShortcutsActive(True)
         
     def _initActions(self):
         """ Initalizes the actions connected to UI elements. """ 
         # connect buttons
         self.btn_previous_image.clicked.connect(self.on_previous_image)
         self.btn_next_image.clicked.connect(self.on_next_image)
+        
+        self.imageArea.onWheelZoom.connect(self.on_wheel_zoom)
+        self.imageAreaLR.imageAreaL.onWheelZoom.connect(self.on_wheel_zoom)
+        self.imageAreaLR.imageAreaR.onWheelZoom.connect(self.on_wheel_zoom)
 
         # --- define shortcuts ---------------------------------------------- #  
         self.shortcut_previous_image = QtWidgets.QShortcut(
