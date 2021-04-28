@@ -618,7 +618,43 @@ class AnimalPainter(QtCore.QObject):
             
             self.updateBoundingBoxes()   
 
-    def on_remove_animal(self, activate_remove, is_add_active):
+    def on_match_animal(self, activate_match, is_add_active, is_remove_active):
+        """ Handles the activation state of the match mode. 
+
+        Parameters
+        ----------
+        activate_match : bool
+            Whether to activate the remove mode or deactivate it.
+        is_add_active : bool
+            Whether the add mode is active or not.
+        is_remove_active : bool
+            Whether the remove mode is active or not.
+
+        Returns
+        -------
+        is_match_activatable : bool
+            Whether it is possible to activate the match mode.
+        is_add_active : bool
+            Wheter the add mode needs to be active or not.
+        is_remove_active : bool
+            Whether the remove mode needs to be active or not.
+        """ 
+        if not activate_match:
+            return False, is_add_active, is_remove_active  
+        elif is_add_active:
+            # only deactivate add mode is animal is drawn completely
+            if not self.cur_animal \
+            or (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
+                return True, False, False
+            else:
+                displayErrorMsg("Error", 
+                                "Please draw head and tail before switching off the Add-mode.", 
+                                "Error")     
+                return False, True, False
+        else:
+            return True, False, False    
+        
+    def on_remove_animal(self, activate_remove, is_add_active, is_match_active):
         """ Handles the activation state of the remove mode. 
 
         Parameters
@@ -634,22 +670,25 @@ class AnimalPainter(QtCore.QObject):
             Whether it is possible to activate the remove mode.
         is_add_active : bool
             Wheter the add mode needs to be active or not.
+        is_match_active : bool
+            Whether the match mode needs to be active or not.
         """ 
         if not activate_remove:
-            return False, is_add_active       
+            return False, is_add_active, is_match_active  
         elif is_add_active:
             # only deactivate add mode is animal is drawn completely
             if not self.cur_animal \
             or (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn):
-                return True, False   
+                return True, False, False
             else:
                 displayErrorMsg("Error", 
                                 "Please draw head and tail before switching off the Add-mode.", 
-                                "Error")           
+                                "Error")    
+                return False, True, False
         else:
-            return True, False       
+            return True, False, False    
 
-    def on_add_animal(self, activate_add, is_remove_active): 
+    def on_add_animal(self, activate_add, is_remove_active, is_match_active): 
         """ Handles the activation state of the add mode. 
         
         Parameters
@@ -664,7 +703,9 @@ class AnimalPainter(QtCore.QObject):
         is_add_activatable : bool
             Whether it is possible to activate the add mode.
         is_remove_active : bool
-            Wheter the remove mode needs to be active or not.
+            Whether the remove mode needs to be active or not.
+        is_match_active : bool
+            Whether the match mode needs to be active or not.
         """
         # if add mode is to be turned off
         if not activate_add:
@@ -673,15 +714,15 @@ class AnimalPainter(QtCore.QObject):
             if self.cur_animal is not None:
                 if (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn) \
                     or (not self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
-                        return False, is_remove_active
+                        return False, is_remove_active, is_match_active
                 else:
                     displayErrorMsg("Error", 
                                     "Please draw head and tail before switching off the Add-mode.", 
                                     "Error")
             else:
-                return False, is_remove_active
+                return False, is_remove_active, is_match_active
         else:
-            return True, False
+            return True, False, False
             
     def deselectAnimal(self):
         """ Deselects the current animal. """

@@ -86,32 +86,37 @@ class PageHome(QtWidgets.QWidget):
     def on_add_clicked(self):
         """ (De-)activate the add mode. """
         if self.is_add_animal_active:          
-            self.is_add_animal_active, self.is_remove_animal_active = self.photo_viewer.on_add_animal(False, self.is_remove_animal_active)
+            self.is_add_animal_active, self.is_remove_animal_active, self.is_match_animal_active = \
+            self.photo_viewer.on_add_animal(False, self.is_remove_animal_active, self.is_match_animal_active)
         else:
-            self.is_add_animal_active, self.is_remove_animal_active = self.photo_viewer.on_add_animal(True, self.is_remove_animal_active)         
+            self.is_add_animal_active, self.is_remove_animal_active, self.is_match_animal_active = \
+            self.photo_viewer.on_add_animal(True, self.is_remove_animal_active, self.is_match_animal_active)         
         
-        if self.is_add_animal_active or self.is_remove_animal_active:
-            self.is_match_animal_active = False
-            self.photo_viewer.imageAreaLR.on_match_activated(False)
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
-        
-        self.updateAddRemoveIcons()
+        self.updateAddRemoveMatchIcons()
             
     def on_remove_clicked(self):
         """ (De-)activate the remove mode. """
         if self.is_remove_animal_active:          
-            self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(False, self.is_add_animal_active)
+            self.is_remove_animal_active, self.is_add_animal_active, self.is_match_animal_active = \
+            self.photo_viewer.on_remove_animal(False, self.is_add_animal_active, self.is_match_animal_active)
         else:
-            self.is_remove_animal_active, self.is_add_animal_active = self.photo_viewer.on_remove_animal(True, self.is_add_animal_active)
-        
-        if self.is_add_animal_active or self.is_remove_animal_active:
-            self.is_match_animal_active = False
-            self.photo_viewer.imageAreaLR.on_match_activated(False)
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
+            self.is_remove_animal_active, self.is_add_animal_active, self.is_match_animal_active = \
+            self.photo_viewer.on_remove_animal(True, self.is_add_animal_active, self.is_match_animal_active)
             
-        self.updateAddRemoveIcons()
+        self.updateAddRemoveMatchIcons()
+        
+    def on_match_clicked(self):
+        """ (De-)activated the match mode. """
+        if self.is_match_animal_active:          
+            self.is_match_animal_active, self.is_add_animal_active, self.is_remove_animal_active = \
+            self.photo_viewer.on_match_btn(False, self.is_add_animal_active, self.is_remove_animal_active)
+        else:
+            self.is_match_animal_active, self.is_add_animal_active, self.is_remove_animal_active = \
+            self.photo_viewer.on_match_btn(True, self.is_add_animal_active, self.is_remove_animal_active)
 
-    def updateAddRemoveIcons(self):
+        self.updateAddRemoveMatchIcons()
+        
+    def updateAddRemoveMatchIcons(self):
         """ Update the icond of add and remove mode according to their state.  """
         # adapt icon of the add button
         if self.is_add_animal_active:
@@ -123,7 +128,13 @@ class PageHome(QtWidgets.QWidget):
         if self.is_remove_animal_active:
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_open_darkBlue.png"))
         else:
-            self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))        
+            self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))   
+            
+        # adapt icon of match button
+        if self.is_match_animal_active:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png")) 
+        else:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
  
     def on_filter_clicked(self):
         """ !!! NOT IMPLEMENTED YET !!! 
@@ -559,24 +570,6 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
       
-    def on_match_clicked(self):
-        """ Handles click on match mode button. """
-        # update match mode state and icon
-        if self.is_match_animal_active:
-            self.is_match_animal_active = False
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
-        else:
-            self.is_match_animal_active = True
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
-            
-            # deactivate other modes
-            self.is_add_animal_active = False
-            self.is_remove_animal_active = False
-            
-            # update icons
-            self.updateAddRemoveIcons()
-            
-        self.photo_viewer.imageAreaLR.on_match_activated(self.is_match_animal_active)
             
     def _initModels(self):
         """ Add data models to respective UI elements. """

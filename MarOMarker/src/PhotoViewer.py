@@ -139,7 +139,25 @@ class PhotoViewer(QtWidgets.QWidget):
             
         self.updateImageList()
 
-    def on_add_animal(self, activate_add, is_remove_active):
+    def on_match_btn(self, activate_match, is_add_active, is_remove_active):#@todo
+        a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_match_animal(
+            activate_match, is_add_active, is_remove_active)
+        
+        b, e, h = self.imageAreaLR.imageAreaR.animal_painter.on_match_animal(
+            activate_match, is_add_active, is_remove_active)
+        
+        c, f, i = self.imageArea.animal_painter.on_match_animal(
+            activate_match, is_add_active, is_remove_active)
+        
+        is_match_activatable = a and b and c
+        is_add_active = d or e or f
+        is_remove_active = g or h or i
+        
+        self.imageAreaLR.on_match_activated(is_match_activatable)
+        
+        return is_match_activatable, is_add_active, is_remove_active
+    
+    def on_add_animal(self, activate_add, is_remove_active, is_match_active):
         """
         Delegates query to (de-)activate the add mode to the correct 
         animal painters.
@@ -150,7 +168,7 @@ class PhotoViewer(QtWidgets.QWidget):
             Whether to activate the add mode or deactivate it.
         is_remove_active : bool
             Whether the remove mode is active or not.
-
+            
         Returns
         -------
         is_add_activatable : bool
@@ -158,18 +176,24 @@ class PhotoViewer(QtWidgets.QWidget):
         is_remove_active : bool
             Wheter the remove mode needs to be active or not.
         """
-        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(
-            activate_add, is_remove_active)
-        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_add_animal(
-            activate_add, is_remove_active)
-        c, f = self.imageArea.animal_painter.on_add_animal(
-            activate_add, is_remove_active)
+        a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(
+            activate_add, is_remove_active, is_match_active)
+        
+        b, e, h = self.imageAreaLR.imageAreaR.animal_painter.on_add_animal(
+            activate_add, is_remove_active, is_match_active)
+        
+        c, f, i = self.imageArea.animal_painter.on_add_animal(
+            activate_add, is_remove_active, is_match_active)
         
         is_add_activatable = a and b and c
-        is_remove_active = d and e and f
-        return is_add_activatable, is_remove_active
+        is_remove_active = d or e or f
+        is_match_active = g or h or i
+        
+        self.imageAreaLR.on_match_activated(is_match_active)
+        
+        return is_add_activatable, is_remove_active, is_match_active
 
-    def on_remove_animal(self, activate_remove, is_add_active):
+    def on_remove_animal(self, activate_remove, is_add_active, is_match_active):
         """
         Delegates query to (de-)activate the remove mode to the correct 
         animal painters.
@@ -188,16 +212,22 @@ class PhotoViewer(QtWidgets.QWidget):
         is_add_active : bool
             Wheter the add mode needs to be active or not.
         """
-        a, d = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(
-            activate_remove, is_add_active)
-        b, e = self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal(
-            activate_remove, is_add_active)
-        c, f = self.imageArea.animal_painter.on_remove_animal(
-            activate_remove, is_add_active)
+        a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(
+            activate_remove, is_add_active, is_match_active)
+        
+        b, e, h = self.imageAreaLR.imageAreaR.animal_painter.on_remove_animal(
+            activate_remove, is_add_active, is_match_active)
+        
+        c, f, i = self.imageArea.animal_painter.on_remove_animal(
+            activate_remove, is_add_active, is_match_active)
         
         is_remove_activatable = a and b and c
-        is_add_active = d and e and f
-        return is_remove_activatable, is_add_active
+        is_add_active = d or e or f
+        is_match_active = g or h or i
+        
+        self.imageAreaLR.on_match_activated(is_match_active)
+        
+        return is_remove_activatable, is_add_active, is_match_active
           
     def on_next_animal(self):
         """ Delegates the query to make the next animal active to the correct 
