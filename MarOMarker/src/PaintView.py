@@ -1346,7 +1346,7 @@ class ImageArea(QtWidgets.QGraphicsView):
         """ Returns if there is a photo loaded or not. """
         return not self._empty
 
-    def _fitInView(self, scale=True):
+    def fitInView(self, scale=True):
         """ Responsible for proper image scaling. """
         rect = QtCore.QRectF(self._image.pixmap().rect())
         if not rect.isNull():
@@ -1375,7 +1375,7 @@ class ImageArea(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self._image.setPixmap(QtGui.QPixmap())
             self.setEnableInteraction(False)
-        self._fitInView() 
+        self.fitInView() 
         
     def setEnableInteraction(self, isInteractionEnabled):
         """ Enables/Disables if the image is manipulable. """
@@ -1413,7 +1413,7 @@ class ImageArea(QtWidgets.QGraphicsView):
                 self.scale(factor, factor)
                 parent.setArrowShortcutsActive(False)
             elif self._zoom == 0:
-                self._fitInView()
+                self.fitInView()
                 parent.setArrowShortcutsActive(True)
             else:
                 self._zoom = 0

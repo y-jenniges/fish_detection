@@ -60,13 +60,28 @@ class PageHome(QtWidgets.QWidget):
         """ Zoom into the image according to the level of the zoom slider.  """
         # determine the zoom factor and transform the photo of the photo_viewer
         scale = 1 + value*self.factor/100
-        self.photo_viewer.imageArea.setTransform(
-            self.photo_viewer.imageArea.transform().fromScale(scale, scale))
-
-        # if thevalue is smaller 1, make the photo fill the photo_viewer image area
+        
+        if self.photo_viewer.stackedWidget_imagearea.currentIndex() == 0:
+            self.photo_viewer.imageArea.setTransform(
+                self.photo_viewer.imageArea.transform().fromScale(scale, scale))
+        elif self.photo_viewer.stackedWidget_imagearea.currentIndex() == 1:
+            self.photo_viewer.imageAreaLR.imageAreaL.setTransform(
+                self.photo_viewer.imageAreaLR.imageAreaL.transform().fromScale(scale, scale))
+            
+            self.photo_viewer.imageAreaLR.imageAreaR.setTransform(
+                self.photo_viewer.imageAreaLR.imageAreaR.transform().fromScale(scale, scale))
+            
+        # if the value is smaller 1, make the photo fill the photo_viewer image area
         if value < 1:
-            self.photo_viewer.imageArea.resetTransform() 
-            self.photo_viewer.imageArea.fitInView()
+            if self.photo_viewer.stackedWidget_imagearea.currentIndex() == 0:
+                self.photo_viewer.imageArea.resetTransform() 
+                self.photo_viewer.imageArea.fitInView()
+            elif self.photo_viewer.stackedWidget_imagearea.currentIndex() == 1:
+                self.photo_viewer.imageAreaLR.imageAreaL.resetTransform()
+                self.photo_viewer.imageAreaLR.imageAreaL.fitInView()
+                
+                self.photo_viewer.imageAreaLR.imageAreaR.resetTransform()
+                self.photo_viewer.imageAreaLR.imageAreaR.fitInView()
   
     def on_add_clicked(self):
         """ (De-)activate the add mode. """
