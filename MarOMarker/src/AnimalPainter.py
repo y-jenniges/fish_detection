@@ -421,8 +421,6 @@ class AnimalPainter(QtCore.QObject):
             # draw bounding box of current animal (without match) a bit thinner
             # than animals that have a match
             elif animal == self.cur_animal:
-                print("current animal but without match")
-                
                 # set colour to full opacity
                 animal.color.setAlpha(255)
                 
@@ -513,6 +511,7 @@ class AnimalPainter(QtCore.QObject):
         self.btns_remove_match = []
         
     def remove_match(self, animal):
+        """ Called when a remove match button is clicked. """
         self.removeMatchBtnClicked.emit(animal)
 
     def drawAnimalId(self, animal):
