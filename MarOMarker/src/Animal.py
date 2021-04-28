@@ -613,23 +613,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.animal.length = animal.length
             self.updateVisuals()
         
-        else:
-            # group = AnimalGroup.UNIDENTIFIED.name.title()
-            # self.comboBox_group.blockSignals(True) 
-            # self.comboBox_group.setCurrentIndex(self.comboBox_group.findText(group))
-            # self.comboBox_group.blockSignals(False)
-            
-            # species = AnimalSpecies.UNIDENTIFIED.name.title()
-            # self.comboBox_species.blockSignals(True)
-            # self.comboBox_species.setCurrentIndex(self.comboBox_species.findText(species))
-            # self.comboBox_species.blockSignals(False) 
-            
-            # # set remark to empty
-            # self.comboBox_remark.setCurrentIndex(0)
-            
-            # # set length to 0
-            # self.spinBox_length.setValue(0)
-            
+        else:            
             self.updateVisuals()
             self.setEnabled(False)
             
@@ -769,6 +753,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.spinBox_length.setMaximum(99909.99)
         self.spinBox_length.setObjectName("spinBox_length")
         self.spinBox_length.setEnabled(False)
+        self.spinBox_length.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
         
         # self.spinBox_heigth = QtWidgets.QDoubleSpinBox(self)
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
