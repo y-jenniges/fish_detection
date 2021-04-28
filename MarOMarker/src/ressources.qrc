@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/x_white.png</file>
     <file>icons/other_settings.png</file>
     <file>icons/puzzle_black.png</file>
     <file>icons/puzzle_darkblue.png</file>

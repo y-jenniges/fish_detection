@@ -476,7 +476,7 @@ class AnimalPainter(QtCore.QObject):
         btn.setSizePolicy(sizePolicy)
         btn.setMinimumSize(QtCore.QSize(20, 20))
         btn.setMaximumSize(QtCore.QSize(20, 20))
-        btn.setIcon(getIcon("icons/x_white.png"))
+        btn.setIcon(getIcon(":/icons/icons/x_white.png"))
         btn.setIconSize(QtCore.QSize(15, 15))
         btn.setObjectName("btn")
         btn.setStyleSheet("QPushButton{\n"
