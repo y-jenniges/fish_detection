@@ -663,6 +663,8 @@ class AnimalPainter(QtCore.QObject):
             Whether to activate the remove mode or deactivate it.
         is_add_active : bool
             Whether the add mode is active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
 
         Returns
         -------
@@ -672,6 +674,8 @@ class AnimalPainter(QtCore.QObject):
             Wheter the add mode needs to be active or not.
         is_match_active : bool
             Whether the match mode needs to be active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
         """ 
         if not activate_remove:
             return False, is_add_active, is_match_active  
@@ -696,6 +700,8 @@ class AnimalPainter(QtCore.QObject):
         activate_add : bool
             Whether to activate the add mode or deactivate it.
         is_remove_active : bool
+            Whether the remove mode is active or not.
+        is_match_active : bool
             Whether the remove mode is active or not.
 
         Returns

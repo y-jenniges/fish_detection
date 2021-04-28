@@ -139,7 +139,29 @@ class PhotoViewer(QtWidgets.QWidget):
             
         self.updateImageList()
 
-    def on_match_btn(self, activate_match, is_add_active, is_remove_active):#@todo
+    def on_match_btn(self, activate_match, is_add_active, is_remove_active):
+        """
+        Delegates query to (de-)activate the match mode to the correct 
+        animal painters.
+
+        Parameters
+        ----------
+        activate_match : bool
+            Whether to activate the add mode or deactivate it.
+        is_add_active : bool
+            Whether the add mode is active or not.
+        is_remove_active : bool
+            Whether the remove mode is active or not.
+            
+        Returns
+        -------
+        is_match_activatable : bool
+            Whether it is possible to activate the add mode.
+        is_add_active : bool
+            Wheter the add mode needs to be active or not.
+        is_remove_active : bool
+            Whether the remove mode is active or not.
+        """
         a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_match_animal(
             activate_match, is_add_active, is_remove_active)
         
@@ -168,6 +190,8 @@ class PhotoViewer(QtWidgets.QWidget):
             Whether to activate the add mode or deactivate it.
         is_remove_active : bool
             Whether the remove mode is active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
             
         Returns
         -------
@@ -175,6 +199,8 @@ class PhotoViewer(QtWidgets.QWidget):
             Whether it is possible to activate the add mode.
         is_remove_active : bool
             Wheter the remove mode needs to be active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
         """
         a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(
             activate_add, is_remove_active, is_match_active)
@@ -204,6 +230,8 @@ class PhotoViewer(QtWidgets.QWidget):
             Whether to activate the remove mode or deactivate it.
         is_add_active : bool
             Whether the add mode is active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
 
         Returns
         -------
@@ -211,6 +239,8 @@ class PhotoViewer(QtWidgets.QWidget):
             Whether it is possible to activate the remove mode.
         is_add_active : bool
             Wheter the add mode needs to be active or not.
+        is_match_active : bool
+            Whether the remove mode is active or not.
         """
         a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_remove_animal(
             activate_remove, is_add_active, is_match_active)
