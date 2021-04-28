@@ -245,6 +245,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaR.animal_painter.updateBoundingBoxes()
         
+        # set length to zero (without a match, it cannot be calculated)
+        animal_L.setLength(0.0)
+        animal_R.setLength(0.0)
+        
         # remove cancel button, redraw cancel button when group changes
         for btn, ani in self.imageAreaL.animal_painter.btns_remove_match:
             if animal_L == ani:
@@ -311,6 +315,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         otherImageArea.animal_painter.updateBoundingBoxes()  
         otherImageArea.animal_painter.placeSpecsWidget()  
         
+        # if cur_animal is None, make active animal None
+        if cur_animal is None:
+            self.animal_to_match = [None, image]
+            
         # update specs widget content
         self.updateSpecsWidget()
         
@@ -371,15 +379,6 @@ class ImageAreaLR(QtWidgets.QWidget):
                             return matching_animal
         return None
         
-        
-    def redrawLeftAnimal(self, animal):
-        """ Given the right animal, redraw its matching left animal. """
-        self.redrawAnimalMatch(animal, "R")
-        
-    def redrawRightAnimal(self, animal):
-        """ Given the left animal, redraw its matching right animal. """
-        self.redrawAnimalMatch(animal, "L")
-
     def redrawAnimalMatch(self, animal, image="L"):
         """
         Redraws the animal that is matched to the given animal (if existant). 
@@ -452,82 +451,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaR.animal_painter.updateBoundingBoxes() 
         
-        # update specs widget  #@todo needed here?
+        # update specs widget
         self.updateSpecsWidget()
-        
-    def _initUi(self):
-        """ Defines and draws the UI elements. """
-        # -- frame for the two images displayed below each other ------------ #
-        layout_imageFrame = QtWidgets.QVBoxLayout(self)
-        layout_imageFrame.setContentsMargins(0, 0, 0, 0)
-        layout_imageFrame.setSpacing(0)
-        layout_imageFrame.setObjectName("layout_imageFrame")
-        
-        self.imageAreaL = ImageArea(self._models, self)
-        self.imageAreaR = ImageArea(self._models, self)
-        
-        spacer = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)  
-        
-        layout_imageFrame.addWidget(self.imageAreaL)
-        layout_imageFrame.addItem(spacer)
-        layout_imageFrame.addWidget(self.imageAreaR)
-        
-        frame_image = QtWidgets.QFrame(self)
-        frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_image.setLayout(layout_imageFrame)
-
-        
-        # -- frame for more options ----------------------------------------- #
-        # layout for frame that should contain the specifications widget
-        layout_specs = QtWidgets.QGridLayout(self)
-        layout_specs.setObjectName("layout_specs")
-        layout_specs.setAlignment(QtCore.Qt.AlignCenter)
-        
-        # frame to contain the specs widget
-        frame_specs = QtWidgets.QFrame(self)
-        frame_specs.setStyleSheet("QFrame{background-color:rgb(200, 200, 200);  border-radius: 3px; border: none;} ")
-        frame_specs.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_specs.setLayout(layout_specs)
             
-        # specification widget
-        self.widget_animal_specs = AnimalSpecificationsWidget(self._models, self.imageAreaL)
-        self.widget_animal_specs.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;} QComboBox QAbstractItemView {background-color:white;border:None;selection-background-color: rgb(0, 203, 221);}")
-        self.widget_animal_specs.show()
-        
-        # add specs widget to specs layout
-        layout_specs.addWidget(self.widget_animal_specs) 
-        
-        # layout for the options frame
-        layout_options = QtWidgets.QVBoxLayout(self)
-        layout_options.setContentsMargins(7, 7, 7, 7)
-        layout_options.setSpacing(0)
-        layout_options.setObjectName("layout_options")
-        
-        # spacer
-        spacer1 = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)  
-        
-        # add widgets to options frame
-        layout_options.addWidget(frame_specs)
-        layout_options.addItem(spacer1)
-        
-        # put options layout into a frame
-        frame_options = QtWidgets.QFrame(self)
-        frame_options.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_options.setLayout(layout_options)
-        
-        # main layout
-        self.layout = QtWidgets.QHBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
-        self.layout.setObjectName("layout")
-        
-        # adding widgets to main layout 
-        self.layout.addWidget(frame_image)
-        self.layout.addWidget(frame_options)
-        
-        # set main layout
-        self.setLayout(self.layout)
-    
     def updateDrawnAnimal(self, animal):
         """ Given the animal stored in the specs widget (on the side), this 
         function updates the corresponding animal on left and right image. """
@@ -738,6 +664,9 @@ class ImageAreaLR(QtWidgets.QWidget):
             Either "L" or "R", depending on which image the animal is located. 
             The default is "L".
         """
+        # set animal length to zero (since it doesnt have a match anymore)
+        animal.setLength(0.0)
+        
         # get experiment settings
         image_path = self._models.model_animals.data.loc[animal.row_index, "file_id"] + "_R.jpg"  
         image_remark = self._models.model_animals.data.loc[animal.row_index, "image_remarks"]
@@ -758,7 +687,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             if animal == ani:
                 imageArea._scene.removeItem(btn)
                 imageArea.animal_painter.btns_remove_match.remove([btn, ani])
-                
+            
     def match(self, animal_L, animal_R):
         """
         Adapting match information in the data table and updating the indeces
@@ -803,10 +732,28 @@ class ImageAreaLR(QtWidgets.QWidget):
             # update row index of new right animal 
             match.row_index = animal.row_index
         
+    def on_remove_match_btn(self, image, animal):
+        """
+        Removes the match of the given animal.
+
+        Parameters
+        ----------
+        image : string
+            The image on which the animal is located. Either 'L' or 'R'. 
+        animal : Animal
+            The animal belonging to the clicked remove button.
+        """
+        match = self.findAnimalMatch(animal, image)
+
+        if image == "L":
+            self.on_remove_match(animal, match)
+        elif image == "R":
+            self.on_remove_match(match, animal)
+
     def _initActions(self):
         """ Defines the actions possible on the ImageAreaLR. """
-        self.imageAreaL.animal_painter.propertyChanged.connect(self.redrawRightAnimal)
-        self.imageAreaR.animal_painter.propertyChanged.connect(self.redrawLeftAnimal)
+        self.imageAreaL.animal_painter.propertyChanged.connect(partial(self.redrawAnimalMatch, "L"))
+        self.imageAreaR.animal_painter.propertyChanged.connect(partial(self.redrawAnimalMatch, "R"))
         
         self.imageAreaL.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
@@ -822,12 +769,76 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
         self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
    
+    
+    def _initUi(self):
+        """ Defines and draws the UI elements. """
+        # -- frame for the two images displayed below each other ------------ #
+        layout_imageFrame = QtWidgets.QVBoxLayout(self)
+        layout_imageFrame.setContentsMargins(0, 0, 0, 0)
+        layout_imageFrame.setSpacing(0)
+        layout_imageFrame.setObjectName("layout_imageFrame")
         
-    def on_remove_match_btn(self, image, animal):
-        print("on_remove_match_btn")
-        match = self.findAnimalMatch(animal, image)
-        #@todo when removing one animal match by btn, the matching cross is not deleted
-        if image == "L":
-            self.on_remove_match(animal, match)
-        elif image == "R":
-            self.on_remove_match(match, animal)
+        self.imageAreaL = ImageArea(self._models, self)
+        self.imageAreaR = ImageArea(self._models, self)
+        
+        spacer = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)  
+        
+        layout_imageFrame.addWidget(self.imageAreaL)
+        layout_imageFrame.addItem(spacer)
+        layout_imageFrame.addWidget(self.imageAreaR)
+        
+        frame_image = QtWidgets.QFrame(self)
+        frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_image.setLayout(layout_imageFrame)
+
+        
+        # -- frame for more options ----------------------------------------- #
+        # layout for frame that should contain the specifications widget
+        layout_specs = QtWidgets.QGridLayout(self)
+        layout_specs.setObjectName("layout_specs")
+        layout_specs.setAlignment(QtCore.Qt.AlignCenter)
+        
+        # frame to contain the specs widget
+        frame_specs = QtWidgets.QFrame(self)
+        frame_specs.setStyleSheet("QFrame{background-color:rgb(200, 200, 200);  border-radius: 3px; border: none;} ")
+        frame_specs.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_specs.setLayout(layout_specs)
+            
+        # specification widget
+        self.widget_animal_specs = AnimalSpecificationsWidget(self._models, self.imageAreaL)
+        self.widget_animal_specs.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;} QComboBox QAbstractItemView {background-color:white;border:None;selection-background-color: rgb(0, 203, 221);}")
+        self.widget_animal_specs.show()
+        
+        # add specs widget to specs layout
+        layout_specs.addWidget(self.widget_animal_specs) 
+        
+        # layout for the options frame
+        layout_options = QtWidgets.QVBoxLayout(self)
+        layout_options.setContentsMargins(7, 7, 7, 7)
+        layout_options.setSpacing(0)
+        layout_options.setObjectName("layout_options")
+        
+        # spacer
+        spacer1 = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)  
+        
+        # add widgets to options frame
+        layout_options.addWidget(frame_specs)
+        layout_options.addItem(spacer1)
+        
+        # put options layout into a frame
+        frame_options = QtWidgets.QFrame(self)
+        frame_options.setFrameShape(QtWidgets.QFrame.NoFrame)
+        frame_options.setLayout(layout_options)
+        
+        # main layout
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.layout.setObjectName("layout")
+        
+        # adding widgets to main layout 
+        self.layout.addWidget(frame_image)
+        self.layout.addWidget(frame_options)
+        
+        # set main layout
+        self.setLayout(self.layout)
