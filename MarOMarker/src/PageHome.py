@@ -1,7 +1,7 @@
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Helpers import TopFrame, getIcon
-from PaintView import PhotoViewer
+from PhotoViewer import PhotoViewer
 
 
 class PageHome(QtWidgets.QWidget):
