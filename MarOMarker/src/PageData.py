@@ -980,6 +980,14 @@ class PageData(QtWidgets.QWidget):
                
         # --------------- new
         
+        # check if there is a valid input image directory
+        if not os.path.isdir(self.lineEdit_img_dir.text()):
+            text = "Error: Invalid image directory"
+            information = "Please specify a valid image directory beside the calendar on the data page."
+            windowTitle = "Invalid image directory"
+            displayErrorMsg(text, information, windowTitle)
+            return
+        
         # check if there is a valid output directory
         if not os.path.isdir(self.lineEdit_output_dir.text()):
             text = "Error: Missing output directory"
@@ -988,74 +996,74 @@ class PageData(QtWidgets.QWidget):
             displayErrorMsg(text, information, windowTitle)
             return
         
-        # if neural netowk is not None
-        if self.predicter.neural_network is not None:
-            
-            # create a thread for the neural network  @todo
-            print("activated, net not none")
-            
-            # get image path list from photo viewer
-            img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-            
-            print("916: img_list created")
-            print(img_list)
-			
-            for path in img_list[0]:
-				
-                print("iterate over pathes")
-			
-                file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
-                
-                print(file_id)
-				
-                # predict only images that are not yet in the result file
-                #if not file_id in self.models.model_animals.data["file_id"].values:
-
-                # get experiment and user ID
-                exp_id = self.lineEdit_exp_id.text()
-                user_id = self.frame_topBar.label_user_id.text()
-                
-                print(exp_id)
-                print(user_id)
-                
-                # @todo idea here: make predicter class inherit from QThread??
-				
-                # start image predictions
-                #self.predicter.start()
-                df = self.predicter.predictImage(path, file_id, exp_id, user_id)
-                
-                print("predicted")
-                print(df)
-				
-                row = len(self.models.model_animals.data)
-                count = len(df)
-				
-                print(row)
-                print(count)
-                
-                # insert data into model
-                self.models.model_animals.insertDfRows(row=row, 
-                                                      count=count, 
-                                                      df=df,
-                                                      image_path=path, 
-                                                      image_remark="", 
-                                                      experiment_id=exp_id, 
-                                                      user_id=user_id)
-
-                print("data inserted into model")
-
-                # update label displaying number of predicted images
-                num_imgs = int(self.label_nn_activation_number.text()) + 1
-                self.label_nn_activation_number.setText(str(num_imgs))
-				
-                print(num_imgs)
-	
-        else:
+        # check if there is a neural netowk
+        if self.predicter.neural_network is None:
             displayErrorMsg(
                 "Missing Neural Network", 
                 "Please specify a neural network on settings page.", 
                 "Error")
-    
+            return
+        
+        
+        # create a thread for the neural network  @todo
+        print("activated, net not none")
+        
+        # get image path list from photo viewer
+        img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+        
+        print("916: img_list created")
+        print(img_list)
+			
+        for path in img_list[0]:
+				
+            print("iterate over pathes")
+			
+            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+            
+            print(file_id)
+				
+            # predict only images that are not yet in the result file
+            #if not file_id in self.models.model_animals.data["file_id"].values:
+
+            # get experiment and user ID
+            exp_id = self.lineEdit_exp_id.text()
+            user_id = self.frame_topBar.label_user_id.text()
+            
+            print(exp_id)
+            print(user_id)
+            
+            # @todo idea here: make predicter class inherit from QThread??
+				
+            # start image predictions
+            #self.predicter.start()
+            df = self.predicter.predictImage(path, file_id, exp_id, user_id)
+            
+            print("predicted")
+            print(df)
+				
+            row = len(self.models.model_animals.data)
+            count = len(df)
+				
+            print(row)
+            print(count)
+            
+            # insert data into model
+            self.models.model_animals.insertDfRows(row=row, 
+                                                  count=count, 
+                                                  df=df,
+                                                  image_path=path, 
+                                                  image_remark="", 
+                                                  experiment_id=exp_id, 
+                                                  user_id=user_id)
+
+            print("data inserted into model")
+
+            # update label displaying number of predicted images
+            num_imgs = int(self.label_nn_activation_number.text()) + 1
+            self.label_nn_activation_number.setText(str(num_imgs))
+				
+            print(num_imgs)
+	   
     def onCheckPredictions(self):
         """ Handles the click on 'Check predictions on home screen' button by
         navigating to the home screen. """ 
@@ -1209,7 +1217,7 @@ class PageData(QtWidgets.QWidget):
         settings.setValue("date", self.calendarWidget.selectedDate())       
         settings.setValue("dataFilter", self.comboBox_image_filter.currentIndex())
         settings.setValue("imgDir", self.lineEdit_img_dir.text())       
-        settings.setValue("resultFile", self.lineEdit_output_dir.text())
+        settings.setValue("outDir", self.lineEdit_output_dir.text())
         settings.setValue("imgPrefix", self.lineEdit_img_prefix.text())
         settings.setValue("experimentId", self.lineEdit_exp_id.text())
         
@@ -1218,7 +1226,7 @@ class PageData(QtWidgets.QWidget):
         self.calendarWidget.setSelectedDate(settings.value("date"))
         self.comboBox_image_filter.setCurrentIndex(settings.value("dataFilter"))
         self.lineEdit_img_dir.setText(settings.value("imgDir"))
-        self.lineEdit_output_dir.setText(settings.value("resultFile"))
+        self.lineEdit_output_dir.setText(settings.value("outDir"))
         self.lineEdit_img_prefix.setText(settings.value("imgPrefix"))
         self.lineEdit_exp_id.setText(settings.value("experimentId"))
         
