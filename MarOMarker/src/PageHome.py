@@ -168,6 +168,7 @@ class PageHome(QtWidgets.QWidget):
 
     def showEvent(self, event):
         """" Reload the image when opening the home page. """
+        if len(self.photo_viewer.image_list) < 2: return
         if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list[0]):
             self.photo_viewer.loadImageFromIndex(self.photo_viewer.cur_image_index)
 
