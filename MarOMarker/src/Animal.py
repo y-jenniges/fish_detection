@@ -362,7 +362,7 @@ class Animal():
         """
         self.remark = remark
         
-        # adapt species in data model if there is an entry for this animal
+        # adapt remark in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
                 self.row_index, 'object_remarks'] = remark
@@ -442,22 +442,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.setTabOrder(self.comboBox_species, self.comboBox_remark)
         self.setTabOrder(self.comboBox_remark, self.spinBox_length)
         
-    def _initActions(self):
-        """ Function to connect signals and slots. """
-        # connecting signals and slots
-        self.spinBox_length.valueChanged.connect(self.onLengthSpinboxChanged)
-        self.comboBox_group.currentTextChanged.connect(self.onGroupComboboxChanged)
-        self.comboBox_species.currentTextChanged.connect(self.onSpeciesComboboxChanged)
-        self.comboBox_remark.currentTextChanged.connect(self.onRemarkComboboxChanged)
-        self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
-        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxReturnPressed)
-        
-        self.btn_group_fish.clicked.connect(partial(self._set_combobox_group_idx, 0))
-        self.btn_group_crustacea.clicked.connect(partial(self._set_combobox_group_idx, 1))
-        self.btn_group_chaetognatha.clicked.connect(partial(self._set_combobox_group_idx, 2))
-        self.btn_group_jellyfish.clicked.connect(partial(self._set_combobox_group_idx, 3))
-        self.btn_group_unidentified.clicked.connect(partial(self._set_combobox_group_idx, 4))
-    
     def _set_combobox_group_idx(self, idx):
         self.comboBox_group.setCurrentIndex(idx)
         
@@ -598,10 +582,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
                 self.animal.group = animal.group
                 
             # set species
-            if animal.species in AnimalSpecies.__members__.values(): 
-                self.animal.species = animal.species.name.title()
-            else:
-                self.animal.species = animal.species
+            self.animal.species = animal.species
     
             # set remark
             if animal.remark is not None:
@@ -646,7 +627,11 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         if index != -1:
             self.comboBox_species.blockSignals(True)
             self.comboBox_species.setCurrentIndex(index)
-            self.comboBox_species.blockSignals(False)       
+            self.comboBox_species.blockSignals(False)    
+        elif species != "" and species is not None:
+            # add new species entry
+            print("add new species entry")
+            self.models.addSpecies(species, "")
         
         # set remark combobox
         index = self.comboBox_remark.findText(remark) 
@@ -675,6 +660,22 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         else: 
             self.spinBox_length.setValue(0)
 
+    def _initActions(self):
+        """ Function to connect signals and slots. """
+        # connecting signals and slots
+        self.spinBox_length.valueChanged.connect(self.onLengthSpinboxChanged)
+        self.comboBox_group.currentTextChanged.connect(self.onGroupComboboxChanged)
+        self.comboBox_species.currentTextChanged.connect(self.onSpeciesComboboxChanged)
+        self.comboBox_remark.currentTextChanged.connect(self.onRemarkComboboxChanged)
+        self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
+        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxReturnPressed)
+        
+        self.btn_group_fish.clicked.connect(partial(self._set_combobox_group_idx, 0))
+        self.btn_group_crustacea.clicked.connect(partial(self._set_combobox_group_idx, 1))
+        self.btn_group_chaetognatha.clicked.connect(partial(self._set_combobox_group_idx, 2))
+        self.btn_group_jellyfish.clicked.connect(partial(self._set_combobox_group_idx, 3))
+        self.btn_group_unidentified.clicked.connect(partial(self._set_combobox_group_idx, 4))
+        
     def _initUi(self):
         """ Inits the UI. """
         self.setObjectName("animal_specs_widget")
