@@ -145,7 +145,7 @@ class Models():
         image_path: string
             Path to the image showing the species. Default is ""
         """
-        if species is not None and str(species) != "nan":
+        if species is not None and str(species) != "nan" and species != "":
             same_species = self.model_species.findItems(str(species))
             
             # add species if it is not already in the model
@@ -161,12 +161,11 @@ class Models():
             else:
                 # if there are multiple entries with same title, 
                 # add the one wich has an image
-                if same_species[0].icon() is None and image_path is not None:
-                    self.removeSpecies(self.model_species.indexFromIcon(
-                        same_species[0]))
+                if same_species[0].icon().isNull() and image_path is not None:
+                    row = self.model_species.indexFromItem(same_species[0]).row()
+                    self.removeSpecies(row)
                     self.addSpecies(species, image_path)
                     
-                
     def removeSpecies(self, row):
         """
         Removes a row from the species model.
@@ -177,6 +176,15 @@ class Models():
             Row to remove
         """
         title = self.model_species.item(row).text()
+
+        # only remove species if no animal in the table has this species
+        if (self.model_animals.data["species"] == title).any():
+            text = "Error: Cannot remove species"
+            information = "The species to be deleted is assigned to at least \
+            one animal. Hence, it cannot be removed."
+            window_title = "Species not removable"
+            Helpers.displayErrorMsg(text, information, window_title)
+            return
 
         # update dictionary and model
         self._dict_species = [i for i in self._dict_species 
