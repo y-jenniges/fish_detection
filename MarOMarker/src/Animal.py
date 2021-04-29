@@ -347,7 +347,7 @@ class Animal():
         if isinstance(species, AnimalSpecies):
             s = species.name.title()
         else:
-            s = species.title()
+            s = species
           
         self.species = s 
         
