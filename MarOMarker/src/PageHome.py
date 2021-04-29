@@ -130,11 +130,14 @@ class PageHome(QtWidgets.QWidget):
         else:
             self.btn_delete.setIcon(getIcon(":/icons/icons/bin_closed.png"))   
             
-        # adapt icon of match button
-        if self.is_match_animal_active:
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png")) 
-        else:
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
+        # adapt icon of match button depending on the displayed image
+        if self.photo_viewer.stackedWidget_imagearea.currentIndex() == 0:
+            self.btn_match.setIcon(QtGui.QIcon()) 
+        elif self.photo_viewer.stackedWidget_imagearea.currentIndex() == 1:
+            if self.is_match_animal_active:
+                self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png")) 
+            else:
+                self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
  
     def on_filter_clicked(self):
         """ !!! NOT IMPLEMENTED YET !!! 
