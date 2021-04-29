@@ -349,17 +349,20 @@ class PhotoViewer(QtWidgets.QWidget):
     def loadImageFromIndex(self, index):
         """ Loads image at index in the image list into all views 
         (i.e. L, R and LR). """
-        pathL = self.image_list[0][index]
-        pathR = self.image_list[1][index]
-        
-        if self.stackedWidget_imagearea.currentIndex() == 0:
-            if self.imageArea.animal_painter.image_ending == "*_L.jpg":
-                self.loadSingleImage(pathL, self.imageArea)
-            else:
-                self.loadSingleImage(pathR, self.imageArea)
-        elif self.stackedWidget_imagearea.currentIndex() == 1:
-            self.loadSingleImage(pathL, self.imageAreaLR.imageAreaL)
-            self.loadSingleImage(pathR, self.imageAreaLR.imageAreaR)
+        # only load image if the list is build and it has an entry at index
+        if len(self.image_list) == 2:
+            if index < len(self.image_list[0]) and index < len(self.image_list[1]):
+                pathL = self.image_list[0][index]
+                pathR = self.image_list[1][index]
+                
+                if self.stackedWidget_imagearea.currentIndex() == 0:
+                    if self.imageArea.animal_painter.image_ending == "*_L.jpg":
+                        self.loadSingleImage(pathL, self.imageArea)
+                    else:
+                        self.loadSingleImage(pathR, self.imageArea)
+                elif self.stackedWidget_imagearea.currentIndex() == 1:
+                    self.loadSingleImage(pathL, self.imageAreaLR.imageAreaL)
+                    self.loadSingleImage(pathR, self.imageAreaLR.imageAreaR)
         
     def loadImageFromPath(self, path, imageArea=None):
         # if LR view is active, update both image views, else only the current one
@@ -399,8 +402,11 @@ class PhotoViewer(QtWidgets.QWidget):
         # clear visuals
         imageArea.animal_painter.removeAll()
         
-        # update animal list
+        # clear animal list
         imageArea.animal_painter.animal_list.clear()
+        
+        # remove 'remove match' buttons from scene
+        imageArea.animal_painter.removeAllRemoveMatchBtns()
         
         # find current image in result file and draw all animals from it
         if self.models.model_animals.data is not None and path is not None:
