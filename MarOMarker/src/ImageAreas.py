@@ -283,7 +283,7 @@ class ImageAreaLR(QtWidgets.QWidget):
     
     def redrawSelection(self):   
         """ Finds the current animal (on the lastly active image area) and
-        updates the bounding boxes of it and of its match on the right image. """
+        updates the bounding boxes of it and of its match on the right image. """        
         if self.last_active == "*_L.jpg":
             imageArea = self.imageAreaL
             otherImageArea = self.imageAreaR
@@ -368,7 +368,7 @@ class ImageAreaLR(QtWidgets.QWidget):
                             return matching_animal
         return None
         
-    def redrawAnimalMatch(self, animal, image="L"):
+    def redrawAnimalMatch(self, image, animal):
         """
         Redraws the animal that is matched to the given animal (if existant). 
 
@@ -469,7 +469,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         painter.updateBoundingBoxes() 
         
         # redraw matching animal
-        self.redrawAnimalMatch(painter.cur_animal, image)
+        self.redrawAnimalMatch(image, painter.cur_animal)
     
     def handleMatching(self, image="L"):
         """ When the match mode is active, this function enables a different
