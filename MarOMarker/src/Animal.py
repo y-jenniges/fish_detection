@@ -344,12 +344,17 @@ class Animal():
         species : string
             New animal species.
         """
-        self.species = species
+        if isinstance(species, AnimalSpecies):
+            s = species.name.title()
+        else:
+            s = species.title()
+          
+        self.species = s 
         
         # adapt species in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
-                self.row_index, 'species'] = species
+                self.row_index, 'species'] = s
     
     def setRemark(self, remark):
         """
