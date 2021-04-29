@@ -3,9 +3,9 @@ import json
 import glob
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-from Helpers import TopFrame, MenuFrame, displayErrorMsg
+from Helpers import TopFrame, MenuFrame, displayErrorMsg, ProgressBar
 import PostProcessing as pp
-from Predicter import Predicter
+from Predicter import Predicter, PredictionWorker
 from DistanceMeasurer import DistanceMeasurer
 
 
@@ -191,7 +191,7 @@ class PageData(QtWidgets.QWidget):
         try:
             img_root_dir = self.parent().parent().page_settings.lineEdit_root_dir.text()
             date = self.calendarWidget.selectedDate().toString("yyyy_MM")
-            directory = img_root_dir + "/" + date + "/" #+ "/Rectified Images/" # @todo adapt default folder to "/Time-normized images/"
+            directory = img_root_dir + "/" + date + "/" 
             print(img_root_dir)
             print(directory)
             # enable frame to manipulate data properties
@@ -371,7 +371,7 @@ class PageData(QtWidgets.QWidget):
         return frame
     
     def _createFrameBtnLabelNumber(self, parent, frame_name, btn_name, 
-                                   label_text_name, label_nr_name):
+                                   label_text_name, label_nr_name, add_progressBar=False):
         """ Creates a frame with a button, a label and a number. """
         frame = QtWidgets.QFrame(parent)
         frame.setObjectName(frame_name)
@@ -391,7 +391,7 @@ class PageData(QtWidgets.QWidget):
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(btn.sizePolicy().hasHeightForWidth())
         btn.setSizePolicy(sizePolicy4)
-        btn.setMinimumSize(QtCore.QSize(0, 40))
+        btn.setMinimumSize(QtCore.QSize(500, 40))
 
         # label
         label_text = QtWidgets.QLabel(frame)
@@ -403,10 +403,14 @@ class PageData(QtWidgets.QWidget):
         
         # add widgets to layout
         layout.addWidget(btn)
-        
-        
         layout.addWidget(label_text)
         layout.addWidget(label_number)
+        
+        if add_progressBar:
+            progress = ProgressBar(parent)
+            progress.setMinimumWidth(100)
+            layout.addWidget(progress)
+            return frame, btn, label_text, label_number, progress
         
         return frame, btn, label_text, label_number
     
@@ -433,12 +437,14 @@ class PageData(QtWidgets.QWidget):
         # neural network activation row
         self.label_nn_activation = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.frame_nn_activation, self.btn_nn_activation, \
-        self.label_nn_activation_text, self.label_nn_activation_number \
+        self.label_nn_activation_text, self.label_nn_activation_number, \
+        self.progressBar_nn \
         = self._createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
                                          "frame_nn_activation",
                                           "btn_nn_activation", 
                                           "label_nn_activation", 
-                                          "label_nn_activation_number")
+                                          "label_nn_activation_number", 
+                                          True)
         frame_process_arrow2 = self._createFrameProcessArrow(self.scrollAreaWidgetContents)
         
         # prediction check row
@@ -473,8 +479,6 @@ class PageData(QtWidgets.QWidget):
                                           "label_check_match", 
                                           "label_check_match_number")
         frame_process_arrow5 = self._createFrameProcessArrow(self.scrollAreaWidgetContents)
-        
-        #self.frame_check_match.setEnabled(False) # @todo functionality needs to be implemented
         
         # length measurement row
         self.label_length_measurement = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -892,7 +896,7 @@ class PageData(QtWidgets.QWidget):
         self.layout_page_data.addWidget(self.frame_topBar)
         self.layout_page_data.addWidget(self.frame_controlBar)
         self.layout_page_data.addWidget(self.frame_data)
-    
+
     def _initActions(self):
         """ Function to initialize the actions on data page """
         self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
@@ -911,25 +915,29 @@ class PageData(QtWidgets.QWidget):
         self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
     
     def onNnFinished(self):
+        self.setEnabled(True)
+        
         # get prediction parameters
         df = self.predicter.df
-        img_list = self.predicter.image_list
-        exp_id = self.predicter.exp_id
+        image_pathes = self.predicter.image_pathes
+        experiment_id = self.predicter.experiment_id
         user_id = self.predicter.user_id
+        
+        print(df)
         
         # insert data into data model
         row = len(self.models.model_animals.data)
         count = len(df)
 
-        for path in img_list:
-                # insert data into model
-                self.models.model_animals.insertDfRows(row=row, 
-                                                       count=count, 
-                                                       df=df,
-                                                       image_path=path, 
-                                                       image_remark="", 
-                                                       experiment_id=exp_id, 
-                                                       user_id=user_id)
+        for path in image_pathes:
+            # insert data into model
+            self.models.model_animals.insertDfRows(row=row, 
+                                                   count=count, 
+                                                   df=df,
+                                                   image_path=path, 
+                                                   image_remark="", 
+                                                   experiment_id=experiment_id, 
+                                                   user_id=user_id)
 
         print("data inserted into model")
     
@@ -937,49 +945,17 @@ class PageData(QtWidgets.QWidget):
         # update label displaying number of predicted images
         self.label_nn_activation_number.setText(str(i))
         
+        # update progress bar
+        img_list = self.parent().parent().page_home.photo_viewer.image_list
+        num_images = len(img_list[0])
+        self.progressBar_nn.setValue(i/num_images*100)
+        
     def onNnActivated(self):
         """
         Handles the activation of the "run neural network" button.
         It gets the current image list from the photo viewer that it applies 
         the neural network to. It appends the new data to the data model.
         """
-        # --------------- new
-        # if self.predicter is not None:
-        #     # get image path list from photo viewer
-        #     img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-            
-        #     file_ids = []
-        #     # determine file IDs
-        #     for path in img_list:
-        #         file_ids.append(os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L"))
-                
-        #     # get experiment and user ID
-        #     exp_id = self.lineEdit_exp_id.text()
-        #     user_id = self.frame_topBar.label_user_id.text()
-            
-        #     # create a QThread and worker object
-        #     self.thread = QtCore.QThread()
-        #     #self.worker = Worker()
-            
-        #     # move worker to the thread
-        #     self.predicter.moveToThread(self.thread)
-            
-        #     # prepare prediction inputs
-        #     self.predicter.setInputsForPrediction(img_list, file_ids, exp_id, user_id)
-            
-        #     # connect signals and slots from thread to worker and vice versa
-        #     self.thread.started.connect(self.predicter.predictImageList)
-        #     self.thread.finished.connect(self.thread.deleteLater)
-            
-        #     self.predicter.finished.connect(self.thread.quit)
-        #     #self.predicter.finished.connect(self.predicter.deleteLater)    
-        #     self.predicter.progress.connect(self.onNnProgress)
-        
-        #     # start prediction           
-        #     self.thread.start()
-               
-        # --------------- new
-        
         # check if there is a valid input image directory
         if not os.path.isdir(self.lineEdit_img_dir.text()):
             text = "Error: Invalid image directory"
@@ -1003,6 +979,52 @@ class PageData(QtWidgets.QWidget):
                 "Please specify a neural network on settings page.", 
                 "Error")
             return
+        
+        
+        # --------------- new
+        if self.predicter is not None:
+            # reset progress bar
+            self.progressBar_nn.setValue(0)
+            
+            # get image path list from photo viewer
+            img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
+            
+            file_ids = []
+            # determine file IDs
+            for path in img_list[0]:
+                file_ids.append(os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L"))
+                
+            # get experiment and user ID
+            exp_id = self.lineEdit_exp_id.text()
+            user_id = self.frame_topBar.label_user_id.text()
+            
+            # create a QThread and worker object
+            self.thread = QtCore.QThread()
+            self.worker = PredictionWorker(self.predicter)
+            
+            # move worker to the thread
+            self.worker.moveToThread(self.thread)
+            
+            # prepare prediction inputs
+            self.worker.setInputsForPrediction(img_list[0], file_ids, exp_id, user_id)
+            
+            # connect signals and slots from thread to worker and vice versa
+            self.thread.started.connect(self.worker.predictImageList)
+            self.thread.finished.connect(self.thread.deleteLater)
+            
+            self.worker.finished.connect(self.onNnFinished)
+            self.worker.finished.connect(self.thread.quit)
+            self.worker.finished.connect(self.worker.deleteLater)    
+            self.worker.progress.connect(self.onNnProgress)
+        
+            # start prediction       
+            self.setEnabled(False)
+            self.thread.start()
+               
+        # --------------- new
+        return
+        
+
         
         
         # create a thread for the neural network  @todo

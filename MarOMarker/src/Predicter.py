@@ -39,6 +39,8 @@ class Predicter(QtCore.QObject):
         Neural network used for the predictions.
     class_weights:
         Class weights used by the neural network.
+    finished : pyqtSignal
+    progress : pyqtSignal
     """
     
     # define custom signals
@@ -286,7 +288,7 @@ class Predicter(QtCore.QObject):
             path = local_img_pathes[i]
             file_id = local_file_ids[i]
             prediction = self.predictImage(path, file_id, experiment_id, user_id)
-            df.append(prediction, file_id, experiment_id, user_id)
+            df = df.append(prediction, file_id, experiment_id, user_id)
             self.progress.emit(i+1)
         
         self.df = df
@@ -323,4 +325,31 @@ class Predicter(QtCore.QObject):
         self.file_ids = file_ids
         self.experiment_id = experiment_id
         self.user_id = user_id
-            
+
+#@todo docu            
+class PredictionWorker(QtCore.QObject):
+    # define custom signals
+    finished = QtCore.pyqtSignal() 
+    """ Signal emitted when the predicter finished predicting an image list. """
+    
+    progress = QtCore.pyqtSignal(int)
+    """ Signal emitted for every image from an image list that is already predicted. """
+    
+    def __init__(self, predicter):
+        super().__init__()
+        
+        self.predicter = predicter
+        self.predicter.finished.connect(self.predicterFinished)
+        self.predicter.progress.connect(self.predicterProgress)
+     
+    def predicterFinished(self):
+        self.finished.emit()
+    
+    def predicterProgress(self, i):
+        self.progress.emit(i)
+        
+    def predictImageList(self):
+        self.predicter.predictImageList()
+        
+    def setInputsForPrediction(self, image_pathes, file_ids, experiment_id="", user_id=""):
+        self.predicter.setInputsForPrediction(image_pathes, file_ids, experiment_id, user_id)

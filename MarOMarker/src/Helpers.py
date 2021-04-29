@@ -464,6 +464,21 @@ class TopFrame(QtWidgets.QFrame):
         horizontalLayout_34.addWidget(self.btn_user)
 
 
+ #@todo docu'       
+class ProgressBar(QtWidgets.QProgressBar):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("QProgressBar {\
+                                border: none; \
+                                border-radius: 3px;\
+                                font: 12pt \'Century Gothic\';\
+                                text-align: center;} \
+                           QProgressBar::chunk { \
+                                border: none; \
+                                border-radius: 3px;\
+                                background-color: rgb(0, 203, 221);}")
+
 
 class MenuFrame(QtWidgets.QFrame):
     """
