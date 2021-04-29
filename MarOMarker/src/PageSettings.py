@@ -1,12 +1,9 @@
 import json
 import os
-import numpy as np
 import pandas as pd
-import tensorflow as tf
 from PyQt5 import QtCore, QtGui, QtWidgets
 from TabWidget import TabWidget
 import Helpers
-import Losses
 
 class PageSettings(QtWidgets.QWidget):
     """ 

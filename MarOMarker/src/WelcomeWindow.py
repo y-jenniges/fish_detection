@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import json
 from PyQt5 import QtCore, QtGui, QtWidgets
 import Helpers
