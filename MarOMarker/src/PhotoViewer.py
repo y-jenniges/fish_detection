@@ -322,7 +322,7 @@ class PhotoViewer(QtWidgets.QWidget):
         """ Resizes image and animal positions when resize event occurs. """
         super().resizeEvent(event)
         if len(self.image_list) != 2: return
-        if self.cur_image_index < len(self.image_list[0]) or self.cur_image_index < len(self.image_list[1]): return
+        if self.cur_image_index >= len(self.image_list[0]) or self.cur_image_index >= len(self.image_list[1]): return
         
         pathL = self.image_list[0][self.cur_image_index]
         pathR = self.image_list[1][self.cur_image_index]
