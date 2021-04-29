@@ -64,8 +64,14 @@ class PageData(QtWidgets.QWidget):
         self.predicter = Predicter()
         
         # camera configuration @todo needs to be set to file used in settings and adaptable by the parameters that are set there
-        config_path = "config.json"
-
+        config_path = "config.json" # default camera config
+        self.onCameraConfigChanged(config_path)
+        
+        self.onCalenderSelectionChanged()
+     
+    def onCameraConfigChanged(self, config_path):
+        """ Loads a new camera configuration from a json file path. """
+        print("loadi loadi loadi cami config")
         # read camera config
         self.camera_config = {}
         with open(config_path, 'r') as f:
@@ -85,9 +91,10 @@ class PageData(QtWidgets.QWidget):
                                                  self.camera_config['mtx_R'], 
                                                  self.camera_config['dist_R'],
                                                  self.camera_config['R'], 
-                                                 self.camera_config['T'], IMAGE_SIZE)
+                                                 self.camera_config['T'], IMAGE_SIZE)       
         
-        self.onCalenderSelectionChanged()
+        # recalculate length of animals
+        self.onCalcLength()
         
     def onImageDirEditChanged(self, text=None, updateVisuals=True):
         """ Function to handle when the user changes the img_dir line edit """
@@ -1135,10 +1142,12 @@ class PageData(QtWidgets.QWidget):
         # @todo check if the coordinate rectification is correct
         print("calc length")
         
-        # get list of images to process (images of the current day)            
+        # get list of images to process (images of the current day)      
+        if self.parent().parent() is None: return
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
                 
         # iterate over images and measure length
+        if len(img_list) == 0: return
         for path in img_list[0]:                
             # get animals on current image
             file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")

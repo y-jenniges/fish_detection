@@ -1,3 +1,4 @@
+import json
 import os
 import numpy as np
 import pandas as pd
@@ -338,187 +339,187 @@ class PageSettings(QtWidgets.QWidget):
         self.btn_load.setObjectName("btn_load")
         
         # button for saving current camera config
-        self.btn_save = QtWidgets.QPushButton(frame_config)
-        self.btn_save.setMinimumSize(QtCore.QSize(125, 40))
-        self.btn_save.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.btn_save.setObjectName("btn_save")
+        # self.btn_save = QtWidgets.QPushButton(frame_config)
+        # self.btn_save.setMinimumSize(QtCore.QSize(125, 40))
+        # self.btn_save.setMaximumSize(QtCore.QSize(16777215, 40))
+        # self.btn_save.setObjectName("btn_save")
         
         # add widgets to layout
         layout_config.addWidget(self.lineEdit_config_path)
         layout_config.addWidget(self.btn_load)
-        layout_config.addWidget(self.btn_save)
+        #layout_config.addWidget(self.btn_save)
         
         
         # --- frame for offset options -------------------------------------- # 
-        frame_offset = QtWidgets.QFrame(frame_camera_options)
-        frame_offset.setMinimumSize(QtCore.QSize(0, 30))
-        frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_offset.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_offset.setObjectName("frame_offset")
+        # frame_offset = QtWidgets.QFrame(frame_camera_options)
+        # frame_offset.setMinimumSize(QtCore.QSize(0, 30))
+        # frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
+        # frame_offset.setFrameShape(QtWidgets.QFrame.NoFrame)
+        # frame_offset.setObjectName("frame_offset")
         
-        # layout
-        layout_offset = QtWidgets.QHBoxLayout(frame_offset)
-        layout_offset.setContentsMargins(0, 0, 0, 0)
-        layout_offset.setObjectName("layout_offset")
+        # # layout
+        # layout_offset = QtWidgets.QHBoxLayout(frame_offset)
+        # layout_offset.setContentsMargins(0, 0, 0, 0)
+        # layout_offset.setObjectName("layout_offset")
         
-        # label to display parameter name "offset"
-        self.label_offset = QtWidgets.QLabel(frame_offset)
-        self.label_offset.setObjectName("label_offset")
+        # # label to display parameter name "offset"
+        # self.label_offset = QtWidgets.QLabel(frame_offset)
+        # self.label_offset.setObjectName("label_offset")
         
-        # horizontal spacer
-        spacerItem29 = QtWidgets.QSpacerItem(40, 20, 
-                                             QtWidgets.QSizePolicy.Expanding, 
-                                             QtWidgets.QSizePolicy.Minimum)
+        # # horizontal spacer
+        # spacerItem29 = QtWidgets.QSpacerItem(40, 20, 
+        #                                      QtWidgets.QSizePolicy.Expanding, 
+        #                                      QtWidgets.QSizePolicy.Minimum)
              
-        # spin box for the offset
-        self.spinBox_offset = QtWidgets.QDoubleSpinBox(frame_offset)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-                                           QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.spinBox_offset.sizePolicy().hasHeightForWidth())
-        self.spinBox_offset.setSizePolicy(sizePolicy)
-        self.spinBox_offset.setMinimumSize(QtCore.QSize(200, 40))
-        self.spinBox_offset.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_offset.setAlignment(
-            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_offset.setMaximum(9999.99)
-        self.spinBox_offset.setObjectName("spinBox_offset")
+        # # spin box for the offset
+        # self.spinBox_offset = QtWidgets.QDoubleSpinBox(frame_offset)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+        #                                    QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(
+        #     self.spinBox_offset.sizePolicy().hasHeightForWidth())
+        # self.spinBox_offset.setSizePolicy(sizePolicy)
+        # self.spinBox_offset.setMinimumSize(QtCore.QSize(200, 40))
+        # self.spinBox_offset.setMaximumSize(QtCore.QSize(16777215, 40))
+        # self.spinBox_offset.setAlignment(
+        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        # self.spinBox_offset.setMaximum(9999.99)
+        # self.spinBox_offset.setObjectName("spinBox_offset")
         
-        # label to display the unit of the offset
-        self.label_unit_offset = QtWidgets.QLabel(frame_offset)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-                                           QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.label_unit_offset.sizePolicy().hasHeightForWidth())
-        self.label_unit_offset.setSizePolicy(sizePolicy)
-        self.label_unit_offset.setMinimumSize(QtCore.QSize(50, 0))
-        self.label_unit_offset.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.label_unit_offset.setObjectName("label_unit_offset")
+        # # label to display the unit of the offset
+        # self.label_unit_offset = QtWidgets.QLabel(frame_offset)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+        #                                    QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(
+        #     self.label_unit_offset.sizePolicy().hasHeightForWidth())
+        # self.label_unit_offset.setSizePolicy(sizePolicy)
+        # self.label_unit_offset.setMinimumSize(QtCore.QSize(50, 0))
+        # self.label_unit_offset.setMaximumSize(QtCore.QSize(50, 16777215))
+        # self.label_unit_offset.setObjectName("label_unit_offset")
              
-        # add widgets to layout
-        layout_offset.addWidget(self.label_offset)
-        layout_offset.addItem(spacerItem29)
-        layout_offset.addWidget(self.spinBox_offset)
-        layout_offset.addWidget(self.label_unit_offset)
+        # # add widgets to layout
+        # layout_offset.addWidget(self.label_offset)
+        # layout_offset.addItem(spacerItem29)
+        # layout_offset.addWidget(self.spinBox_offset)
+        # layout_offset.addWidget(self.label_unit_offset)
         
         
-        # --- frame for camera distance options ----------------------------- #
-        frame_distance_cameras = QtWidgets.QFrame(frame_camera_options)
-        frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
-        frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_distance_cameras.setFrameShape(QtWidgets.QFrame.NoFrame)
-        frame_distance_cameras.setObjectName("frame_distance_cameras")
+        # # --- frame for camera distance options ----------------------------- #
+        # frame_distance_cameras = QtWidgets.QFrame(frame_camera_options)
+        # frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
+        # frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
+        # frame_distance_cameras.setFrameShape(QtWidgets.QFrame.NoFrame)
+        # frame_distance_cameras.setObjectName("frame_distance_cameras")
         
-        # layout
-        layout_distance = QtWidgets.QHBoxLayout(frame_distance_cameras)
-        layout_distance.setContentsMargins(0, 0, 0, 0)
-        layout_distance.setObjectName("layout_distance")
+        # # layout
+        # layout_distance = QtWidgets.QHBoxLayout(frame_distance_cameras)
+        # layout_distance.setContentsMargins(0, 0, 0, 0)
+        # layout_distance.setObjectName("layout_distance")
         
-        # label to display parameter name "distance between cameras"
-        self.label_distance_cameras = QtWidgets.QLabel(frame_distance_cameras)
-        self.label_distance_cameras.setObjectName("label_distance_cameras")
+        # # label to display parameter name "distance between cameras"
+        # self.label_distance_cameras = QtWidgets.QLabel(frame_distance_cameras)
+        # self.label_distance_cameras.setObjectName("label_distance_cameras")
               
-        # horizontal spacer
-        spacerItem30 = QtWidgets.QSpacerItem(40, 20, 
-                                             QtWidgets.QSizePolicy.Expanding, 
-                                             QtWidgets.QSizePolicy.Minimum)
+        # # horizontal spacer
+        # spacerItem30 = QtWidgets.QSpacerItem(40, 20, 
+        #                                      QtWidgets.QSizePolicy.Expanding, 
+        #                                      QtWidgets.QSizePolicy.Minimum)
         
-        # spin box for the distance between the cameras
-        self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(frame_distance_cameras)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-                                           QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.spinBox_distance_cameras.sizePolicy().hasHeightForWidth())
-        self.spinBox_distance_cameras.setSizePolicy(sizePolicy)
-        self.spinBox_distance_cameras.setMinimumSize(QtCore.QSize(200, 40))
-        self.spinBox_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_distance_cameras.setAlignment(
-            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_distance_cameras.setMaximum(9999.99)
-        self.spinBox_distance_cameras.setObjectName("spinBox_distance_cameras")
+        # # spin box for the distance between the cameras
+        # self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(frame_distance_cameras)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+        #                                    QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(
+        #     self.spinBox_distance_cameras.sizePolicy().hasHeightForWidth())
+        # self.spinBox_distance_cameras.setSizePolicy(sizePolicy)
+        # self.spinBox_distance_cameras.setMinimumSize(QtCore.QSize(200, 40))
+        # self.spinBox_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 40))
+        # self.spinBox_distance_cameras.setAlignment(
+        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        # self.spinBox_distance_cameras.setMaximum(9999.99)
+        # self.spinBox_distance_cameras.setObjectName("spinBox_distance_cameras")
         
-        # label to display the unit of the distance between the cameras
-        self.label_unit_ditance_cameras = QtWidgets.QLabel(frame_distance_cameras)
-        self.label_unit_ditance_cameras.setMinimumSize(QtCore.QSize(50, 0))
-        self.label_unit_ditance_cameras.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.label_unit_ditance_cameras.setObjectName("label_unit_ditance_cameras")
+        # # label to display the unit of the distance between the cameras
+        # self.label_unit_ditance_cameras = QtWidgets.QLabel(frame_distance_cameras)
+        # self.label_unit_ditance_cameras.setMinimumSize(QtCore.QSize(50, 0))
+        # self.label_unit_ditance_cameras.setMaximumSize(QtCore.QSize(50, 16777215))
+        # self.label_unit_ditance_cameras.setObjectName("label_unit_ditance_cameras")
         
-        # add widgets to layout
-        layout_distance.addWidget(self.label_distance_cameras)
-        layout_distance.addItem(spacerItem30)
-        layout_distance.addWidget(self.spinBox_distance_cameras)
-        layout_distance.addWidget(self.label_unit_ditance_cameras)
+        # # add widgets to layout
+        # layout_distance.addWidget(self.label_distance_cameras)
+        # layout_distance.addItem(spacerItem30)
+        # layout_distance.addWidget(self.spinBox_distance_cameras)
+        # layout_distance.addWidget(self.label_unit_ditance_cameras)
         
         
-        # --- frame for distance chip lense options ------------------------- #
-        frame_distance_chip_lense = QtWidgets.QFrame(frame_camera_options)
-        frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
-        frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
-        frame_distance_chip_lense.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        frame_distance_chip_lense.setFrameShadow(QtWidgets.QFrame.Raised)
-        frame_distance_chip_lense.setObjectName("frame_distance_chip_lense")
+        # # --- frame for distance chip lense options ------------------------- #
+        # frame_distance_chip_lense = QtWidgets.QFrame(frame_camera_options)
+        # frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
+        # frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
+        # frame_distance_chip_lense.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        # frame_distance_chip_lense.setFrameShadow(QtWidgets.QFrame.Raised)
+        # frame_distance_chip_lense.setObjectName("frame_distance_chip_lense")
         
-        # layout
-        layout_distance_cl = QtWidgets.QHBoxLayout(frame_distance_chip_lense)
-        layout_distance_cl.setContentsMargins(0, 0, 0, 0)
-        layout_distance_cl.setObjectName("layout_distance_cl")
+        # # layout
+        # layout_distance_cl = QtWidgets.QHBoxLayout(frame_distance_chip_lense)
+        # layout_distance_cl.setContentsMargins(0, 0, 0, 0)
+        # layout_distance_cl.setObjectName("layout_distance_cl")
         
-        # label to display name of parameter "distance between chip and lense"
-        self.label_distance_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
-        self.label_distance_chip_lense.setObjectName("label_distance_chip_lense")
+        # # label to display name of parameter "distance between chip and lense"
+        # self.label_distance_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
+        # self.label_distance_chip_lense.setObjectName("label_distance_chip_lense")
  
-        # horizontal spacer
-        spacerItem31 = QtWidgets.QSpacerItem(40, 20, 
-                                             QtWidgets.QSizePolicy.Expanding, 
-                                             QtWidgets.QSizePolicy.Minimum)
+        # # horizontal spacer
+        # spacerItem31 = QtWidgets.QSpacerItem(40, 20, 
+        #                                      QtWidgets.QSizePolicy.Expanding, 
+        #                                      QtWidgets.QSizePolicy.Minimum)
 
-        # spin box for the distance between chip and lense
-        self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(frame_distance_chip_lense)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-                                           QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.spinBox_distance_chip_lense.sizePolicy().hasHeightForWidth())
-        self.spinBox_distance_chip_lense.setSizePolicy(sizePolicy)
-        self.spinBox_distance_chip_lense.setMinimumSize(QtCore.QSize(200, 40))
-        self.spinBox_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 40))
-        self.spinBox_distance_chip_lense.setAlignment(
-            QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.spinBox_distance_chip_lense.setMaximum(99999.99)
-        self.spinBox_distance_chip_lense.setObjectName("spinBox_distance_chip_lense")
+        # # spin box for the distance between chip and lense
+        # self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(frame_distance_chip_lense)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
+        #                                    QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(
+        #     self.spinBox_distance_chip_lense.sizePolicy().hasHeightForWidth())
+        # self.spinBox_distance_chip_lense.setSizePolicy(sizePolicy)
+        # self.spinBox_distance_chip_lense.setMinimumSize(QtCore.QSize(200, 40))
+        # self.spinBox_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 40))
+        # self.spinBox_distance_chip_lense.setAlignment(
+        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        # self.spinBox_distance_chip_lense.setMaximum(99999.99)
+        # self.spinBox_distance_chip_lense.setObjectName("spinBox_distance_chip_lense")
         
-        # label to display the unit of the distance between chip and lense
-        self.label_unit_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
-                                           QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.label_unit_chip_lense.sizePolicy().hasHeightForWidth())
-        self.label_unit_chip_lense.setSizePolicy(sizePolicy)
-        self.label_unit_chip_lense.setMinimumSize(QtCore.QSize(50, 0))
-        self.label_unit_chip_lense.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.label_unit_chip_lense.setObjectName("label_unit_chip_lense")
+        # # label to display the unit of the distance between chip and lense
+        # self.label_unit_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+        #                                    QtWidgets.QSizePolicy.Preferred)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(
+        #     self.label_unit_chip_lense.sizePolicy().hasHeightForWidth())
+        # self.label_unit_chip_lense.setSizePolicy(sizePolicy)
+        # self.label_unit_chip_lense.setMinimumSize(QtCore.QSize(50, 0))
+        # self.label_unit_chip_lense.setMaximumSize(QtCore.QSize(50, 16777215))
+        # self.label_unit_chip_lense.setObjectName("label_unit_chip_lense")
         
-        # add widgets to layout
-        layout_distance_cl.addWidget(self.label_distance_chip_lense)
-        layout_distance_cl.addItem(spacerItem31)
-        layout_distance_cl.addWidget(self.spinBox_distance_chip_lense)
-        layout_distance_cl.addWidget(self.label_unit_chip_lense)
+        # # add widgets to layout
+        # layout_distance_cl.addWidget(self.label_distance_chip_lense)
+        # layout_distance_cl.addItem(spacerItem31)
+        # layout_distance_cl.addWidget(self.spinBox_distance_chip_lense)
+        # layout_distance_cl.addWidget(self.label_unit_chip_lense)
         
         
         # --- adding widgets to content (camera options) and main frame ----- #
         layout_camera_options.addWidget(frame_config)
-        layout_camera_options.addWidget(frame_offset)
-        layout_camera_options.addWidget(frame_distance_cameras)
-        layout_camera_options.addWidget(frame_distance_chip_lense)
+        #layout_camera_options.addWidget(frame_offset)
+        #layout_camera_options.addWidget(frame_distance_cameras)
+        #layout_camera_options.addWidget(frame_distance_chip_lense)
         layout_camera_options.addItem(spacerItem32)
         
         layout.addWidget(frame_camera_options, 0, 0, 1, 1)
@@ -904,10 +905,10 @@ class PageSettings(QtWidgets.QWidget):
         # camera tab      
         self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
         self.btn_load.clicked.connect(self.browse_config)
-        self.btn_save.clicked.connect(self.save_config)       
-        self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
-        self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
-        self.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
+        #self.btn_save.clicked.connect(self.save_config)       
+        #self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
+        #self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
+        #self.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
         
         # neural net tab
         self.btn_browse_nn.clicked.connect(self.browse_for_nn)
@@ -933,7 +934,7 @@ class PageSettings(QtWidgets.QWidget):
 
     def browse_config(self):
         """ Opens an explorer window with the option to browse for CSV files. """
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
         self.apply_configFile(filename[0])
    
     def apply_configFile(self, path):
@@ -941,22 +942,27 @@ class PageSettings(QtWidgets.QWidget):
         the values on th GUI accordingly. """
         # check if path is valid
         if path != "" and os.path.isfile(path): 
-            df = pd.read_csv(path)
+            #df = pd.read_csv(path)
+            with open(path) as f:
+                data = json.load(f)
         
             # check format of file
-            if(self.check_config_format(df)):
+            if(self.check_config_format(data)):
                 # save old values of spinBoxes
-                self.spinBox_offset_oldValue = self.spinBox_offset.value()
-                self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-                self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
+                # self.spinBox_offset_oldValue = self.spinBox_offset.value()
+                # self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
+                # self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
                 
                 # set the respective spinBox values
-                self.spinBox_offset.setValue(df["y-offset"][0])
-                self.spinBox_distance_cameras.setValue(df["camera-distance"][0])
-                self.spinBox_distance_chip_lense.setValue(df["chip-distance"][0])
+                # self.spinBox_offset.setValue(data["y-offset"][0])
+                # self.spinBox_distance_cameras.setValue(data["camera-distance"][0])
+                # self.spinBox_distance_chip_lense.setValue(data["chip-distance"][0])
                 
                 # display the path to the file in the respective lineEdit
                 self.lineEdit_config_path.setText(path)
+                
+                # tell the data page about the change
+                self.parent().parent().page_data.onCameraConfigChanged(path)
             
             else:
                 msg = QtWidgets.QMessageBox()
@@ -964,22 +970,29 @@ class PageSettings(QtWidgets.QWidget):
                 msg.setText("File Format Error")
                 msg.setInformativeText(
                     "The given CSV file is not in the required format. Please "+\
-                    "make sure that it has the following columns with the correct "+\
-                    "data types:\n   'y-offset' (int64) \n   'camera-distance' (float64) \n   'chip-distance' (int64)")
+                    "make sure that it has the following keys: \n"
+                    "   'mtx_L' (left camera matrix) \n   'dist_L' (distance matrix of left camera) \n   'mtx_R' (right camera matrix) \n   'dist_R' (distance matrix of right camera) \n   'R' (rotation matrix) \n   'T' (translation matrix)")
                 msg.setWindowTitle("Error")
                 msg.exec_()  
             
         
-    def check_config_format(self, df_config):
+    def check_config_format(self, config_data):
         """ Checks if the necessary columns are present in the given camera
         config dataframe. """
-        # check if the necessary columns are present in the dataframe
-        if "y-offset" in df_config.columns \
-        and "camera-distance" in df_config.columns \
-        and "chip-distance" in df_config.columns:
-            return True
-        else:
-            return False
+        # check if json file has necessary keys
+        to_check = ["mtx_L", "dist_L", "mtx_R", "dist_R", "R", "T"]
+        for attribute in to_check:
+            if attribute not in config_data: return False
+        
+        return True
+        
+        # # check if the necessary columns are present in the dataframe
+        # if "y-offset" in df_config.columns \
+        # and "camera-distance" in df_config.columns \
+        # and "chip-distance" in df_config.columns:
+        #     return True
+        # else:
+        #     return False
         
     def save_config(self):
         """ Opens a 'Save file' dialogue to save the current settings of the

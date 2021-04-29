@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import json
 from PyQt5 import QtCore, QtGui, QtWidgets
 import Helpers
 """ Module for displaying content to first-time users. """
@@ -179,7 +180,7 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.lineEdit_user_id.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"User ID...", None))
         self.lineEdit_user_id.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow",u"User ID = first letter of first name + first letter of last name", None))
         
-        self.label_choose_config.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Choose a camera configuration file.", None))
+        self.label_choose_config.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Choose a camera configuration file (json format).", None))
         self.lineEdit_config.setText("")
         self.lineEdit_config.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file...", None))
         self.lineEdit_config.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file", None))
@@ -197,15 +198,16 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         """ Opens a file explorer to browse for a camera configuration file
         and adapts the config path on settings page accordingly. """
         if self.main_window is not None:
-            filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.csv")
+            filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
             path = filename[0]
             
             # check if path is valid
             if path != "" and os.path.isfile(path): 
-                df = pd.read_csv(path)
+                with open(path) as file:
+                    data = json.load(file)
             
                 # check format of file
-                if(self.main_window.page_settings.check_config_format(df)):
+                if(self.main_window.page_settings.check_config_format(data)):
                     self.lineEdit_config.setText(path)
                     self.main_window.page_settings.apply_configFile(path)
                     
