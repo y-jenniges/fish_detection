@@ -973,7 +973,13 @@ class PageData(QtWidgets.QWidget):
                
         # --------------- new
         
-        
+        # check if there is a valid output directory
+        if not os.path.isdir(self.lineEdit_output_dir.text()):
+            text = "Error: Missing output directory"
+            information = "Please specify the output directory beside the calendar on the data page."
+            windowTitle = "Missing output directory"
+            displayErrorMsg(text, information, windowTitle)
+            return
         
         # if neural netowk is not None
         if self.predicter.neural_network is not None:
