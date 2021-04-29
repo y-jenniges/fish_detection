@@ -161,7 +161,7 @@ class Models():
             else:
                 # if there are multiple entries with same title, 
                 # add the one wich has an image
-                if same_species[0].icon().isNull() and image_path is not None:
+                if same_species[0].icon().isNull() and image_path is not None and image_path != "":
                     row = self.model_species.indexFromItem(same_species[0]).row()
                     self.removeSpecies(row)
                     self.addSpecies(species, image_path)
