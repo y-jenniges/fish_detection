@@ -144,9 +144,10 @@ class AnimalPainter(QtCore.QObject):
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
-            # redraw ID
-            self.imageArea._scene.removeItem(self.cur_animal.id_visual)
-            self.drawAnimalIdRemoveBtn(self.cur_animal)
+            # redraw ID and 'remove match' button if match mode is active
+            if hasattr(self.imageArea.parent().parent().parent().parent().parent, "is_match_animal_active"):
+                self.imageArea._scene.removeItem(self.cur_animal.id_visual)
+                self.drawAnimalIdRemoveBtn(self.cur_animal)
             
             self.propertyChanged.emit(self.cur_animal)   
      
