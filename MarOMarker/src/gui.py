@@ -153,14 +153,16 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         # save image data, update CSV output file
         index = self.page_home.photo_viewer.cur_image_index
-        if index < len(self.page_home.photo_viewer.image_list[0]):        
-            cur_file_id = os.path.basename(
-                self.page_home.photo_viewer.image_list[0][index])[:-6]
-            output_dir = self.page_data.lineEdit_output_dir.text()
-            res_file_name = self.getResultFileName()
-            self.models.model_animals.exportToCsv(output_dir=output_dir,
-                                                  filename=res_file_name,
-                                                  file_id=cur_file_id)
+        
+        if len(self.page_home.photo_viewer.image_list) == 2:
+            if index < len(self.page_home.photo_viewer.image_list[0]):        
+                cur_file_id = os.path.basename(
+                    self.page_home.photo_viewer.image_list[0][index])[:-6]
+                output_dir = self.page_data.lineEdit_output_dir.text()
+                res_file_name = self.getResultFileName()
+                self.models.model_animals.exportToCsv(output_dir=output_dir,
+                                                      filename=res_file_name,
+                                                      file_id=cur_file_id)
 
         # close table window
         if self.window_table is not None:
