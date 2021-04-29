@@ -806,16 +806,22 @@ class AnimalPainter(QtCore.QObject):
                             self.models.model_animals.data.loc[animal.row_index, "LY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LX2"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1     
+                            match = self.imageArea.parent().parent().findAnimalMatch(animal, "L")
                             
                         elif self.image_ending == "*_R.jpg":
                             self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY2"] = -1
+                            match = self.imageArea.parent().parent().findAnimalMatch(animal, "R")
                         
-                        # if the match mode is active, we need to update the ID and bounding box of the matching animal too
-                        if is_match_animal_active:
-                            self.imageArea.parent().parent().redrawSelection()
+                        # reset length of matching animal
+                        match.setLength(0)
+                        self.models.model_animals.data.loc[animal.row_index, "length"] = -1 #@todo how to update visual???
+                        
+                        # update the visuals of the matching animal too
+                        self.imageArea.parent().parent().redrawSelection()
+                            
                     else:  
                         # if animal has only left OR right coordinates, remove
                         # complete data row
