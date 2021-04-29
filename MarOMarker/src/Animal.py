@@ -623,7 +623,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_group.blockSignals(False)
 
         # set species combobox
-        index = self.comboBox_species.findText(species) 
+        index = self.comboBox_species.findText(str(species)) 
         if index != -1:
             self.comboBox_species.blockSignals(True)
             self.comboBox_species.setCurrentIndex(index)
@@ -631,7 +631,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         elif species != "" and species is not None:
             # add new species entry
             print("add new species entry")
-            self.models.addSpecies(species, "")
+            self.models.addSpecies(str(species), "")
         
         # set remark combobox
         index = self.comboBox_remark.findText(remark) 
