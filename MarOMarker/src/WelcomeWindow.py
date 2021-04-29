@@ -112,6 +112,33 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         input_validator = QtGui.QRegExpValidator(reg_ex, self.lineEdit_user_id)
         self.lineEdit_user_id.setValidator(input_validator)
         
+        # label to requesto to choose an image root directory
+        self.label_choose_root_dir = QtWidgets.QLabel(self.centralwidget)
+        self.label_choose_root_dir.setObjectName(u"label_choose_root_dir")
+        
+        # frame containing the config line edit and browse button
+        self.frame_root_dir = QtWidgets.QFrame(self.centralwidget)
+        self.frame_root_dir.setObjectName(u"frame_root_dir")
+        self.frame_root_dir.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.layout_root_dir = QtWidgets.QHBoxLayout(self.frame_root_dir)
+        self.layout_root_dir.setObjectName(u"layout_root_dir")
+        self.layout_root_dir.setContentsMargins(0, 0, 0, 0)
+        self.lineEdit_root_dir = QtWidgets.QLineEdit(self.frame_root_dir)
+        self.lineEdit_root_dir.setObjectName(u"lineEdit_root_dir")
+        self.lineEdit_root_dir.setMinimumSize(QtCore.QSize(0, 40))
+        self.lineEdit_root_dir.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.lineEdit_root_dir.setReadOnly(True)
+
+        # button to browse for a camera config file
+        self.btn_browse_root_dir = QtWidgets.QPushButton(self.frame_root_dir)
+        self.btn_browse_root_dir.setObjectName(u"btn_browse_root_dir")
+        self.btn_browse_root_dir.setMinimumSize(QtCore.QSize(80, 40))
+        self.btn_browse_root_dir.setMaximumSize(QtCore.QSize(80, 40))
+        
+        self.layout_root_dir.addWidget(self.lineEdit_root_dir)
+        self.layout_root_dir.addWidget(self.btn_browse_root_dir)
+        
+        
         # label to request to choose a camera configuration file
         self.label_choose_config = QtWidgets.QLabel(self.centralwidget)
         self.label_choose_config.setObjectName(u"label_choose_config")
@@ -162,6 +189,8 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.verticalLayout.addWidget(self.label_fill_in)
         self.verticalLayout.addWidget(self.label_enter_id)
         self.verticalLayout.addWidget(self.lineEdit_user_id)
+        self.verticalLayout.addWidget(self.label_choose_root_dir)
+        self.verticalLayout.addWidget(self.frame_root_dir)
         self.verticalLayout.addWidget(self.label_choose_config)
         self.verticalLayout.addWidget(self.frame_cam_config)
         self.verticalLayout.addWidget(self.frame)
@@ -185,9 +214,29 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.lineEdit_config.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file...", None))
         self.lineEdit_config.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to camera configuration file", None))
         
+        self.btn_browse_root_dir.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Browse", None))
         self.btn_browse_config.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Browse", None))
         self.btn_ok.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"OK", None))
            
+        self.label_choose_root_dir.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Choose an image root directory.", None))
+        self.lineEdit_root_dir.setText("")
+        self.lineEdit_root_dir.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to image root directory...", None))
+        self.lineEdit_root_dir.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to directory containing folders named YYYY_MM that contain the photos.", None))
+    
+    def onBrowseRootDir(self):
+        """ Function that opens a dialog for the user to select an image root
+        directory. """ 
+        filename = QtWidgets.QFileDialog.getExistingDirectory(
+            self, self.tr("Select image root directory"), "", 
+            QtWidgets.QFileDialog.ShowDirsOnly)
+        
+        print(f"WelcomeWindow: onBrowseRootDir {filename}")
+        
+        if len(filename) > 0: 
+            if os.path.isdir(filename):
+                self.lineEdit_root_dir.setText(filename)
+                self.main_window.page_settings.lineEdit_root_dir.setText(filename)
+    
     def onUserIdChanged(self, text):
         """ Handles when user ID is changed. It adaptes the user ID on 
         settings page. """
@@ -218,13 +267,18 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         # check if user ID is entered
         if self.lineEdit_user_id.text() != "":
             # check if config file is selected
-            if self.lineEdit_config.text() != "" and os.path.isfile(
-                    self.lineEdit_config.text()):
-                # close welcome window
-                self.close()
-                
-                # enable main window
-                self.main_window.setEnabled(True)
+            if self.lineEdit_config.text() != "" and os.path.isfile(self.lineEdit_config.text()):
+                if self.lineEdit_root_dir.text() != "" and os.path.isdir(self.lineEdit_root_dir.text()):
+                    # close welcome window
+                    self.close()
+                    
+                    # enable main window
+                    self.main_window.setEnabled(True)
+                else:
+                    Helpers.displayErrorMsg(
+                    "Invalid Image Root Directory", 
+                    "Please specify a valid image root directory.", 
+                    "Error")
             else:
                 Helpers.displayErrorMsg(
                     "Invalid Camera Configuration", 
@@ -240,6 +294,7 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         
     def _initActions(self):
         """ Init actions for the window. """
+        self.btn_browse_root_dir.clicked.connect(self.onBrowseRootDir)
         self.btn_browse_config.clicked.connect(self.onBrowseConfig)
         self.btn_ok.clicked.connect(self.onOk)
         
