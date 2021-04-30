@@ -906,21 +906,16 @@ class PageData(QtWidgets.QWidget):
         img_list = self.parent().parent().page_home.photo_viewer.image_list
         num_images = len(img_list[0])
         self.progressBar_nn.setValue(i/num_images*100)
-        
-    def onNnActivated(self):
-        """
-        Handles the activation of the "run neural network" button.
-        It gets the current image list from the photo viewer that it applies 
-        the neural network to (in a separate thread). It appends the new data 
-        to the data model.
-        """
+    
+    def areInputOutputDirsValid(self): 
+        """ Checks if there is a valid image input directory and output directory. """
         # check if there is a valid input image directory
         if not os.path.isdir(self.lineEdit_img_dir.text()):
             text = "Error: Invalid image directory"
             information = "Please specify a valid image directory beside the calendar on the data page."
             windowTitle = "Invalid image directory"
             displayErrorMsg(text, information, windowTitle)
-            return
+            return False
         
         # check if there is a valid output directory
         if not os.path.isdir(self.lineEdit_output_dir.text()):
@@ -928,7 +923,19 @@ class PageData(QtWidgets.QWidget):
             information = "Please specify the output directory beside the calendar on the data page."
             windowTitle = "Missing output directory"
             displayErrorMsg(text, information, windowTitle)
-            return
+            return False
+        
+        return True
+        
+    def onNnActivated(self):
+        """
+        Handles the activation of the "run neural network" button.
+        It gets the current image list from the photo viewer that it applies 
+        the neural network to (in a separate thread). It appends the new data 
+        to the data model.
+        """       
+        # check for input and output directories
+        if not self.areInputOutputDirsValid(): return
         
         # check if there is a neural netowk
         if self.predicter.neural_network is None:
@@ -991,6 +998,8 @@ class PageData(QtWidgets.QWidget):
         determines the positions of the respective animal on the right image
         using block matching. 
         """
+        # check for input and output directories
+        if not self.areInputOutputDirsValid(): return
         
         # reset progress bar and label
         self.progressBar_rectify_match.setValue(0)
