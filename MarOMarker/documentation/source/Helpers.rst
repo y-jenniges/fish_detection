@@ -37,6 +37,12 @@ Helper functions and classes for displaying purposes.
     :undoc-members:
     :show-inheritance:
 	
+``ProgressBar`` class
+*****************************
+.. autoclass:: Helpers.ProgressBar
+    :members:
+    :undoc-members:
+    :show-inheritance:
 	
 Functions
 **************
