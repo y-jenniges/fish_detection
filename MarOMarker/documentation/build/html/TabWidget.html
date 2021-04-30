@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TabWidget &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Welcome Content" href="WelcomeWindow.html" />
+    <link rel="prev" title="Table Window" href="TableWindow.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tabwidget">
+<h1>TabWidget<a class="headerlink" href="#tabwidget" title="Permalink to this headline">¶</a></h1>
+<p>This module provides a custom tab widget that enables tabs on the side with
+vertical text.
+The implementaion was taken from
+<a class="reference external" href="https://www.manongdao.com/q-367474.html">https://www.manongdao.com/q-367474.html</a> (last access: 11.08.2020)</p>
+<div class="section" id="tabwidget-class">
+<h2><code class="docutils literal notranslate"><span class="pre">TabWidget</span></code> class<a class="headerlink" href="#tabwidget-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="TabWidget.TabWidget">
+<em class="property">class </em><code class="sig-prename descclassname">TabWidget.</code><code class="sig-name descname">TabWidget</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#TabWidget.TabWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QTabWidget</span></code></p>
+<p>A custom tab widget that uses the custom TabBar to display tabs on
+the left side but with horizontal text (default is vertical text).</p>
+<dl class="simple">
+<dt>Taken from:</dt><dd><p><a class="reference external" href="https://www.manongdao.com/q-367474.html">https://www.manongdao.com/q-367474.html</a> (last access: 11.08.2020)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="imagearea-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ImageArea</span></code> class<a class="headerlink" href="#imagearea-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="TabWidget.TabBar">
+<em class="property">class </em><code class="sig-prename descclassname">TabWidget.</code><code class="sig-name descname">TabBar</code><a class="headerlink" href="#TabWidget.TabBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QTabBar</span></code></p>
+<p>A custom QTabBar that displays the tabs on the left side but with
+horizontal text (usually it is vertical).</p>
+<dl class="simple">
+<dt>Taken from:</dt><dd><p><a class="reference external" href="https://www.manongdao.com/q-367474.html">https://www.manongdao.com/q-367474.html</a> (last access: 11.08.2020)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="TabWidget.TabBar.paintEvent">
+<code class="sig-name descname">paintEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QPaintEvent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#TabWidget.TabBar.paintEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="TabWidget.TabBar.tabSizeHint">
+<code class="sig-name descname">tabSizeHint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; QSize<a class="headerlink" href="#TabWidget.TabBar.tabSizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TabWidget</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tabwidget-class"><code class="docutils literal notranslate"><span class="pre">TabWidget</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#imagearea-class"><code class="docutils literal notranslate"><span class="pre">ImageArea</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="TableWindow.html" title="previous chapter">Table Window</a></li>
+      <li>Next: <a href="WelcomeWindow.html" title="next chapter">Welcome Content</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/TabWidget.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

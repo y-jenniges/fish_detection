@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predicter &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Table Window" href="TableWindow.html" />
+    <link rel="prev" title="Post Processing" href="PostProcessing.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="predicter">
+<h1>Predicter<a class="headerlink" href="#predicter" title="Permalink to this headline">¶</a></h1>
+<p>Handles the process of animal group and position prediction.</p>
+<div class="section" id="predicter-class">
+<h2><code class="docutils literal notranslate"><span class="pre">Predicter</span></code> class<a class="headerlink" href="#predicter-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Predicter.Predicter">
+<em class="property">class </em><code class="sig-prename descclassname">Predicter.</code><code class="sig-name descname">Predicter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">neural_network_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">class_weights</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.Predicter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtCore.QObject</span></code></p>
+<p>Class that handles the complete prediction process. First, animal posisions
+and groups on an image are predicted with a neural network. The
+generated location heatmaps are then focused into single points. Then,
+heads and tails are matched.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#Predicter.Predicter.finished" title="Predicter.Predicter.finished"><strong>finished</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#Predicter.Predicter.progress" title="Predicter.Predicter.progress"><strong>progress</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><strong>neural_network</strong> (<em>keras model</em>) – Neural network used for the predictions.</p></li>
+<li><p><strong>class_weights</strong> – Class weights used by the neural network.</p></li>
+<li><p><a class="reference internal" href="#Predicter.Predicter.finished" title="Predicter.Predicter.finished"><strong>finished</strong></a> – </p></li>
+<li><p><a class="reference internal" href="#Predicter.Predicter.progress" title="Predicter.Predicter.progress"><strong>progress</strong></a> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="Predicter.Predicter.finished">
+<code class="sig-name descname">finished</code><a class="headerlink" href="#Predicter.Predicter.finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the predicter finished predicting an image list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.Predicter.loadNeuralNet">
+<code class="sig-name descname">loadNeuralNet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.Predicter.loadNeuralNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a neural network from a path with weights for the weighted
+categorical crossentropy loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – Path to neural network.</p></li>
+<li><p><strong>weights</strong> (<em>list&lt;float&gt;</em><em>, </em><em>optional</em>) – Class weights for the network. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True, if the loading was successfull.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.Predicter.predictImage">
+<code class="sig-name descname">predictImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img_path</span></em>, <em class="sig-param"><span class="n">file_id</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.Predicter.predictImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the prediction of an image. From the neural network prediction
+(heatmaps), coordinates are inferred. Then, heads and tails are
+matched.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_path</strong> (<em>string</em>) – Path to the image to predict.</p></li>
+<li><p><strong>file_id</strong> (<em>string</em>) – ID of the image. Used as file ID in the returned dataframe.</p></li>
+<li><p><strong>experiment_id</strong> (<em>string</em><em>, </em><em>optional</em>) – ID of experiment. Used as experiment ID in the returned dataframe.
+The default is “”.</p></li>
+<li><p><strong>user_id</strong> (<em>string</em><em>, </em><em>optional</em>) – ID of currently working user. The default is “”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df</strong> – Prediction information wrapped in a dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.Predicter.predictImageList">
+<code class="sig-name descname">predictImageList</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_pathes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file_ids</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.Predicter.predictImageList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts a list of images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_pathes</strong> (<em>list&lt;string&gt;</em>) – Pathes to images to predict. Length n.</p></li>
+<li><p><strong>image_pathes</strong> – File IDs for the files contained in image_pathes -&gt; length n.</p></li>
+<li><p><strong>experiment_id</strong> (<em>string</em>) – ID of the current experiment. Default is “”.</p></li>
+<li><p><strong>user_id</strong> (<em>string</em>) – ID of the active user. Deafult is “”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df</strong> – Prediction information wrapped in a dataframe..</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="Predicter.Predicter.progress">
+<code class="sig-name descname">progress</code><a class="headerlink" href="#Predicter.Predicter.progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted for every image from an image list that is already predicted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.Predicter.setInputsForPrediction">
+<code class="sig-name descname">setInputsForPrediction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_pathes</span></em>, <em class="sig-param"><span class="n">file_ids</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.Predicter.setInputsForPrediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all necessary inputs for prediction. Use this functionality, if you
+want to run the neural network predictions in a separate worker thread.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_pathes</strong> (<em>list&lt;string&gt;</em>) – Pathes to images to predict. Length n.</p></li>
+<li><p><strong>image_pathes</strong> – File IDs for the files contained in image_pathes -&gt; length n.</p></li>
+<li><p><strong>experiment_id</strong> (<em>string</em>) – ID of the current experiment. Default is “”.</p></li>
+<li><p><strong>user_id</strong> (<em>string</em>) – ID of the active user. Deafult is “”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="predictionworker-class">
+<h2><code class="docutils literal notranslate"><span class="pre">PredictionWorker</span></code> class<a class="headerlink" href="#predictionworker-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Predicter.PredictionWorker">
+<em class="property">class </em><code class="sig-prename descclassname">Predicter.</code><code class="sig-name descname">PredictionWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predicter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtCore.QObject</span></code></p>
+<p>Object to work in a thread and to be deleted after the prediction
+calculations finished.</p>
+<dl class="py attribute">
+<dt id="Predicter.PredictionWorker.finished">
+<code class="sig-name descname">finished</code><a class="headerlink" href="#Predicter.PredictionWorker.finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the predicter finished predicting an image list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.PredictionWorker.predictImageList">
+<code class="sig-name descname">predictImageList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker.predictImageList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.PredictionWorker.predicterFinished">
+<code class="sig-name descname">predicterFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker.predicterFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.PredictionWorker.predicterProgress">
+<code class="sig-name descname">predicterProgress</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker.predicterProgress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="Predicter.PredictionWorker.progress">
+<code class="sig-name descname">progress</code><a class="headerlink" href="#Predicter.PredictionWorker.progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted for every image from an image list that is already predicted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Predicter.PredictionWorker.setInputsForPrediction">
+<code class="sig-name descname">setInputsForPrediction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_pathes</span></em>, <em class="sig-param"><span class="n">file_ids</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker.setInputsForPrediction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Predicter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#predicter-class"><code class="docutils literal notranslate"><span class="pre">Predicter</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#predictionworker-class"><code class="docutils literal notranslate"><span class="pre">PredictionWorker</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PostProcessing.html" title="previous chapter">Post Processing</a></li>
+      <li>Next: <a href="TableWindow.html" title="next chapter">Table Window</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Predicter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

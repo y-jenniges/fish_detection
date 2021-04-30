@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Distance Measurer &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GUI" href="gui.html" />
+    <link rel="prev" title="Animal Painter" href="AnimalPainter.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="distance-measurer">
+<h1>Distance Measurer<a class="headerlink" href="#distance-measurer" title="Permalink to this headline">¶</a></h1>
+<p>Implemented by Timo Jasper in his Bachelor thesis ‘Erkennen und Vermessen
+von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz’ (2019)</p>
+<div class="section" id="distancemeasurer-class">
+<h2><code class="docutils literal notranslate"><span class="pre">DistanceMeasurer</span></code> class<a class="headerlink" href="#distancemeasurer-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="DistanceMeasurer.DistanceMeasurer">
+<em class="property">class </em><code class="sig-prename descclassname">DistanceMeasurer.</code><code class="sig-name descname">DistanceMeasurer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c_L</span></em>, <em class="sig-param"><span class="n">d_L</span></em>, <em class="sig-param"><span class="n">c_R</span></em>, <em class="sig-param"><span class="n">d_R</span></em>, <em class="sig-param"><span class="n">rotation</span></em>, <em class="sig-param"><span class="n">translation</span></em>, <em class="sig-param"><span class="n">img_size</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DistanceMeasurer.DistanceMeasurer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Calculator for distances between points in calibrated stereo-camera images</p>
+<dl class="py method">
+<dt id="DistanceMeasurer.DistanceMeasurer.distances">
+<code class="sig-name descname">distances</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img_points_L0</span></em>, <em class="sig-param"><span class="n">img_points_L1</span></em>, <em class="sig-param"><span class="n">img_points_R0</span></em>, <em class="sig-param"><span class="n">img_points_R1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DistanceMeasurer.DistanceMeasurer.distances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get points in image space with shape Nx2
+return distances of given points in image space
+if positions in one of the images are 0, return “NaN” as that distance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Distance Measurer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#distancemeasurer-class"><code class="docutils literal notranslate"><span class="pre">DistanceMeasurer</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="AnimalPainter.html" title="previous chapter">Animal Painter</a></li>
+      <li>Next: <a href="gui.html" title="next chapter">GUI</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/DistanceMeasurer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

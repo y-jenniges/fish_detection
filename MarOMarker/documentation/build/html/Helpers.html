@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GUI Helpers &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Image Areas" href="ImageAreas.html" />
+    <link rel="prev" title="GUI" href="gui.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="gui-helpers">
+<h1>GUI Helpers<a class="headerlink" href="#gui-helpers" title="Permalink to this headline">¶</a></h1>
+<p>Helper functions and classes for displaying purposes.</p>
+<div class="section" id="comboboxdelegate-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ComboboxDelegate</span></code> class<a class="headerlink" href="#comboboxdelegate-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.ComboboxDelegate">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">ComboboxDelegate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">combobox</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.ComboboxDelegate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QStyledItemDelegate</span></code></p>
+<p>Used for displaying content in a combobox: It shows an image and
+text beside it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>combobox</strong> (<em>QCombobox</em>) – The combobox where content should be displayed.</p></li>
+<li><p><strong>item_height</strong> (<em>int</em>) – Height of the image to display.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="Helpers.ComboboxDelegate.paint">
+<code class="sig-name descname">paint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QPainter</span></em>, <em class="sig-param"><span class="n">QStyleOptionViewItem</span></em>, <em class="sig-param"><span class="n">QModelIndex</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.ComboboxDelegate.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="Helpers.ComboboxDelegate.sizeHint">
+<code class="sig-name descname">sizeHint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QStyleOptionViewItem</span></em>, <em class="sig-param"><span class="n">QModelIndex</span></em><span class="sig-paren">)</span> &#x2192; QSize<a class="headerlink" href="#Helpers.ComboboxDelegate.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="listviewdelegate-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ListViewDelegate</span></code> class<a class="headerlink" href="#listviewdelegate-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.ListViewDelegate">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">ListViewDelegate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">listview</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.ListViewDelegate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QStyledItemDelegate</span></code></p>
+<p>Used for displaying content in a list view: It shows an image and
+text beside it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>listview</strong> (<em>QListView</em>) – The view where content should be displayed.</p></li>
+<li><p><strong>item_height</strong> (<em>int</em>) – Height of the image to display.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="Helpers.ListViewDelegate.paint">
+<code class="sig-name descname">paint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QPainter</span></em>, <em class="sig-param"><span class="n">QStyleOptionViewItem</span></em>, <em class="sig-param"><span class="n">QModelIndex</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.ListViewDelegate.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="Helpers.ListViewDelegate.sizeHint">
+<code class="sig-name descname">sizeHint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">QStyleOptionViewItem</span></em>, <em class="sig-param"><span class="n">QModelIndex</span></em><span class="sig-paren">)</span> &#x2192; QSize<a class="headerlink" href="#Helpers.ListViewDelegate.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="textimageitemwidget-class">
+<h2><code class="docutils literal notranslate"><span class="pre">TextImageItemWidget</span></code> class<a class="headerlink" href="#textimageitemwidget-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.TextImageItemWidget">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">TextImageItemWidget</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imagePath</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.TextImageItemWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>Creates a widget containing an image and text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>string</em>) – Text to display.</p></li>
+<li><p><strong>imagePath</strong> (<em>string</em>) – Path to the image to display.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="Helpers.TextImageItemWidget.on_lineEdit_changed">
+<code class="sig-name descname">on_lineEdit_changed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.TextImageItemWidget.on_lineEdit_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adapt the title variable if changed in UI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Helpers.TextImageItemWidget.set_text">
+<code class="sig-name descname">set_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.TextImageItemWidget.set_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the title of the image, i.e. the displaed text.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="menuframe-class">
+<h2><code class="docutils literal notranslate"><span class="pre">MenuFrame</span></code> class<a class="headerlink" href="#menuframe-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.MenuFrame">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">MenuFrame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">central_text</span></em>, <em class="sig-param"><span class="n">frame_name</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.MenuFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QFrame</span></code></p>
+<p>Frame that contains the menu button. It is similar on most pages, except the home page.
+The latter includes controls instead of a text in this bar.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="topframe-class">
+<h2><code class="docutils literal notranslate"><span class="pre">TopFrame</span></code> class<a class="headerlink" href="#topframe-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.TopFrame">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">TopFrame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pixmap_path</span></em>, <em class="sig-param"><span class="n">frame_name</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.TopFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QFrame</span></code></p>
+<p>This class creates the blue frame which is at the top on every page.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="progressbar-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ProgressBar</span></code> class<a class="headerlink" href="#progressbar-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Helpers.ProgressBar">
+<em class="property">class </em><code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">ProgressBar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.ProgressBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QProgressBar</span></code></p>
+<p>A simple progress bar with a stylesheet to be reused in the application.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="Helpers.displayErrorMsg">
+<code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">displayErrorMsg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em>, <em class="sig-param"><span class="n">information</span></em>, <em class="sig-param"><span class="n">windowTitle</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.displayErrorMsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays an error message with the given text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>string</em>) – Error description.</p></li>
+<li><p><strong>information</strong> (<em>string</em>) – More information about the error.</p></li>
+<li><p><strong>windowTitle</strong> (<em>string</em>) – Title of error window.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="Helpers.getIcon">
+<code class="sig-prename descclassname">Helpers.</code><code class="sig-name descname">getIcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ressource_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Helpers.getIcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an icon from a ressource path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ressource_path</strong> (<em>string</em>) – Path to icon.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>icon</strong> – Loaded icon.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>QIcon</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GUI Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#comboboxdelegate-class"><code class="docutils literal notranslate"><span class="pre">ComboboxDelegate</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#listviewdelegate-class"><code class="docutils literal notranslate"><span class="pre">ListViewDelegate</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#textimageitemwidget-class"><code class="docutils literal notranslate"><span class="pre">TextImageItemWidget</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#menuframe-class"><code class="docutils literal notranslate"><span class="pre">MenuFrame</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#topframe-class"><code class="docutils literal notranslate"><span class="pre">TopFrame</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#progressbar-class"><code class="docutils literal notranslate"><span class="pre">ProgressBar</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="gui.html" title="previous chapter">GUI</a></li>
+      <li>Next: <a href="ImageAreas.html" title="next chapter">Image Areas</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Helpers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

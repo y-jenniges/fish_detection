@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Processing &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Predicter" href="Predicter.html" />
+    <link rel="prev" title="Photo Viewer" href="PhotoViewer.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="post-processing">
+<h1>Post Processing<a class="headerlink" href="#post-processing" title="Permalink to this headline">¶</a></h1>
+<p>Functions and classes necessary for post processing.</p>
+<div class="section" id="stereocorrespondence-class">
+<h2><code class="docutils literal notranslate"><span class="pre">StereoCorrespondence</span></code> class<a class="headerlink" href="#stereocorrespondence-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="PostProcessing.StereoCorrespondence">
+<em class="property">class </em><code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">StereoCorrespondence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c_L</span></em>, <em class="sig-param"><span class="n">d_L</span></em>, <em class="sig-param"><span class="n">c_R</span></em>, <em class="sig-param"><span class="n">d_R</span></em>, <em class="sig-param"><span class="n">rotation</span></em>, <em class="sig-param"><span class="n">translation</span></em>, <em class="sig-param"><span class="n">img_size</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Finder of corresponding objects in stereo image0 and image1
+stereo rectifies the images by given calibrations.
+Get positions of objects in img0, also rectifies them and get the epilines
+in img1.
+Get region around a position as template and seach for similar region on
+the other img.
+Seach for a template like region only near the epiline.</p>
+<p>Implemented by Timo Jasper in his Bachelor thesis ‘Erkennen und Vermessen
+von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz’
+(2019). Functions distortPoint and undistortPoint are added for this program.</p>
+<dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.distortPoint">
+<code class="sig-name descname">distortPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em>, <em class="sig-param"><span class="n">lr</span><span class="o">=</span><span class="default_value">'L'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.distortPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redistort undistorted point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.matchCorrespondences">
+<code class="sig-name descname">matchCorrespondences</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img_L</span></em>, <em class="sig-param"><span class="n">img_R</span></em>, <em class="sig-param"><span class="n">obj_L</span></em>, <em class="sig-param"><span class="n">obj_R</span></em>, <em class="sig-param"><span class="n">template_radius</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">epiline_thresh</span><span class="o">=</span><span class="default_value">2000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.matchCorrespondences" title="Permalink to this definition">¶</a></dt>
+<dd><p>match similar obj coordinates, near eplines in the other img and returns merged objects</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.sameVec">
+<code class="sig-name descname">sameVec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vec0</span></em>, <em class="sig-param"><span class="n">vec1</span></em>, <em class="sig-param"><span class="n">min_thresh</span><span class="o">=</span><span class="default_value">5.0</span></em>, <em class="sig-param"><span class="n">dynamic_thresh</span><span class="o">=</span><span class="default_value">2.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.sameVec" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if 2 vectors have less than dynamic_thresh*norm(vec0) difference
+param min_thresh is minimum absolute distance threshold for difference of vec0, vec1,
+param dynamic_thresh defines the part of the longer vector thats used as thresh</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.templateMatching">
+<code class="sig-name descname">templateMatching</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template</span></em>, <em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">position</span></em>, <em class="sig-param"><span class="n">epiline_thresh</span></em>, <em class="sig-param"><span class="n">template_radius</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.templateMatching" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template matching near the epiline</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.undistortPoint">
+<code class="sig-name descname">undistortPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em>, <em class="sig-param"><span class="n">lr</span><span class="o">=</span><span class="default_value">'L'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.undistortPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undistort a point.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="PostProcessing.applyNnToImage">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">applyNnToImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">image</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.applyNnToImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a neural network to an image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Keras model</em>) – Neural network model used for the prediction.</p></li>
+<li><p><strong>image</strong> (<em>np.array</em>) – Image in range in [-1,1] that is to be predicted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>yHat</strong> – Prediction of the neural network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.applyThresholdToHm">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">applyThresholdToHm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.applyThresholdToHm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets all pixels below the given threshold value to zero.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.findCoordinates">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">findCoordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">heatmap</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">50</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.findCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a threshold and performs non-maximum supproession to
+extract coordinates from heatmaps.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.findHeadTailMatches">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">findHeadTailMatches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">heads</span></em>, <em class="sig-param"><span class="n">tails</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.findHeadTailMatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds matching heads and tails by optimizing distances using the
+weighted Euclidean distance measure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heads</strong> (<em>list&lt;tuple&lt;int&gt;&gt;</em>) – A list of animal head positions.</p></li>
+<li><p><strong>tails</strong> (<em>list&lt;tuple&lt;int&gt;&gt;</em>) – A list of animal tail positions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.loadImage">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">loadImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em>, <em class="sig-param"><span class="n">factor</span><span class="o">=</span><span class="default_value">32</span></em>, <em class="sig-param"><span class="n">rescale_range</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.loadImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an image as a h*w*3 numpy array in [-1, 1] (if rescale_range is True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em>) – Path to image.</p></li>
+<li><p><strong>factor</strong> (<em>int</em><em>, </em><em>optional</em>) – Factor used for padding necessary for the neural network prediction.
+The default is 32.</p></li>
+<li><p><strong>rescale_range</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – Tells if the image range should be scaled to [-1,1]. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>img</strong> – Loaded image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.measureLength">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">measureLength</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distance_measurer</span></em>, <em class="sig-param"><span class="n">camera_config</span></em>, <em class="sig-param"><span class="n">merged_objects</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.measureLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measures the length of an animal by stereo calculations performed by
+distance_measurer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance_measurer</strong> (<a class="reference internal" href="DistanceMeasurer.html#DistanceMeasurer.DistanceMeasurer" title="DistanceMeasurer.DistanceMeasurer"><em>DistanceMeasurer</em></a>) – Performs the length calculations.</p></li>
+<li><p><strong>camera_config</strong> (<em>loaded json</em>) – Confugration of the camera.</p></li>
+<li><p><strong>merged_objects</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
+on the left and right image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>distances</strong> – List of measurments of animal length.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list&lt;float&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.nonMaxSuppression">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">nonMaxSuppression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">min_distance</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.nonMaxSuppression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds local maxima.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.rectifyAndMatch">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">rectifyAndMatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matcher</span></em>, <em class="sig-param"><span class="n">camera_config</span></em>, <em class="sig-param"><span class="n">left_image_path</span></em>, <em class="sig-param"><span class="n">right_image_path</span></em>, <em class="sig-param"><span class="n">objects_left</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.rectifyAndMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to rectify images and find corresponding animals on the right image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matcher</strong> (<a class="reference internal" href="#PostProcessing.StereoCorrespondence" title="PostProcessing.StereoCorrespondence"><em>StereoCorrespondence</em></a>) – Object to perform the stereo matching.</p></li>
+<li><p><strong>camera_config</strong> (<em>loaded json</em>) – Confugration of the camera.</p></li>
+<li><p><strong>left_image_path</strong> (<em>string</em>) – Path to left image.</p></li>
+<li><p><strong>right_image_path</strong> (<em>string</em>) – Path to right image.</p></li>
+<li><p><strong>objects_left</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
+on the left image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>merged_objects</strong> – One entry depicts the group, head and tail positions of one animal
+on the left and right image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list&lt;list&lt;int&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.resizeHm">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">resizeHm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">hm</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.resizeHm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resizes a heatmap to the size of a given image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.scaleMatchCoordinates">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">scaleMatchCoordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matches</span></em>, <em class="sig-param"><span class="n">input_res</span></em>, <em class="sig-param"><span class="n">output_res</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.scaleMatchCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales coordinates from an image with input_resolution to an image with
+output_resolution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matches</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
+on the left and right image.</p></li>
+<li><p><strong>input_res</strong> (<em>TYPE</em>) – Input resolution.</p></li>
+<li><p><strong>output_res</strong> (<em>TYPE</em>) – Target resolution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List with scaled coordinates.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PostProcessing.weightedEuclidean">
+<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">weightedEuclidean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.weightedEuclidean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Euclidean distance formula weighted by a in x-direction and by b in
+y-direction.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Post Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#stereocorrespondence-class"><code class="docutils literal notranslate"><span class="pre">StereoCorrespondence</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PhotoViewer.html" title="previous chapter">Photo Viewer</a></li>
+      <li>Next: <a href="Predicter.html" title="next chapter">Predicter</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/PostProcessing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

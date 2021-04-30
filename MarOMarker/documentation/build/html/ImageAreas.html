@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Areas &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Neural Network Losses" href="Losses.html" />
+    <link rel="prev" title="GUI Helpers" href="Helpers.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="image-areas">
+<h1>Image Areas<a class="headerlink" href="#image-areas" title="Permalink to this headline">¶</a></h1>
+<p>Classes to display photos.</p>
+<div class="section" id="imagearea-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ImageArea</span></code> class<a class="headerlink" href="#imagearea-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="ImageAreas.ImageArea">
+<em class="property">class </em><code class="sig-prename descclassname">ImageAreas.</code><code class="sig-name descname">ImageArea</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QGraphicsView</span></code></p>
+<p>An implementation of QGraphicsView to enable painting of animals on a
+photo as well as loading of photos. Moreover, it provides a
+wheel zoom functionality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_zoom</strong> (<em>int</em>) – Zoom level.</p></li>
+<li><p><strong>_scene</strong> (<em>QGraphicsScene</em>) – The Scene for the QGraphicsView.</p></li>
+<li><p><strong>_image</strong> (<em>QGraphicsPixmapItem</em>) – The image to display.</p></li>
+<li><p><strong>_empty</strong> (<em>bool</em>) – Indicates if an image is currently displayed.</p></li>
+<li><p><strong>animal_painter</strong> (<a class="reference internal" href="AnimalPainter.html#src.AnimalPainter.AnimalPainter" title="src.AnimalPainter.AnimalPainter"><em>AnimalPainter</em></a>) – The painter to delegate the mouse events to.</p></li>
+<li><p><a class="reference internal" href="#ImageAreas.ImageArea.rightMouseButtonClicked" title="ImageAreas.ImageArea.rightMouseButtonClicked"><strong>rightMouseButtonClicked</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#ImageAreas.ImageArea.onWheelZoom" title="ImageAreas.ImageArea.onWheelZoom"><strong>onWheelZoom</strong></a> (<em>pyqtSignal</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.enterEvent">
+<code class="sig-name descname">enterEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.enterEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines behaviour when cursor enters image area.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.fitInView">
+<code class="sig-name descname">fitInView</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.fitInView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Responsible for proper image scaling.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.hasPhoto">
+<code class="sig-name descname">hasPhoto</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.hasPhoto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns if there is a photo loaded or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.leaveEvent">
+<code class="sig-name descname">leaveEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.leaveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines behaviour when cursor leaves image area.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.mouseMoveEvent">
+<code class="sig-name descname">mouseMoveEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes the mouse move event to the animal_painter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.mousePressEvent">
+<code class="sig-name descname">mousePressEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes the mouse press event to the animal_painter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.mouseReleaseEvent">
+<code class="sig-name descname">mouseReleaseEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes the mouse release event to the animal_painter.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ImageAreas.ImageArea.onWheelZoom">
+<code class="sig-name descname">onWheelZoom</code><a class="headerlink" href="#ImageAreas.ImageArea.onWheelZoom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="ImageAreas.ImageArea.rightMouseButtonClicked">
+<code class="sig-name descname">rightMouseButtonClicked</code><a class="headerlink" href="#ImageAreas.ImageArea.rightMouseButtonClicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the right mouse button is pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.setEnableInteraction">
+<code class="sig-name descname">setEnableInteraction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isInteractionEnabled</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.setEnableInteraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enables/Disables if the image is manipulable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.setPhoto">
+<code class="sig-name descname">setPhoto</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pixmap</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.setPhoto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the current image corectly scaled to the screen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageArea.wheelEvent">
+<code class="sig-name descname">wheelEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageArea.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Catches the mouse wheel event and zooms into the image accordingly.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="imagearealr-class">
+<h2><code class="docutils literal notranslate"><span class="pre">ImageAreaLR</span></code> class<a class="headerlink" href="#imagearealr-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="ImageAreas.ImageAreaLR">
+<em class="property">class </em><code class="sig-prename descclassname">ImageAreas.</code><code class="sig-name descname">ImageAreaLR</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>A QWidget that handles the LR view, i.e. displays left and right images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>_models</strong> (<a class="reference internal" href="Models.html#Models.Models" title="Models.Models"><em>Models</em></a>) – Underlying data models containing the animal information.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.createSeparateDataRow">
+<code class="sig-name descname">createSeparateDataRow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em>, <em class="sig-param"><span class="n">image</span><span class="o">=</span><span class="default_value">'L'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.createSeparateDataRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a row at the end of the data table for the given animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animal</strong> (<em>Annimal</em>) – The animal to create a data row for.</p></li>
+<li><p><strong>image</strong> (<em>string</em>) – Either “L” or “R”, depending on which image the animal is located.
+The default is “L”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.findAnimalMatch">
+<code class="sig-name descname">findAnimalMatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em>, <em class="sig-param"><span class="n">image</span><span class="o">=</span><span class="default_value">'L'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.findAnimalMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines which animal object belongs to the given animal by
+checking the data table and comparing head and tail coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animal</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Animal to find the match of.</p></li>
+<li><p><strong>image</strong> (<em>string</em>) – Depicts whether the given animal is on the left ro right image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>matching_animal</strong> – The matching animal. If none exists yet, None is returned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal">Animal</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.handleDifferentGroup">
+<code class="sig-name descname">handleDifferentGroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.handleDifferentGroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.handleDifferentRemark">
+<code class="sig-name descname">handleDifferentRemark</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.handleDifferentRemark" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.handleDifferentSpecies">
+<code class="sig-name descname">handleDifferentSpecies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.handleDifferentSpecies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.handleMatching">
+<code class="sig-name descname">handleMatching</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span><span class="o">=</span><span class="default_value">'L'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.handleMatching" title="Permalink to this definition">¶</a></dt>
+<dd><p>When the match mode is active, this function enables a different
+clicking strategy, i.e. 1st click selects animal, 2nd click matches
+the animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>string</em>) – Either ‘L’ or ‘R’. Depicts on which image the selection occured.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.match">
+<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adapting match information in the data table and updating the indeces
+of the given animals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animal_L</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Animal on left image.</p></li>
+<li><p><strong>animal_R</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Animal on right image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.matchAnimals">
+<code class="sig-name descname">matchAnimals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.matchAnimals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_match_activated">
+<code class="sig-name descname">on_match_activated</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">is_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_match_activated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes bounding box style when match mode is activated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>is_active</strong> (<em>bool</em>) – State of the match mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_next_animal">
+<code class="sig-name descname">on_next_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_next_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates the query to make next animal active to the lastly active
+image area (L or R). Also adapts the selection to have a matching pair
+in both image areas active.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_previous_animal">
+<code class="sig-name descname">on_previous_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_previous_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates the query to make next animal active to the lastly active
+image area (L or R). Also adapts the selection to have a matching pair
+in both image areas active.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_remove_match">
+<code class="sig-name descname">on_remove_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_L</span></em>, <em class="sig-param"><span class="n">animal_R</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_remove_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a separate data row for the right animal and removes the
+right coordinates from the left animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_remove_match_btn">
+<code class="sig-name descname">on_remove_match_btn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_remove_match_btn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the match of the given animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>string</em>) – The image on which the animal is located. Either ‘L’ or ‘R’.</p></li>
+<li><p><strong>animal</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – The animal belonging to the clicked remove button.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.on_right_mouse_click">
+<code class="sig-name descname">on_right_mouse_click</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">click_position</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.on_right_mouse_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates the process of removing a match when the right mouse
+button is clicked and the match mode is active.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>string</em>) – Either ‘L’ or ‘R’. Depicts on which image the click occured.</p></li>
+<li><p><strong>click_position</strong> (<em>QPoint</em>) – Position where the click occured.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.redrawAnimalMatch">
+<code class="sig-name descname">redrawAnimalMatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.redrawAnimalMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redraws the animal that is matched to the given animal (if existant).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animal</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – The animal whose counterpart is to be redrawn.</p></li>
+<li><p><strong>image</strong> (<em>string</em><em>, </em><em>optional</em>) – Describes on which image the animal is located, i.e. on the right
+(‘R’) or the left (‘L’) image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.redrawSelection">
+<code class="sig-name descname">redrawSelection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.redrawSelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the current animal (on the lastly active image area) and
+updates the bounding boxes of it and of its match on the right image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.updateDrawnAnimal">
+<code class="sig-name descname">updateDrawnAnimal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.updateDrawnAnimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the animal stored in the specs widget (on the side), this
+function updates the corresponding animal on left and right image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ImageAreas.ImageAreaLR.updateSpecsWidget">
+<code class="sig-name descname">updateSpecsWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ImageAreas.ImageAreaLR.updateSpecsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the specs widget (on the side) with the currently active
+animal (either on left or right image).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Image Areas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#imagearea-class"><code class="docutils literal notranslate"><span class="pre">ImageArea</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#imagearealr-class"><code class="docutils literal notranslate"><span class="pre">ImageAreaLR</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Helpers.html" title="previous chapter">GUI Helpers</a></li>
+      <li>Next: <a href="Losses.html" title="next chapter">Neural Network Losses</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ImageAreas.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,531 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animal Painter &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Distance Measurer" href="DistanceMeasurer.html" />
+    <link rel="prev" title="Animal" href="Animal.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="animal-painter">
+<h1>Animal Painter<a class="headerlink" href="#animal-painter" title="Permalink to this headline">¶</a></h1>
+<p>Class to enable annoations on the photos.</p>
+<div class="section" id="animalpainter-class">
+<h2><code class="docutils literal notranslate"><span class="pre">AnimalPainter</span></code> class<a class="headerlink" href="#animalpainter-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="src.AnimalPainter.AnimalPainter">
+<em class="property">class </em><code class="sig-prename descclassname">src.AnimalPainter.</code><code class="sig-name descname">AnimalPainter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">imageArea</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtCore.QObject</span></code></p>
+<p>Class providing the logic for adding/removing/moving and jumping between
+animals. It needs a QGraphicsView that it can paint on and that delegates
+the mouse events to the AnimalPainter.</p>
+<p>Dragging implementation taken from
+<a class="reference external" href="https://stackoverflow.com/questions/60571837/how-to-move-a-figurecreated-using-paintevent-by-simply-draging-it-in-pyqt5">https://stackoverflow.com/questions/60571837/how-to-move-a-figurecreated-using-paintevent-by-simply-draging-it-in-pyqt5</a>
+(last access: 19.10.2020)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animal_list</strong> (<em>list&lt;Animal&gt;</em>) – A list of animals on the current image.</p></li>
+<li><p><strong>drag_position_head</strong> (<em>QPoint</em>) – </p></li>
+<li><p><strong>drag_position_tail</strong> (<em>QPoint</em>) – </p></li>
+<li><p><strong>cur_animal</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Currently active animal.</p></li>
+<li><p><strong>imageArea</strong> (<a class="reference internal" href="ImageAreas.html#ImageAreas.ImageArea" title="ImageAreas.ImageArea"><em>ImageArea</em></a>) – A canvas to paint the object on and that provides mouse events to
+the AnimalPainter.</p></li>
+<li><p><strong>image_ending</strong> (<em>string</em>) – It is either ‘*_L.jpg’ or ‘*_R.jpg’. Indicates if the left or right
+image is currently being edited.</p></li>
+<li><p><strong>original_img_width</strong> (<em>int</em>) – Width of the original image. Necessary for rescaling calculations.</p></li>
+<li><p><strong>original_img_height</strong> (<em>int</em>) – Height of the original image. Necessary for rescaling calculations.</p></li>
+<li><p><a class="reference internal" href="#src.AnimalPainter.AnimalPainter.propertyChanged" title="src.AnimalPainter.AnimalPainter.propertyChanged"><strong>propertyChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#src.AnimalPainter.AnimalPainter.animalSelectionChanged" title="src.AnimalPainter.AnimalPainter.animalSelectionChanged"><strong>animalSelectionChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#src.AnimalPainter.AnimalPainter.removeMatchBtnClicked" title="src.AnimalPainter.AnimalPainter.removeMatchBtnClicked"><strong>removeMatchBtnClicked</strong></a> (<em>pyqtSignal</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="src.AnimalPainter.AnimalPainter.animalSelectionChanged">
+<code class="sig-name descname">animalSelectionChanged</code><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.animalSelectionChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when animal selection changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.checkVisibility">
+<code class="sig-name descname">checkVisibility</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top_left</span></em>, <em class="sig-param"><span class="n">visibility_areas</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.checkVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks which corners of the specs widget, i.e. a QRect specified by it’s
+top left corner position) are visible and how much area of the specs is
+visible in the current image area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>top_left</strong> (<em>QPoint</em>) – Top left corner position of the animal specification widget.</p></li>
+<li><p><strong>visibility_areas</strong> (<em>np.array&lt;int</em><em>, </em><em>QPoint&gt;</em><em>, </em><em>optional</em>) – List of top left corners specifying the specs widget, as well as the
+corresponding visible area. If given, the new position and area will
+be stacked on this array. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>bool</em> – Whether all 4 corners of the specs widget are visible.</p></li>
+<li><p><strong>visibility_areas</strong> (<em>np.array&lt;int, QPoint&gt;</em>) – The area of the specs widget that is visible in the image area and
+the top left corner of the specs widget specifying its position.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.checkVisibleCorners">
+<code class="sig-name descname">checkVisibleCorners</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top_left</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.checkVisibleCorners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks which corners of the specs widget (specified by it’s top left
+corner) are visible on the image area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>top_left</strong> (<em>QPoint</em><em>, </em><em>optional</em>) – Top left corner position of the specs widget. If not given, its
+current position is assumed. The default is None.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>count</strong> (<em>int</em>) – Number of visible corners.</p></li>
+<li><p><strong>tl</strong> (<em>bool</em>) – Whether the top left corner is visible.</p></li>
+<li><p><strong>tr</strong> (<em>bool</em>) – Whether the top right corner is visible.</p></li>
+<li><p><strong>bl</strong> (<em>bool</em>) – Whether the bottom left corner is visible.</p></li>
+<li><p><strong>br</strong> (<em>bool</em>) – Whether the bottom right corner is visible.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.deselectAnimal">
+<code class="sig-name descname">deselectAnimal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.deselectAnimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deselects the current animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalHead">
+<code class="sig-name descname">drawAnimalHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the head of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalId">
+<code class="sig-name descname">drawAnimalId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the ID of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalIdRemoveBtn">
+<code class="sig-name descname">drawAnimalIdRemoveBtn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalIdRemoveBtn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the ID the of a given animal and a button to remove its
+match if the match mode is active.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalLine">
+<code class="sig-name descname">drawAnimalLine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the line between head an tail of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalTailLineBoundingBox">
+<code class="sig-name descname">drawAnimalTailLineBoundingBox</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalTailLineBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the tail of a given animal, the line betwen head and tail and
+the bounding box around it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawAnimalsFromList">
+<code class="sig-name descname">drawAnimalsFromList</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawAnimalsFromList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws animals from a dataframe on the current image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>animal_list</strong> (<em>DataFrame</em>) – The list of animals to draw. Necessary columns:
+LX1, LY1 (head position on left image),
+LX2, LY2 (tail position on left image),
+RX1, RY1 (head position on right image),
+RX2, RY2 (tail position on right image),
+group, species, object_remarks</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.drawRemoveMatchBtn">
+<code class="sig-name descname">drawRemoveMatchBtn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawRemoveMatchBtn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the button to remove a match on a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.mouseMoveEvent">
+<code class="sig-name descname">mouseMoveEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>When moving the mouse, adapt head/tail visual position when they
+are dragged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.mousePressEvent">
+<code class="sig-name descname">mousePressEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the painting options on the image: Enables dragging of
+head/tail visuals, as well as removing/adding animals on click.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.mouseReleaseEvent">
+<code class="sig-name descname">mouseReleaseEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>When releasing the mouse, reset the drag positions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.on_add_animal">
+<code class="sig-name descname">on_add_animal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_add</span></em>, <em class="sig-param"><span class="n">is_remove_active</span></em>, <em class="sig-param"><span class="n">is_match_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.on_add_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the activation state of the add mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_add</strong> (<em>bool</em>) – Whether to activate the add mode or deactivate it.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_add_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the add mode.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode needs to be active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the match mode needs to be active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.on_match_animal">
+<code class="sig-name descname">on_match_animal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_match</span></em>, <em class="sig-param"><span class="n">is_add_active</span></em>, <em class="sig-param"><span class="n">is_remove_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.on_match_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the activation state of the match mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_match</strong> (<em>bool</em>) – Whether to activate the remove mode or deactivate it.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Whether the add mode is active or not.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_match_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the match mode.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Wheter the add mode needs to be active or not.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode needs to be active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.on_next_animal">
+<code class="sig-name descname">on_next_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.on_next_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the next animal in the animal_list active.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.on_previous_animal">
+<code class="sig-name descname">on_previous_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.on_previous_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the previous animal in the animal_list active.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.on_remove_animal">
+<code class="sig-name descname">on_remove_animal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_remove</span></em>, <em class="sig-param"><span class="n">is_add_active</span></em>, <em class="sig-param"><span class="n">is_match_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.on_remove_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the activation state of the remove mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_remove</strong> (<em>bool</em>) – Whether to activate the remove mode or deactivate it.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Whether the add mode is active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_remove_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the remove mode.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Wheter the add mode needs to be active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the match mode needs to be active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.placeSpecsWidget">
+<code class="sig-name descname">placeSpecsWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.placeSpecsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to move the specs widget with the bounding box of the
+current animal (and prevent it from getting out of the borders of
+the image)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="src.AnimalPainter.AnimalPainter.propertyChanged">
+<code class="sig-name descname">propertyChanged</code><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.propertyChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the group or species of an animal is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.redraw">
+<code class="sig-name descname">redraw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.redraw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redraws all animals on the current image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.redrawAnimal">
+<code class="sig-name descname">redrawAnimal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.redrawAnimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redraws the given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeAll">
+<code class="sig-name descname">removeAll</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remove_from_list</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes visuals of all animals and its storage in the list if
+desired.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeAllRemoveMatchBtns">
+<code class="sig-name descname">removeAllRemoveMatchBtns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeAllRemoveMatchBtns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeAnimal">
+<code class="sig-name descname">removeAnimal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em>, <em class="sig-param"><span class="n">remove_from_list</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeAnimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes given animal visually and from list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeBoundingBoxVisual">
+<code class="sig-name descname">removeBoundingBoxVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeBoundingBoxVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the bounding box visual on the image of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeHeadVisual">
+<code class="sig-name descname">removeHeadVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeHeadVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the head visual on the image of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeIdVisual">
+<code class="sig-name descname">removeIdVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeIdVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the ID visual on the image of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeLineVisual">
+<code class="sig-name descname">removeLineVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeLineVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the line visual on the image of a given animal.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="src.AnimalPainter.AnimalPainter.removeMatchBtnClicked">
+<code class="sig-name descname">removeMatchBtnClicked</code><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeMatchBtnClicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when a remove animal match button was clicked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeTailVisual">
+<code class="sig-name descname">removeTailVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeTailVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the tail visual on the image of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.remove_match">
+<code class="sig-name descname">remove_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.remove_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a remove match button is clicked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.setAnimalGroup">
+<code class="sig-name descname">setAnimalGroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.setAnimalGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the group of the currently active animal and adapts the
+visuals accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.setAnimalRemark">
+<code class="sig-name descname">setAnimalRemark</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remark</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.setAnimalRemark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the remark of the currently active animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.setAnimalSpecies">
+<code class="sig-name descname">setAnimalSpecies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">species</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.setAnimalSpecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the species of the currently active animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.setOriginalWidthHeight">
+<code class="sig-name descname">setOriginalWidthHeight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">height</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.setOriginalWidthHeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to set the width and/or height of the original image used for
+coordinate transformations on animals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the original image in pixels. The default is None.</p></li>
+<li><p><strong>height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of the original image in pixels. The default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.updateAnimalPosition">
+<code class="sig-name descname">updateAnimalPosition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.updateAnimalPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculates the position of a given animal using its position on
+the original image and the current size of the displayed image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.updateBoundingBoxesMatchMode">
+<code class="sig-name descname">updateBoundingBoxesMatchMode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.updateBoundingBoxesMatchMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws boundingg boxes as needed in the match mode (i.e. draws a
+(more transparent) bounding box and an ID for every animal that has a
+match).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.updateBoundingBoxesNormal">
+<code class="sig-name descname">updateBoundingBoxesNormal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.updateBoundingBoxesNormal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes bounding box visuals for all animals and draws only the
+one of the current animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.updateOriginalAnimalPosition">
+<code class="sig-name descname">updateOriginalAnimalPosition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.updateOriginalAnimalPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the position of a given animal on the original image by
+transforming its position on the currently displayed image.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Animal Painter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#animalpainter-class"><code class="docutils literal notranslate"><span class="pre">AnimalPainter</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Animal.html" title="previous chapter">Animal</a></li>
+      <li>Next: <a href="DistanceMeasurer.html" title="next chapter">Distance Measurer</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/AnimalPainter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

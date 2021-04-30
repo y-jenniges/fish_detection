@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Viewer &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Post Processing" href="PostProcessing.html" />
+    <link rel="prev" title="Models" href="Models.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="photo-viewer">
+<h1>Photo Viewer<a class="headerlink" href="#photo-viewer" title="Permalink to this headline">¶</a></h1>
+<p>Class to display and switch between photos.</p>
+<div class="section" id="photoviewer-class">
+<h2><code class="docutils literal notranslate"><span class="pre">PhotoViewer</span></code> class<a class="headerlink" href="#photoviewer-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="PhotoViewer.PhotoViewer">
+<em class="property">class </em><code class="sig-prename descclassname">PhotoViewer.</code><code class="sig-name descname">PhotoViewer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">imageDirectory</span></em>, <em class="sig-param"><span class="n">imagePrefix</span></em>, <em class="sig-param"><span class="n">outputDir</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>A photo viewer that contains a QGraphicsView to display the photos and
+draw the animals on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_directory</strong> (<em>string</em>) – Directory where the images are stored.</p></li>
+<li><p><strong>image_prefix</strong> (<em>string</em>) – Images will be displayed only if they start with this prefix.</p></li>
+<li><p><strong>output_dir</strong> (<em>string</em>) – Directory where the output file is stored.</p></li>
+<li><p><strong>cur_image_index</strong> (<em>int</em>) – Index of the current image in image_list.</p></li>
+<li><p><strong>image_list</strong> (<em>[</em><em>list&lt;string&gt;</em><em>, </em><em>list&lt;string&gt;</em><em>]</em>) – List containing all image pathes that have the given prefix, are of the
+selected date. First entry contains all left image pathes and second
+entry all right image pathes.</p></li>
+<li><p><a class="reference internal" href="#PhotoViewer.PhotoViewer.newImageLoaded" title="PhotoViewer.PhotoViewer.newImageLoaded"><strong>newImageLoaded</strong></a> (<em>pyqtSignal</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.activateImageMode">
+<code class="sig-name descname">activateImageMode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.activateImageMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Showing either the left, right or both images in the GUI depending on
+the mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>string</em>) – Can be either ‘L’, ‘R’ or ‘LR’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.exportToCsv">
+<code class="sig-name descname">exportToCsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.exportToCsv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the current CSV table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.isAddModeActive">
+<code class="sig-name descname">isAddModeActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.isAddModeActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if add mode is active in one of the image areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>If the add mode is active or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.isRemoveModeActive">
+<code class="sig-name descname">isRemoveModeActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.isRemoveModeActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if remove mode is active in one of the image areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>If the remove mode is active or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.loadImageFromIndex">
+<code class="sig-name descname">loadImageFromIndex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.loadImageFromIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads image at index in the image list into all views
+(i.e. L, R and LR).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.loadImageFromPath">
+<code class="sig-name descname">loadImageFromPath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.loadImageFromPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.loadResFile">
+<code class="sig-name descname">loadResFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.loadResFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the output file and updates data models with unseen remarks and
+species.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.loadSingleImage">
+<code class="sig-name descname">loadSingleImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.loadSingleImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads an image from a path to the given imageArea and draws
+available animals from output file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PhotoViewer.PhotoViewer.newImageLoaded">
+<code class="sig-name descname">newImageLoaded</code><a class="headerlink" href="#PhotoViewer.PhotoViewer.newImageLoaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal that is emitted when a new image is loaded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_add_animal">
+<code class="sig-name descname">on_add_animal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_add</span></em>, <em class="sig-param"><span class="n">is_remove_active</span></em>, <em class="sig-param"><span class="n">is_match_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_add_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates query to (de-)activate the add mode to the correct
+animal painters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_add</strong> (<em>bool</em>) – Whether to activate the add mode or deactivate it.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_add_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the add mode.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Wheter the remove mode needs to be active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_match_btn">
+<code class="sig-name descname">on_match_btn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_match</span></em>, <em class="sig-param"><span class="n">is_add_active</span></em>, <em class="sig-param"><span class="n">is_remove_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_match_btn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates query to (de-)activate the match mode to the correct
+animal painters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_match</strong> (<em>bool</em>) – Whether to activate the add mode or deactivate it.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Whether the add mode is active or not.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_match_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the add mode.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Wheter the add mode needs to be active or not.</p></li>
+<li><p><strong>is_remove_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_next_animal">
+<code class="sig-name descname">on_next_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_next_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates the query to make the next animal active to the correct
+animal painter by checking for the active image area.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_next_image">
+<code class="sig-name descname">on_next_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_next_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the next image and draws animals accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_previous_animal">
+<code class="sig-name descname">on_previous_animal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_previous_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates the query to make the previous animal active to the correct
+animal painter by checking for the active image area.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_previous_image">
+<code class="sig-name descname">on_previous_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_previous_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the previous image and draws animals accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_remove_animal">
+<code class="sig-name descname">on_remove_animal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">activate_remove</span></em>, <em class="sig-param"><span class="n">is_add_active</span></em>, <em class="sig-param"><span class="n">is_match_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_remove_animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delegates query to (de-)activate the remove mode to the correct
+animal painters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>activate_remove</strong> (<em>bool</em>) – Whether to activate the remove mode or deactivate it.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Whether the add mode is active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>is_remove_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the remove mode.</p></li>
+<li><p><strong>is_add_active</strong> (<em>bool</em>) – Wheter the add mode needs to be active or not.</p></li>
+<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.on_wheel_zoom">
+<code class="sig-name descname">on_wheel_zoom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zoom</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.on_wheel_zoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>When wheel zoom is used on the image, arrow key shortcuts are needed
+for navigating on image and not to switch to next image. The shortcuts
+are handled here.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.resizeEvent">
+<code class="sig-name descname">resizeEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resizes image and animal positions when resize event occurs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.setArrowShortcutsActive">
+<code class="sig-name descname">setArrowShortcutsActive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">are_active</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.setArrowShortcutsActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to en-/disable arrow shortcuts for switching between images.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.setImageDir">
+<code class="sig-name descname">setImageDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.setImageDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates image list according to new image directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.setImageEnding">
+<code class="sig-name descname">setImageEnding</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em>, <em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.setImageEnding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adapt image ending in animal_painter and in self. Must be either
+‘*_L.jpg’ or ‘*_R.jpg’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.setImagePrefix">
+<code class="sig-name descname">setImagePrefix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.setImagePrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the image list according to new prefix.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.setOutDir">
+<code class="sig-name descname">setOutDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.setOutDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the output file for the new output directoy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.switchImage">
+<code class="sig-name descname">switchImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">newIndex</span></em>, <em class="sig-param"><span class="n">imageArea</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.switchImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.updateImageCountVisual">
+<code class="sig-name descname">updateImageCountVisual</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.updateImageCountVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the display of the total number of images and the current
+image index</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PhotoViewer.PhotoViewer.updateImageList">
+<code class="sig-name descname">updateImageList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PhotoViewer.PhotoViewer.updateImageList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculate image list, i.e. filter the image directory for images
+with the correct prefix and date.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Photo Viewer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#photoviewer-class"><code class="docutils literal notranslate"><span class="pre">PhotoViewer</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Models.html" title="previous chapter">Models</a></li>
+      <li>Next: <a href="PostProcessing.html" title="next chapter">Post Processing</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/PhotoViewer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GUI &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GUI Helpers" href="Helpers.html" />
+    <link rel="prev" title="Distance Measurer" href="DistanceMeasurer.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-gui">
+<span id="gui"></span><h1>GUI<a class="headerlink" href="#module-gui" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="gui.MarOMarker_MainWindow">
+<em class="property">class </em><code class="sig-prename descclassname">gui.</code><code class="sig-name descname">MarOMarker_MainWindow</code><a class="headerlink" href="#gui.MarOMarker_MainWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QMainWindow</span></code></p>
+<p>Main window class for MarOMarker.</p>
+<dl class="simple">
+<dt>Remark:</dt><dd><p>The stylesheets are partly taken and adapted from QT stylesheet
+examples accessible at <a class="reference external" href="https://doc.qt.io/qt-5/stylesheet-examples.html">https://doc.qt.io/qt-5/stylesheet-examples.html</a>
+(last access 15.10.2020)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>settings</strong> (<em>QSettings</em>) – Used to store program settings for the next session.</p></li>
+<li><p><strong>models</strong> (<a class="reference internal" href="Models.html#Models.Models" title="Models.Models"><em>Models</em></a>) – Data models necessary for the workflow.</p></li>
+<li><p><strong>page_home</strong> (<a class="reference internal" href="PageHome.html#PageHome.PageHome" title="PageHome.PageHome"><em>PageHome</em></a>) – Home page of the software.</p></li>
+<li><p><strong>page_data</strong> (<a class="reference internal" href="PageData.html#PageData.PageData" title="PageData.PageData"><em>PageData</em></a>) – Data page of the software.</p></li>
+<li><p><strong>page_settings</strong> (<a class="reference internal" href="PageSettings.html#PageSettings.PageSettings" title="PageSettings.PageSettings"><em>PageSettings</em></a>) – Settings page of the software.</p></li>
+<li><p><strong>page_about</strong> (<a class="reference internal" href="PageAbout.html#PageAbout.PageAbout" title="PageAbout.PageAbout"><em>PageAbout</em></a>) – About page of the software.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.closeEvent">
+<code class="sig-name descname">closeEvent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.closeEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saving some values when closing the program, like window size and
+position, settings, secific model information. It also saves the
+current image and updates the CSV table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>QEvent</em>) – The event called when closing the program.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToABoutPage">
+<code class="sig-name descname">directToABoutPage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToABoutPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to about page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToDataPage">
+<code class="sig-name descname">directToDataPage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToDataPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to data page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToHandbookPage">
+<code class="sig-name descname">directToHandbookPage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToHandbookPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to handbook page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToHomePage">
+<code class="sig-name descname">directToHomePage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToHomePage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to home page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToSettingsPage">
+<code class="sig-name descname">directToSettingsPage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToSettingsPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to settings page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.directToUserSettings">
+<code class="sig-name descname">directToUserSettings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.directToUserSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to user section of settings page.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.getResultFileName">
+<code class="sig-name descname">getResultFileName</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isInProgress</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.getResultFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the convention for the result file name. It is
+results_yyyy_MM_STATE.csv, where _STATE is empty if the image editing
+is finished or “inProgress”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>isInProgress</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if the image editing is finished or not. The default is True.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>name</strong> – Name of the result file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.onImageDirChanged">
+<code class="sig-name descname">onImageDirChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.onImageDirChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the image directory on the data page was changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.onImagePrefixChanged">
+<code class="sig-name descname">onImagePrefixChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.onImagePrefixChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the image prefix on the data page was changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.onOutDirChanged">
+<code class="sig-name descname">onOutDirChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.onOutDirChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the output directory on the data page was changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.restorePreviousValues">
+<code class="sig-name descname">restorePreviousValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.restorePreviousValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to restore values from previous session (saved on closeEvent)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.retranslateUi">
+<code class="sig-name descname">retranslateUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.retranslateUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to retranslate the UI and set the inital texts.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.showWelcome">
+<code class="sig-name descname">showWelcome</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.showWelcome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and shows the welcome screen. A user ID and camera config
+path have to be entered here before continuing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="gui.MarOMarker_MainWindow.updateUserIds">
+<code class="sig-name descname">updateUserIds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#gui.MarOMarker_MainWindow.updateUserIds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to update user ID in top bar of all pages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>string</em>) – New user ID.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="DistanceMeasurer.html" title="previous chapter">Distance Measurer</a></li>
+      <li>Next: <a href="Helpers.html" title="next chapter">GUI Helpers</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/gui.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

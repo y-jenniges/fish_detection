@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animal &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Animal Painter" href="AnimalPainter.html" />
+    <link rel="prev" title="Settings Page" href="PageSettings.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="animal">
+<h1>Animal<a class="headerlink" href="#animal" title="Permalink to this headline">¶</a></h1>
+<p>Classes to store information about single animals.</p>
+<div class="section" id="animal-class">
+<h2><code class="docutils literal notranslate"><span class="pre">Animal</span></code> class<a class="headerlink" href="#animal-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Animal.Animal">
+<em class="property">class </em><code class="sig-prename descclassname">Animal.</code><code class="sig-name descname">Animal</code><span class="sig-paren">(</span><em class="sig-param">models</em>, <em class="sig-param">row_index</em>, <em class="sig-param">position_head=PyQt5.QtCore.QPoint(-1</em>, <em class="sig-param">-1)</em>, <em class="sig-param">position_tail=PyQt5.QtCore.QPoint(-1</em>, <em class="sig-param">-1)</em>, <em class="sig-param">group=&lt;AnimalGroup.UNIDENTIFIED: 5&gt;</em>, <em class="sig-param">species=&lt;AnimalSpecies.UNIDENTIFIED: 0&gt;</em>, <em class="sig-param">remark=''</em>, <em class="sig-param">length=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to represent an animal on an image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_index</strong> (<em>int</em>) – The index of the row in the result table that this animal
+represents.</p></li>
+<li><p><strong>position_head</strong> (<em>QPoint</em><em>, </em><em>optional</em>) – The position of the animal head on the displayed image. It will be
+the center for the head visual, i.e. an ‘o’.</p></li>
+<li><p><strong>position_tail</strong> (<em>QPoint</em>) – The position of the animal tail on the displayed image. It will be
+the center for the tail visual, i.e. a ‘x’.</p></li>
+<li><p><strong>group</strong> (<em>string</em>) – The group of the animal. Selectable from the Enum AnimalGroup.</p></li>
+<li><p><strong>species</strong> (<em>string</em>) – The species of the animal.</p></li>
+<li><p><strong>remark</strong> (<em>string</em>) – The remark to the animal.</p></li>
+<li><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – The length of the animal.</p></li>
+<li><p><strong>original_pos_head</strong> (<em>QPoint</em>) – The head position on the unscaled original image.</p></li>
+<li><p><strong>original_pos_tail</strong> (<em>QPoint</em>) – The tail position on the unscaled original image.</p></li>
+<li><p><strong>pixmap_width</strong> (<em>int</em>) – Width of the square pixmap for the head and tail visuals.</p></li>
+<li><p><strong>pos_visual_head</strong> (<em>QPoint</em>) – Position of the head visual.</p></li>
+<li><p><strong>pos_visual_tail</strong> – Position of the tail visual.</p></li>
+<li><p><strong>rect_head</strong> (<em>QRect</em>) – Geomatry of the head drawn by the head_item_visual</p></li>
+<li><p><strong>rect_tail</strong> (<em>QRect</em>) – Geometry of the tail drawn by the tail_item_visual</p></li>
+<li><p><strong>line</strong> (<em>QLineF</em>) – Geometry of the line drawn by the line_item_visual.</p></li>
+<li><p><strong>is_head_drawn</strong> (<em>bool</em>) – Indicates if the head of the animal is already drawn.</p></li>
+<li><p><strong>is_tail_drawn</strong> (<em>bool</em>) – Indicates if the tail of the animal is already drawn.</p></li>
+<li><p><strong>boundingBox</strong> (<em>QRectF</em>) – Box surrdounding the animal and drawn when it becomes active.</p></li>
+<li><p><strong>boundingBox_visual</strong> – Visual of the bounding box that can be drawn in the QGraphicsScene.</p></li>
+<li><p><strong>head_item_visual</strong> – Visual of the head that can be drawn in the QGraphicsScene.</p></li>
+<li><p><strong>tail_item_visual</strong> – Visual of the tail that can be drawn in the QGraphicsScene.</p></li>
+<li><p><strong>line_item_visual</strong> – Visual of the line that can be drawn in the QGraphicsScene.</p></li>
+<li><p><strong>id_visual</strong> – Visual of the ID that can be drawn in the QGraphicsScene.</p></li>
+<li><p><strong>manually_corrected</strong> (<em>bool</em>) – Indicates if the animal was manually adapted.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="Animal.Animal.calculateBoundingBox">
+<code class="sig-name descname">calculateBoundingBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.calculateBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the bounding box of the animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.createHeadVisual">
+<code class="sig-name descname">createHeadVisual</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.createHeadVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a pixmap item (showing a circle), that is drawable on a
+QGraphicsScene for the animal head and sets its position to the animal
+head position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The visual of the animal head (a circle).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>QGraphicsPixmapItem</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.createTailVisual">
+<code class="sig-name descname">createTailVisual</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.createTailVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a pixmap item (showing a cross), that is drawable on a
+QGraphicsScene for the animal tail and sets its position to the animal
+tail position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The visual of the animal tail (a cross).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>QGraphicsPixmapItem</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.getColorsAccordingToGroup">
+<code class="sig-name descname">getColorsAccordingToGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.getColorsAccordingToGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the colour for the animal according to its group and sets the
+pixmaps for head and tail accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setGroup">
+<code class="sig-name descname">setGroup</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the animal group, adapts the colours and updates the model entry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>group</strong> (<em>string</em><em> or </em><a class="reference internal" href="Models.html#Models.AnimalGroup" title="Models.AnimalGroup"><em>AnimalGroup</em></a>) – New animal group.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setLength">
+<code class="sig-name descname">setLength</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the length of the animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>float</em>) – Length of the animal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setManuallyCorrected">
+<code class="sig-name descname">setManuallyCorrected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">corrected</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setManuallyCorrected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the manually-corrected parameter of the animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>corrected</strong> (<em>bool</em><em>, </em><em>optional</em>) – New value. The default is False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setPositionHead">
+<code class="sig-name descname">setPositionHead</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pos</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setPositionHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the head position, moves the displayed rect and adapts the line
+connecting head and tail accordingly. Also, bounding boxes are updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pos</strong> (<em>QPoint</em>) – New animal head position.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setPositionTail">
+<code class="sig-name descname">setPositionTail</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pos</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setPositionTail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the tail position, moves the displayed rect and adapts the line
+connecting head and tail accordingly. Also, bounding boxes are updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pos</strong> (<em>QPoint</em>) – New animal tail position.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setRemark">
+<code class="sig-name descname">setRemark</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remark</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setRemark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a remark for the animal and updates the model entry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>remark</strong> (<em>string</em>) – New animal remark.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.Animal.setSpecies">
+<code class="sig-name descname">setSpecies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">species</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal.setSpecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the animal species and updates the model entry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>species</strong> (<em>string</em>) – New animal species.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="animalspecificationswidget-class">
+<h2><code class="docutils literal notranslate"><span class="pre">AnimalSpecificationsWidget</span></code> class<a class="headerlink" href="#animalspecificationswidget-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="Animal.AnimalSpecificationsWidget">
+<em class="property">class </em><code class="sig-prename descclassname">Animal.</code><code class="sig-name descname">AnimalSpecificationsWidget</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>A widget to provide all information about the current animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#Animal.AnimalSpecificationsWidget.propertyChanged" title="Animal.AnimalSpecificationsWidget.propertyChanged"><strong>propertyChanged</strong></a> (<em>pyqtSignal</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onGroupComboboxChanged">
+<code class="sig-name descname">onGroupComboboxChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onGroupComboboxChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function called when group combobox entry is changed. It sets the
+group of the current animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>group</strong> (<em>string</em>) – The selected group of the animal.
+Selectable from the Enum AnimalGroup.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onLengthSpinboxChanged">
+<code class="sig-name descname">onLengthSpinboxChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onLengthSpinboxChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when length combobox is changed. Sets the length of the
+current animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>float</em>) – New value for animal length.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxChanged">
+<code class="sig-name descname">onRemarkComboboxChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remark</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function handling when the animal remark combobox gets changed,
+i.e. the editing is not finished yet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxEdited">
+<code class="sig-name descname">onRemarkComboboxEdited</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxEdited" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function called when animal remark is edited.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxReturnPressed">
+<code class="sig-name descname">onRemarkComboboxReturnPressed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxReturnPressed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function dealing with the return event on the editable combobox
+for animal remarks. This ensures that the newly typed entry is
+capitalized and right-aligned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.onSpeciesComboboxChanged">
+<code class="sig-name descname">onSpeciesComboboxChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">species</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onSpeciesComboboxChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function called when the species combobox is changed.
+It sets the species of the current animal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>species</strong> (<em>string</em>) – The selected species of the animal.
+Selectable from the Enum AnimalSpecies.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="Animal.AnimalSpecificationsWidget.propertyChanged">
+<code class="sig-name descname">propertyChanged</code><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.propertyChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the group, species or remark is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.setAnimal">
+<code class="sig-name descname">setAnimal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.setAnimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies a given animal into the specifications window or resets the
+specs window and disables it when no animal is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>animal</strong> (<a class="reference internal" href="#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Animal to copy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Animal.AnimalSpecificationsWidget.updateVisuals">
+<code class="sig-name descname">updateVisuals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.updateVisuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the visuals of the specifications widget to the currently
+set animal.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Animal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#animal-class"><code class="docutils literal notranslate"><span class="pre">Animal</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#animalspecificationswidget-class"><code class="docutils literal notranslate"><span class="pre">AnimalSpecificationsWidget</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PageSettings.html" title="previous chapter">Settings Page</a></li>
+      <li>Next: <a href="AnimalPainter.html" title="next chapter">Animal Painter</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Animal.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

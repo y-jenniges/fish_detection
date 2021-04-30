@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings Page &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Animal" href="Animal.html" />
+    <link rel="prev" title="Home Page" href="PageHome.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-PageSettings">
+<span id="settings-page"></span><h1>Settings Page<a class="headerlink" href="#module-PageSettings" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="PageSettings.PageSettings">
+<em class="property">class </em><code class="sig-prename descclassname">PageSettings.</code><code class="sig-name descname">PageSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>Class to create the settings page of the software. It contains tabs for
+different types of settings (e.g. camera, user, neural network, species).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#PageSettings.PageSettings.userIdChanged" title="PageSettings.PageSettings.userIdChanged"><strong>userIdChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><strong>nn_model</strong> (<em>keras model</em>) – Neural network model used for the predictions.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="PageSettings.PageSettings.addSpecies">
+<code class="sig-name descname">addSpecies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_path</span></em>, <em class="sig-param"><span class="n">text</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.addSpecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a species to the data model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.apply_configFile">
+<code class="sig-name descname">apply_configFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.apply_configFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the given path contains a valid config file and update
+the values on th GUI accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.browse_config">
+<code class="sig-name descname">browse_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.browse_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens an explorer window with the option to browse for CSV files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.browse_for_nn">
+<code class="sig-name descname">browse_for_nn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.browse_for_nn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens explorer to search for a neural network.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.browse_for_root_dir">
+<code class="sig-name descname">browse_for_root_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.browse_for_root_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open file explorer to browse for a root directory for the images.
+It is used by the calendar widget to find the correct image directory
+according to the selected date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.browse_for_species_image">
+<code class="sig-name descname">browse_for_species_image</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.browse_for_species_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a file dialogue to open an image of a species. It’s title
+will be used as name for the species.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.camera_spinBox_changed">
+<code class="sig-name descname">camera_spinBox_changed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.camera_spinBox_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empties the config file path when one of the spinboxes is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.check_config_format">
+<code class="sig-name descname">check_config_format</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.check_config_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the necessary columns are present in the given camera
+config dataframe.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.nn_path_changed">
+<code class="sig-name descname">nn_path_changed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.nn_path_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the neural network specified by the given path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.removeSpecies">
+<code class="sig-name descname">removeSpecies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.removeSpecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a species from the data model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.restoreValues">
+<code class="sig-name descname">restoreValues</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.restoreValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores settings from previous session.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.saveCurrentValues">
+<code class="sig-name descname">saveCurrentValues</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.saveCurrentValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the current camera settings in the given settings object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.save_config">
+<code class="sig-name descname">save_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.save_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a ‘Save file’ dialogue to save the current settings of the
+camera configuration in a file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PageSettings.PageSettings.userIdChanged">
+<code class="sig-name descname">userIdChanged</code><a class="headerlink" href="#PageSettings.PageSettings.userIdChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the user ID is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageSettings.PageSettings.user_id_changed">
+<code class="sig-name descname">user_id_changed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageSettings.PageSettings.user_id_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emit the userIdChanged signal when the user lineEdit is changed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageData.html">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PageHome.html" title="previous chapter">Home Page</a></li>
+      <li>Next: <a href="Animal.html" title="next chapter">Animal</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/PageSettings.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

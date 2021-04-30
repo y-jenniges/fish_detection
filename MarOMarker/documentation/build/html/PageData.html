@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Page &#8212; MarOMarker 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Handbook Page" href="PageHandbook.html" />
+    <link rel="prev" title="About Page" href="PageAbout.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-PageData">
+<span id="data-page"></span><h1>Data Page<a class="headerlink" href="#module-PageData" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="PageData.PageData">
+<em class="property">class </em><code class="sig-prename descclassname">PageData.</code><code class="sig-name descname">PageData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
+<p>Class to create the data page of the software.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicter</strong> (<a class="reference internal" href="Predicter.html#Predicter.Predicter" title="Predicter.Predicter"><em>Predicter</em></a>) – Applies the neural network and performs post processing to generate
+animal information.</p></li>
+<li><p><strong>config_path</strong> (<em>string</em>) – Path to the camera configuration file. TODO: replace this configuration
+by the configuration loadable on settings page.</p></li>
+<li><p><strong>matcher</strong> (<a class="reference internal" href="PostProcessing.html#PostProcessing.StereoCorrespondence" title="PostProcessing.StereoCorrespondence"><em>StereoCorrespondence</em></a>) – For the animals on the left image, it finds corresponding animals
+on the right image.</p></li>
+<li><p><strong>distance_measurer</strong> (<a class="reference internal" href="DistanceMeasurer.html#DistanceMeasurer.DistanceMeasurer" title="DistanceMeasurer.DistanceMeasurer"><em>DistanceMeasurer</em></a>) – Calculates the length of animals.</p></li>
+<li><p><a class="reference internal" href="#PageData.PageData.imageDirChanged" title="PageData.PageData.imageDirChanged"><strong>imageDirChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#PageData.PageData.outputDirectoryChanged" title="PageData.PageData.outputDirectoryChanged"><strong>outputDirectoryChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#PageData.PageData.imagePrefixChanged" title="PageData.PageData.imagePrefixChanged"><strong>imagePrefixChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+<li><p><a class="reference internal" href="#PageData.PageData.experimentIdChanged" title="PageData.PageData.experimentIdChanged"><strong>experimentIdChanged</strong></a> (<em>pyqtSignal</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="PageData.PageData.experimentIdChanged">
+<code class="sig-name descname">experimentIdChanged</code><a class="headerlink" href="#PageData.PageData.experimentIdChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the experiment ID is changed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PageData.PageData.imageDirChanged">
+<code class="sig-name descname">imageDirChanged</code><a class="headerlink" href="#PageData.PageData.imageDirChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the image directory is changed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PageData.PageData.imagePrefixChanged">
+<code class="sig-name descname">imagePrefixChanged</code><a class="headerlink" href="#PageData.PageData.imagePrefixChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the image prefix is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onBrowseImageDir">
+<code class="sig-name descname">onBrowseImageDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onBrowseImageDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that opens a dialog for the user to select a directory
+where the images are</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onBrowseOutDir">
+<code class="sig-name descname">onBrowseOutDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onBrowseOutDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that opens a dialog for the user to select an output
+directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onCalcLength">
+<code class="sig-name descname">onCalcLength</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onCalcLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets current image list from photo viewer and calculates the
+length of animals whose coordinates are valid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onCalenderSelectionChanged">
+<code class="sig-name descname">onCalenderSelectionChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onCalenderSelectionChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to handle a change of the calender widget selection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onCameraConfigChanged">
+<code class="sig-name descname">onCameraConfigChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onCameraConfigChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a new camera configuration from a json file path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onCheckMatch">
+<code class="sig-name descname">onCheckMatch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onCheckMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directs to LR screen (showing left and right images) if  at least one
+match is already calculated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onCheckPredictions">
+<code class="sig-name descname">onCheckPredictions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onCheckPredictions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the click on ‘Check predictions on home screen’ button by
+navigating to the home screen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onExpIdEditChanged">
+<code class="sig-name descname">onExpIdEditChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onExpIdEditChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to handle when the user changes the experiment id line edit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onImageDirEditChanged">
+<code class="sig-name descname">onImageDirEditChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">updateVisuals</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onImageDirEditChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to handle when the user changes the img_dir line edit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onNnActivated">
+<code class="sig-name descname">onNnActivated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onNnActivated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the activation of the “run neural network” button.
+It gets the current image list from the photo viewer that it applies
+the neural network to (in a separate thread). It appends the new data
+to the data model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onNnFinished">
+<code class="sig-name descname">onNnFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onNnFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onNnProgress">
+<code class="sig-name descname">onNnProgress</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onNnProgress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onOutDirChanged">
+<code class="sig-name descname">onOutDirChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onOutDirChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to handle when the user changes the output dir line edit.
+It makes sure that a result file exists and creates one otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onPrefixEditChanged">
+<code class="sig-name descname">onPrefixEditChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onPrefixEditChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to handle when the user changes the image prefix line edit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onRectifyMatch">
+<code class="sig-name descname">onRectifyMatch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onRectifyMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets current image list from photo viewer, rectifies them and
+determines the positions of the respective animal on the right image
+using block matching.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PageData.PageData.outputDirectoryChanged">
+<code class="sig-name descname">outputDirectoryChanged</code><a class="headerlink" href="#PageData.PageData.outputDirectoryChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the output directory is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.restoreValues">
+<code class="sig-name descname">restoreValues</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.restoreValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores settings of page data from last program start</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.saveCurrentValues">
+<code class="sig-name descname">saveCurrentValues</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.saveCurrentValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves current settings on data page for next program start</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.updateImageDir">
+<code class="sig-name descname">updateImageDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.updateImageDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to update the image directory according to the input
+from the calender widget</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.updateNumImages">
+<code class="sig-name descname">updateNumImages</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.updateNumImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to check how many images are in the current
+image directory with the current prefix for the current date and
+updates the display of this count</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MarOMarker</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PageAbout.html">About Page</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHandbook.html">Handbook Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageHome.html">Home Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PageSettings.html">Settings Page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Animal.html">Animal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AnimalPainter.html">Animal Painter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DistanceMeasurer.html">Distance Measurer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">GUI Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ImageAreas.html">Image Areas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Losses.html">Neural Network Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcessing.html">Post Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Predicter.html">Predicter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TableWindow.html">Table Window</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TabWidget.html">TabWidget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WelcomeWindow.html">Welcome Content</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PageAbout.html" title="previous chapter">About Page</a></li>
+      <li>Next: <a href="PageHandbook.html" title="next chapter">Handbook Page</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Yvonne Jenniges.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/PageData.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
