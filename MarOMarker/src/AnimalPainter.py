@@ -760,6 +760,9 @@ class AnimalPainter(QtCore.QObject):
             print("AnimalPainter: Could not find PhotoViewer parent.")
             return
         
+        # check if user can draw an animal (not possible, when user drew an animal head on other image)
+        is_animal_addable = parent.imageAreaLR.isAnimalAddable(self.image_ending)
+        
         # get states of add and remove modes from home page
         is_add_mode_active = parent.parent().is_add_animal_active
         is_remove_mode_active = parent.parent().is_remove_animal_active
@@ -844,6 +847,13 @@ class AnimalPainter(QtCore.QObject):
             self.animalSelectionChanged.emit()
                             
         elif(is_add_mode_active):
+            if not is_animal_addable: 
+                text = "Error: Animal not addable."
+                information = "Please complete the animal on the other image before adding an animal here."
+                title = "Animal not addable"
+                displayErrorMsg(text, information, title)
+                return 
+            
             # calculate click position in original format
             original_x = round(pos.x()*self.original_img_width/self.imageArea.width())
             original_y = round(pos.y()*self.original_img_height/self.imageArea.height())

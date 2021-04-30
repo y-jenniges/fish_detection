@@ -144,7 +144,7 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.animal_painter.shortcut_deselect_animal.setEnabled(False)
 
 
-
+#@todo instead of making the frame a QGraphicsView, simly make this one a view
 class ImageAreaLR(QtWidgets.QWidget):
     """
     A QWidget that handles the LR view, i.e. displays left and right images.
@@ -317,6 +317,20 @@ class ImageAreaLR(QtWidgets.QWidget):
         else:
             self.widget_animal_specs.setAnimal(None)
     
+    def isAnimalAddable(self, image_ending):#@todo docu
+        if image_ending == "*_L.jpg":
+            otherImageArea = self.imageAreaR
+        elif image_ending == "*_R.jpg":
+            otherImageArea = self.imageAreaL
+            
+        # check if animal on the other image area is complete
+        cur_animal = otherImageArea.animal_painter.cur_animal
+        if cur_animal is not None:
+            if not cur_animal.is_tail_drawn:
+                return False
+            
+        return True
+    
     def findAnimalMatch(self, animal, image="L"):
         """ Determines which animal object belongs to the given animal by 
         checking the data table and comparing head and tail coordinates.
@@ -398,7 +412,21 @@ class ImageAreaLR(QtWidgets.QWidget):
             # redraw the visuals
             imageArea.animal_painter.drawAnimalHead(matching_animal)
             imageArea.animal_painter.drawAnimalTailLineBoundingBox(matching_animal)      
-            imageArea.animal_painter.updateBoundingBoxes()     
+            imageArea.animal_painter.updateBoundingBoxes
+            
+            # redraw 'remove match' button
+            for btn, ani in imageArea.animal_painter.btns_remove_match:
+                if animal == ani:
+                    imageArea._scene.removeItem(btn)
+                    break
+            imageArea.animal_painter.drawRemoveMatchBtn(matching_animal)
+                
+            # # draw a line connecting the animals #@todo
+            # start = QtCore.QPoint(100,100)
+            # end = QtCore.QPoint(400,400)
+            # pen = QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine)
+            # self.graphicsScene.addLine(100,100,400,400, pen)
+            # print("line drawn")
 
         self.updateSpecsWidget()     
             
@@ -752,7 +780,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
         self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
-   
+           
     def _initUi(self):
         """ Defines and draws the UI elements. """
         # -- frame for the two images displayed below each other ------------ #
@@ -770,9 +798,15 @@ class ImageAreaLR(QtWidgets.QWidget):
         layout_imageFrame.addItem(spacer)
         layout_imageFrame.addWidget(self.imageAreaR)
         
-        frame_image = QtWidgets.QFrame(self)
+        frame_image = QtWidgets.QFrame(self) #@todo what if we made this a QGraphicsView?
         frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_image.setLayout(layout_imageFrame)
+        
+        # self.graphicsView = QtWidgets.QGraphicsView(self) 
+        # self.graphicsScene = QtWidgets.QGraphicsScene(self)
+        # self.graphicsView.setScene(self.graphicsScene)
+        # #self.graphicsView.setFrameShape(QtWidgets.QFrame.NoFrame)
+        # self.graphicsView.setLayout(layout_imageFrame)
 
         
         # -- frame for more options ----------------------------------------- #
@@ -820,6 +854,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.layout.setObjectName("layout")
         
         # adding widgets to main layout 
+        #self.layout.addWidget(self.graphicsView)
         self.layout.addWidget(frame_image)
         self.layout.addWidget(frame_options)
         
