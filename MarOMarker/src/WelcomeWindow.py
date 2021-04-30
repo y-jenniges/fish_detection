@@ -28,6 +28,85 @@ class WelcomeWindow(QtWidgets.QMainWindow):
          
         self._initUi()
         self._initActions()
+
+    def onBrowseRootDir(self):
+        """ Function that opens a dialog for the user to select an image root
+        directory. """ 
+        filename = QtWidgets.QFileDialog.getExistingDirectory(
+            self, self.tr("Select image root directory"), "", 
+            QtWidgets.QFileDialog.ShowDirsOnly)
+        
+        print(f"WelcomeWindow: onBrowseRootDir {filename}")
+        
+        if len(filename) > 0: 
+            if os.path.isdir(filename):
+                self.lineEdit_root_dir.setText(filename)
+                self.main_window.page_settings.lineEdit_root_dir.setText(filename)
+    
+    def onUserIdChanged(self, text):
+        """ Handles when user ID is changed. It adaptes the user ID on 
+        settings page. """
+        # set user ID on settings page
+        self.main_window.page_settings.lineEdit_user_id.setText(text)
+    
+    def onBrowseConfig(self):
+        """ Opens a file explorer to browse for a camera configuration file
+        and adapts the config path on settings page accordingly. """
+        if self.main_window is not None:
+            filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
+            path = filename[0]
+            
+            # check if path is valid
+            if path != "" and os.path.isfile(path): 
+                with open(path) as file:
+                    data = json.load(file)
+            
+                # check format of file
+                if(self.main_window.page_settings.check_config_format(data)):
+                    self.lineEdit_config.setText(path)
+                    self.main_window.page_settings.apply_configFile(path)
+                    
+    def onOk(self):
+        """ Handles clicking on the confirmation button: It closes the current
+        window (if a user ID and config path are entered) and enables the
+        main window. """
+        # check if user ID is entered
+        if self.lineEdit_user_id.text() != "":
+            # check if config file is selected
+            if self.lineEdit_config.text() != "" and os.path.isfile(self.lineEdit_config.text()):
+                if self.lineEdit_root_dir.text() != "" and os.path.isdir(self.lineEdit_root_dir.text()):
+                    # close welcome window
+                    self.close()
+                    
+                    # enable main window
+                    self.main_window.setEnabled(True)
+                else:
+                    Helpers.displayErrorMsg(
+                    "Invalid Image Root Directory", 
+                    "Please specify a valid image root directory.", 
+                    "Error")
+            else:
+                Helpers.displayErrorMsg(
+                    "Invalid Camera Configuration", 
+                    "Please specify a valid camera configuration file.", 
+                    "Error")
+        
+        else:
+            Helpers.displayErrorMsg(
+                "No User ID", 
+                "Please specify a user ID first (first letter of first name +"
+                " first letter of last name).", 
+                "Error")
+
+# --- initialization -------------------------------------------------------- #            
+    def _initActions(self):
+        """ Init actions for the window. """
+        self.btn_browse_root_dir.clicked.connect(self.onBrowseRootDir)
+        self.btn_browse_config.clicked.connect(self.onBrowseConfig)
+        self.btn_ok.clicked.connect(self.onOk)
+        
+        self.lineEdit_user_id.textChanged.connect(self.onUserIdChanged)
+        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())
         
     def _initUi(self):  
         """ Init the UI. """
@@ -220,82 +299,4 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         self.label_choose_root_dir.setText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Choose an image root directory.", None))
         self.lineEdit_root_dir.setText("")
         self.lineEdit_root_dir.setPlaceholderText(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to image root directory...", None))
-        self.lineEdit_root_dir.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to directory containing folders named YYYY_MM that contain the photos.", None))
-    
-    def onBrowseRootDir(self):
-        """ Function that opens a dialog for the user to select an image root
-        directory. """ 
-        filename = QtWidgets.QFileDialog.getExistingDirectory(
-            self, self.tr("Select image root directory"), "", 
-            QtWidgets.QFileDialog.ShowDirsOnly)
-        
-        print(f"WelcomeWindow: onBrowseRootDir {filename}")
-        
-        if len(filename) > 0: 
-            if os.path.isdir(filename):
-                self.lineEdit_root_dir.setText(filename)
-                self.main_window.page_settings.lineEdit_root_dir.setText(filename)
-    
-    def onUserIdChanged(self, text):
-        """ Handles when user ID is changed. It adaptes the user ID on 
-        settings page. """
-        # set user ID on settings page
-        self.main_window.page_settings.lineEdit_user_id.setText(text)
-    
-    def onBrowseConfig(self):
-        """ Opens a file explorer to browse for a camera configuration file
-        and adapts the config path on settings page accordingly. """
-        if self.main_window is not None:
-            filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
-            path = filename[0]
-            
-            # check if path is valid
-            if path != "" and os.path.isfile(path): 
-                with open(path) as file:
-                    data = json.load(file)
-            
-                # check format of file
-                if(self.main_window.page_settings.check_config_format(data)):
-                    self.lineEdit_config.setText(path)
-                    self.main_window.page_settings.apply_configFile(path)
-                    
-    def onOk(self):
-        """ Handles clicking on the confirmation button: It closes the current
-        window (if a user ID and config path are entered) and enables the
-        main window. """
-        # check if user ID is entered
-        if self.lineEdit_user_id.text() != "":
-            # check if config file is selected
-            if self.lineEdit_config.text() != "" and os.path.isfile(self.lineEdit_config.text()):
-                if self.lineEdit_root_dir.text() != "" and os.path.isdir(self.lineEdit_root_dir.text()):
-                    # close welcome window
-                    self.close()
-                    
-                    # enable main window
-                    self.main_window.setEnabled(True)
-                else:
-                    Helpers.displayErrorMsg(
-                    "Invalid Image Root Directory", 
-                    "Please specify a valid image root directory.", 
-                    "Error")
-            else:
-                Helpers.displayErrorMsg(
-                    "Invalid Camera Configuration", 
-                    "Please specify a valid camera configuration file.", 
-                    "Error")
-        
-        else:
-            Helpers.displayErrorMsg(
-                "No User ID", 
-                "Please specify a user ID first (first letter of first name +"
-                " first letter of last name).", 
-                "Error")
-        
-    def _initActions(self):
-        """ Init actions for the window. """
-        self.btn_browse_root_dir.clicked.connect(self.onBrowseRootDir)
-        self.btn_browse_config.clicked.connect(self.onBrowseConfig)
-        self.btn_ok.clicked.connect(self.onOk)
-        
-        self.lineEdit_user_id.textChanged.connect(self.onUserIdChanged)
-        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())
+        self.lineEdit_root_dir.setToolTip(QtCore.QCoreApplication.translate("WelcomeWindow", u"Path to directory containing folders named YYYY_MM that contain the photos.", None))       

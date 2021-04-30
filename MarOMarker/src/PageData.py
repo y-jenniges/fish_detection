@@ -9,13 +9,7 @@ from Predicter import Predicter, PredictionWorker
 from DistanceMeasurer import DistanceMeasurer
 
 
-#IMAGE_DIRECTORY_ROOT = "T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1/"
-#IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Documents/Uni/UniBremen/Semester4/MA/Coding/fish_detection/data/maritime_dataset_25/training_data_animals/"
-#IMAGE_DIRECTORY_ROOT = "G:/Universität/UniBremen/Semester4/Data/moreTestData/"
-#IMAGE_DIRECTORY_ROOT = "C:/Users/yjenn/Desktop/usability-test/input_images/"
-
 IMAGE_SIZE = (4272, 2848)
-#IMAGE_SIZE = (2848, 4272)
 
 class PageData(QtWidgets.QWidget): 
     """ Class to create the data page of the software.
@@ -195,7 +189,7 @@ class PageData(QtWidgets.QWidget):
             print(img_root_dir)
             print(directory)
             # enable frame to manipulate data properties
-            self.frame_data_information.setEnabled(True) # @todo always enabled
+            self.frame_data_information.setEnabled(True) 
             
             # if directory does not exist, clear the image directory
             if not os.path.isdir(directory):
@@ -871,49 +865,6 @@ class PageData(QtWidgets.QWidget):
         
         return frame_data_information
     
-    def _initUi(self):
-        """ Initializes the UI of data page """
-        self.setObjectName("page_data")
-
-        # main layout
-        self.layout_page_data = QtWidgets.QVBoxLayout(self)
-        self.layout_page_data.setContentsMargins(0, 0, 0, 0)
-        self.layout_page_data.setSpacing(0)
-        self.layout_page_data.setObjectName("layout_page_data")
-        
-        # create the blue top bar
-        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", 
-                                     "frame_dataBar", self)     
-               
-        # create the cotrol bar containing the menu
-        self.frame_controlBar = MenuFrame("Data", 
-                                          "frame_controlBar_data", self)  
-   
-        # create the main frame for the data
-        self.frame_data = self._createFrameData()
-        
-        # add widgets to data page
-        self.layout_page_data.addWidget(self.frame_topBar)
-        self.layout_page_data.addWidget(self.frame_controlBar)
-        self.layout_page_data.addWidget(self.frame_data)
-
-    def _initActions(self):
-        """ Function to initialize the actions on data page """
-        self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
-        
-        self.btn_img_dir.clicked.connect(self.onBrowseImageDir)
-        self.btn_out_dir.clicked.connect(self.onBrowseOutDir)
-        self.btn_nn_activation.clicked.connect(self.onNnActivated)
-        self.btn_pred_check.clicked.connect(self.onCheckPredictions)
-        self.btn_rectify_match.clicked.connect(self.onRectifyMatch)
-        self.btn_check_match.clicked.connect(self.onCheckMatch)
-        self.btn_length_measurement.clicked.connect(self.onCalcLength)
-        
-        self.lineEdit_img_dir.editingFinished.connect(self.onImageDirEditChanged)
-        self.lineEdit_output_dir.editingFinished.connect(self.onOutDirChanged)
-        self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
-        self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)
-    
     def onNnFinished(self):
         self.setEnabled(True)
         
@@ -954,7 +905,8 @@ class PageData(QtWidgets.QWidget):
         """
         Handles the activation of the "run neural network" button.
         It gets the current image list from the photo viewer that it applies 
-        the neural network to. It appends the new data to the data model.
+        the neural network to (in a separate thread). It appends the new data 
+        to the data model.
         """
         # check if there is a valid input image directory
         if not os.path.isdir(self.lineEdit_img_dir.text()):
@@ -980,8 +932,6 @@ class PageData(QtWidgets.QWidget):
                 "Error")
             return
         
-        
-        # --------------- new
         if self.predicter is not None:
             # reset progress bar
             self.progressBar_nn.setValue(0)
@@ -1020,72 +970,7 @@ class PageData(QtWidgets.QWidget):
             # start prediction       
             self.setEnabled(False)
             self.thread.start()
-               
-        # --------------- new
-        return
-        
-
-        
-        
-        # create a thread for the neural network  @todo
-        print("activated, net not none")
-        
-        # get image path list from photo viewer
-        img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-        
-        print("916: img_list created")
-        print(img_list)
-			
-        for path in img_list[0]:
-				
-            print("iterate over pathes")
-			
-            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
-            
-            print(file_id)
-				
-            # predict only images that are not yet in the result file
-            #if not file_id in self.models.model_animals.data["file_id"].values:
-
-            # get experiment and user ID
-            exp_id = self.lineEdit_exp_id.text()
-            user_id = self.frame_topBar.label_user_id.text()
-            
-            print(exp_id)
-            print(user_id)
-            
-            # @todo idea here: make predicter class inherit from QThread??
-				
-            # start image predictions
-            #self.predicter.start()
-            df = self.predicter.predictImage(path, file_id, exp_id, user_id)
-            
-            print("predicted")
-            print(df)
-				
-            row = len(self.models.model_animals.data)
-            count = len(df)
-				
-            print(row)
-            print(count)
-            
-            # insert data into model
-            self.models.model_animals.insertDfRows(row=row, 
-                                                  count=count, 
-                                                  df=df,
-                                                  image_path=path, 
-                                                  image_remark="", 
-                                                  experiment_id=exp_id, 
-                                                  user_id=user_id)
-
-            print("data inserted into model")
-
-            # update label displaying number of predicted images
-            num_imgs = int(self.label_nn_activation_number.text()) + 1
-            self.label_nn_activation_number.setText(str(num_imgs))
-				
-            print(num_imgs)
-	   
+  
     def onCheckPredictions(self):
         """ Handles the click on 'Check predictions on home screen' button by
         navigating to the home screen. """ 
@@ -1104,8 +989,8 @@ class PageData(QtWidgets.QWidget):
             
         # iterate over left images, rectify and match   
         for i in range(len(img_list[0])):
-            right_image = img_list[1][i]#.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_L") + "_R.jpg"
-            left_image = img_list[0][i]#.rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R") + "_L.jpg"
+            right_image = img_list[1][i]
+            left_image = img_list[0][i]
             print(right_image)
             print(left_image)
             print()
@@ -1259,3 +1144,46 @@ class PageData(QtWidgets.QWidget):
         self.onPrefixEditChanged()
         self.onExpIdEditChanged()
         
+# --- initialization -------------------------------------------------------- # 
+    def _initUi(self):
+        """ Initializes the UI of data page """
+        self.setObjectName("page_data")
+
+        # main layout
+        self.layout_page_data = QtWidgets.QVBoxLayout(self)
+        self.layout_page_data.setContentsMargins(0, 0, 0, 0)
+        self.layout_page_data.setSpacing(0)
+        self.layout_page_data.setObjectName("layout_page_data")
+        
+        # create the blue top bar
+        self.frame_topBar = TopFrame(":/icons/icons/data_w.png", 
+                                     "frame_dataBar", self)     
+               
+        # create the cotrol bar containing the menu
+        self.frame_controlBar = MenuFrame("Data", 
+                                          "frame_controlBar_data", self)  
+   
+        # create the main frame for the data
+        self.frame_data = self._createFrameData()
+        
+        # add widgets to data page
+        self.layout_page_data.addWidget(self.frame_topBar)
+        self.layout_page_data.addWidget(self.frame_controlBar)
+        self.layout_page_data.addWidget(self.frame_data)
+
+    def _initActions(self):
+        """ Function to initialize the actions on data page """
+        self.calendarWidget.selectionChanged.connect(self.onCalenderSelectionChanged)
+        
+        self.btn_img_dir.clicked.connect(self.onBrowseImageDir)
+        self.btn_out_dir.clicked.connect(self.onBrowseOutDir)
+        self.btn_nn_activation.clicked.connect(self.onNnActivated)
+        self.btn_pred_check.clicked.connect(self.onCheckPredictions)
+        self.btn_rectify_match.clicked.connect(self.onRectifyMatch)
+        self.btn_check_match.clicked.connect(self.onCheckMatch)
+        self.btn_length_measurement.clicked.connect(self.onCalcLength)
+        
+        self.lineEdit_img_dir.editingFinished.connect(self.onImageDirEditChanged)
+        self.lineEdit_output_dir.editingFinished.connect(self.onOutDirChanged)
+        self.lineEdit_img_prefix.editingFinished.connect(self.onPrefixEditChanged)
+        self.lineEdit_exp_id.editingFinished.connect(self.onExpIdEditChanged)

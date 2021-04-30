@@ -64,12 +64,7 @@ class ImageArea(QtWidgets.QGraphicsView):
             self.setSceneRect(rect)
             if self.hasPhoto():
                 unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
-                self.scale(1 / unity.width(), 1 / unity.height())
-                # viewrect = self.viewport().rect()
-                # scenerect = self.transform().mapRect(rect)
-                # factor = min(viewrect.width() / scenerect.width(),
-                #               viewrect.height() / scenerect.height())
-                # self.scale(factor, factor)   
+                self.scale(1 / unity.width(), 1 / unity.height())  
             self._zoom = 0
 
     def setPhoto(self, pixmap=None):     
@@ -758,7 +753,6 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
         self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
    
-    
     def _initUi(self):
         """ Defines and draws the UI elements. """
         # -- frame for the two images displayed below each other ------------ #

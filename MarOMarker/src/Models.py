@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
 import Helpers
-#from Predicter import Predicter
 
 # constants for initalizing data models
 IMAGE_REMARKS= ["", "Low turbidity", "Medium turbidity", "High turbidity", 
@@ -17,6 +16,7 @@ GROUP_ICON_LIST = [":/animal_markings/animal_markings/square_blue.png",
                    ":/animal_markings/animal_markings/square_orange.png", 
                    ":/animal_markings/animal_markings/square_black.png", 
                    ":/animal_markings/animal_markings/square_gray.png"]
+
 
 class AnimalGroup(enum.Enum):
     """ 

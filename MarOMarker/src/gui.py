@@ -274,13 +274,6 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_settings.lineEdit_config_path.setToolTip(_translate("MainWindow", "Select a camera configuration file using the \"Load\" button on the right"))
         self.page_settings.lineEdit_config_path.setPlaceholderText(_translate("MainWindow", "Path to camera configuration file..."))    
         self.page_settings.btn_load.setText(_translate("MainWindow", "Browse"))
-        #self.page_settings.btn_save.setText(_translate("MainWindow", "Save"))
-        # self.page_settings.label_offset.setText(_translate("MainWindow", "Y-offset"))
-        # self.page_settings.label_unit_offset.setText(_translate("MainWindow", "pixel"))
-        # self.page_settings.label_distance_cameras.setText(_translate("MainWindow", "Distance between cameras"))
-        # self.page_settings.label_unit_ditance_cameras.setText(_translate("MainWindow", "mm"))
-        # self.page_settings.label_distance_chip_lense.setText(_translate("MainWindow", "Distance between chip and lense"))
-        # self.page_settings.label_unit_chip_lense.setText(_translate("MainWindow", "pixel"))
         
         # --- neural network tab
         self.page_settings.tabWidget.setTabText(self.page_settings.tabWidget.indexOf(self.page_settings.tab_neuralNet), _translate("MainWindow", "Neural Network"))

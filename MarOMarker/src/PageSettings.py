@@ -48,7 +48,174 @@ class PageSettings(QtWidgets.QWidget):
         
         # default image root directory
         self.lineEdit_root_dir.setText("T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1")
+                 
+# --- actions in camera tab ------------------------------------------------- #        
+    def camera_spinBox_changed(self):
+        """ Empties the config file path when one of the spinboxes is changed. """
+        # remove file path (it is not valid for the new spinBox values anymore)
+        self.lineEdit_config_path.setText("")
+
+    def browse_config(self):
+        """ Opens an explorer window with the option to browse for CSV files. """
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
+        self.apply_configFile(filename[0])
+   
+    def apply_configFile(self, path):
+        """ Check if the given path contains a valid config file and update 
+        the values on th GUI accordingly. """
+        # check if path is valid
+        if path != "" and os.path.isfile(path): 
+            #df = pd.read_csv(path)
+            with open(path) as f:
+                data = json.load(f)
+        
+            # check format of file
+            if(self.check_config_format(data)):                
+                # display the path to the file in the respective lineEdit
+                self.lineEdit_config_path.setText(path)
                 
+                # tell the data page about the change
+                self.parent().parent().page_data.onCameraConfigChanged(path)
+            
+            else:
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.setText("File Format Error")
+                msg.setInformativeText(
+                    "The given CSV file is not in the required format. Please "+\
+                    "make sure that it has the following keys: \n"
+                    "   'mtx_L' (left camera matrix) \n   'dist_L' (distance matrix of left camera) \n   'mtx_R' (right camera matrix) \n   'dist_R' (distance matrix of right camera) \n   'R' (rotation matrix) \n   'T' (translation matrix)")
+                msg.setWindowTitle("Error")
+                msg.exec_()  
+            
+        
+    def check_config_format(self, config_data):
+        """ Checks if the necessary columns are present in the given camera
+        config dataframe. """
+        # check if json file has necessary keys
+        to_check = ["mtx_L", "dist_L", "mtx_R", "dist_R", "R", "T"]
+        for attribute in to_check:
+            if attribute not in config_data: return False
+        
+        return True
+        
+    def save_config(self):
+        """ Opens a 'Save file' dialogue to save the current settings of the
+        camera configuration in a file. """
+        # create the file dialog
+        dialog = QtWidgets.QFileDialog()
+        filename = dialog.getSaveFileName(self, 'Save file', filter="*.csv")
+        
+        # fill the dataframe and write it
+        data = {"y-offset": [self.spinBox_offset.value()], 
+                "camera-distance": [self.spinBox_distance_cameras.value()], 
+                "chip-distance": [self.spinBox_distance_chip_lense.value()]}
+        df = pd.DataFrame(data)  
+        df.to_csv(filename[0], index=False)
+
+        # update the lineEdit
+        self.lineEdit_config_path.setText(filename[0])
+          
+# --- actions in nn tab ----------------------------------------------------- #   
+    def nn_path_changed(self, model_path):
+        """ Loads the neural network specified by the given path. """
+        print("load model...")
+        if not self.parent().parent().page_data.predicter.loadNeuralNet(model_path):
+            # if loading of neural net was not successfull,
+            	# block signal (we do not want to call nn_path_changed again) 
+            # and set empty text in line edit
+            self.lineEdit_nn.blockSignals(True)
+            self.lineEdit_nn.setText("")
+            self.lineEdit_nn.blockSignals(False)
+                
+    def browse_for_nn(self):
+        """ Opens explorer to search for a neural network. """
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        path = filename[0]
+        
+        # check if path is valid
+        if path != "" and os.path.isfile(path):    
+            self.lineEdit_nn.setText(path)
+        
+# --- actions in species tab ------------------------------------------------ #
+    def browse_for_species_image(self):
+        """ Open a file dialogue to open an image of a species. It's title 
+        will be used as name for the species. """
+        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
+        self.addSpecies(filename[0])
+          
+    def removeSpecies(self):
+        """ Remove a species from the data model. """
+        row = self.listView_species.currentIndex().row()
+        self.models.removeSpecies(row)
+        
+    def addSpecies(self, image_path, text=None):
+        """ Add a species to the data model. """
+        # take text as title or the image name
+        if text is None:
+            text = os.path.basename(image_path).split('.')[0]
+
+        self.models.addSpecies(text, image_path)
+
+# --- actions in user tab --------------------------------------------------- #  
+    def user_id_changed(self):
+        """ Emit the userIdChanged signal when the user lineEdit is changed. """
+        self.userIdChanged.emit(self.lineEdit_user_id.text())
+
+# --- actions in other tab -------------------------------------------------- #  
+    #def root_dir_changed(self, root_dir):
+    #    """ Loads the image root directory specified by the given path. """
+       # self.root_dir = root_dir
+            
+    def browse_for_root_dir(self):
+        """ Open file explorer to browse for a root directory for the images. 
+        It is used by the calendar widget to find the correct image directory 
+        according to the selected date. """
+        folderpath = QtWidgets.QFileDialog.getExistingDirectory(
+            self, 'Select folder as root image directory')
+        
+        # check if path is valid
+        if folderpath != "" :    
+            self.lineEdit_root_dir.setText(folderpath)
+
+# --- functions for saving and restoring options ---------------------------- # 
+    def saveCurrentValues(self, settings):       
+        """ Saves the current camera settings in the given settings object. """
+        settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
+        settings.setValue("nnPath", self.lineEdit_nn.text()) 
+        settings.setValue("userId", self.lineEdit_user_id.text())
+        settings.setValue("imageRootDirectory", self.lineEdit_root_dir.text())
+
+    def restoreValues(self, settings):
+        """ Restores settings from previous session. """
+        self.apply_configFile(settings.value("cameraConfigPath"))
+        self.lineEdit_nn.setText(settings.value("nnPath"))
+        self.lineEdit_user_id.setText(settings.value("userId"))
+        self.lineEdit_root_dir.setText(settings.value("imageRootDirectory"))
+        
+# --- initialization -------------------------------------------------------- #   
+    def _initActions(self):
+        """ Initalizes the actions triggered by user interactions. """
+        # camera tab      
+        self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
+        self.btn_load.clicked.connect(self.browse_config)
+        
+        # neural net tab
+        self.btn_browse_nn.clicked.connect(self.browse_for_nn)
+        self.lineEdit_nn.textChanged.connect(self.nn_path_changed) #@todo kann man das überhaupt anpassen?
+        
+        # species tab
+        self.btn_add_species.clicked.connect(self.browse_for_species_image)
+        self.btn_remove_species.clicked.connect(self.removeSpecies)  
+        
+        # user tab
+        self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
+        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())      
+        
+        # other tab
+        self.btn_browse_root_dir.clicked.connect(self.browse_for_root_dir)
+        #self.lineEdit_root_dir.textChanged.connect(self.root_dir_changed)
+            
     def _initUi(self):  
         """
         Function that initializes the UI components for the settings page.
@@ -335,188 +502,12 @@ class PageSettings(QtWidgets.QWidget):
         self.btn_load.setMaximumSize(QtCore.QSize(16777215, 40))
         self.btn_load.setObjectName("btn_load")
         
-        # button for saving current camera config
-        # self.btn_save = QtWidgets.QPushButton(frame_config)
-        # self.btn_save.setMinimumSize(QtCore.QSize(125, 40))
-        # self.btn_save.setMaximumSize(QtCore.QSize(16777215, 40))
-        # self.btn_save.setObjectName("btn_save")
-        
         # add widgets to layout
         layout_config.addWidget(self.lineEdit_config_path)
         layout_config.addWidget(self.btn_load)
-        #layout_config.addWidget(self.btn_save)
-        
-        
-        # --- frame for offset options -------------------------------------- # 
-        # frame_offset = QtWidgets.QFrame(frame_camera_options)
-        # frame_offset.setMinimumSize(QtCore.QSize(0, 30))
-        # frame_offset.setMaximumSize(QtCore.QSize(16777215, 60))
-        # frame_offset.setFrameShape(QtWidgets.QFrame.NoFrame)
-        # frame_offset.setObjectName("frame_offset")
-        
-        # # layout
-        # layout_offset = QtWidgets.QHBoxLayout(frame_offset)
-        # layout_offset.setContentsMargins(0, 0, 0, 0)
-        # layout_offset.setObjectName("layout_offset")
-        
-        # # label to display parameter name "offset"
-        # self.label_offset = QtWidgets.QLabel(frame_offset)
-        # self.label_offset.setObjectName("label_offset")
-        
-        # # horizontal spacer
-        # spacerItem29 = QtWidgets.QSpacerItem(40, 20, 
-        #                                      QtWidgets.QSizePolicy.Expanding, 
-        #                                      QtWidgets.QSizePolicy.Minimum)
-             
-        # # spin box for the offset
-        # self.spinBox_offset = QtWidgets.QDoubleSpinBox(frame_offset)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-        #                                    QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(
-        #     self.spinBox_offset.sizePolicy().hasHeightForWidth())
-        # self.spinBox_offset.setSizePolicy(sizePolicy)
-        # self.spinBox_offset.setMinimumSize(QtCore.QSize(200, 40))
-        # self.spinBox_offset.setMaximumSize(QtCore.QSize(16777215, 40))
-        # self.spinBox_offset.setAlignment(
-        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        # self.spinBox_offset.setMaximum(9999.99)
-        # self.spinBox_offset.setObjectName("spinBox_offset")
-        
-        # # label to display the unit of the offset
-        # self.label_unit_offset = QtWidgets.QLabel(frame_offset)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-        #                                    QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(
-        #     self.label_unit_offset.sizePolicy().hasHeightForWidth())
-        # self.label_unit_offset.setSizePolicy(sizePolicy)
-        # self.label_unit_offset.setMinimumSize(QtCore.QSize(50, 0))
-        # self.label_unit_offset.setMaximumSize(QtCore.QSize(50, 16777215))
-        # self.label_unit_offset.setObjectName("label_unit_offset")
-             
-        # # add widgets to layout
-        # layout_offset.addWidget(self.label_offset)
-        # layout_offset.addItem(spacerItem29)
-        # layout_offset.addWidget(self.spinBox_offset)
-        # layout_offset.addWidget(self.label_unit_offset)
-        
-        
-        # # --- frame for camera distance options ----------------------------- #
-        # frame_distance_cameras = QtWidgets.QFrame(frame_camera_options)
-        # frame_distance_cameras.setMinimumSize(QtCore.QSize(0, 30))
-        # frame_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 60))
-        # frame_distance_cameras.setFrameShape(QtWidgets.QFrame.NoFrame)
-        # frame_distance_cameras.setObjectName("frame_distance_cameras")
-        
-        # # layout
-        # layout_distance = QtWidgets.QHBoxLayout(frame_distance_cameras)
-        # layout_distance.setContentsMargins(0, 0, 0, 0)
-        # layout_distance.setObjectName("layout_distance")
-        
-        # # label to display parameter name "distance between cameras"
-        # self.label_distance_cameras = QtWidgets.QLabel(frame_distance_cameras)
-        # self.label_distance_cameras.setObjectName("label_distance_cameras")
-              
-        # # horizontal spacer
-        # spacerItem30 = QtWidgets.QSpacerItem(40, 20, 
-        #                                      QtWidgets.QSizePolicy.Expanding, 
-        #                                      QtWidgets.QSizePolicy.Minimum)
-        
-        # # spin box for the distance between the cameras
-        # self.spinBox_distance_cameras = QtWidgets.QDoubleSpinBox(frame_distance_cameras)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-        #                                    QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(
-        #     self.spinBox_distance_cameras.sizePolicy().hasHeightForWidth())
-        # self.spinBox_distance_cameras.setSizePolicy(sizePolicy)
-        # self.spinBox_distance_cameras.setMinimumSize(QtCore.QSize(200, 40))
-        # self.spinBox_distance_cameras.setMaximumSize(QtCore.QSize(16777215, 40))
-        # self.spinBox_distance_cameras.setAlignment(
-        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        # self.spinBox_distance_cameras.setMaximum(9999.99)
-        # self.spinBox_distance_cameras.setObjectName("spinBox_distance_cameras")
-        
-        # # label to display the unit of the distance between the cameras
-        # self.label_unit_ditance_cameras = QtWidgets.QLabel(frame_distance_cameras)
-        # self.label_unit_ditance_cameras.setMinimumSize(QtCore.QSize(50, 0))
-        # self.label_unit_ditance_cameras.setMaximumSize(QtCore.QSize(50, 16777215))
-        # self.label_unit_ditance_cameras.setObjectName("label_unit_ditance_cameras")
-        
-        # # add widgets to layout
-        # layout_distance.addWidget(self.label_distance_cameras)
-        # layout_distance.addItem(spacerItem30)
-        # layout_distance.addWidget(self.spinBox_distance_cameras)
-        # layout_distance.addWidget(self.label_unit_ditance_cameras)
-        
-        
-        # # --- frame for distance chip lense options ------------------------- #
-        # frame_distance_chip_lense = QtWidgets.QFrame(frame_camera_options)
-        # frame_distance_chip_lense.setMinimumSize(QtCore.QSize(0, 30))
-        # frame_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 60))
-        # frame_distance_chip_lense.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        # frame_distance_chip_lense.setFrameShadow(QtWidgets.QFrame.Raised)
-        # frame_distance_chip_lense.setObjectName("frame_distance_chip_lense")
-        
-        # # layout
-        # layout_distance_cl = QtWidgets.QHBoxLayout(frame_distance_chip_lense)
-        # layout_distance_cl.setContentsMargins(0, 0, 0, 0)
-        # layout_distance_cl.setObjectName("layout_distance_cl")
-        
-        # # label to display name of parameter "distance between chip and lense"
-        # self.label_distance_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
-        # self.label_distance_chip_lense.setObjectName("label_distance_chip_lense")
- 
-        # # horizontal spacer
-        # spacerItem31 = QtWidgets.QSpacerItem(40, 20, 
-        #                                      QtWidgets.QSizePolicy.Expanding, 
-        #                                      QtWidgets.QSizePolicy.Minimum)
-
-        # # spin box for the distance between chip and lense
-        # self.spinBox_distance_chip_lense = QtWidgets.QDoubleSpinBox(frame_distance_chip_lense)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, 
-        #                                    QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(
-        #     self.spinBox_distance_chip_lense.sizePolicy().hasHeightForWidth())
-        # self.spinBox_distance_chip_lense.setSizePolicy(sizePolicy)
-        # self.spinBox_distance_chip_lense.setMinimumSize(QtCore.QSize(200, 40))
-        # self.spinBox_distance_chip_lense.setMaximumSize(QtCore.QSize(16777215, 40))
-        # self.spinBox_distance_chip_lense.setAlignment(
-        #     QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        # self.spinBox_distance_chip_lense.setMaximum(99999.99)
-        # self.spinBox_distance_chip_lense.setObjectName("spinBox_distance_chip_lense")
-        
-        # # label to display the unit of the distance between chip and lense
-        # self.label_unit_chip_lense = QtWidgets.QLabel(frame_distance_chip_lense)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, 
-        #                                    QtWidgets.QSizePolicy.Preferred)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(
-        #     self.label_unit_chip_lense.sizePolicy().hasHeightForWidth())
-        # self.label_unit_chip_lense.setSizePolicy(sizePolicy)
-        # self.label_unit_chip_lense.setMinimumSize(QtCore.QSize(50, 0))
-        # self.label_unit_chip_lense.setMaximumSize(QtCore.QSize(50, 16777215))
-        # self.label_unit_chip_lense.setObjectName("label_unit_chip_lense")
-        
-        # # add widgets to layout
-        # layout_distance_cl.addWidget(self.label_distance_chip_lense)
-        # layout_distance_cl.addItem(spacerItem31)
-        # layout_distance_cl.addWidget(self.spinBox_distance_chip_lense)
-        # layout_distance_cl.addWidget(self.label_unit_chip_lense)
-        
         
         # --- adding widgets to content (camera options) and main frame ----- #
         layout_camera_options.addWidget(frame_config)
-        #layout_camera_options.addWidget(frame_offset)
-        #layout_camera_options.addWidget(frame_distance_cameras)
-        #layout_camera_options.addWidget(frame_distance_chip_lense)
         layout_camera_options.addItem(spacerItem32)
         
         layout.addWidget(frame_camera_options, 0, 0, 1, 1)
@@ -776,7 +767,8 @@ class PageSettings(QtWidgets.QWidget):
         self.lineEdit_user_id.setReadOnly(False)
         self.lineEdit_user_id.setObjectName("lineEdit_user_id")
         
-        # set a validator to ensure that the user ID consists of up to three letters (at least one letter)
+        # set a validator to ensure that the user ID consists of up to three 
+        # letters (at least one letter)
         reg_ex = QtCore.QRegExp("[a-zA-Z]{1,3}")
         input_validator = QtGui.QRegExpValidator(reg_ex, self.lineEdit_user_id)
         self.lineEdit_user_id.setValidator(input_validator)
@@ -896,191 +888,3 @@ class PageSettings(QtWidgets.QWidget):
         layout.addItem(spacerItem40, 1, 0, 1, 1)
         
         return tab_other
-    
-    def _initActions(self):
-        """ Initalizes the actions triggered by user interactions. """
-        # camera tab      
-        self.lineEdit_config_path.textChanged.connect(self.apply_configFile)
-        self.btn_load.clicked.connect(self.browse_config)
-        #self.btn_save.clicked.connect(self.save_config)       
-        #self.spinBox_offset.valueChanged.connect(self.camera_spinBox_changed)
-        #self.spinBox_distance_cameras.valueChanged.connect(self.camera_spinBox_changed)
-        #self.spinBox_distance_chip_lense.valueChanged.connect(self.camera_spinBox_changed)
-        
-        # neural net tab
-        self.btn_browse_nn.clicked.connect(self.browse_for_nn)
-        self.lineEdit_nn.textChanged.connect(self.nn_path_changed) #@todo kann man das überhaupt anpassen?
-        
-        # species tab
-        self.btn_add_species.clicked.connect(self.browse_for_species_image)
-        self.btn_remove_species.clicked.connect(self.removeSpecies)  
-        
-        # user tab
-        self.lineEdit_user_id.textChanged.connect(self.user_id_changed)
-        self.lineEdit_user_id.returnPressed.connect(lambda: self.focusNextChild())      
-        
-        # other tab
-        self.btn_browse_root_dir.clicked.connect(self.browse_for_root_dir)
-        #self.lineEdit_root_dir.textChanged.connect(self.root_dir_changed)
-                
-# --- actions in camera tab ------------------------------------------------- #        
-    def camera_spinBox_changed(self):
-        """ Empties the config file path when one of the spinboxes is changed. """
-        # remove file path (it is not valid for the new spinBox values anymore)
-        self.lineEdit_config_path.setText("")
-
-    def browse_config(self):
-        """ Opens an explorer window with the option to browse for CSV files. """
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
-        self.apply_configFile(filename[0])
-   
-    def apply_configFile(self, path):
-        """ Check if the given path contains a valid config file and update 
-        the values on th GUI accordingly. """
-        # check if path is valid
-        if path != "" and os.path.isfile(path): 
-            #df = pd.read_csv(path)
-            with open(path) as f:
-                data = json.load(f)
-        
-            # check format of file
-            if(self.check_config_format(data)):
-                # save old values of spinBoxes
-                # self.spinBox_offset_oldValue = self.spinBox_offset.value()
-                # self.spinBox_distance_cameras_oldValue = self.spinBox_distance_cameras.value()
-                # self.spinBox_distance_chip_lense_oldValue = self.spinBox_distance_chip_lense.value()
-                
-                # set the respective spinBox values
-                # self.spinBox_offset.setValue(data["y-offset"][0])
-                # self.spinBox_distance_cameras.setValue(data["camera-distance"][0])
-                # self.spinBox_distance_chip_lense.setValue(data["chip-distance"][0])
-                
-                # display the path to the file in the respective lineEdit
-                self.lineEdit_config_path.setText(path)
-                
-                # tell the data page about the change
-                self.parent().parent().page_data.onCameraConfigChanged(path)
-            
-            else:
-                msg = QtWidgets.QMessageBox()
-                msg.setIcon(QtWidgets.QMessageBox.Critical)
-                msg.setText("File Format Error")
-                msg.setInformativeText(
-                    "The given CSV file is not in the required format. Please "+\
-                    "make sure that it has the following keys: \n"
-                    "   'mtx_L' (left camera matrix) \n   'dist_L' (distance matrix of left camera) \n   'mtx_R' (right camera matrix) \n   'dist_R' (distance matrix of right camera) \n   'R' (rotation matrix) \n   'T' (translation matrix)")
-                msg.setWindowTitle("Error")
-                msg.exec_()  
-            
-        
-    def check_config_format(self, config_data):
-        """ Checks if the necessary columns are present in the given camera
-        config dataframe. """
-        # check if json file has necessary keys
-        to_check = ["mtx_L", "dist_L", "mtx_R", "dist_R", "R", "T"]
-        for attribute in to_check:
-            if attribute not in config_data: return False
-        
-        return True
-        
-        # # check if the necessary columns are present in the dataframe
-        # if "y-offset" in df_config.columns \
-        # and "camera-distance" in df_config.columns \
-        # and "chip-distance" in df_config.columns:
-        #     return True
-        # else:
-        #     return False
-        
-    def save_config(self):
-        """ Opens a 'Save file' dialogue to save the current settings of the
-        camera configuration in a file. """
-        # create the file dialog
-        dialog = QtWidgets.QFileDialog()
-        filename = dialog.getSaveFileName(self, 'Save file', filter="*.csv")
-        
-        # fill the dataframe and write it
-        data = {"y-offset": [self.spinBox_offset.value()], 
-                "camera-distance": [self.spinBox_distance_cameras.value()], 
-                "chip-distance": [self.spinBox_distance_chip_lense.value()]}
-        df = pd.DataFrame(data)  
-        df.to_csv(filename[0], index=False)
-
-        # update the lineEdit
-        self.lineEdit_config_path.setText(filename[0])
-          
-# --- actions in nn tab ----------------------------------------------------- #   
-    def nn_path_changed(self, model_path):
-        """ Loads the neural network specified by the given path. """
-        print("load model...")
-        if not self.parent().parent().page_data.predicter.loadNeuralNet(model_path):
-            # if loading of neural net was not successfull,
-            	# block signal (we do not want to call nn_path_changed again) 
-            # and set empty text in line edit
-            self.lineEdit_nn.blockSignals(True)
-            self.lineEdit_nn.setText("")
-            self.lineEdit_nn.blockSignals(False)
-                
-    def browse_for_nn(self):
-        """ Opens explorer to search for a neural network. """
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        path = filename[0]
-        
-        # check if path is valid
-        if path != "" and os.path.isfile(path):    
-            self.lineEdit_nn.setText(path)
-        
-# --- actions in species tab ------------------------------------------------ #
-    def browse_for_species_image(self):
-        """ Open a file dialogue to open an image of a species. It's title 
-        will be used as name for the species. """
-        filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.png; *jpg")
-        self.addSpecies(filename[0])
-          
-    def removeSpecies(self):
-        """ Remove a species from the data model. """
-        row = self.listView_species.currentIndex().row()
-        self.models.removeSpecies(row)
-        
-    def addSpecies(self, image_path, text=None):
-        """ Add a species to the data model. """
-        # take text as title or the image name
-        if text is None:
-            text = os.path.basename(image_path).split('.')[0]
-
-        self.models.addSpecies(text, image_path)
-
-# --- actions in user tab --------------------------------------------------- #  
-    def user_id_changed(self):
-        """ Emit the userIdChanged signal when the user lineEdit is changed. """
-        self.userIdChanged.emit(self.lineEdit_user_id.text())
-
-# --- actions in other tab -------------------------------------------------- #  
-    #def root_dir_changed(self, root_dir):
-    #    """ Loads the image root directory specified by the given path. """
-       # self.root_dir = root_dir
-            
-    def browse_for_root_dir(self):
-        """ Open file explorer to browse for a root directory for the images. 
-        It is used by the calendar widget to find the correct image directory 
-        according to the selected date. """
-        folderpath = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select folder as root image directory')
-        
-        # check if path is valid
-        if folderpath != "" :    
-            self.lineEdit_root_dir.setText(folderpath)
-
-# --- functions for saving and restoring options ---------------------------- # 
-    def saveCurrentValues(self, settings):       
-        """ Saves the current camera settings in the given settings object. """
-        settings.setValue("cameraConfigPath", self.lineEdit_config_path.text())       
-        settings.setValue("nnPath", self.lineEdit_nn.text()) 
-        settings.setValue("userId", self.lineEdit_user_id.text())
-        settings.setValue("imageRootDirectory", self.lineEdit_root_dir.text())
-
-    def restoreValues(self, settings):
-        """ Restores settings from previous session. """
-        self.apply_configFile(settings.value("cameraConfigPath"))
-        self.lineEdit_nn.setText(settings.value("nnPath"))
-        self.lineEdit_user_id.setText(settings.value("userId"))
-        self.lineEdit_root_dir.setText(settings.value("imageRootDirectory"))
-        

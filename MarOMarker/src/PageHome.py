@@ -172,6 +172,127 @@ class PageHome(QtWidgets.QWidget):
         if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list[0]):
             self.photo_viewer.loadImageFromIndex(self.photo_viewer.cur_image_index)
 
+    def setComboboxImageRemark(self, text):
+        """ Add a text to the image remark combobx and data model. """
+        # if the remark is not in the combobox, add it. Else choose its index
+        index = self.comboBox_imgRemark.findText(text) 
+        
+        if self.comboBox_imgRemark.findText(text) == -1:
+            item = QtGui.QStandardItem(str(text))
+            item.setTextAlignment(QtCore.Qt.AlignLeft)
+            self.models.model_image_remarks.appendRow(item)
+            self.comboBox_imgRemark.setCurrentIndex(self.comboBox_imgRemark.count()-1)
+        else:
+            self.comboBox_imgRemark.setCurrentIndex(index)
+        
+        # get the current photo ID
+        cur_image_path = self.photo_viewer.image_list[0][self.photo_viewer.cur_image_index]
+        file_id = os.path.basename(cur_image_path)[:-6]
+    
+        # adapt the image remark in the data model
+        cur_indices = self.models.model_animals.data[
+            self.models.model_animals.data['file_id']==file_id].index
+        for idx in cur_indices:
+            self.models.model_animals.data.loc[idx, 'image_remarks'] = text
+    
+    def onNewImage(self, remark):
+        """ Sets the text in the image remark combobox according to the 
+        newly loaded image. """
+        # adapt image remark combobox
+        self.setComboboxImageRemark(remark)
+    
+    def switchImageMode(self):
+        """ Switches the image mode depending on the current image mode """
+        cur_mode = self.btn_imgSwitch.text()
+        if cur_mode == "L": 
+            self.displayRightImage()
+        elif cur_mode == "R":
+            self.displayBothImages()
+        else:
+            self.displayLeftImage()
+        
+    def displayLeftImage(self):
+        """ Display left image. """
+        self.btn_imgSwitch.setText("L")
+        self.btn_match.setIcon(QtGui.QIcon())
+        self.btn_match.setEnabled(False)
+        self.photo_viewer.activateImageMode("L")
+
+    def displayRightImage(self):
+        """ Display right image. """
+        self.btn_imgSwitch.setText("R")
+        self.btn_match.setIcon(QtGui.QIcon())
+        self.btn_match.setEnabled(False)
+        self.photo_viewer.activateImageMode("R")
+    
+    def displayBothImages(self):
+        """ Display both images. """
+        self.btn_imgSwitch.setText("LR")
+        if self.is_match_animal_active:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
+        else:
+            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
+        self.btn_match.setEnabled(True)
+        self.photo_viewer.activateImageMode("LR")
+     
+    def mousePressEvent(self, event):
+        """ On mouse press, update visibility of zoom slider widget. """
+        super().mousePressEvent(event)          
+        # hide the zoom widget if it is open and a click somewhere else is registered
+        if self.widget_zoom.isVisible() and not self.widget_zoom.rect().contains(event.pos()):
+            self.openZoomWidget()
+
+    def resizeEvent(self, event):
+        """ Make sure that zoom slider widget is placed correctly when 
+        program is resized. """
+        super().resizeEvent(event)
+        self.placeZoomWidget()
+  
+    def placeZoomWidget(self):
+        """ Place the zoom widget under the zoom button. """
+        # reset position of zoom widget
+        self.widget_zoom.move(0,0)
+        
+        # map the position of the zoom button to the local coordinate system 
+        # of the zoom widget
+        pos = self.btn_zoom.mapToGlobal(self.btn_zoom.rect().topLeft())
+        p = self.widget_zoom.mapFromGlobal(pos)
+        
+        # move the zoom widget a bit below the button position and center it below the button
+        self.widget_zoom.move(p + QtCore.QPoint(-self.widget_zoom.width()/2 + 20, 50))        
+
+# --- initialization -------------------------------------------------------- # 
+    def _initActions(self):
+        """ Define actions triggered by user interaction with the UI. """
+        # connecting signals and slots
+        self.btn_add.clicked.connect(self.on_add_clicked)
+        self.btn_delete.clicked.connect(self.on_remove_clicked)
+        self.btn_next.clicked.connect(self.photo_viewer.on_next_animal)
+        self.btn_previous.clicked.connect(self.photo_viewer.on_previous_animal)
+        self.btn_zoom.clicked.connect(self.openZoomWidget)
+        self.btn_imgSwitch.clicked.connect(self.switchImageMode)
+        self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
+        self.photo_viewer.newImageLoaded.connect(self.onNewImage)
+        self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
+        self.btn_filter.clicked.connect(self.on_filter_clicked)
+        self.btn_match.clicked.connect(self.on_match_clicked)
+        
+        # --- define shortcuts ------------------------------------------------------------------------------------------- #  
+        self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
+        self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.on_next_animal)
+        self.shortcut_add_animal = QtWidgets.QShortcut(QtGui.QKeySequence("+"), self.btn_add, self.on_add_clicked)
+        self.shortcut_match_animal = QtWidgets.QShortcut(QtGui.QKeySequence("m"), self.btn_match, self.on_match_clicked)
+        self.shortcut_remove_animal = QtWidgets.QShortcut(QtGui.QKeySequence("-"), self.btn_delete, self.on_remove_clicked)
+        self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
+        self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
+        self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
+      
+            
+    def _initModels(self):
+        """ Add data models to respective UI elements. """
+        self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
+        self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
+        
     def _initUi(self):
         """ Initalize the UI of the home page. """
         # --- top bar  ----------------------------------------------------- #         
@@ -181,10 +302,6 @@ class PageHome(QtWidgets.QWidget):
         
         
         # --- control bar  ------------------------------------------------- #         
-        # create the cotrol bar containing the menu
-        #self.frame_controlBar = MenuFrame("Home", "frame_controlBar_home")  
-       
-        
         # main frame
         self.frame_controlBar = self._createHomeControlBar()
         self.frame_controlBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, 
@@ -318,12 +435,6 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark.setMaximumSize(QtCore.QSize(16777215, 40))
         self.comboBox_imgRemark.setEditable(True)
         self.comboBox_imgRemark.setObjectName("comboBox_imgRemark")
-        # self.comboBox_imgRemark.addItem("")
-        # self.comboBox_imgRemark.addItem("")
-        # self.comboBox_imgRemark.addItem("")
-        # self.comboBox_imgRemark.addItem("")
-        # self.comboBox_imgRemark.addItem("")
-        # self.comboBox_imgRemark.addItem("")
         
         # button for opening a widget for zooming into photo
         self.btn_zoom = QtWidgets.QPushButton(frame_controlBar)
@@ -548,123 +659,3 @@ class PageHome(QtWidgets.QWidget):
         self.layout_frame_controlBar.addWidget(self.btn_menu)             
         
         return frame_controlBar
-        
-    def _initActions(self):
-        """ Define actions triggered by user interaction with the UI. """
-        # connecting signals and slots
-        self.btn_add.clicked.connect(self.on_add_clicked)
-        self.btn_delete.clicked.connect(self.on_remove_clicked)
-        self.btn_next.clicked.connect(self.photo_viewer.on_next_animal)
-        self.btn_previous.clicked.connect(self.photo_viewer.on_previous_animal)
-        self.btn_zoom.clicked.connect(self.openZoomWidget)
-        self.btn_imgSwitch.clicked.connect(self.switchImageMode)
-        self.slider_zoom.valueChanged.connect(self.onZoomValueChanged)
-        self.photo_viewer.newImageLoaded.connect(self.onNewImage)
-        self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
-        self.btn_filter.clicked.connect(self.on_filter_clicked)
-        self.btn_match.clicked.connect(self.on_match_clicked)
-        
-        # --- define shortcuts ------------------------------------------------------------------------------------------- #  
-        self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
-        self.shortcut_next_animal = QtWidgets.QShortcut(QtGui.QKeySequence("d"), self.btn_next, self.photo_viewer.on_next_animal)
-        self.shortcut_add_animal = QtWidgets.QShortcut(QtGui.QKeySequence("+"), self.btn_add, self.on_add_clicked)
-        self.shortcut_match_animal = QtWidgets.QShortcut(QtGui.QKeySequence("m"), self.btn_match, self.on_match_clicked)
-        self.shortcut_remove_animal = QtWidgets.QShortcut(QtGui.QKeySequence("-"), self.btn_delete, self.on_remove_clicked)
-        self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
-        self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
-        self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
-      
-            
-    def _initModels(self):
-        """ Add data models to respective UI elements. """
-        self.comboBox_imgRemark_dummy.setModel(self.models.model_image_remarks)
-        self.comboBox_imgRemark.setModel(self.models.model_image_remarks)
-
-    def setComboboxImageRemark(self, text):
-        """ Add a text to the image remark combobx and data model. """
-        # if the remark is not in the combobox, add it. Else choose its index
-        index = self.comboBox_imgRemark.findText(text) 
-        
-        if self.comboBox_imgRemark.findText(text) == -1:
-            item = QtGui.QStandardItem(str(text))
-            item.setTextAlignment(QtCore.Qt.AlignLeft)
-            self.models.model_image_remarks.appendRow(item)
-            self.comboBox_imgRemark.setCurrentIndex(self.comboBox_imgRemark.count()-1)
-        else:
-            self.comboBox_imgRemark.setCurrentIndex(index)
-        
-        # get the current photo ID
-        cur_image_path = self.photo_viewer.image_list[0][self.photo_viewer.cur_image_index]
-        file_id = os.path.basename(cur_image_path)[:-6]
-    
-        # adapt the image remark in the data model
-        cur_indices = self.models.model_animals.data[
-            self.models.model_animals.data['file_id']==file_id].index
-        for idx in cur_indices:
-            self.models.model_animals.data.loc[idx, 'image_remarks'] = text
-    
-    def onNewImage(self, remark):
-        """ Sets the text in the image remark combobox according to the 
-        newly loaded image. """
-        # adapt image remark combobox
-        self.setComboboxImageRemark(remark)
-    
-    def switchImageMode(self):
-        """ Switches the image mode depending on the current image mode """
-        cur_mode = self.btn_imgSwitch.text()
-        if cur_mode == "L": 
-            self.displayRightImage()
-        elif cur_mode == "R":
-            self.displayBothImages()
-        else:
-            self.displayLeftImage()
-        
-    def displayLeftImage(self):
-        """ Display left image. """
-        self.btn_imgSwitch.setText("L")
-        self.btn_match.setIcon(QtGui.QIcon())
-        self.btn_match.setEnabled(False)
-        self.photo_viewer.activateImageMode("L")
-
-    def displayRightImage(self):
-        """ Display right image. """
-        self.btn_imgSwitch.setText("R")
-        self.btn_match.setIcon(QtGui.QIcon())
-        self.btn_match.setEnabled(False)
-        self.photo_viewer.activateImageMode("R")
-    
-    def displayBothImages(self):
-        """ Display both images. """
-        self.btn_imgSwitch.setText("LR")
-        if self.is_match_animal_active:
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png"))
-        else:
-            self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png"))
-        self.btn_match.setEnabled(True)
-        self.photo_viewer.activateImageMode("LR")
-     
-    def mousePressEvent(self, event):
-        """ On mouse press, update visibility of zoom slider widget. """
-        super().mousePressEvent(event)          
-        # hide the zoom widget if it is open and a click somewhere else is registered
-        if self.widget_zoom.isVisible() and not self.widget_zoom.rect().contains(event.pos()):
-            self.openZoomWidget()
-
-    def resizeEvent(self, event):
-        """ Make sure that zoom slider widget is placed correctly when 
-        program is resized. """
-        super().resizeEvent(event)
-        self.placeZoomWidget()
-  
-    def placeZoomWidget(self):
-        """ Place the zoom widget under the zoom button. """
-        # reset position of zoom widget
-        self.widget_zoom.move(0,0)
-        
-        # map the position of the zoom button to the local coordinate system 
-        # of the zoom widget
-        pos = self.btn_zoom.mapToGlobal(self.btn_zoom.rect().topLeft())
-        p = self.widget_zoom.mapFromGlobal(pos)
-        
-        # move the zoom widget a bit below the button position and center it below the button
-        self.widget_zoom.move(p + QtCore.QPoint(-self.widget_zoom.width()/2 + 20, 50))        

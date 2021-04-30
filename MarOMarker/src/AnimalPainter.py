@@ -763,7 +763,6 @@ class AnimalPainter(QtCore.QObject):
         # get states of add and remove modes from home page
         is_add_mode_active = parent.parent().is_add_animal_active
         is_remove_mode_active = parent.parent().is_remove_animal_active
-        is_match_animal_active = parent.parent().is_match_animal_active
         
         # enable dragging for current animal (when add mode is not active and 
         # the current animal is completey drawn)
@@ -817,7 +816,7 @@ class AnimalPainter(QtCore.QObject):
                         
                         # reset length of matching animal
                         match.setLength(0)
-                        self.models.model_animals.data.loc[animal.row_index, "length"] = -1 #@todo how to update visual???
+                        self.models.model_animals.data.loc[animal.row_index, "length"] = -1 
                         
                         # update the visuals of the matching animal too
                         self.imageArea.parent().parent().redrawSelection()
