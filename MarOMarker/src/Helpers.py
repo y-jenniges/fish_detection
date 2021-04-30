@@ -466,7 +466,7 @@ class TopFrame(QtWidgets.QFrame):
         
 class ProgressBar(QtWidgets.QProgressBar):
     """
-    A simple progress bar with a stylesheet to reuse in the application.
+    A simple progress bar with a stylesheet to be reused in the application.
     """
     def __init__(self, parent=None):
         super().__init__(parent)

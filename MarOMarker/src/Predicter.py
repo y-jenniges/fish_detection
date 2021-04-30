@@ -13,18 +13,14 @@ GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea",
               3: "Chaetognatha", 4: "Unidentified", 5: "Jellyfish"}
 
 #IMAGE_SHAPE = (4272, 2848)
-IMAGE_SHAPE = (2848, 4272)
+IMAGE_SHAPE = (2848, 4272) # image shape output by the predicter
 
 CLASS_WEIGHTS = np.array([ 1,  1.04084507,  1.04084507,  1,  1,
         8.90361446,  8.90361446, 13.19642857, 13.19642857, 12.52542373,
        12.52542373])
 
-#class PredictionWorker(QtCore.QObject):
-    # @todo since i do not want to delete the predicter on page data again and again, so only outsource the list prediction if possible...
-    # otherwise, i can only click predict button once, then predicter is deleted and cant be called again (but this also looses the loaded NN)
 
 class Predicter(QtCore.QObject):
-#class Predicter():
     """
     Class that handles the complete prediction process. First, animal posisions
     and groups on an image are predicted with a neural network. The 
@@ -326,8 +322,12 @@ class Predicter(QtCore.QObject):
         self.experiment_id = experiment_id
         self.user_id = user_id
 
-#@todo docu            
+         
 class PredictionWorker(QtCore.QObject):
+    """ Object to work in a thread and to be deleted after the prediction 
+    calculations finished.
+    """
+    
     # define custom signals
     finished = QtCore.pyqtSignal() 
     """ Signal emitted when the predicter finished predicting an image list. """
