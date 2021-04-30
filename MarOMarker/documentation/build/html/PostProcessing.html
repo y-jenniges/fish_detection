@@ -87,6 +87,34 @@ param dynamic_thresh defines the part of the longer vector thats used as thresh<
 </dd></dl>
 
 </div>
+<div class="section" id="rectifymatchworker-class">
+<h2><code class="docutils literal notranslate"><span class="pre">RectifyMatchWorker</span></code> class<a class="headerlink" href="#rectifymatchworker-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="PostProcessing.RectifyMatchWorker">
+<em class="property">class </em><code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">RectifyMatchWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matcher</span></em>, <em class="sig-param"><span class="n">models</span></em>, <em class="sig-param"><span class="n">img_list</span></em>, <em class="sig-param"><span class="n">camera_config</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.RectifyMatchWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtCore.QObject</span></code></p>
+<p>Object to work in a thread and to be deleted after the rectification
+and matching calculations finished.</p>
+<dl class="py attribute">
+<dt id="PostProcessing.RectifyMatchWorker.finished">
+<code class="sig-name descname">finished</code><a class="headerlink" href="#PostProcessing.RectifyMatchWorker.finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted when the predicter finished predicting an image list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="PostProcessing.RectifyMatchWorker.progress">
+<code class="sig-name descname">progress</code><a class="headerlink" href="#PostProcessing.RectifyMatchWorker.progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal emitted for every image from an image list that is already predicted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PostProcessing.RectifyMatchWorker.rectifyMatch">
+<code class="sig-name descname">rectifyMatch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.RectifyMatchWorker.rectifyMatch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -287,6 +315,7 @@ y-direction.</p>
 <li class="toctree-l1"><a class="reference internal" href="PhotoViewer.html">Photo Viewer</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Post Processing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#stereocorrespondence-class"><code class="docutils literal notranslate"><span class="pre">StereoCorrespondence</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rectifymatchworker-class"><code class="docutils literal notranslate"><span class="pre">RectifyMatchWorker</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
 </li>

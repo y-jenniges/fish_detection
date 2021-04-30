@@ -146,12 +146,16 @@ to the data model.</p>
 <dl class="py method">
 <dt id="PageData.PageData.onNnFinished">
 <code class="sig-name descname">onNnFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onNnFinished" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called when the predictions are done. Enables the data page and
+updates data table.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="PageData.PageData.onNnProgress">
 <code class="sig-name descname">onNnProgress</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onNnProgress" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called to report on the prediction progress. Updates the label
+displaying the number of predicted images and the progress bar.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="PageData.PageData.onOutDirChanged">
@@ -172,6 +176,21 @@ It makes sure that a result file exists and creates one otherwise.</p>
 <dd><p>Gets current image list from photo viewer, rectifies them and
 determines the positions of the respective animal on the right image
 using block matching.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onRectifyMatchFinished">
+<code class="sig-name descname">onRectifyMatchFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onRectifyMatchFinished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the rectification and matching calculations are done.
+Enables the data page and triggers length calculations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="PageData.PageData.onRectifyMatchProgress">
+<code class="sig-name descname">onRectifyMatchProgress</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PageData.PageData.onRectifyMatchProgress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called to report on the rectification and matching progress.
+Updates the label displaying the number of rectified and matched
+images and the progress bar.</p>
 </dd></dl>
 
 <dl class="py attribute">
