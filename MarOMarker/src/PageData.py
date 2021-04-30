@@ -455,12 +455,14 @@ class PageData(QtWidgets.QWidget):
         # rectify and match row
         self.label_rectify_match = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.frame_rectify_match, self.btn_rectify_match, \
-        self.label_rectify_match_text, self.label_rectify_match_number \
+        self.label_rectify_match_text, self.label_rectify_match_number, \
+        self.progressBar_rectify_match \
         = self._createFrameBtnLabelNumber(self.scrollAreaWidgetContents, 
                                          "frame_rectify_match",
                                           "btn_rectify_match", 
                                           "label_rectify_match", 
-                                          "label_rectify_match_number")
+                                          "label_rectify_match_number", 
+                                          True)
         frame_process_arrow4 = self._createFrameProcessArrow(self.scrollAreaWidgetContents)
         
         # check matching row
@@ -866,6 +868,8 @@ class PageData(QtWidgets.QWidget):
         return frame_data_information
     
     def onNnFinished(self):
+        """ Called when the predictions are done. Enables the data page and 
+        updates data table. """
         self.setEnabled(True)
         
         # get prediction parameters
@@ -890,9 +894,11 @@ class PageData(QtWidgets.QWidget):
                                                    experiment_id=experiment_id, 
                                                    user_id=user_id)
 
-        print("data inserted into model")
-    
+        print("PageData: New data inserted into model")
+
     def onNnProgress(self, i):
+        """ Called to report on the prediction progress. Updates the label
+        displaying the number of predicted images and the progress bar. """
         # update label displaying number of predicted images
         self.label_nn_activation_number.setText(str(i))
         
@@ -933,14 +939,15 @@ class PageData(QtWidgets.QWidget):
             return
         
         if self.predicter is not None:
-            # reset progress bar
+            # reset progress bar and label
             self.progressBar_nn.setValue(0)
+            self.label_nn_activation_number.setText(str(0))
             
             # get image path list from photo viewer
             img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
             
-            file_ids = []
             # determine file IDs
+            file_ids = []
             for path in img_list[0]:
                 file_ids.append(os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L"))
                 
@@ -984,63 +991,55 @@ class PageData(QtWidgets.QWidget):
         determines the positions of the respective animal on the right image
         using block matching. 
         """
+        
+        # reset progress bar and label
+        self.progressBar_rectify_match.setValue(0)
+        self.label_rectify_match_number.setText(str(0))
+        
         # get list of images to process (images of the current day)            
         img_list = self.parent().parent().page_home.photo_viewer.image_list.copy()
-            
-        # iterate over left images, rectify and match   
-        for i in range(len(img_list[0])):
-            right_image = img_list[1][i]
-            left_image = img_list[0][i]
-            print(right_image)
-            print(left_image)
-            print()
-            
-            # only continue if both images exists
-            if os.path.isfile(right_image) and os.path.isfile(left_image):
-                file_id = os.path.basename(left_image).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
-                
-                # get animals on current image into necessary format
-                cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
-                
-                animals_left = []
-                for i in range(len(cur_entries)):      
-                    animal = [0, cur_entries.iloc[i]["LY1"], 
-                              cur_entries.iloc[i]["LX1"], 
-                              cur_entries.iloc[i]["LY2"], 
-                              cur_entries.iloc[i]["LX2"]]
-                    animals_left.append(animal)                
-                
-                # rectify and match images
-                merged_objects = pp.rectifyAndMatch(self.matcher, 
-                                                    self.camera_config, 
-                                                    left_image, 
-                                                    right_image, 
-                                                    animals_left)
-                
-                print(merged_objects)
-                print()
-                
-                # add right coordinates to data model
-                for i in range(len(cur_entries.index)):
-                    idx = cur_entries.index[i]
-                    # the matcher returns rectified coordinates,
-                    # they have to be calculated back and just then add them to data model 
-                    head = self.matcher.distortPoint([merged_objects[i][6], merged_objects[i][5]], "R")
-                    tail = self.matcher.distortPoint([merged_objects[i][8], merged_objects[i][7]], "R")
-                    
-                    if (np.array(head) < 0).any() or (np.array(tail) < 0).any():
-                        head = [-1,-1]
-                        tail = [-1,-1]
-                        
-                    self.models.model_animals.data.loc[idx, "RX1"] = head[1]
-                    self.models.model_animals.data.loc[idx, "RY1"] = head[0]
-                    self.models.model_animals.data.loc[idx, "RX2"] = tail[1]
-                    self.models.model_animals.data.loc[idx, "RY2"] = tail[0]     
-            
-                # update label displaying number of rectified and matched images
-                num_imgs = int(self.label_rectify_match_number.text()) + 1
-                self.label_rectify_match_number.setText(str(num_imgs))
         
+        # create thread and worker
+        self.thread = QtCore.QThread()
+        self.worker = pp.RectifyMatchWorker(self.matcher, self.models, 
+                                            img_list, self.camera_config)    
+        
+        # move worker to the thread
+        self.worker.moveToThread(self.thread)
+            
+        # connect signals and slots from thread to worker and vice versa
+        self.thread.started.connect(self.worker.rectifyMatch)
+        self.thread.finished.connect(self.thread.deleteLater)
+        
+        self.worker.finished.connect(self.onRectifyMatchFinished)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)    
+        self.worker.progress.connect(self.onRectifyMatchProgress)
+    
+        # start prediction       
+        self.setEnabled(False)
+        self.thread.start()
+            
+    def onRectifyMatchProgress(self, i):   
+        """ Called to report on the rectification and matching progress. 
+        Updates the label displaying the number of rectified and matched 
+        images and the progress bar. """
+        # update label displaying number of predicted images
+        self.label_rectify_match_number.setText(str(i))
+        
+        # update progress bar
+        img_list = self.parent().parent().page_home.photo_viewer.image_list
+        num_images = len(img_list[0])
+        self.progressBar_rectify_match.setValue(i/num_images*100)
+            
+    def onRectifyMatchFinished(self): 
+        """ Called when the rectification and matching calculations are done.
+        Enables the data page and triggers length calculations. """
+        self.setEnabled(True)
+
+        # update length calculations
+        self.onCalcLength()
+    
     def onCheckMatch(self):
         """ 
         Directs to LR screen (showing left and right images) if  at least one
@@ -1056,6 +1055,9 @@ class PageData(QtWidgets.QWidget):
         
         # @todo check if the coordinate rectification is correct
         print("calc length")
+        
+        # reset label
+        self.label_length_measurement_number.setText(str(0))
         
         # get list of images to process (images of the current day)      
         if self.parent().parent() is None: return

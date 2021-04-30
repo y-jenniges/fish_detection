@@ -234,7 +234,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         
         self.page_data.btn_nn_activation.setText(_translate("MainWindow", "Run neural network"))
         self.page_data.label_nn_activation.setText(_translate("MainWindow", "Run neural network"))
-        self.page_data.label_nn_activation_text.setText(_translate("MainWindow", "   #Predicted images: "))
+        self.page_data.label_nn_activation_text.setText(_translate("MainWindow", "   #Predicted images:                                     "))
         self.page_data.label_nn_activation_number.setText(_translate("MainWindow", "0"))
         
         self.page_data.btn_pred_check.setText(_translate("MainWindow", "Check predictions on Home screen (L)"))

@@ -9,6 +9,13 @@ Functions and classes necessary for post processing.
     :undoc-members:
     :show-inheritance:
 	
+``RectifyMatchWorker`` class
+********************************
+.. autoclass:: PostProcessing.RectifyMatchWorker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+	
 Functions
 **************
 .. autofunction:: PostProcessing.applyNnToImage(model, image) 

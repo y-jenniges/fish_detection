@@ -3,7 +3,9 @@
 import numpy as np
 import cv2
 import pandas as pd
+import os
 #import matplotlib.pyplot as plt
+from PyQt5 import QtCore
 from tensorflow.keras.preprocessing.image import load_img, img_to_array # check if t works, otherwise only keras
 from skimage.feature import peak_local_max
 #from skimage.transform import resize
@@ -79,6 +81,85 @@ def measureLength(distance_measurer, camera_config, merged_objects):
         
     return distances
 
+
+class RectifyMatchWorker(QtCore.QObject):
+    """ Object to work in a thread and to be deleted after the rectification 
+    and matching calculations finished.
+    """
+    
+    # define custom signals
+    finished = QtCore.pyqtSignal() 
+    """ Signal emitted when the predicter finished predicting an image list. """
+    
+    progress = QtCore.pyqtSignal(int)
+    """ Signal emitted for every image from an image list that is already predicted. """
+    
+    def __init__(self, matcher, models, img_list, camera_config):
+        super().__init__()
+        
+        self.matcher = matcher
+        self.models = models
+        self.image_list = img_list
+        self.camera_config = camera_config
+
+    def rectifyMatch(self):
+        count = 0
+        
+        # iterate over left images, rectify and match   
+        for i in range(len(self.image_list[0])):
+            right_image = self.image_list[1][i]
+            left_image = self.image_list[0][i]
+            print(right_image)
+            print(left_image)
+            print()
+            
+            # only continue if both images exists
+            if os.path.isfile(right_image) and os.path.isfile(left_image):
+                file_id = os.path.basename(left_image).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+                
+                # get animals on current image into necessary format
+                cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
+                
+                animals_left = []
+                for i in range(len(cur_entries)):      
+                    animal = [0, cur_entries.iloc[i]["LY1"], 
+                              cur_entries.iloc[i]["LX1"], 
+                              cur_entries.iloc[i]["LY2"], 
+                              cur_entries.iloc[i]["LX2"]]
+                    animals_left.append(animal)                
+                
+                # rectify and match images
+                merged_objects = rectifyAndMatch(self.matcher, 
+                                                 self.camera_config, 
+                                                 left_image, 
+                                                 right_image, 
+                                                 animals_left)
+                
+                print(merged_objects)
+                print()
+                
+                # add right coordinates to data model
+                for i in range(len(cur_entries.index)):
+                    idx = cur_entries.index[i]
+                    # the matcher returns rectified coordinates,
+                    # they have to be calculated back and just then add them to data model 
+                    head = self.matcher.distortPoint([merged_objects[i][6], merged_objects[i][5]], "R")
+                    tail = self.matcher.distortPoint([merged_objects[i][8], merged_objects[i][7]], "R")
+                    
+                    if (np.array(head) < 0).any() or (np.array(tail) < 0).any():
+                        head = [-1,-1]
+                        tail = [-1,-1]
+                        
+                    self.models.model_animals.data.loc[idx, "RX1"] = head[1]
+                    self.models.model_animals.data.loc[idx, "RY1"] = head[0]
+                    self.models.model_animals.data.loc[idx, "RX2"] = tail[1]
+                    self.models.model_animals.data.loc[idx, "RY2"] = tail[0] 
+                    
+            count = count + 1
+            self.progress.emit(count)
+    
+        self.finished.emit()
+        
 
 class StereoCorrespondence():
     """ Finder of corresponding objects in stereo image0 and image1
