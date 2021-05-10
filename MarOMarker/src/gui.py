@@ -77,7 +77,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         # translate UI and set starting tabs
         self.retranslateUi()
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(1) #@todo 1
         self.window_table.tabWidget.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
@@ -606,8 +606,12 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """
         if hasattr(self, 'page_data'):
             month = self.page_data.calendarWidget.selectedDate().toString("yyyy_MM")
-            state = "" if not isInProgress else "inProgress"
-            name = "results_" + month + "_" +  state + ".csv"
+            
+            if not isInProgress:
+                name = "results_" + month + ".csv"
+            else:  
+                state = "inProgress"
+                name = "results_" + month + "_" +  state + ".csv"
             return name
         else:
             return None
