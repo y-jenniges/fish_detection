@@ -146,6 +146,8 @@ class ImageArea(QtWidgets.QGraphicsView):
 
 #@todo instead of making the frame a QGraphicsView, simly make this one a view
 class ImageAreaLR(QtWidgets.QWidget):
+#class ImageAreaLR(QtWidgets.QGraphicsWidget):
+#class ImageAreaLR(QtWidgets.QGraphicsView):
     """
     A QWidget that handles the LR view, i.e. displays left and right images.
     
@@ -177,6 +179,17 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.parent().setImageEnding("*_L.jpg", self.imageAreaL)
             self.parent().setImageEnding("*_R.jpg", self.imageAreaR)
     
+    def drawForeground(self, painter, rect):
+        # draw a line connecting the animals #@todo
+        # start = QtCore.QPoint(100,100)
+        # end = QtCore.QPoint(400,400)
+        pen = QtGui.QPen(QtCore.Qt.red, 2, QtCore.Qt.SolidLine)
+        painter.setPen(pen)
+        painter.drawLine(rect.topLeft(), rect.bottomRight())
+        #self.scene.addLine(0,0,1000,1000, pen)
+        #print("draw foreground")
+        # print("line drawn")
+        
     def on_right_mouse_click(self, image, click_position):
         """
         Initiates the process of removing a match when the right mouse 
@@ -317,7 +330,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         else:
             self.widget_animal_specs.setAnimal(None)
     
-    def isAnimalAddable(self, image_ending):#@todo docu
+    def isAnimalAddable(self, image_ending):
+        """ Checks if there is an uncompleted animal on the other image which 
+        needs to be completed before drawing another animal. """
         if image_ending == "*_L.jpg":
             otherImageArea = self.imageAreaR
         elif image_ending == "*_R.jpg":
@@ -425,7 +440,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             # start = QtCore.QPoint(100,100)
             # end = QtCore.QPoint(400,400)
             # pen = QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine)
-            # self.graphicsScene.addLine(100,100,400,400, pen)
+            # self.scene.addLine(100,100,400,400, pen)
             # print("line drawn")
 
         self.updateSpecsWidget()     
@@ -793,7 +808,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaR = ImageArea(self._models, self)
         
         spacer = QtWidgets.QSpacerItem(5, 7, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)  
-        
+            
         layout_imageFrame.addWidget(self.imageAreaL)
         layout_imageFrame.addItem(spacer)
         layout_imageFrame.addWidget(self.imageAreaR)
@@ -801,13 +816,6 @@ class ImageAreaLR(QtWidgets.QWidget):
         frame_image = QtWidgets.QFrame(self) #@todo what if we made this a QGraphicsView?
         frame_image.setFrameShape(QtWidgets.QFrame.NoFrame)
         frame_image.setLayout(layout_imageFrame)
-        
-        # self.graphicsView = QtWidgets.QGraphicsView(self) 
-        # self.graphicsScene = QtWidgets.QGraphicsScene(self)
-        # self.graphicsView.setScene(self.graphicsScene)
-        # #self.graphicsView.setFrameShape(QtWidgets.QFrame.NoFrame)
-        # self.graphicsView.setLayout(layout_imageFrame)
-
         
         # -- frame for more options ----------------------------------------- #
         # layout for frame that should contain the specifications widget
@@ -855,8 +863,194 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         # adding widgets to main layout 
         #self.layout.addWidget(self.graphicsView)
+        #self.scene.addItem(proxy)
         self.layout.addWidget(frame_image)
         self.layout.addWidget(frame_options)
         
         # set main layout
         self.setLayout(self.layout)
+     
+        
+     
+        
+
+        # overlayfilter = LineOverlayFactoryFilter(self)
+        # self.installEventFilter(overlayfilter)
+        # self.overlay = LineOverlay(self)
+        # self.overlay.show()
+        
+    #     # of = LineOverlayFactoryFilter(self)
+    #     # self.installEventFilter(of)
+        
+    #     print("event filter installed")
+    # # def paintEvent(self, event):
+    # #     painter = QtGui.QPainter(self)
+        
+    # #     pen = QtGui.QPen(QtCore.Qt.red)
+    # #     brush = QtGui.QBrush(QtCore.Qt.green, QtCore.Qt.SolidPattern)
+    # #     painter.setPen(pen)    #painter.setBrush(brush)
+    # #     painter.drawEllipse(40,40,400,400)
+    # #     print("paint event")
+    
+    # def resizeEvent(self, event):
+    #     self.overlay.resize(event.size())
+    #     event.accept()
+        
+    def _initUii(self):
+        #self.scene = QtWidgets.QGraphicsScene(self)
+        #self.view = QtWidgets.QGraphicsView(self.scene)        
+        
+        # draw a line
+        tl = self.rect().topLeft()
+        br = self.rect().bottomRight()
+        line = QtCore.QLineF(tl, br)
+        pen = QtGui.QPen(QtCore.Qt.red)
+        #self.scene.addLine(line, pen)
+
+        self.imageAreaL = ImageArea(self._models, self)
+        self.imageAreaR = ImageArea(self._models, self)
+    
+        
+        # proxyL = self.scene.addWidget(self.imageAreaL)
+        # proxyR = self.scene.addWidget(self.imageAreaR)
+        # proxy = QtWidgets.QGraphicsProxyWidget()
+        # proxy.setWidget(self.imageAreaL)
+        # self.scene.addItem(proxy)
+
+        # self.layout = QtWidgets.QHBoxLayout(self)
+        # self.layout.setContentsMargins(0, 0, 0, 0)
+        # self.layout.setSpacing(0)
+        # self.layout.setObjectName("layout")
+        
+        # self.layout.addWidget(self.imageAreaL)
+        # self.layout.addWidget(self.imageAreaR)
+        
+        # self.setLayout(self.layout)
+        
+        # specification widget
+        self.widget_animal_specs = AnimalSpecificationsWidget(self._models, self.imageAreaL)
+        self.widget_animal_specs.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;} QComboBox QAbstractItemView {background-color:white;border:None;selection-background-color: rgb(0, 203, 221);}")
+        self.widget_animal_specs.show()
+      
+# @todo maybe this need to be done in photoviewer?
+class LineOverlay(QtWidgets.QWidget):
+    def __init__(self, parent):
+        super(LineOverlay, self).__init__(parent)
+        
+        self.setWindowFlags(QtCore.Qt.Widget | QtCore.Qt.FramelessWindowHint | QtCore.Qt.ToolTip | QtCore.Qt.WindowStaysOnTopHint);
+        self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True);
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True);
+        
+        palette = QtGui.QPalette(self.palette())
+        palette.setColor(palette.Background, QtCore.Qt.transparent)
+
+        self.setPalette(palette)
+        
+        # self.widget = widget
+        # self.widget.setParent(self)
+        # if parent is not None: 
+        #     self.setMinimumSize(parent.size())
+        # else:
+        #     self.setMinimumSize(QtCore.QSize(200,200))
+            
+        # print("overlay parent")
+        # print(self.parent())
+    
+    def paintEvent(self, event):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        painter.fillRect(event.rect(), QtGui.QBrush(QtGui.QColor(255, 255, 255, 127)))
+        painter.drawLine(self.width() / 8, self.height() / 8, 7 * self.width() / 8, 7 * self.height() / 8)
+        painter.drawLine(self.width() / 8, 7 * self.height() / 8, 7 * self.width() / 8, self.height() / 8)
+        painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+        
+        # painter = QtGui.QPainter(self)
+        # painter.fillRect(event.rect(), QtGui.QColor(80, 80, 255, 128))
+        # # painter.begin(self)
+        # # #self.drawText(event, painter)
+        # # if self.parent is not None:
+        # #     #self.setMinimumSize(self.parent().size())
+        # #     #self.rect().setSize(self.parent().rect().size())
+        # #     painter.fillRect(self.parent().rect(), QtCore.Qt.green)
+        # #     painter.drawText(self.parent().rect(), QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter, "Loading...")
+        # # painter.end()
+        # print("paint")
+        
+    def drawText(self, event, painter):
+        painter.setPen(QtGui.QColor(168, 34, 3))
+        painter.setFont(QtGui.QFont("Century Gothic", 22))
+        painter.drawText(event.rect(), QtCore.Qt.AlignCenter, "Diese Spinne die itzi bitzi Spinne krabbelt die Regenrinne rauf")
+        
+        painter.setBrush(QtGui.QColor(255, 80, 0, 160))
+        painter.drawRect(130, 15, 90, 60)
+     
+    def resize(self, size):
+        self.rect().setSize(size)
+        self.move(self.parent().rect().center())
+        
+    # def resizeEvent(self, event):
+    #     # print("resizziiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiing")
+    #     # if self.parent() is not None:
+    #     #     self.setMinimumSize(self.parent().size())
+    #     position_x = (self.frameGeometry().width()-self.parent().frameGeometry().width())/2
+    #     position_y = (self.frameGeometry().height()-self.parent().frameGeometry().height())/2
+
+    #     self.move(self.parent().rect().center())#.pos())#position_x, position_y)
+        
+    #     #self.widget.move(position_x, position_y)
+    #     event.accept()
+        
+class LineOverlayFactoryFilter(QtCore.QObject):
+    def __init__(self, parent=None):
+        super(LineOverlayFactoryFilter, self).__init__(parent)
+        
+        self.overlay = LineOverlay(parent)
+        print("overlay created)")
+        
+    def eventFilter(self, widget, event):
+        if not widget.isWidgetType(): return False
+        
+        if event.type() == QtCore.QEvent.MouseButtonPress:
+            #print("mouse button press event")
+            if self.overlay is None: self.overlay = LineOverlay(self.parent())
+            #self.overlay.setParent(widget)
+            self.overlay.resize(self.parent().size())
+            self.overlay.move(widget.rect().center())
+            self.overlay.show()
+            
+        elif event.type() == QtCore.QEvent.Resize:
+            #print("resize event")
+            if self.overlay is not None and self.overlay.parent() == widget:
+                self.overlay.resize(widget.size())
+                self.overlay.move(widget.rect().center())
+                self.overlay.show()
+                
+        return False
+    
+class CtmWidget(QtWidgets.QWidget):
+    def __init__(self, parent = None):
+        QtWidgets.QWidget.__init__(self, parent)
+
+        self.button = QtWidgets.QPushButton("Close Overlay")
+        self.setLayout(QtWidgets.QHBoxLayout())
+        self.layout().addWidget(self.button)
+
+        self.button.clicked.connect(self.hideOverlay)
+
+    def paintEvent(self, event):
+
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        path = QtGui.QPainterPath()
+        path.addRoundedRect(QtCore.QRectF(self.rect()), 10, 10)
+        mask = QtGui.QRegion(path.toFillPolygon().toPolygon())
+        pen = QtGui.QPen(QtCore.Qt.white, 1)
+        painter.setPen(pen)
+        painter.fillPath(path, QtCore.Qt.white)
+        painter.drawPath(path)
+        painter.end()
+
+    def hideOverlay(self):
+        self.parent().hide()

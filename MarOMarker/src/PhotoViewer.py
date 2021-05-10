@@ -701,3 +701,75 @@ class PhotoViewer(QtWidgets.QWidget):
 
         # set main layout
         self.layout = self.layout
+        
+        
+        # scene = QtWidgets.QGraphicsScene(self)
+        # gv = QtWidgets.QGraphicsView(scene)
+        # gv.setStyleSheet("background-color:green;")
+        # gv.setMinimumSize(300,300)
+        
+        # gv.move(50,50)
+        
+        
+# class LineOverlay(QtWidgets.QWidget):
+#     def __init__(self, parent):
+#         super(LineOverlay, self).__init__(parent)
+
+#         self.setWindowFlags(QtCore.Qt.Widget | QtCore.Qt.FramelessWindowHint | QtCore.Qt.ToolTip | QtCore.Qt.WindowStaysOnTopHint);
+#         self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True);
+#         self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True);
+    
+#     def paintEvent(self, event):
+#         painter = QtGui.QPainter(self)
+#         painter.fillRect(event.rect(), QtGui.QBrush(QtGui.QColor(80, 80, 255, 128)))
+
+# class LineOverlayFactoryFilter(QtCore.QObject):
+#     def __init__(self, parent=None):
+#         super(LineOverlayFactoryFilter, self).__init__(parent)
+        
+#         #self.overlay = LineOverlay(self.parent())
+#         self.overlay = LineOverlay(parent)
+        
+#     def eventFilter(self, widget, event):
+#         if not widget.isWidgetType(): return False
+        
+#         if event.type() == QtCore.QEvent.MouseButtonPress:
+#             #print("mouse button press event")
+#             if self.overlay is None: self.overlay = LineOverlay(widget)
+#             #self.overlay.setParent(widget)
+#             self.overlay.resize(widget.rect().size())
+#             self.overlay.move(widget.rect().center())
+#             self.overlay.show()
+            
+#         elif event.type() == QtCore.QEvent.Resize:
+#             #print("resize event")
+#             if self.overlay is not None and self.overlay.parent() == widget:
+#                 self.overlay.resize(widget.size())
+#                 self.overlay.move(widget.rect().center())
+#                 self.overlay.show()
+                
+#         return False
+ 
+# import sys
+
+# if __name__ == '__main__':
+#     app = QtWidgets.QApplication(sys.argv)
+    
+    
+#     window = QtWidgets.QWidget()
+#     factory = LineOverlayFactoryFilter(window)
+#     layout = QtWidgets.QVBoxLayout(window)
+
+
+    
+    
+#     for t in ["foo", "bar", "baz"]:
+#         label = QtWidgets.QLabel(t)
+#         layout.addWidget(label)
+#         label.installEventFilter(factory)
+        
+#     window.setMinimumSize(300,250)
+#     window.show()
+    
+#     sys.exit(app.exec_())
+    
