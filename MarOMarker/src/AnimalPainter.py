@@ -6,6 +6,7 @@ from Animal import Animal, AnimalSpecificationsWidget
 from Models import AnimalGroup, AnimalSpecies
 from Helpers import getIcon, displayErrorMsg
 import PhotoViewer
+import ImageAreas 
     
 
 class AnimalPainter(QtCore.QObject):
@@ -807,23 +808,26 @@ class AnimalPainter(QtCore.QObject):
                             self.models.model_animals.data.loc[animal.row_index, "LX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "LX2"] = -1
-                            self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1     
-                            match = self.imageArea.parent().parent().findAnimalMatch(animal, "L")
+                            self.models.model_animals.data.loc[animal.row_index, "LY2"] = -1 
+                            if isinstance(self.imageArea.parent().parent(), ImageAreas.ImageAreaLR):
+                                match = self.imageArea.parent().parent().findAnimalMatch(animal, "L")
                             
                         elif self.image_ending == "*_R.jpg":
                             self.models.model_animals.data.loc[animal.row_index, "RX1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY1"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RX2"] = -1
                             self.models.model_animals.data.loc[animal.row_index, "RY2"] = -1
-                            match = self.imageArea.parent().parent().findAnimalMatch(animal, "R")
+                            if isinstance(self.imageArea.parent().parent(), ImageAreas.ImageAreaLR):
+                                match = self.imageArea.parent().parent().findAnimalMatch(animal, "R")
                         
                         # reset length of matching animal
-                        match.setLength(0)
-                        self.models.model_animals.data.loc[animal.row_index, "length"] = -1 
-                        
-                        # update the visuals of the matching animal too
-                        self.imageArea.parent().parent().redrawSelection()
+                        if isinstance(self.imageArea.parent().parent(), ImageAreas.ImageAreaLR):
+                            match.setLength(0)
+                            # update the visuals of the matching animal too
+                            self.imageArea.parent().parent().redrawSelection()
                             
+                        self.models.model_animals.data.loc[animal.row_index, "length"] = -1 
+                           
                     else:  
                         # if animal has only left OR right coordinates, remove
                         # complete data row
