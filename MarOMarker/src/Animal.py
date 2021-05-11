@@ -12,10 +12,10 @@ class Animal():
     row_index : int
         The index of the row in the result table that this animal 
         represents.
-    position_head : QPoint, optional
+    position_head : QPointF, optional
         The position of the animal head on the displayed image. It will be 
         the center for the head visual, i.e. an 'o'. 
-    position_tail : QPoint
+    position_tail : QPointF
         The position of the animal tail on the displayed image. It will be 
         the center for the tail visual, i.e. a 'x'.
     group : string
@@ -26,15 +26,15 @@ class Animal():
         The remark to the animal.
     length: int, optional
         The length of the animal. 
-    original_pos_head : QPoint
+    original_pos_head : QPointF
         The head position on the unscaled original image.
-    original_pos_tail : QPoint
+    original_pos_tail : QPointF
         The tail position on the unscaled original image.
     pixmap_width : int
         Width of the square pixmap for the head and tail visuals.         
     pos_visual_head : QPoint
         Position of the head visual.
-    pos_visual_tail 
+    pos_visual_tail : QPoint
         Position of the tail visual.
     rect_head : QRect
         Geomatry of the head drawn by the head_item_visual
@@ -65,8 +65,8 @@ class Animal():
     # the input position refers to the center of the visual
     def __init__(self, models, 
                  row_index, 
-                 position_head=QtCore.QPoint(-1,-1), 
-                 position_tail=QtCore.QPoint(-1,-1), 
+                 position_head=QtCore.QPointF(-1,-1), 
+                 position_tail=QtCore.QPointF(-1,-1), 
                  group=AnimalGroup.UNIDENTIFIED, 
                  species=AnimalSpecies.UNIDENTIFIED, 
                  remark="", 
@@ -82,11 +82,11 @@ class Animal():
         position_head : QPoint, optional
             The position of the animal head on the displayed image. It will be 
             the center for the head visual, i.e. an 'o'. The default is 
-            QtCore.QPoint(-1,-1).
+            QtCore.QPointF(-1,-1).
         position_tail : QPoint, optional
             The position of the animal tail on the displayed image. It will be 
             the center for the tail visual, i.e. a 'x'. The default is 
-            QtCore.QPoint(-1,-1).
+            QtCore.QPointF(-1,-1).
         group : string, optional
             The group of the animal. Selectable from the Enum AnimalGroup.
             The default is AnimalGroup.UNIDENTIFIED.
@@ -110,8 +110,8 @@ class Animal():
         self._pixmap_tail = None
         
         # store the position on the original (i.e. not resized) image
-        self.original_pos_head = QtCore.QPoint(position_head)
-        self.original_pos_tail = QtCore.QPoint(position_tail)
+        self.original_pos_head = QtCore.QPointF(position_head)
+        self.original_pos_tail = QtCore.QPointF(position_tail)
         
         # current position of head and tail on the image
         self.position_head = position_head
@@ -125,9 +125,9 @@ class Animal():
         #self.height = height if height > 0 else 0
       
         # set the visual for the head, tail and line between them 
-        self.pos_visual_head = position_head - QtCore.QPoint(
+        self.pos_visual_head = QtCore.QPoint(int(position_head.x()), int(position_head.y())) - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2)
-        self.pos_visual_tail = position_tail - QtCore.QPoint(
+        self.pos_visual_tail = QtCore.QPoint(int(position_tail.x()), int(position_tail.y())) - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2)
 
         self.rect_head = QtCore.QRect(self.pos_visual_head, QtCore.QSize(
@@ -158,7 +158,6 @@ class Animal():
         # indicate if this animal was manually corrected
         self.manually_corrected = False
      
-     
     def createHeadVisual(self):
         """
         Creates a pixmap item (showing a circle), that is drawable on a 
@@ -170,14 +169,14 @@ class Animal():
         QGraphicsPixmapItem
             The visual of the animal head (a circle).
         """
-        if self.position_head != QtCore.QPoint(-1,-1):
+        if self.position_head != QtCore.QPointF(-1,-1):
             # create the head visual
             self.head_item_visual = QtWidgets.QGraphicsPixmapItem( \
                 self._pixmap_head)
             
             # set position of head visual
             self.head_item_visual.setPos(self.rect_head.center() \
-                                         - QtCore.QPoint( \
+                                         - QtCore.QPointF( \
                                              self.pixmap_width/4, 
                                              self.pixmap_width/4))
             self.head_item_visual.ItemIsMovable = True
@@ -196,14 +195,14 @@ class Animal():
         QGraphicsPixmapItem
             The visual of the animal tail (a cross).
         """
-        if self.position_tail != QtCore.QPoint(-1,-1):
+        if self.position_tail != QtCore.QPointF(-1,-1):
             # create the tail visual
             self.tail_item_visual = QtWidgets.QGraphicsPixmapItem( \
                 self._pixmap_tail)
                 
             # set position of tail visual
             self.tail_item_visual.setPos(self.rect_tail.center() \
-                                         - QtCore.QPoint( \
+                                         - QtCore.QPointF( \
                                              self.pixmap_width/4, 
                                              self.pixmap_width/4))
             self.tail_item_visual.ItemIsMovable = True

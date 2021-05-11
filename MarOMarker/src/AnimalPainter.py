@@ -1064,22 +1064,22 @@ class AnimalPainter(QtCore.QObject):
         for i in range(len(animal_list)):  
             # get the head and tail position form the list
             if self.image_ending=="*_L.jpg":
-                original_pos_h = QtCore.QPoint(int(animal_list["LX1"].iloc[i]), int(animal_list["LY1"].iloc[i]))
-                original_pos_t = QtCore.QPoint(int(animal_list["LX2"].iloc[i]), int(animal_list["LY2"].iloc[i]))
+                original_pos_h = QtCore.QPointF(float(animal_list["LX1"].iloc[i]), float(animal_list["LY1"].iloc[i]))
+                original_pos_t = QtCore.QPointF(float(animal_list["LX2"].iloc[i]), float(animal_list["LY2"].iloc[i]))
             elif self.image_ending == "*_R.jpg":
-                original_pos_h = QtCore.QPoint(int(animal_list["RX1"].iloc[i]), int(animal_list["RY1"].iloc[i]))
-                original_pos_t = QtCore.QPoint(int(animal_list["RX2"].iloc[i]), int(animal_list["RY2"].iloc[i]))   
+                original_pos_h = QtCore.QPointF(float(animal_list["RX1"].iloc[i]), float(animal_list["RY1"].iloc[i]))
+                original_pos_t = QtCore.QPointF(float(animal_list["RX2"].iloc[i]), float(animal_list["RY2"].iloc[i]))   
             else:
                 print("AnimalPainter: Error - no such image ending!")
 
             # only add an animal if there is a value for the coordinates
-            if original_pos_h != QtCore.QPoint(-1, -1) and original_pos_t != QtCore.QPoint(-1, -1):
+            if original_pos_h != QtCore.QPointF(-1, -1) and original_pos_t != QtCore.QPointF(-1, -1):
                 # transform coordinates from original image to scene cooridnates
-                pos_h = QtCore.QPoint(-1,-1)
+                pos_h = QtCore.QPointF(-1,-1)
                 pos_h.setX(round(original_pos_h.x()*self.imageArea.width()/self.original_img_width))
                 pos_h.setY(round(original_pos_h.y()*self.imageArea.height()/self.original_img_height))
                 
-                pos_t = QtCore.QPoint(-1,-1)
+                pos_t = QtCore.QPointF(-1,-1)
                 pos_t.setX(round(original_pos_t.x()*self.imageArea.width()/self.original_img_width))
                 pos_t.setY(round(original_pos_t.y()*self.imageArea.height()/self.original_img_height))
     

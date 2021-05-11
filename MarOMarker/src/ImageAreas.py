@@ -378,10 +378,10 @@ class ImageAreaLR(QtWidgets.QWidget):
             if self._models.model_animals.data.loc[animal.row_index, coord+'X1'] != -1:
                 
                 # get right (left) animal coordinates from data model
-                position_head = QtCore.QPoint(
+                position_head = QtCore.QPointF(
                     self._models.model_animals.data.loc[animal.row_index, coord+'X1'], 
                     self._models.model_animals.data.loc[animal.row_index, coord+'Y1'])
-                position_tail = QtCore.QPoint(
+                position_tail = QtCore.QPointF(
                     self._models.model_animals.data.loc[animal.row_index, coord+'X2'], 
                     self._models.model_animals.data.loc[animal.row_index, coord+'Y2'])
                 
@@ -493,18 +493,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         else:
             return
         
-        # update properties of current animal
-        painter.cur_animal.setGroup(animal.group)
-        painter.cur_animal.setSpecies(animal.species)
-        painter.cur_animal.setRemark(animal.remark)
-        
-        # remove animal visuals
-        painter.removeAnimal(painter.cur_animal, False)
-        
-        # redraw the visuals
-        painter.drawAnimalHead(painter.cur_animal)
-        painter.drawAnimalTailLineBoundingBox(painter.cur_animal)      
-        painter.updateBoundingBoxes() 
+        # # update properties of current animal
+        painter.setAnimalGroup(animal.group)
+        painter.setAnimalSpecies(animal.species)
+        painter.setAnimalRemark(animal.remark)
         
         # redraw matching animal
         self.redrawAnimalMatch(image, painter.cur_animal)
@@ -618,15 +610,15 @@ class ImageAreaLR(QtWidgets.QWidget):
         
     def matchAnimals(self, animal_L, animal_R):
         # if group, species, remark, length, other props are different, then what?
-        if str(animal_L.group) != str(animal_R.group):
+        if str(animal_L.group).lower() != str(animal_R.group).lower():
             print(f"animals do not have the same group {animal_L.group, animal_R.group}")
             if not self.handleDifferentGroup(animal_L, animal_R): return False
                    
-        if str(animal_L.species) != str(animal_R.species):
+        if str(animal_L.species).lower() != str(animal_R.species).lower():
             print(f"animals do not have the same species {animal_L.species, animal_R.species}")
             if not self.handleDifferentSpecies(animal_L, animal_R): return False
             
-        if str(animal_L.remark) != str(animal_R.remark):
+        if str(animal_L.remark).lower() != str(animal_R.remark).lower():
             print(f"animals do not have the same remark {animal_L.remark, animal_R.remark}")
             if not self.handleDifferentRemark(animal_L, animal_R): return False
         
@@ -661,8 +653,12 @@ class ImageAreaLR(QtWidgets.QWidget):
             self.match(animal_L, animal_R)
         
         # left animal has right coordinates, right animal has left coordinates
-        elif self._models.model_animals.data.loc[animal_R.row_index, "RX1"] != -1 \
+        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
         and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
+            
+            # do nothing when the animal has already been matched
+            if animal_L.row_index == animal_R.row_index: return True
+            
             # find old animal that represents curent right coordinates  
             cur_right_animal = self.findAnimalMatch(animal_L, "L")
             cur_left_animal = self.findAnimalMatch(animal_R, "R")
@@ -747,10 +743,10 @@ class ImageAreaLR(QtWidgets.QWidget):
             self._models.model_animals.data.loc[animal.row_index, image+"Y2"] = -1
         else:
             # merge the new animal coordinates to the original animal
-            self._models.model_animals.data.loc[animal.row_index, image+"X1"] = self._models.model_animals.data.loc[match.row_index, image+"X1"]
-            self._models.model_animals.data.loc[animal.row_index, image+"Y1"] = self._models.model_animals.data.loc[match.row_index, image+"Y1"]
-            self._models.model_animals.data.loc[animal.row_index, image+"X2"] = self._models.model_animals.data.loc[match.row_index, image+"X2"]
-            self._models.model_animals.data.loc[animal.row_index, image+"Y2"] = self._models.model_animals.data.loc[match.row_index, image+"Y2"]
+            self._models.model_animals.data.loc[animal.row_index, image+"X1"] = float(self._models.model_animals.data.loc[match.row_index, image+"X1"])
+            self._models.model_animals.data.loc[animal.row_index, image+"Y1"] = float(self._models.model_animals.data.loc[match.row_index, image+"Y1"])
+            self._models.model_animals.data.loc[animal.row_index, image+"X2"] = float(self._models.model_animals.data.loc[match.row_index, image+"X2"])
+            self._models.model_animals.data.loc[animal.row_index, image+"Y2"] = float(self._models.model_animals.data.loc[match.row_index, image+"Y2"])
     
             # remove new animal entry from data model
             pos = self._models.model_animals.data.index.get_loc(match.row_index)

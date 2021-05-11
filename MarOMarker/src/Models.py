@@ -107,7 +107,7 @@ class Models():
         remark : string
             Remark to add
         """
-        if remark is not None and str(remark) != "nan":
+        if remark is not None and str(remark).lower() != "nan":
             same_remarks = self.model_image_remarks.findItems(str(remark))
             
             # add the remark if it is not already in the model
@@ -125,7 +125,7 @@ class Models():
         remark : string
             Remark to add
         """
-        if remark is not None and str(remark) != "nan":
+        if remark is not None and str(remark).lower() != "nan":
             same_remarks = self.model_animal_remarks.findItems(str(remark))
             
             # add the remark if it is not already in the model
@@ -145,7 +145,7 @@ class Models():
         image_path: string
             Path to the image showing the species. Default is ""
         """
-        if species is not None and str(species) != "nan" and species != "":
+        if species is not None and str(species).lower() != "nan" and species != "":
             same_species = self.model_species.findItems(str(species))
             
             # add species if it is not already in the model
