@@ -10,6 +10,7 @@ from DistanceMeasurer import DistanceMeasurer
 
 
 IMAGE_SIZE = (4272, 2848)
+#IMAGE_SIZE = (2848, 4272)
 
 class PageData(QtWidgets.QWidget): 
     """ Class to create the data page of the software.
@@ -1079,7 +1080,7 @@ class PageData(QtWidgets.QWidget):
             file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
             cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
             
-            animals = []
+            #animals = []
             for i in range(len(cur_entries)):
                 
                 # measure length only if there are valid coordinates for right image and left image
@@ -1089,27 +1090,21 @@ class PageData(QtWidgets.QWidget):
                 and cur_entries.iloc[i]["LX2"] > 0 and cur_entries.iloc[i]["LY2"] > 0:
 
                     # make sure that the entries have the right format (i.e. np float arrays)
-                    head_L_entry = np.array([cur_entries.iloc[i]["LX1"], cur_entries.iloc[i]["LY1"]]).astype(np.float32)
-                    tail_L_entry = np.array([cur_entries.iloc[i]["LX2"], cur_entries.iloc[i]["LY2"]]).astype(np.float32)
-                    head_R_entry = np.array([cur_entries.iloc[i]["RX1"], cur_entries.iloc[i]["RY1"]]).astype(np.float32)
-                    tail_R_entry = np.array([cur_entries.iloc[i]["RX2"], cur_entries.iloc[i]["RY2"]]).astype(np.float32)
+                    head_L_entry = np.array([cur_entries.iloc[i]["LX1"], cur_entries.iloc[i]["LY1"]]).astype(np.float64)
+                    tail_L_entry = np.array([cur_entries.iloc[i]["LX2"], cur_entries.iloc[i]["LY2"]]).astype(np.float64)
+                    head_R_entry = np.array([cur_entries.iloc[i]["RX1"], cur_entries.iloc[i]["RY1"]]).astype(np.float64)
+                    tail_R_entry = np.array([cur_entries.iloc[i]["RX2"], cur_entries.iloc[i]["RY2"]]).astype(np.float64)
                                         
                     # undistort points (i.e. rectify)
                     head_L = self.matcher.undistortPoint(head_L_entry, "L")
                     tail_L = self.matcher.undistortPoint(tail_L_entry, "L")
                     head_R = self.matcher.undistortPoint(head_R_entry, "R")
-                    tail_R = self.matcher.undistortPoint(tail_R_entry, "R")
+                    tail_R = self.matcher.undistortPoint(tail_R_entry, "R")    
                     
-                    animal = [0, 
-                              head_L[0], head_L[1], tail_L[0], tail_L[1],
-                              head_R[0], head_R[1], tail_R[0], tail_R[1]]
-                    animals.append(animal)     
-                    
-                    # calculate animal length
-                    distances = pp.measureLength(self.distance_measurer, 
-                                              self.camera_config, 
-                                              [animal])
-        
+                    # calculate animal length by triangulation        
+                    distances = self.distance_measurer.distances(head_L, tail_L, 
+                                                                 head_R, tail_R)
+
                     # add length measurements to model
                     idx = cur_entries.index[i]
                     self.models.model_animals.data.loc[idx, "length"] = distances[0]

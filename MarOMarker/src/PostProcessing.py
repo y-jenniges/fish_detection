@@ -15,72 +15,6 @@ from scipy.optimize import linear_sum_assignment
 
 """ Functions and classes necessary for post processing. """
 
-def rectifyAndMatch(matcher, camera_config, left_image_path, right_image_path, objects_left):   
-    """
-    Function to rectify images and find corresponding animals on the right image.
-
-    Parameters
-    ----------
-    matcher : StereoCorrespondence
-        Object to perform the stereo matching.
-    camera_config : loaded json
-        Confugration of the camera.
-    left_image_path : string
-        Path to left image.
-    right_image_path : string
-        Path to right image.
-    objects_left : list<list<int>>
-        One entry depicts the group, head and tail positions of one animal
-        on the left image.
-        
-    Returns
-    -------
-    merged_objects : list<list<int>>
-        One entry depicts the group, head and tail positions of one animal
-        on the left and right image.
-
-    """
-    image_L = img_to_array(load_img(left_image_path), dtype="uint8")
-    image_R = img_to_array(load_img(right_image_path), dtype="uint8")
-    
-    merged_objects, img_stereo_debug = \
-        matcher.matchCorrespondences(image_L, image_R, objects_left, [])
-        
-    return merged_objects
-
-def measureLength(distance_measurer, camera_config, merged_objects):
-    """
-    Measures the length of an animal by stereo calculations performed by 
-    distance_measurer. 
-
-    Parameters
-    ----------
-    distance_measurer : DistanceMeasurer
-        Performs the length calculations.
-    camera_config : loaded json
-        Confugration of the camera.
-    merged_objects : list<list<int>>
-        One entry depicts the group, head and tail positions of one animal
-        on the left and right image.
-
-    Returns
-    -------
-    distances : list<float>
-        List of measurments of animal length.
-    """
-    #calculate distances by triangulation 
-    if len(merged_objects) != 0:
-        
-        # stereo triangulation
-        merged_pos = np.empty((len(merged_objects),8), dtype=np.float)
-        for i in range(len(merged_objects)):
-            merged_pos[i] = np.array(merged_objects[i][1:], dtype=np.float)
-            print("found: ", merged_pos[i][:4], " -> ", merged_pos[i][-4:])
-        distances = distance_measurer.distances(merged_pos[:,0:2], merged_pos[:,2:4],
-                                                merged_pos[:,4:6], merged_pos[:,6:8])
-        
-    return distances
-
 
 class RectifyMatchWorker(QtCore.QObject):
     """ Object to work in a thread and to be deleted after the rectification 
@@ -129,7 +63,7 @@ class RectifyMatchWorker(QtCore.QObject):
                     animals_left.append(animal)                
                 
                 # rectify and match images
-                merged_objects = rectifyAndMatch(self.matcher, 
+                merged_objects = self.matcher.rectifyAndMatch(self.matcher, 
                                                  self.camera_config, 
                                                  left_image, 
                                                  right_image, 
@@ -341,6 +275,38 @@ class StereoCorrespondence():
 
         return merged_objects, img_stereo
     
+    def rectifyAndMatch(matcher, camera_config, left_image_path, right_image_path, objects_left):   
+        """
+        Function to rectify images and find corresponding animals on the right image.
+    
+        Parameters
+        ----------
+        matcher : StereoCorrespondence
+            Object to perform the stereo matching.
+        camera_config : loaded json
+            Confugration of the camera.
+        left_image_path : string
+            Path to left image.
+        right_image_path : string
+            Path to right image.
+        objects_left : list<list<int>>
+            One entry depicts the group, head and tail positions of one animal
+            on the left image.
+            
+        Returns
+        -------
+        merged_objects : list<list<int>>
+            One entry depicts the group, head and tail positions of one animal
+            on the left and right image.
+    
+        """
+        image_L = img_to_array(load_img(left_image_path), dtype="uint8")
+        image_R = img_to_array(load_img(right_image_path), dtype="uint8")
+        
+        merged_objects, img_stereo_debug = \
+            matcher.matchCorrespondences(image_L, image_R, objects_left, [])
+            
+        return merged_objects
  
 # --- neural network helpers ----------------------------------------------- #
 def loadImage(fname, factor=32, rescale_range=True):
