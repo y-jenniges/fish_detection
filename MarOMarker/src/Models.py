@@ -596,7 +596,7 @@ class TableModel(QtCore.QAbstractTableModel):
             New row for the data
         """
         # get file ID
-        file_id = os.path.basename(image_path)[:-6] # @Todo rather use the strip methods
+        file_id = os.path.basename(image_path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
         
         # get animal group
         if isinstance(animal.group, AnimalGroup):
