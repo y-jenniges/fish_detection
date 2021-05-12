@@ -634,7 +634,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_species.blockSignals(False)    
         elif species != "" and species is not None:
             # add new species entry
-            print("add new species entry")
             self.models.addSpecies(str(species), "")
         
         # set remark combobox
@@ -759,6 +758,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.spinBox_length.setObjectName("spinBox_length")
         self.spinBox_length.setEnabled(False)
         self.spinBox_length.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
+        self.spinBox_length.setToolTip("Animal length in mm")
+        self.spinBox_length.setSuffix(" mm")
         
         # self.spinBox_heigth = QtWidgets.QDoubleSpinBox(self)
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
