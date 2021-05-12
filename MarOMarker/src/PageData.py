@@ -1080,7 +1080,7 @@ class PageData(QtWidgets.QWidget):
             file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
             cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
             
-            #animals = []
+            # iterate over animals
             for i in range(len(cur_entries)):
                 
                 # measure length only if there are valid coordinates for right image and left image
@@ -1114,17 +1114,17 @@ class PageData(QtWidgets.QWidget):
                         if animal.row_index == idx:
                             print(f"length {distances[0]} set on animal")
                             animal.setLength(distances[0])
-                            
+
                     for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaL.animal_painter.animal_list:
                         if animal.row_index == idx:
                             print(f"length {distances[0]} set on animal")
                             animal.setLength(distances[0])
-                        
+                    
                     for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaR.animal_painter.animal_list:
                         if animal.row_index == idx:
                             print(f"length {distances[0]} set on animal")
                             animal.setLength(distances[0])
-                
+                            
             # update label displaying number of rectified and matched images
             num_imgs = int(self.label_length_measurement_number.text()) + 1
             self.label_length_measurement_number.setText(str(num_imgs))
