@@ -9,7 +9,7 @@ from PyQt5 import QtCore
 from tensorflow.keras.preprocessing.image import load_img, img_to_array # check if t works, otherwise only keras
 from skimage.feature import peak_local_max
 #from skimage.transform import resize
-from skimage.transform import rescale
+#from skimage.transform import rescale
 from scipy.optimize import linear_sum_assignment
 
 
