@@ -147,7 +147,7 @@ class PageHome(QtWidgets.QWidget):
     def on_filter_clicked(self):
         """ !!! NOT IMPLEMENTED YET !!! 
         
-        Opens a widget showinf options for image filters. 
+        Opens a widget showing options for image filters. 
         """
         print("Filters are not implemented yet.")
         # img_path = self.photo_viewer.image_list[self.photo_viewer.cur_image_index]
@@ -156,6 +156,11 @@ class PageHome(QtWidgets.QWidget):
         # h,w,c = img.shape
         # qimage = QtGui.QImage(img, h, w, 3*h, QtGui.QImage.Format_RGB888)
         # self.photo_viewer.imageArea.setPhoto(QtGui.QPixmap.fromImage(qimage))
+        
+    def on_undo_clicked(self):
+        """ NOT IMPLEMENTED YET!!! 
+        Undos last action. Whatis counted as an action? add/remove/drag/szh else?"""
+        print("Undo is not implemented yet")
 
     def update_species_list(self, list_species):
         """ Append given list of species names to the species data model if
@@ -281,6 +286,7 @@ class PageHome(QtWidgets.QWidget):
         self.comboBox_imgRemark.currentTextChanged.connect(self.setComboboxImageRemark)
         self.btn_filter.clicked.connect(self.on_filter_clicked)
         self.btn_match.clicked.connect(self.on_match_clicked)
+        self.btn_undo.clicked.connect(self.on_undo_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
         self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
