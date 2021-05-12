@@ -51,7 +51,7 @@ class ImageArea(QtWidgets.QGraphicsView):
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
         # animal painter to enable adding/removing of animals
-        self.animal_painter = AnimalPainter(models, self)      
+        self.animal_painter = AnimalPainter(models, self)    
         
     def hasPhoto(self):
         """ Returns if there is a photo loaded or not. """
@@ -111,6 +111,9 @@ class ImageArea(QtWidgets.QGraphicsView):
                 self._zoom = 0
                 
             self.onWheelZoom.emit(self._zoom)
+            
+            # update specs widget placement
+            self.animal_painter.placeSpecsWidget()
                     
     # delegate mouse events to animal painter
     def mousePressEvent(self, event):

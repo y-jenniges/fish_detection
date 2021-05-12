@@ -82,6 +82,11 @@ class PageHome(QtWidgets.QWidget):
                 
                 self.photo_viewer.imageAreaLR.imageAreaR.resetTransform()
                 self.photo_viewer.imageAreaLR.imageAreaR.fitInView()
+            
+        # update specs widget placement
+        self.photo_viewer.imageArea.animal_painter.placeSpecsWidget()
+        self.photo_viewer.imageAreaLR.imageAreaL.animal_painter.placeSpecsWidget()
+        self.photo_viewer.imageAreaLR.imageAreaR.animal_painter.placeSpecsWidget()
   
     def on_add_clicked(self):
         """ (De-)activate the add mode. """
