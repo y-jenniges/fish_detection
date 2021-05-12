@@ -560,6 +560,10 @@ class PhotoViewer(QtWidgets.QWidget):
         self.imageArea.onWheelZoom.connect(self.on_wheel_zoom)
         self.imageAreaLR.imageAreaL.onWheelZoom.connect(self.on_wheel_zoom)
         self.imageAreaLR.imageAreaR.onWheelZoom.connect(self.on_wheel_zoom)
+        
+        self.imageArea.animal_painter.animalPositionChanged.connect(self.onAnimalDragged)
+        self.imageAreaLR.imageAreaL.animal_painter.animalPositionChanged.connect(self.onAnimalDragged)
+        self.imageAreaLR.imageAreaR.animal_painter.animalPositionChanged.connect(self.onAnimalDragged)
 
         # --- define shortcuts ---------------------------------------------- #  
         self.shortcut_previous_image = QtWidgets.QShortcut(
@@ -569,7 +573,19 @@ class PhotoViewer(QtWidgets.QWidget):
             QtGui.QKeySequence("right"), self.btn_next_image, 
             self.on_next_image) 
 
-    # enable or disable arrow key shortcuts
+    def onAnimalDragged(self):
+        """ Recalculates the length of an animal when it is dragged and 
+        updates all specification widgets accordingly. """
+        if hasattr(self.parent().parent().parent(), 'page_data'):
+            # recalculate animal length 
+            self.parent().parent().parent().page_data.onCalcLength()
+            
+            # update all specs widgets
+            self.imageArea.animal_painter.widget_animal_specs.setAnimal(self.imageArea.animal_painter.cur_animal)
+            self.imageAreaLR.imageAreaL.animal_painter.widget_animal_specs.setAnimal(self.imageAreaLR.imageAreaL.animal_painter.cur_animal)
+            self.imageAreaLR.imageAreaR.animal_painter.widget_animal_specs.setAnimal(self.imageAreaLR.imageAreaR.animal_painter.cur_animal)
+            self.imageAreaLR.updateSpecsWidget() # specs widget on side of LR        
+
     def setArrowShortcutsActive(self, are_active):
         """ Function to en-/disable arrow shortcuts for switching between images. """
         self.shortcut_previous_image.setEnabled(are_active)
