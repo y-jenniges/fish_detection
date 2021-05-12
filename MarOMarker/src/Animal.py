@@ -118,9 +118,9 @@ class Animal():
         self.position_tail = position_tail
         
         # group, species, remark and length of the animal
-        self.group = group
-        self.species = species
-        self.remark = remark
+        self.group = self.setGroup(group)
+        self.species = self.setSpecies(species)
+        self.remark = self.setRemark(remark)
         self.length = length if length > 0 else 0
         #self.height = height if height > 0 else 0
       
@@ -139,9 +139,6 @@ class Animal():
         # indicate if head/tail is already drawn
         self.is_head_drawn = False
         self.is_tail_drawn = False           
-
-        # set pixmaps for head/tail visuals
-        self.getColorsAccordingToGroup()
         
         # set the bounding box visual
         self.boundingBox = QtCore.QRectF()
@@ -262,7 +259,7 @@ class Animal():
             self.color = QtGui.QColor(0, 0, 0)
             
         else:
-            print("Animal: Unknown animal group! Using unidentified colour.")
+            print(f"Animal: Unknown animal group '{self.group, type(self.group)}'! Using unidentified colour.")
             self._pixmap_head = QtGui.QPixmap(":/animal_markings/animal_markings/o_gray.png")        
             self._pixmap_tail = QtGui.QPixmap(":/animal_markings/animal_markings/x_gray.png")  
             self.color = QtGui.QColor(217, 217, 217)
@@ -320,15 +317,15 @@ class Animal():
         ----------
         group : string or AnimalGroup
             New animal group.
-        """
-        self.group = group
-        self.getColorsAccordingToGroup()
-        
+        """       
         if isinstance(group, AnimalGroup):
             g = group.name.title()
         else:
             g = group.title()
             
+        self.group = g
+        self.getColorsAccordingToGroup()
+        
         # adapt group in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
@@ -345,6 +342,8 @@ class Animal():
         """
         if isinstance(species, AnimalSpecies):
             s = species.name.title()
+        elif species.lower() == "nan" or species == "":
+            s = "Unidentified"
         else:
             s = species
           
