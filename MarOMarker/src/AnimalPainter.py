@@ -41,7 +41,8 @@ class AnimalPainter(QtCore.QObject):
         Height of the original image. Necessary for rescaling calculations.
     propertyChanged : pyqtSignal
     animalSelectionChanged : pyqtSignal
-    removeMatchBtnClicked: pyqtSignal
+    removeMatchBtnClicked : pyqtSignal
+    animalPositionChanged : pyqtSignal
     """
     # define custom signals
     propertyChanged = QtCore.pyqtSignal(Animal)
@@ -52,6 +53,9 @@ class AnimalPainter(QtCore.QObject):
     
     removeMatchBtnClicked = QtCore.pyqtSignal(Animal)
     """ Signal emitted when a remove animal match button was clicked. """
+    
+    animalPositionChanged = QtCore.pyqtSignal()
+    """ Signal emitted when a the position of an animal is changed by dragging. """
     
     def __init__(self, models, imageArea, parent=None):
         """
@@ -196,13 +200,23 @@ class AnimalPainter(QtCore.QObject):
             if self.cur_animal.boundingBox_visual is not None:
                 # reset position of specs widget
                 self.widget_animal_specs.move(0,0)
-            
+
                 # get position of current bounding box from scene
                 pos = self.imageArea.mapFromScene(
                     self.cur_animal.boundingBox_visual.rect().bottomLeft().toPoint())
                 
                 # move the specs to the bottom left corner of the animal bounding box
                 self.widget_animal_specs.move(pos)
+                
+                # specs widget in viewport coords
+                specs_vp = self.imageArea.mapFromScene(QtCore.QRectF(self.widget_animal_specs.rect()))
+                specs_width = (specs_vp.value(1) - specs_vp.value(0)).x() #self.widget_animal_specs.width()
+                specs_height = (specs_vp.value(2) - specs_vp.value(1)).y() #self.widget_animal_specs.height()
+                    
+                # bounding box in viewport coordinates
+                bb_vp = self.imageArea.mapFromScene(self.cur_animal.boundingBox_visual.rect())
+                bb_width = (bb_vp.value(1) - bb_vp.value(0)).x() #self.cur_animal.boundingBox_visual.rect().width()
+                bb_height = (bb_vp.value(2) - bb_vp.value(1)).y() #self.cur_animal.boundingBox_visual.rect().height()
                 
                 # 8 possible placements of specs that are checked one after the other
                 # 1. specs below animal
@@ -211,37 +225,37 @@ class AnimalPainter(QtCore.QObject):
                 if result: return
                 
                 # 2. specs left of animal
-                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height())
+                top_left = pos + QtCore.QPoint(-specs_width, -bb_height)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                 
                 # 3. specs above animal
-                top_left = pos + QtCore.QPoint(0, -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                top_left = pos + QtCore.QPoint(0, -bb_height - specs_height)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                 
                 # 4. specs right of animal
-                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height())
+                top_left = pos + QtCore.QPoint(bb_width, -bb_height)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
     
                 # 5. specs on top left corner
-                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                top_left = pos + QtCore.QPoint(-specs_width, -bb_height - specs_height)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                            
                 # 6. specs on top right corner
-                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), -self.cur_animal.boundingBox_visual.rect().height()-self.widget_animal_specs.height())
+                top_left = pos + QtCore.QPoint(bb_width, -bb_height - specs_height)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                 
                 # 7. specs on bottom left corner
-                top_left = pos + QtCore.QPoint(-self.widget_animal_specs.width(), 0)
+                top_left = pos + QtCore.QPoint(-specs_width, 0)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                 
                 # 8. specs on bottom right corner
-                top_left = pos + QtCore.QPoint(self.cur_animal.boundingBox_visual.rect().width(), 0)
+                top_left = pos + QtCore.QPoint(bb_width, 0)
                 result, visibility_areas = self.checkVisibility(top_left, visibility_areas)
                 if result: return
                 
@@ -964,6 +978,8 @@ class AnimalPainter(QtCore.QObject):
             
             self.updateBoundingBoxes()            
             self.cur_animal.setManuallyCorrected(True)
+            
+            self.animalPositionChanged.emit()
 
         # if there is a tail to draw and if the drag_position is within the widget, move the tail
         if not self.drag_position_tail.isNull() \
@@ -981,6 +997,8 @@ class AnimalPainter(QtCore.QObject):
 
             self.updateBoundingBoxes()            
             self.cur_animal.setManuallyCorrected(True)
+            
+            self.animalPositionChanged.emit()
 
     def mouseReleaseEvent(self, event):
         """ When releasing the mouse, reset the drag positions. """
