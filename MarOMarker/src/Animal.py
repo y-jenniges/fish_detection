@@ -285,9 +285,9 @@ class Animal():
             New animal head position.
         """
         self.position_head = pos
-        self.rect_head.moveTopLeft(pos - QtCore.QPoint(
+        self.rect_head.moveTopLeft(QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2))
-        self.pos_visual_head = pos - QtCore.QPoint(
+        self.pos_visual_head = QtCore.QPoint(int(pos.x()), int(pos.y()))  - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2)
         
         self.line.setP1(pos)
@@ -304,9 +304,9 @@ class Animal():
             New animal tail position.
         """
         self.position_tail = pos
-        self.rect_tail.moveTopLeft(pos - QtCore.QPoint(
+        self.rect_tail.moveTopLeft(QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2))
-        self.pos_visual_tail = pos - QtCore.QPoint(
+        self.pos_visual_tail = QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
             self.pixmap_width/2, self.pixmap_width/2)
         
         self.line.setP2(pos)
