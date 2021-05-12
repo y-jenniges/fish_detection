@@ -24,8 +24,7 @@ class DistanceMeasurer():
                           self.rotation, self.translation, R1, R2,
                           self.P1, self.P2, Q=None,
                           flags=cv2.CALIB_ZERO_DISPARITY, alpha=1, newImageSize=(0, 0))
-    
-        
+            
     def distances(self, img_points_L0, img_points_L1, img_points_R0, img_points_R1):
         """ Get points in image space with shape Nx2
         return distances of given points in image space
