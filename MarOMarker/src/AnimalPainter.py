@@ -374,15 +374,13 @@ class AnimalPainter(QtCore.QObject):
         one of the current animal. """
         # remove bounding of other animals
         for animal in self.animal_list:
-            self.imageArea._scene.removeItem(animal.boundingBox_visual)
-            animal.boundingBox_visual = None
+            self.removeBoundingBoxVisual(animal)
             
             # set colour to full opacity
             animal.color.setAlpha(255)
             
             # remove ID
-            self.imageArea._scene.removeItem(animal.id_visual)
-            animal.id_visual = None
+            self.removeIdVisual(animal)
 
         # draw the current animal bounding box
         if self.cur_animal is not None and self.cur_animal in self.animal_list:
@@ -404,13 +402,11 @@ class AnimalPainter(QtCore.QObject):
         self.widget_animal_specs.hide()
     
         for animal in self.animal_list:
-            # remove old bounding box from scene
-            self.imageArea._scene.removeItem(animal.boundingBox_visual)
-            animal.boundingBox_visual = None
-            
+            # remove old bounding box from scene   
+            self.removeBoundingBoxVisual(animal)
+
             # remove ID
-            self.imageArea._scene.removeItem(animal.id_visual)
-            animal.id_visual = None
+            self.removeIdVisual(animal)
                            
             # only drawbounding boxes of animals that are annotated on both images
             if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 \
