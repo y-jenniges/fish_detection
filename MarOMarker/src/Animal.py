@@ -118,9 +118,9 @@ class Animal():
         self.position_tail = position_tail
         
         # group, species, remark and length of the animal
-        self.group = self.setGroup(group)
-        self.species = self.setSpecies(species)
-        self.remark = self.setRemark(remark)
+        self.setGroup(group)
+        self.setSpecies(species)
+        self.setRemark(remark)
         self.length = length if length > 0 else 0
         #self.height = height if height > 0 else 0
       
@@ -318,6 +318,7 @@ class Animal():
         group : string or AnimalGroup
             New animal group.
         """       
+        group = str(group)
         if isinstance(group, AnimalGroup):
             g = group.name.title()
         else:
