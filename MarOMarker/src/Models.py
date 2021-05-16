@@ -528,7 +528,10 @@ class TableModel(QtCore.QAbstractTableModel):
                     by="file_id", ignore_index=True, inplace=True)
             
                 # save the new CSV file
-                current_output.to_csv(path, sep=",", index=False)
+                try:
+                    current_output.to_csv(path, sep=",", index=False)
+                except:
+                    print("Models: Could not write CSV file. Please close all open tables.")
             else:
                 columns = []
                 self.data = pd.DataFrame(columns=columns)
@@ -538,8 +541,11 @@ class TableModel(QtCore.QAbstractTableModel):
                 self.data = pd.DataFrame(columns=self.getColumns())
             
             # write a completely new file (if a path was selected)
-            if path != "":
-                self.data.to_csv(path, sep=",", index=False)
+            try:
+                if path != "":
+                    self.data.to_csv(path, sep=",", index=False)
+            except:
+                print("Models: Could not write CSV file. Please close all open tables.")
     
     def getColumns(self):
         """ Returns a list of the column names. """
