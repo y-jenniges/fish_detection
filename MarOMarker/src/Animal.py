@@ -268,8 +268,7 @@ class Animal():
         self._pixmap_head = self._pixmap_head.scaled(QtCore.QSize(
             self.pixmap_width/2, self.pixmap_width/2))     
         self._pixmap_tail = self._pixmap_tail.scaled(QtCore.QSize(
-            self.pixmap_width/2, self.pixmap_width/2))
-        
+            self.pixmap_width/2, self.pixmap_width/2))     
     
     def setPositionHead(self, pos):
         """
@@ -454,60 +453,38 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.comboBox_group.setModel(self.models.model_group)
         self.comboBox_species.setModel(self.models.model_species)
         self.comboBox_remark.setModel(self.models.model_animal_remarks)
-        
-    def onRemarkComboboxReturnPressed(self):
-        """ Function dealing with the return event on the editable combobox 
-        for animal remarks. This ensures that the newly typed entry is 
-        capitalized and right-aligned. """
-        text = self.comboBox_remark.currentText()
-        index = self.comboBox_remark.findText(text)
-        
-        if index != -1:
-            # remove item from animal remarks model
-            items = self.models.model_animal_remarks.findItems(text)
-            for item in items:
-                self.models.model_animal_remarks.removeRow(item.row())
-            
-            # add a capitalized, right-aligned entry in model
-            item = QtGui.QStandardItem(str(text.title()))
-            item.setTextAlignment(QtCore.Qt.AlignRight)
-            self.models.model_animal_remarks.appendRow(item)
-            
-            # set current combobox image to the new entry and switch focus
-            self.comboBox_remark.setCurrentIndex(index)
-            self.focusNextChild()
-            
-            #self.propertyChanged.emit()
 
-    # @todo would editfinsihed not be enough?   
     def onRemarkComboboxEdited(self):
         """
         Function called when animal remark is edited. 
         """
         text = self.comboBox_remark.currentText()
-        print(f"editing finsihed {text}")
+
+        # if the text does not start with a capital and is in the model, remove it
+        if text != text.title() and len(self.models.model_animal_remarks.findItems(text)) > 0:
+             # remove item from animal remarks model
+            items = self.models.model_animal_remarks.findItems(text)
+            for item in items:
+                self.models.model_animal_remarks.removeRow(item.row())           
         
         # if the text is not yet in the combobox, add it
         if len(self.models.model_animal_remarks.findItems(text)) == 0:
-            print("on remark combobox edited adding to model")
-        #if self.comboBox_remark.findText(text) == -1:
-            item = QtGui.QStandardItem(str(text.title()))
+            # add a capitalized, right-aligned entry to model
+            item = QtGui.QStandardItem(str(text).title())
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
-            self.focusNextChild()
-            #self.propertyChanged.emit()
-     
-    # @todo why to i need this?
-    def onRemarkComboboxChanged(self, remark):
-        """ Function handling when the animal remark combobox gets changed, 
-        i.e. the editing is not finished yet. """
-        if self.animal is not None:
-            self.animal.remark = remark
-            self.propertyChanged.emit(self.animal)
             
+            # set current combobox image to the new entry and switch focus
+            self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text).title()))
+            self.focusNextChild()
+            
+        # update animal object
+        if self.animal is not None:
             if hasattr(self.parent(), "animal_painter"):
-                self.parent().animal_painter.setAnimalRemark(str(remark))
-                
+                self.parent().animal_painter.setAnimalRemark(str(text).title())
+ 
+        self.propertyChanged.emit(self.animal)
+        
     def onSpeciesComboboxChanged(self, species):
         """ Function called when the species combobox is changed. 
         It sets the species of the current animal. 
@@ -669,9 +646,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         self.spinBox_length.valueChanged.connect(self.onLengthSpinboxChanged)
         self.comboBox_group.currentTextChanged.connect(self.onGroupComboboxChanged)
         self.comboBox_species.currentTextChanged.connect(self.onSpeciesComboboxChanged)
-        self.comboBox_remark.currentTextChanged.connect(self.onRemarkComboboxChanged)
         self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
-        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxReturnPressed)
+        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxEdited)
         
         self.btn_group_fish.clicked.connect(partial(self._set_combobox_group_idx, 0))
         self.btn_group_crustacea.clicked.connect(partial(self._set_combobox_group_idx, 1))
