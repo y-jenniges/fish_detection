@@ -46,7 +46,7 @@ class AnimalPainter(QtCore.QObject):
     """
     # define custom signals
     propertyChanged = QtCore.pyqtSignal(Animal)
-    """ Signal emitted when the group or species of an animal is changed. """
+    """ Signal emitted when the group, remark or species of an animal is changed. """
     
     animalSelectionChanged = QtCore.pyqtSignal()
     """ Signal emitted when animal selection changed. """
