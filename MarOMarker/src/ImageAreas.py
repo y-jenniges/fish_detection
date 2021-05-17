@@ -328,8 +328,10 @@ class ImageAreaLR(QtWidgets.QWidget):
         # check if L or R view has an acitve current animal and update the specs widget
         if self.imageAreaL.animal_painter.cur_animal is not None:
             self.widget_animal_specs.setAnimal(self.imageAreaL.animal_painter.cur_animal)
+        
         elif self.imageAreaR.animal_painter.cur_animal is not None:
             self.widget_animal_specs.setAnimal(self.imageAreaR.animal_painter.cur_animal)
+        
         else:
             self.widget_animal_specs.setAnimal(None)
     
@@ -414,15 +416,15 @@ class ImageAreaLR(QtWidgets.QWidget):
 
         # find matching animal
         matching_animal = self.findAnimalMatch(animal, image)
-        print(matching_animal)
         
         # if there is a matching animal, redraw it on the image area
         if matching_animal:
-            print(matching_animal.group)
             # update properties of matching animal
             matching_animal.setGroup(animal.group)
             matching_animal.setSpecies(animal.species)
             matching_animal.setRemark(animal.remark)
+            
+            print(f"set remark {animal.remark}")
             
             # remove matching animal visuals
             imageArea.animal_painter.removeAnimal(matching_animal, False)
@@ -436,16 +438,20 @@ class ImageAreaLR(QtWidgets.QWidget):
             for btn, ani in imageArea.animal_painter.btns_remove_match:
                 if animal == ani:
                     imageArea._scene.removeItem(btn)
+                    imageArea.animal_painter.drawRemoveMatchBtn(matching_animal)
                     break
-            imageArea.animal_painter.drawRemoveMatchBtn(matching_animal)
                 
+            # update specs widget in other view
+            imageArea.animal_painter.widget_animal_specs.setAnimal(matching_animal)
+            
             # # draw a line connecting the animals #@todo
             # start = QtCore.QPoint(100,100)
             # end = QtCore.QPoint(400,400)
             # pen = QtGui.QPen(animal.color, 2, QtCore.Qt.SolidLine)
             # self.scene.addLine(100,100,400,400, pen)
             # print("line drawn")
-
+            
+        # update specs widget on the side
         self.updateSpecsWidget()     
             
     def on_match_activated(self, is_active):
@@ -488,21 +494,32 @@ class ImageAreaLR(QtWidgets.QWidget):
         """ Given the animal stored in the specs widget (on the side), this 
         function updates the corresponding animal on left and right image. """
         if self.imageAreaL.animal_painter.cur_animal is not None:
-            painter = self.imageAreaL.animal_painter
-            image = "L"
-        elif self.imageAreaR.animal_painter.cur_animal is not None:
-            painter = self.imageAreaR.animal_painter
-            image = "R"
-        else:
-            return
-        
-        # # update properties of current animal
-        painter.setAnimalGroup(animal.group)
-        painter.setAnimalSpecies(animal.species)
-        painter.setAnimalRemark(animal.remark)
-        
-        # redraw matching animal
-        self.redrawAnimalMatch(image, painter.cur_animal)
+            painterL = self.imageAreaL.animal_painter
+            # block painter signal, otherwise the side specs would get the update from the L/R specs
+            painterL.blockSignals(True)
+            
+            # update animal
+            painterL.setAnimalGroup(animal.group)
+            painterL.setAnimalSpecies(animal.species)
+            painterL.setAnimalRemark(animal.remark)
+            
+            # update specs in L view
+            painterL.widget_animal_specs.setAnimal(painterL.cur_animal)
+            painterL.blockSignals(False)
+            
+        if self.imageAreaR.animal_painter.cur_animal is not None:
+            painterR = self.imageAreaR.animal_painter
+            # block painter signal, otherwise the side specs would get the update from the L/R specs
+            painterR.blockSignals(True)
+            
+            # update animal
+            painterR.setAnimalGroup(animal.group)
+            painterR.setAnimalSpecies(animal.species)
+            painterR.setAnimalRemark(animal.remark)
+            
+            # update specs in R view
+            painterR.widget_animal_specs.setAnimal(painterR.cur_animal)
+            painterR.blockSignals(False)
     
     def handleMatching(self, image="L"):
         """ When the match mode is active, this function enables a different
@@ -785,7 +802,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(self.redrawSelection)
         
         self.widget_animal_specs.propertyChanged.connect(self.updateDrawnAnimal)
-        
+
         self.imageAreaL.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "L"))
         self.imageAreaR.animal_painter.animalSelectionChanged.connect(partial(self.handleMatching, "R"))
         
