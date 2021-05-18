@@ -65,6 +65,31 @@ von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz’
 </dd></dl>
 
 <dl class="py method">
+<dt id="PostProcessing.StereoCorrespondence.rectifyAndMatch">
+<code class="sig-name descname">rectifyAndMatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matcher</span></em>, <em class="sig-param"><span class="n">camera_config</span></em>, <em class="sig-param"><span class="n">left_image_path</span></em>, <em class="sig-param"><span class="n">right_image_path</span></em>, <em class="sig-param"><span class="n">objects_left</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.rectifyAndMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to rectify images and find corresponding animals on the right image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matcher</strong> (<a class="reference internal" href="#PostProcessing.StereoCorrespondence" title="PostProcessing.StereoCorrespondence"><em>StereoCorrespondence</em></a>) – Object to perform the stereo matching.</p></li>
+<li><p><strong>camera_config</strong> (<em>loaded json</em>) – Confugration of the camera.</p></li>
+<li><p><strong>left_image_path</strong> (<em>string</em>) – Path to left image.</p></li>
+<li><p><strong>right_image_path</strong> (<em>string</em>) – Path to right image.</p></li>
+<li><p><strong>objects_left</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
+on the left image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>merged_objects</strong> – One entry depicts the group, head and tail positions of one animal
+on the left and right image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list&lt;list&lt;int&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="PostProcessing.StereoCorrespondence.sameVec">
 <code class="sig-name descname">sameVec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vec0</span></em>, <em class="sig-param"><span class="n">vec1</span></em>, <em class="sig-param"><span class="n">min_thresh</span><span class="o">=</span><span class="default_value">5.0</span></em>, <em class="sig-param"><span class="n">dynamic_thresh</span><span class="o">=</span><span class="default_value">2.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.StereoCorrespondence.sameVec" title="Permalink to this definition">¶</a></dt>
 <dd><p>check if 2 vectors have less than dynamic_thresh*norm(vec0) difference
@@ -188,57 +213,9 @@ The default is 32.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="PostProcessing.measureLength">
-<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">measureLength</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distance_measurer</span></em>, <em class="sig-param"><span class="n">camera_config</span></em>, <em class="sig-param"><span class="n">merged_objects</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.measureLength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measures the length of an animal by stereo calculations performed by
-distance_measurer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>distance_measurer</strong> (<a class="reference internal" href="DistanceMeasurer.html#DistanceMeasurer.DistanceMeasurer" title="DistanceMeasurer.DistanceMeasurer"><em>DistanceMeasurer</em></a>) – Performs the length calculations.</p></li>
-<li><p><strong>camera_config</strong> (<em>loaded json</em>) – Confugration of the camera.</p></li>
-<li><p><strong>merged_objects</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
-on the left and right image.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>distances</strong> – List of measurments of animal length.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list&lt;float&gt;</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt id="PostProcessing.nonMaxSuppression">
 <code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">nonMaxSuppression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">min_distance</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.nonMaxSuppression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds local maxima.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="PostProcessing.rectifyAndMatch">
-<code class="sig-prename descclassname">PostProcessing.</code><code class="sig-name descname">rectifyAndMatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matcher</span></em>, <em class="sig-param"><span class="n">camera_config</span></em>, <em class="sig-param"><span class="n">left_image_path</span></em>, <em class="sig-param"><span class="n">right_image_path</span></em>, <em class="sig-param"><span class="n">objects_left</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PostProcessing.rectifyAndMatch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to rectify images and find corresponding animals on the right image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>matcher</strong> (<a class="reference internal" href="#PostProcessing.StereoCorrespondence" title="PostProcessing.StereoCorrespondence"><em>StereoCorrespondence</em></a>) – Object to perform the stereo matching.</p></li>
-<li><p><strong>camera_config</strong> (<em>loaded json</em>) – Confugration of the camera.</p></li>
-<li><p><strong>left_image_path</strong> (<em>string</em>) – Path to left image.</p></li>
-<li><p><strong>right_image_path</strong> (<em>string</em>) – Path to right image.</p></li>
-<li><p><strong>objects_left</strong> (<em>list&lt;list&lt;int&gt;&gt;</em>) – One entry depicts the group, head and tail positions of one animal
-on the left image.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>merged_objects</strong> – One entry depicts the group, head and tail positions of one animal
-on the left and right image.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list&lt;list&lt;int&gt;&gt;</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">

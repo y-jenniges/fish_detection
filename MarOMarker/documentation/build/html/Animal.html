@@ -40,7 +40,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">Animal</span></code> class<a class="headerlink" href="#animal-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="Animal.Animal">
-<em class="property">class </em><code class="sig-prename descclassname">Animal.</code><code class="sig-name descname">Animal</code><span class="sig-paren">(</span><em class="sig-param">models</em>, <em class="sig-param">row_index</em>, <em class="sig-param">position_head=PyQt5.QtCore.QPoint(-1</em>, <em class="sig-param">-1)</em>, <em class="sig-param">position_tail=PyQt5.QtCore.QPoint(-1</em>, <em class="sig-param">-1)</em>, <em class="sig-param">group=&lt;AnimalGroup.UNIDENTIFIED: 5&gt;</em>, <em class="sig-param">species=&lt;AnimalSpecies.UNIDENTIFIED: 0&gt;</em>, <em class="sig-param">remark=''</em>, <em class="sig-param">length=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">Animal.</code><code class="sig-name descname">Animal</code><span class="sig-paren">(</span><em class="sig-param">models</em>, <em class="sig-param">row_index</em>, <em class="sig-param">position_head=PyQt5.QtCore.QPointF(-1.0</em>, <em class="sig-param">-1.0)</em>, <em class="sig-param">position_tail=PyQt5.QtCore.QPointF(-1.0</em>, <em class="sig-param">-1.0)</em>, <em class="sig-param">group=&lt;AnimalGroup.UNIDENTIFIED: 5&gt;</em>, <em class="sig-param">species=&lt;AnimalSpecies.UNIDENTIFIED: 0&gt;</em>, <em class="sig-param">remark=''</em>, <em class="sig-param">length=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.Animal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to represent an animal on an image.</p>
 <dl class="field-list simple">
@@ -48,19 +48,19 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row_index</strong> (<em>int</em>) – The index of the row in the result table that this animal
 represents.</p></li>
-<li><p><strong>position_head</strong> (<em>QPoint</em><em>, </em><em>optional</em>) – The position of the animal head on the displayed image. It will be
+<li><p><strong>position_head</strong> (<em>QPointF</em><em>, </em><em>optional</em>) – The position of the animal head on the displayed image. It will be
 the center for the head visual, i.e. an ‘o’.</p></li>
-<li><p><strong>position_tail</strong> (<em>QPoint</em>) – The position of the animal tail on the displayed image. It will be
+<li><p><strong>position_tail</strong> (<em>QPointF</em>) – The position of the animal tail on the displayed image. It will be
 the center for the tail visual, i.e. a ‘x’.</p></li>
 <li><p><strong>group</strong> (<em>string</em>) – The group of the animal. Selectable from the Enum AnimalGroup.</p></li>
 <li><p><strong>species</strong> (<em>string</em>) – The species of the animal.</p></li>
 <li><p><strong>remark</strong> (<em>string</em>) – The remark to the animal.</p></li>
 <li><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – The length of the animal.</p></li>
-<li><p><strong>original_pos_head</strong> (<em>QPoint</em>) – The head position on the unscaled original image.</p></li>
-<li><p><strong>original_pos_tail</strong> (<em>QPoint</em>) – The tail position on the unscaled original image.</p></li>
+<li><p><strong>original_pos_head</strong> (<em>QPointF</em>) – The head position on the unscaled original image.</p></li>
+<li><p><strong>original_pos_tail</strong> (<em>QPointF</em>) – The tail position on the unscaled original image.</p></li>
 <li><p><strong>pixmap_width</strong> (<em>int</em>) – Width of the square pixmap for the head and tail visuals.</p></li>
 <li><p><strong>pos_visual_head</strong> (<em>QPoint</em>) – Position of the head visual.</p></li>
-<li><p><strong>pos_visual_tail</strong> – Position of the tail visual.</p></li>
+<li><p><strong>pos_visual_tail</strong> (<em>QPoint</em>) – Position of the tail visual.</p></li>
 <li><p><strong>rect_head</strong> (<em>QRect</em>) – Geomatry of the head drawn by the head_item_visual</p></li>
 <li><p><strong>rect_tail</strong> (<em>QRect</em>) – Geometry of the tail drawn by the tail_item_visual</p></li>
 <li><p><strong>line</strong> (<em>QLineF</em>) – Geometry of the line drawn by the line_item_visual.</p></li>
@@ -241,24 +241,9 @@ current animal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxChanged">
-<code class="sig-name descname">onRemarkComboboxChanged</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remark</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxChanged" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function handling when the animal remark combobox gets changed,
-i.e. the editing is not finished yet.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxEdited">
 <code class="sig-name descname">onRemarkComboboxEdited</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxEdited" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function called when animal remark is edited.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="Animal.AnimalSpecificationsWidget.onRemarkComboboxReturnPressed">
-<code class="sig-name descname">onRemarkComboboxReturnPressed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Animal.AnimalSpecificationsWidget.onRemarkComboboxReturnPressed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function dealing with the return event on the editable combobox
-for animal remarks. This ensures that the newly typed entry is
-capitalized and right-aligned.</p>
 </dd></dl>
 
 <dl class="py method">
