@@ -430,7 +430,10 @@ class PhotoViewer(QtWidgets.QWidget):
         # (none should be drawn since cur_animal is None)
         imageArea.animal_painter.cur_animal = None
         imageArea.animal_painter.widget_animal_specs.hide()
-        imageArea.animal_painter.updateBoundingBoxes()    
+        imageArea.animal_painter.updateBoundingBoxes()  
+        
+        if hasattr(self, "imageAreaLR"):
+            self.imageAreaLR.widget_animal_specs.setAnimal(None)
     
     def exportToCsv(self, file_id):
         """ Updates the current CSV table. """
