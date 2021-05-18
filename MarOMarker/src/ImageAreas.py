@@ -416,15 +416,13 @@ class ImageAreaLR(QtWidgets.QWidget):
 
         # find matching animal
         matching_animal = self.findAnimalMatch(animal, image)
-        
+        print("redraw animal match")
         # if there is a matching animal, redraw it on the image area
         if matching_animal:
             # update properties of matching animal
             matching_animal.setGroup(animal.group)
             matching_animal.setSpecies(animal.species)
             matching_animal.setRemark(animal.remark)
-            
-            print(f"set remark {animal.remark}")
             
             # remove matching animal visuals
             imageArea.animal_painter.removeAnimal(matching_animal, False)
@@ -493,6 +491,7 @@ class ImageAreaLR(QtWidgets.QWidget):
     def updateDrawnAnimal(self, animal):
         """ Given the animal stored in the specs widget (on the side), this 
         function updates the corresponding animal on left and right image. """
+        print("updatedrawnanimal")
         if self.imageAreaL.animal_painter.cur_animal is not None:
             painterL = self.imageAreaL.animal_painter
             # block painter signal, otherwise the side specs would get the update from the L/R specs
@@ -503,10 +502,12 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterL.setAnimalSpecies(animal.species)
             painterL.setAnimalRemark(animal.remark)
             
+            #painterL.cur_animal.setRemark(animal.remark)
+            
             # update specs in L view
             painterL.widget_animal_specs.setAnimal(painterL.cur_animal)
             painterL.blockSignals(False)
-            
+
         if self.imageAreaR.animal_painter.cur_animal is not None:
             painterR = self.imageAreaR.animal_painter
             # block painter signal, otherwise the side specs would get the update from the L/R specs
@@ -517,10 +518,12 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterR.setAnimalSpecies(animal.species)
             painterR.setAnimalRemark(animal.remark)
             
+           # painterR.cur_animal.setRemark(animal.remark)
+
             # update specs in R view
             painterR.widget_animal_specs.setAnimal(painterR.cur_animal)
             painterR.blockSignals(False)
-    
+            
     def handleMatching(self, image="L"):
         """ When the match mode is active, this function enables a different
         clicking strategy, i.e. 1st click selects animal, 2nd click matches

@@ -363,12 +363,12 @@ class Animal():
         remark : string
             New animal remark.
         """
-        self.remark = remark
+        self.remark = str(remark)
         
         # adapt remark in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
-                self.row_index, 'object_remarks'] = remark
+                self.row_index, 'object_remarks'] = str(remark)
     
     def calculateBoundingBox(self):
         """ Calculates the bounding box of the animal. """
@@ -465,7 +465,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
              # remove item from animal remarks model
             items = self.models.model_animal_remarks.findItems(text)
             for item in items:
-                self.models.model_animal_remarks.removeRow(item.row())           
+                self.models.model_animal_remarks.removeRow(item.row())      
         
         # if the text is not yet in the combobox, add it
         if len(self.models.model_animal_remarks.findItems(text)) == 0:
@@ -474,17 +474,23 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             
-            # set current combobox image to the new entry and switch focus
-            self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text).title()))
-            self.focusNextChild()
-            
-        # update animal object
-        if self.animal is not None:
-            if hasattr(self.parent(), "animal_painter"):
-                self.parent().animal_painter.setAnimalRemark(str(text).title())
- 
-        self.propertyChanged.emit(self.animal)
+        # set current combobox index to the new entry and switch focus
+        self.comboBox_remark.blockSignals(True)
+        self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text).title()))
+        self.comboBox_remark.blockSignals(False)
+        self.focusNextChild()
         
+        # update animal object stored in the specs widget
+        if self.animal is not None:
+            self.animal.setRemark(str(text).title())#remark = str(text).title()
+            
+            # update the drawn animal
+            self.propertyChanged.emit(self.animal)   
+
+        # let animal painter know about change #@todo maybe make animal_painter react to propertyChanged 
+        if hasattr(self.parent(), "animal_painter"):
+            self.parent().animal_painter.setAnimalRemark(str(text).title())
+
     def onSpeciesComboboxChanged(self, species):
         """ Function called when the species combobox is changed. 
         It sets the species of the current animal. 
@@ -594,6 +600,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             remark = self.animal.remark
             length = self.animal.length
         
+        #print(f"specs,animal and  animal remark: {self.animal, remark}")
+        
         # set group combobox
         index = self.comboBox_group.findText(group) 
         if index != -1:
@@ -630,7 +638,8 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
-            #self.model_remarks.appendRow(item)
+
+        #print(f"combo box current remark {self.comboBox_remark.currentText()} -------------------------")
 
         # set length spinbox
         if length is not None and length != -1: 
@@ -639,16 +648,16 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.spinBox_length.blockSignals(False)
         else: 
             self.spinBox_length.setValue(0)
-
+        
     def _initActions(self):
         """ Function to connect signals and slots. """
         # connecting signals and slots
         self.spinBox_length.valueChanged.connect(self.onLengthSpinboxChanged)
         self.comboBox_group.currentTextChanged.connect(self.onGroupComboboxChanged)
         self.comboBox_species.currentTextChanged.connect(self.onSpeciesComboboxChanged)
+        self.comboBox_remark.currentIndexChanged.connect(self.onRemarkComboboxEdited)
         self.comboBox_remark.lineEdit().editingFinished.connect(self.onRemarkComboboxEdited)
-        self.comboBox_remark.lineEdit().returnPressed.connect(self.onRemarkComboboxEdited)
-        
+
         self.btn_group_fish.clicked.connect(partial(self._set_combobox_group_idx, 0))
         self.btn_group_crustacea.clicked.connect(partial(self._set_combobox_group_idx, 1))
         self.btn_group_chaetognatha.clicked.connect(partial(self._set_combobox_group_idx, 2))
