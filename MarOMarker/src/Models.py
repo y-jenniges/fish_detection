@@ -109,13 +109,13 @@ class Models():
         """
         if remark is not None and str(remark).lower() != "nan":
             same_remarks = self.model_image_remarks.findItems(str(remark))
-            
+                        
             # add the remark if it is not already in the model
             if len(same_remarks) == 0:
                 item = QtGui.QStandardItem(str(remark))
                 item.setTextAlignment(QtCore.Qt.AlignLeft)
                 self.model_image_remarks.appendRow(item)
-        
+                    
     def addAnimalRemark(self, remark):
         """
         Add a remark to the animal remark model.
@@ -127,7 +127,14 @@ class Models():
         """
         if remark is not None and str(remark).lower() != "nan":
             same_remarks = self.model_animal_remarks.findItems(str(remark))
-            
+     
+            # if the text is already present in a similar form, do not add it 
+            for i in range(self.model_animal_remarks.rowCount()):
+                item = self.model_animal_remarks.item(i)
+                
+                if item.text().lower() == remark.lower():
+                    return item.text()
+                
             # add the remark if it is not already in the model
             if len(same_remarks) == 0:
                 item = QtGui.QStandardItem(str(remark))
@@ -620,7 +627,7 @@ class TableModel(QtCore.QAbstractTableModel):
         # right image)
         if image_spec == "L":
             new_row = pd.DataFrame({"file_id": file_id, 
-                                    "object_remarks": animal.remark, 
+                                    "object_remarks": str(animal.remark), 
                                     "group": group, 
                                     "species": species,
                                     "LX1": animal.original_pos_head.x(),
@@ -649,7 +656,7 @@ class TableModel(QtCore.QAbstractTableModel):
                                     }, index=[animal.row_index])
         elif image_spec=="R":
             new_row = pd.DataFrame({"file_id": file_id, 
-                                    "object_remarks": animal.remark, 
+                                    "object_remarks": str(animal.remark), 
                                     "group": group, 
                                     "species": species,
                                     "LX1": -1,

@@ -459,37 +459,37 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         Function called when animal remark is edited. 
         """
         text = self.comboBox_remark.currentText()
-
-        # if the text does not start with a capital and is in the model, remove it
-        if text != text.title() and len(self.models.model_animal_remarks.findItems(text)) > 0:
-             # remove item from animal remarks model
-            items = self.models.model_animal_remarks.findItems(text)
-            for item in items:
-                self.models.model_animal_remarks.removeRow(item.row())      
         
+        # if the text is already present in a similar form, do not add it but only update the combobox index
+        for i in range(self.models.model_animal_remarks.rowCount()):
+            item = self.models.model_animal_remarks.item(i)
+            
+            if item.text().lower() == text.lower():
+                text = str(item.text())
+  
         # if the text is not yet in the combobox, add it
         if len(self.models.model_animal_remarks.findItems(text)) == 0:
             # add a capitalized, right-aligned entry to model
-            item = QtGui.QStandardItem(str(text).title())
+            item = QtGui.QStandardItem(str(text))
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             
         # set current combobox index to the new entry and switch focus
         self.comboBox_remark.blockSignals(True)
-        self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text).title()))
+        self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text)))
         self.comboBox_remark.blockSignals(False)
         self.focusNextChild()
         
         # update animal object stored in the specs widget
         if self.animal is not None:
-            self.animal.setRemark(str(text).title())#remark = str(text).title()
+            self.animal.setRemark(str(text))#remark = str(text).title()
             
             # update the drawn animal
             self.propertyChanged.emit(self.animal)   
 
         # let animal painter know about change #@todo maybe make animal_painter react to propertyChanged 
         if hasattr(self.parent(), "animal_painter"):
-            self.parent().animal_painter.setAnimalRemark(str(text).title())
+            self.parent().animal_painter.setAnimalRemark(str(text))
 
     def onSpeciesComboboxChanged(self, species):
         """ Function called when the species combobox is changed. 
@@ -623,8 +623,17 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         
         # set remark combobox
         index = self.comboBox_remark.findText(remark) 
+        
+        # if the remark is already present in a similar form, take its index 
+        for i in range(self.models.model_animal_remarks.rowCount()):
+            item = self.models.model_animal_remarks.item(i)
+            
+            if item.text().lower() == remark.lower():
+                index = self.comboBox_remark.findText(item.text()) 
+                remark = item.text()
+            
         if len(self.models.model_animal_remarks.findItems(remark)) != 0 or \
-        len(self.models.model_animal_remarks.findItems(remark.title())):
+        len(self.models.model_animal_remarks.findItems(remark)):
             self.comboBox_remark.blockSignals(True)
             self.comboBox_remark.setCurrentIndex(index)
             self.comboBox_remark.blockSignals(False)  
@@ -634,7 +643,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.comboBox_remark.blockSignals(False)            
         elif remark != "" and remark is not None:
             print("adding new remark entry----------------------")
-            item = QtGui.QStandardItem(str(remark).title())
+            item = QtGui.QStandardItem(str(remark))
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
