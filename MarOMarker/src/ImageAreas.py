@@ -416,7 +416,7 @@ class ImageAreaLR(QtWidgets.QWidget):
 
         # find matching animal
         matching_animal = self.findAnimalMatch(animal, image)
-        print("redraw animal match")
+
         # if there is a matching animal, redraw it on the image area
         if matching_animal:
             # update properties of matching animal
@@ -491,9 +491,9 @@ class ImageAreaLR(QtWidgets.QWidget):
     def updateDrawnAnimal(self, animal):
         """ Given the animal stored in the specs widget (on the side), this 
         function updates the corresponding animal on left and right image. """
-        print("updatedrawnanimal")
         if self.imageAreaL.animal_painter.cur_animal is not None:
             painterL = self.imageAreaL.animal_painter
+            
             # block painter signal, otherwise the side specs would get the update from the L/R specs
             painterL.blockSignals(True)
             
@@ -501,15 +501,14 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterL.setAnimalGroup(animal.group)
             painterL.setAnimalSpecies(animal.species)
             painterL.setAnimalRemark(animal.remark)
-            
-            #painterL.cur_animal.setRemark(animal.remark)
-            
+
             # update specs in L view
             painterL.widget_animal_specs.setAnimal(painterL.cur_animal)
             painterL.blockSignals(False)
 
         if self.imageAreaR.animal_painter.cur_animal is not None:
             painterR = self.imageAreaR.animal_painter
+            
             # block painter signal, otherwise the side specs would get the update from the L/R specs
             painterR.blockSignals(True)
             
@@ -517,8 +516,6 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterR.setAnimalGroup(animal.group)
             painterR.setAnimalSpecies(animal.species)
             painterR.setAnimalRemark(animal.remark)
-            
-           # painterR.cur_animal.setRemark(animal.remark)
 
             # update specs in R view
             painterR.widget_animal_specs.setAnimal(painterR.cur_animal)
