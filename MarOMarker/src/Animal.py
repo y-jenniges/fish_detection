@@ -463,7 +463,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
         # if the text is already present in a similar form, do not add it but only update the combobox index
         for i in range(self.models.model_animal_remarks.rowCount()):
             item = self.models.model_animal_remarks.item(i)
-            
+            item.setTextAlignment(QtCore.Qt.AlignRight)
             if item.text().lower() == text.lower():
                 text = str(item.text())
   
@@ -475,14 +475,12 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             self.models.model_animal_remarks.appendRow(item)
             
         # set current combobox index to the new entry and switch focus
-        self.comboBox_remark.blockSignals(True)
         self.comboBox_remark.setCurrentIndex(self.comboBox_remark.findText(str(text)))
-        self.comboBox_remark.blockSignals(False)
         self.focusNextChild()
         
         # update animal object stored in the specs widget
         if self.animal is not None:
-            self.animal.setRemark(str(text))#remark = str(text).title()
+            self.animal.setRemark(str(text))
             
             # update the drawn animal
             self.propertyChanged.emit(self.animal)   
@@ -600,8 +598,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             remark = self.animal.remark
             length = self.animal.length
         
-        #print(f"specs,animal and  animal remark: {self.animal, remark}")
-        
         # set group combobox
         index = self.comboBox_group.findText(group) 
         if index != -1:
@@ -647,9 +643,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             item.setTextAlignment(QtCore.Qt.AlignRight)
             self.models.model_animal_remarks.appendRow(item)
             self.comboBox_remark.setCurrentIndex(self.comboBox_remark.count() - 1)
-
-        #print(f"combo box current remark {self.comboBox_remark.currentText()} -------------------------")
-
+            
         # set length spinbox
         if length is not None and length != -1: 
             self.spinBox_length.blockSignals(True)
