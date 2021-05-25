@@ -35,10 +35,13 @@ class RectifyMatchWorker(QtCore.QObject):
         self.models = models
         self.image_list = img_list
         self.camera_config = camera_config
-
+        
     def rectifyMatch(self):
         count = 0
+        self.matcher.merged_objects = []
+        self.matcher.cur_entries = []
         
+
         # iterate over left images, rectify and match   
         for i in range(len(self.image_list[0])):
             right_image = self.image_list[1][i]
@@ -55,7 +58,9 @@ class RectifyMatchWorker(QtCore.QObject):
                 cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
                 
                 animals_left = []
+                
                 for i in range(len(cur_entries)):   
+                    
                     # only match left animals that do not have a right match yet
                     if cur_entries.iloc[i]["RX1"] is None \
                     or cur_entries.iloc[i]["RX1"] == -1 \
@@ -63,46 +68,30 @@ class RectifyMatchWorker(QtCore.QObject):
                         animal = [0, cur_entries.iloc[i]["LY1"], 
                                   cur_entries.iloc[i]["LX1"], 
                                   cur_entries.iloc[i]["LY2"], 
-                                  cur_entries.iloc[i]["LX2"]]
+                                  cur_entries.iloc[i]["LX2"],
+                                  cur_entries.index[i]]
                         animals_left.append(animal)    
-                    else:
-                        animals_left.append([])  
+                    # else:
+                    #     animals_left.append([])  
                 
                 print("left animals: ")
                 print(animals_left)
                 print()
                 
-                # rectify and match images
-                merged_objects = self.matcher.rectifyAndMatch(self.matcher, 
+                # rectify and match images                
+                merged_objects = self.matcher.rectifyAndMatch( 
                                                  self.camera_config, 
                                                  left_image, 
                                                  right_image, 
                                                  animals_left)
                 
+                self.matcher.merged_objects.append(merged_objects)
+                self.matcher.cur_entries.append([x[5] for x in animals_left])
+                
                 print("merged ojects:")
                 print(merged_objects)
                 print()
-                
-                # add right coordinates to data model
-                for i in range(len(cur_entries.index)):
-                    idx = cur_entries.index[i]
-                    
-                    # only continue if the animal is matched
-                    if merged_objects != [] and merged_objects[i] != []:
-                        # the matcher returns rectified coordinates,
-                        # they have to be calculated back and just then add them to data model 
-                        head = self.matcher.distortPoint([merged_objects[i][6], merged_objects[i][5]], "R")
-                        tail = self.matcher.distortPoint([merged_objects[i][8], merged_objects[i][7]], "R")
-                        
-                        if (np.array(head) < 0).any() or (np.array(tail) < 0).any():
-                            head = [-1,-1]
-                            tail = [-1,-1]
-                            
-                        self.models.model_animals.data.loc[idx, "RX1"] = head[1]
-                        self.models.model_animals.data.loc[idx, "RY1"] = head[0]
-                        self.models.model_animals.data.loc[idx, "RX2"] = tail[1]
-                        self.models.model_animals.data.loc[idx, "RY2"] = tail[0] 
-                    
+
             count = count + 1
             self.progress.emit(count)
     
@@ -134,6 +123,10 @@ class StereoCorrespondence():
         self.R2 = np.zeros((3, 3))
         self.P1 = np.zeros((3, 4))
         self.P2 = np.zeros((3, 4))
+        
+        # output
+        self.merged_objects = []
+        self.cur_entries = []
 
         # cv2.stereoRectify(self <
         #                   self.P1, self.P2, Q=None,
@@ -239,6 +232,10 @@ class StereoCorrespondence():
         if obj_L is None or len(obj_L) == 0:
             return merged_objects, img_stereo
         
+        print("here")
+        print(obj_L)
+        
+        
         #stereo rectify points for Left Head and Back
         pts_L_H = np.array([[x[1],x[2]] for x in obj_L], dtype=np.float32)
         pts_L_B = np.array([[x[3],x[4]] for x in obj_L], dtype=np.float32)
@@ -288,16 +285,15 @@ class StereoCorrespondence():
                 merged_objects.append([obj_L[i][0],head[0],head[1],back[0],back[1],head2[0],head2[1],back2[0],back2[1]])
                 #print("found: ", head[0], head[1], " -> ", top_left2[0], top_left2[1])
 
+        #self.merged_objects = merged_objects #@todo
         return merged_objects, img_stereo
     
-    def rectifyAndMatch(self, matcher, camera_config, left_image_path, right_image_path, objects_left):   
+    def rectifyAndMatch(self, camera_config, left_image_path, right_image_path, objects_left):   
         """
         Function to rectify images and find corresponding animals on the right image.
     
         Parameters
         ----------
-        matcher : StereoCorrespondence
-            Object to perform the stereo matching.
         camera_config : loaded json
             Confugration of the camera.
         left_image_path : string

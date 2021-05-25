@@ -3,6 +3,7 @@ import json
 import glob
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
+from Animal import Animal
 from Helpers import TopFrame, MenuFrame, displayErrorMsg, ProgressBar
 import PostProcessing as pp
 from Predicter import Predicter, PredictionWorker
@@ -1036,6 +1037,54 @@ class PageData(QtWidgets.QWidget):
         """ Called when the rectification and matching calculations are done.
         Enables the data page and triggers length calculations. """
         self.setEnabled(True)
+
+        # now we need to create new right animal instances
+        # for this, we iterate over images
+        for j in range(len(self.matcher.merged_objects)):
+            merged_objects = self.matcher.merged_objects[j] # all new animals 
+            cur_entries = self.matcher.cur_entries[j] # their row index in the data table
+            
+            # add right coordinates to data model
+            for i in range(len(cur_entries)):
+                idx = cur_entries[i]
+                
+                # only continue if the animal is matched
+                if merged_objects != [] and merged_objects[i] != []:
+                    # the matcher returns rectified coordinates,
+                    # they have to be calculated back and just then add them to data model 
+                    head = self.matcher.distortPoint([merged_objects[i][6], merged_objects[i][5]], "R")
+                    tail = self.matcher.distortPoint([merged_objects[i][8], merged_objects[i][7]], "R")
+                    
+                    if (np.array(head) < 0).any() or (np.array(tail) < 0).any():
+                        head = [-1,-1]
+                        tail = [-1,-1]
+                        
+                    # update data model
+                    self.models.model_animals.data.loc[idx, "RX1"] = head[1]
+                    self.models.model_animals.data.loc[idx, "RY1"] = head[0]
+                    self.models.model_animals.data.loc[idx, "RX2"] = tail[1]
+                    self.models.model_animals.data.loc[idx, "RY2"] = tail[0] 
+                    
+                    # create a new right animal instance
+                    animal_remark = str(self.models.model_animals.data.loc[idx, "object_remarks"] )
+                    if not animal_remark: animal_remark = ""       
+            
+                    length = float(self.models.model_animals.data.loc[idx, "length"])
+                    print(f"idx: {idx}")
+                    animal = Animal(self.models,
+                             row_index=idx,
+                             position_head=QtCore.QPointF(head[1], head[0]), 
+                             position_tail=QtCore.QPointF(tail[1], tail[0]),
+                             group=str(self.models.model_animals.data.loc[idx, "group"]),
+                             species=str(self.models.model_animals.data.loc[idx, "species"]),
+                             remark=animal_remark,
+                             length=length)
+                    
+                    # append animal instance to list of viewers showing right images
+                    if self.parent().parent().page_home.photo_viewer.imageArea.animal_painter.image_ending == "*_R.jpg":
+                        self.parent().parent().page_home.photo_viewer.imageArea.animal_painter.animal_list.append(animal)  
+                        
+                    self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaR.animal_painter.animal_list.append(animal)  
 
         # update length calculations
         self.onCalcLength()
