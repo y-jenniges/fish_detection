@@ -68,6 +68,7 @@ class RectifyMatchWorker(QtCore.QObject):
                     else:
                         animals_left.append([])  
                 
+                print("left animals: ")
                 print(animals_left)
                 print()
                 
@@ -78,6 +79,7 @@ class RectifyMatchWorker(QtCore.QObject):
                                                  right_image, 
                                                  animals_left)
                 
+                print("merged ojects:")
                 print(merged_objects)
                 print()
                 
@@ -212,7 +214,7 @@ class StereoCorrespondence():
         
     def matchCorrespondences(self, img_L, img_R, obj_L, obj_R, template_radius=50, epiline_thresh=2000):
         """match similar obj coordinates, near eplines in the other img and returns merged objects"""
-        if obj_L == [] or obj_R == []: return [], []
+        if obj_L == []: return [], []
         
         merged_objects = [] #list to collect outputs
         
