@@ -875,9 +875,6 @@ class PageData(QtWidgets.QWidget):
         
         # get prediction parameters
         df = self.predicter.df
-        image_pathes = self.predicter.image_pathes
-        experiment_id = self.predicter.experiment_id
-        user_id = self.predicter.user_id
         
         print(df)
         
@@ -885,15 +882,11 @@ class PageData(QtWidgets.QWidget):
         row = len(self.models.model_animals.data)
         count = len(df)
 
-        for path in image_pathes:
-            # insert data into model
-            self.models.model_animals.insertDfRows(row=row, 
-                                                   count=count, 
-                                                   df=df,
-                                                   image_path=path, 
-                                                   image_remark="", 
-                                                   experiment_id=experiment_id, 
-                                                   user_id=user_id)
+        #for path in image_pathes:
+        # insert data into model
+        self.models.model_animals.insertDfRows(row=row, 
+                                               count=count, 
+                                               df=df)
 
         print("PageData: New data inserted into model")
 
@@ -965,13 +958,10 @@ class PageData(QtWidgets.QWidget):
             
             # create a QThread and worker object
             self.thread = QtCore.QThread()
-            self.worker = PredictionWorker(self.predicter)
+            self.worker = PredictionWorker(self.predicter, img_list[0], file_ids, exp_id, user_id)
             
             # move worker to the thread
             self.worker.moveToThread(self.thread)
-            
-            # prepare prediction inputs
-            self.worker.setInputsForPrediction(img_list[0], file_ids, exp_id, user_id)
             
             # connect signals and slots from thread to worker and vice versa
             self.thread.started.connect(self.worker.predictImageList)

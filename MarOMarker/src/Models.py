@@ -422,8 +422,7 @@ class TableModel(QtCore.QAbstractTableModel):
         self.sort("file_id")
         return True
 
-    def insertDfRows(self, row, count, df, image_path, image_remark, 
-                   experiment_id, user_id, parent=QtCore.QModelIndex()):
+    def insertDfRows(self, row, count, df, parent=QtCore.QModelIndex()):
         """
         Inserts count rows into the dataframe before the given row. The rows
         are filled using the image path, remarks, experiment ID, user ID 
@@ -437,14 +436,6 @@ class TableModel(QtCore.QAbstractTableModel):
             number of rows to be inserted
         df : DataFrame
             animal information to be stored in the CSV file
-        image_path : string
-            path to the current image
-        image_remark : string
-            remark for the current image
-        experiment_id : string
-            ID of the experiment the current image belongs to
-        user_id : string
-            ID of the currently working user
         parent : TYPE, optional
             Parent object. The default is QtCore.QModelIndex().
 

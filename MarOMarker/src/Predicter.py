@@ -335,10 +335,12 @@ class PredictionWorker(QtCore.QObject):
     progress = QtCore.pyqtSignal(int)
     """ Signal emitted for every image from an image list that is already predicted. """
     
-    def __init__(self, predicter):
+    def __init__(self, predicter, image_pathes, file_ids, experiment_id="", user_id=""):
         super().__init__()
         
         self.predicter = predicter
+        self.predicter.setInputsForPrediction(image_pathes, file_ids, experiment_id, user_id)
+                                              
         self.predicter.finished.connect(self.predicterFinished)
         self.predicter.progress.connect(self.predicterProgress)
      
@@ -350,6 +352,3 @@ class PredictionWorker(QtCore.QObject):
         
     def predictImageList(self):
         self.predicter.predictImageList()
-        
-    def setInputsForPrediction(self, image_pathes, file_ids, experiment_id="", user_id=""):
-        self.predicter.setInputsForPrediction(image_pathes, file_ids, experiment_id, user_id)
