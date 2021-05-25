@@ -281,7 +281,7 @@ the given role, section and orientation.</p>
 
 <dl class="py method">
 <dt id="Models.TableModel.insertDfRows">
-<code class="sig-name descname">insertDfRows</code><span class="sig-paren">(</span><em class="sig-param">row</em>, <em class="sig-param">count</em>, <em class="sig-param">df</em>, <em class="sig-param">image_path</em>, <em class="sig-param">image_remark</em>, <em class="sig-param">experiment_id</em>, <em class="sig-param">user_id</em>, <em class="sig-param">parent=&lt;PyQt5.QtCore.QModelIndex object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#Models.TableModel.insertDfRows" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">insertDfRows</code><span class="sig-paren">(</span><em class="sig-param">row</em>, <em class="sig-param">count</em>, <em class="sig-param">df</em>, <em class="sig-param">parent=&lt;PyQt5.QtCore.QModelIndex object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#Models.TableModel.insertDfRows" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inserts count rows into the dataframe before the given row. The rows
 are filled using the image path, remarks, experiment ID, user ID
 and with the data from a dataframe.</p>
@@ -291,10 +291,6 @@ and with the data from a dataframe.</p>
 <li><p><strong>row</strong> (<em>int</em>) – insert new rows before this one</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – number of rows to be inserted</p></li>
 <li><p><strong>df</strong> (<em>DataFrame</em>) – animal information to be stored in the CSV file</p></li>
-<li><p><strong>image_path</strong> (<em>string</em>) – path to the current image</p></li>
-<li><p><strong>image_remark</strong> (<em>string</em>) – remark for the current image</p></li>
-<li><p><strong>experiment_id</strong> (<em>string</em>) – ID of the experiment the current image belongs to</p></li>
-<li><p><strong>user_id</strong> (<em>string</em>) – ID of the currently working user</p></li>
 <li><p><strong>parent</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – Parent object. The default is QtCore.QModelIndex().</p></li>
 </ul>
 </dd>

@@ -168,7 +168,7 @@ want to run the neural network predictions in a separate worker thread.</p>
 <h2><code class="docutils literal notranslate"><span class="pre">PredictionWorker</span></code> class<a class="headerlink" href="#predictionworker-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="Predicter.PredictionWorker">
-<em class="property">class </em><code class="sig-prename descclassname">Predicter.</code><code class="sig-name descname">PredictionWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predicter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">Predicter.</code><code class="sig-name descname">PredictionWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predicter</span></em>, <em class="sig-param"><span class="n">image_pathes</span></em>, <em class="sig-param"><span class="n">file_ids</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyQt5.QtCore.QObject</span></code></p>
 <p>Object to work in a thread and to be deleted after the prediction
 calculations finished.</p>
@@ -198,11 +198,6 @@ calculations finished.</p>
 <code class="sig-name descname">progress</code><a class="headerlink" href="#Predicter.PredictionWorker.progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Signal emitted for every image from an image list that is already predicted.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt id="Predicter.PredictionWorker.setInputsForPrediction">
-<code class="sig-name descname">setInputsForPrediction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image_pathes</span></em>, <em class="sig-param"><span class="n">file_ids</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predicter.PredictionWorker.setInputsForPrediction" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
