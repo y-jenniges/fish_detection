@@ -230,35 +230,37 @@ class ImageAreaLR(QtWidgets.QWidget):
 
     def on_remove_match(self, animal_L, animal_R):
         """ Creates a separate data row for the right animal and removes the 
-        right coordinates from the left animal. """
+        right coordinates from the left animal. """        
+        # reset current animals
+        self.imageAreaL.animal_painter.cur_animal = None
+        self.imageAreaR.animal_painter.cur_animal = None
+        
         # create data row for the right animal and update index
         self.createSeparateDataRow(animal_R, "R")   
         
         # remove right coordinates from left animal 
         self.match(animal_L, None)
-        
-        # reset current animals
-        self.imageAreaL.animal_painter.cur_animal = None
-        self.imageAreaR.animal_painter.cur_animal = None
-        
+                
         # redraw animals
         self.imageAreaL.animal_painter.updateBoundingBoxes()
         self.imageAreaR.animal_painter.updateBoundingBoxes()
-        
+                
         # set length to zero (without a match, it cannot be calculated)
         animal_L.setLength(0.0)
         animal_R.setLength(0.0)
         
         # remove cancel button, redraw cancel button when group changes
         for btn, ani in self.imageAreaL.animal_painter.btns_remove_match:
-            if animal_L == ani:
+            if animal_L == ani and btn is not None:
                 self.imageAreaL._scene.removeItem(btn)
                 self.imageAreaL.animal_painter.btns_remove_match.remove([btn, ani])
                 
-        for btn, ani in self.imageAreaR.animal_painter.btns_remove_match:
-            if animal_R == ani:
-                self.imageAreaR._scene.removeItem(btn)
-                self.imageAreaR.animal_painter.btns_remove_match.remove([btn, ani])
+        # for btn, ani in self.imageAreaR.animal_painter.btns_remove_match:
+        #     if animal_R == ani and btn is not None:
+        #         self.imageAreaR._scene.removeItem(btn)
+        #         self.imageAreaR.animal_painter.btns_remove_match.remove([btn, ani])
+                
+        print("ImageAreaLR: Removing animal match complete")
         
     def on_next_animal(self):
         """ Delegates the query to make next animal active to the lastly active
@@ -727,7 +729,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         
         # remove the button to remove a match 
         for btn, ani in imageArea.animal_painter.btns_remove_match:
-            if animal == ani:
+            if animal == ani and btn is not None:
                 imageArea._scene.removeItem(btn)
                 imageArea.animal_painter.btns_remove_match.remove([btn, ani])
             
@@ -788,6 +790,7 @@ class ImageAreaLR(QtWidgets.QWidget):
         """
         match = self.findAnimalMatch(animal, image)
 
+        print("ImageAreaLR: Matching animal found, continue to remove the match")
         if image == "L":
             self.on_remove_match(animal, match)
         elif image == "R":
