@@ -105,7 +105,7 @@ class AnimalPainter(QtCore.QObject):
         self.updateBoundingBoxes = self.updateBoundingBoxesNormal
         
         # remember the group and species of the most recently adapted animal
-        self._previous_group = AnimalGroup.UNIDENTIFIED
+        self._previous_group = "Unidentified"
         self._previous_species = AnimalSpecies.UNIDENTIFIED
         
         # setup shortcuts
@@ -150,9 +150,10 @@ class AnimalPainter(QtCore.QObject):
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
             # redraw ID and 'remove match' button if match mode is active
-            if hasattr(self.imageArea.parent().parent().parent().parent().parent, "is_match_animal_active"):
-                self.imageArea._scene.removeItem(self.cur_animal.id_visual)
-                self.drawAnimalIdRemoveBtn(self.cur_animal)
+            if hasattr(self.imageArea.parent().parent().parent().parent().parent(), "is_match_animal_active"):
+                if self.imageArea.parent().parent().parent().parent().parent().is_match_animal_active:
+                    self.imageArea._scene.removeItem(self.cur_animal.id_visual)
+                    self.drawAnimalIdRemoveBtn(self.cur_animal)
             
             self.propertyChanged.emit(self.cur_animal)   
      

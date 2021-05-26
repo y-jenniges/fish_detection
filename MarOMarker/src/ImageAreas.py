@@ -503,6 +503,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterL.setAnimalGroup(animal.group)
             painterL.setAnimalSpecies(animal.species)
             painterL.setAnimalRemark(animal.remark)
+            painterL.updateBoundingBoxes() 
 
             # update specs in L view
             painterL.widget_animal_specs.setAnimal(painterL.cur_animal)
@@ -518,6 +519,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             painterR.setAnimalGroup(animal.group)
             painterR.setAnimalSpecies(animal.species)
             painterR.setAnimalRemark(animal.remark)
+            painterR.updateBoundingBoxes()
 
             # update specs in R view
             painterR.widget_animal_specs.setAnimal(painterR.cur_animal)
