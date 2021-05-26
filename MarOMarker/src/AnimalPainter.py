@@ -685,8 +685,6 @@ class AnimalPainter(QtCore.QObject):
         is_add_active : bool
             Wheter the add mode needs to be active or not.
         is_match_active : bool
-            Whether the match mode needs to be active or not.
-        is_match_active : bool
             Whether the remove mode is active or not.
         """ 
         if not activate_remove:
@@ -728,7 +726,7 @@ class AnimalPainter(QtCore.QObject):
         # if add mode is to be turned off
         if not activate_add:
             # the add mode can only be deactivated when head and tail are drawn 
-            # or none of them is drawn
+            # or none of them is drawn (i.e. cur_animal is None)
             if self.cur_animal is not None:
                 if (self.cur_animal.is_head_drawn and self.cur_animal.is_tail_drawn) \
                     or (not self.cur_animal.is_head_drawn and not self.cur_animal.is_tail_drawn):
@@ -737,9 +735,11 @@ class AnimalPainter(QtCore.QObject):
                     displayErrorMsg("Error", 
                                     "Please draw head and tail before switching off the Add-mode.", 
                                     "Error")
+                    return True, False, False
             else:
-                return False, is_remove_active, is_match_active
+                return True, is_remove_active, is_match_active
         else:
+            # turn on add mode
             return True, False, False
             
     def deselectAnimal(self):
@@ -925,7 +925,6 @@ class AnimalPainter(QtCore.QObject):
                     self.drawAnimalHead(self.cur_animal)
                     
                     # deactivate esc shortcut to prevent creation of incomplete animals
-                    #parent.setEscShortcutActive(False) 
                     self.shortcut_deselect_animal.setEnabled(False)
                     
                      # since a new animal is selected, emit signal
@@ -1059,7 +1058,6 @@ class AnimalPainter(QtCore.QObject):
             self.models.model_animals.data.loc[self.cur_animal.row_index, end+"Y1"] = self.cur_animal.original_pos_head.y()
             self.models.model_animals.data.loc[self.cur_animal.row_index, end+"X2"] = self.cur_animal.original_pos_tail.x()
             self.models.model_animals.data.loc[self.cur_animal.row_index, end+"Y2"] = self.cur_animal.original_pos_tail.y()
-
 
     def drawAnimalsFromList(self, animal_list):
         """
