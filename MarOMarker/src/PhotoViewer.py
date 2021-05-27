@@ -474,25 +474,30 @@ class PhotoViewer(QtWidgets.QWidget):
                                 "Error")  
             # only go to new image if the given index is valid
             elif newIndex in range(len(self.image_list[0])):
-                # current file_id
+                # next file_id
                 cur_file_id = os.path.basename(
                     self.image_list[0][newIndex]).strip(".jpg"). \
                     strip(".png").strip("_L").strip("_R")
-                
-                # set current image to status "checked"
+
+                # previous file_id
+                prev_file_id = os.path.basename(
+                    self.image_list[0][self.cur_image_index]).strip(".jpg"). \
+                    strip(".png").strip("_L").strip("_R")
+                    
+                # set new image to status "checked"
                 cur_file_indices = self.models.model_animals.data[
                     self.models.model_animals.data['file_id'] ==  cur_file_id].index
                 
                 for idx in cur_file_indices:
                     self.models.model_animals.data.loc[idx, "status"] = "checked"
-                    
+                                
+                # update the previous image in the csv file
+                self.exportToCsv(prev_file_id)        
+                
                 # get the new image and load it
                 self.cur_image_index = newIndex
                 self.cur_animal = None
                 self.loadImageFromIndex(newIndex) 
-                
-                # update the previous image in the csv file
-                self.exportToCsv(cur_file_id)        
 
     def updateImageCountVisual(self):
         """ Updates the display of the total number of images and the current 
