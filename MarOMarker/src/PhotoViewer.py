@@ -202,6 +202,14 @@ class PhotoViewer(QtWidgets.QWidget):
         is_match_active : bool
             Whether the remove mode is active or not.
         """
+        
+        # add mode is not activatable when no output file was selected 
+        if self.output_dir is None or self.output_dir == "":
+            displayErrorMsg("Error", 
+                "Please select an output directory on the Data page before drawing animals.", 
+                "Error")  
+            return False, False, False
+        
         a, d, g = self.imageAreaLR.imageAreaL.animal_painter.on_add_animal(
             activate_add, is_remove_active, is_match_active)
         
