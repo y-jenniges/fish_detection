@@ -528,6 +528,7 @@ class TableModel(QtCore.QAbstractTableModel):
                 # save the new CSV file
                 try:
                     current_output.to_csv(path, sep=",", index=False)
+                    print(f"Models: Wrote CSV file for file ID {file_id}")
                 except:
                     print("Models: Could not write CSV file. Please close all open tables.")
             else:
@@ -542,6 +543,7 @@ class TableModel(QtCore.QAbstractTableModel):
             try:
                 if path != "":
                     self.data.to_csv(path, sep=",", index=False)
+                    print("Models: Wrote CSV file")
             except:
                 print("Models: Could not write CSV file. Please close all open tables.")
     
