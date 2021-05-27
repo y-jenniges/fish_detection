@@ -738,7 +738,7 @@ class AnimalPainter(QtCore.QObject):
                                     "Error")
                     return True, False, False
             else:
-                return True, is_remove_active, is_match_active
+                return False, is_remove_active, is_match_active
         else:
             # turn on add mode
             return True, False, False
