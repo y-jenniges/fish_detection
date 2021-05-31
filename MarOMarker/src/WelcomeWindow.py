@@ -53,7 +53,10 @@ class WelcomeWindow(QtWidgets.QMainWindow):
         """ Opens a file explorer to browse for a camera configuration file
         and adapts the config path on settings page accordingly. """
         if self.main_window is not None:
-            filename = QtWidgets.QFileDialog.getOpenFileName(filter = "*.json")
+            filename = QtWidgets.QFileDialog.getOpenFileName(self, 
+                                                             self.tr("Select camera configuration file"), 
+                                                             "", 
+                                                             filter = "*.json")
             path = filename[0]
             
             # check if path is valid
