@@ -219,7 +219,7 @@ class PhotoViewer(QtWidgets.QWidget):
         c, f, i = self.imageArea.animal_painter.on_add_animal(
             activate_add, is_remove_active, is_match_active)
         
-        is_add_activatable = a and b and c
+        is_add_activatable = a or b or c
         is_remove_active = d or e or f
         is_match_active = g or h or i
         
@@ -455,57 +455,70 @@ class PhotoViewer(QtWidgets.QWidget):
         if self.stackedWidget_imagearea.currentIndex() == 0:
             self.switchImage(self.cur_image_index+1, self.imageArea)
         elif self.stackedWidget_imagearea.currentIndex() == 1:
-            self.switchImage(self.cur_image_index+1, self.imageAreaLR.imageAreaL)
-            self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR)
+            if self.is_cur_animal_complete(self.imageAreaLR.imageAreaL) and \
+            self.is_cur_animal_complete(self.imageAreaLR.imageAreaR):
+                self.switchImage(self.cur_image_index+1, self.imageAreaLR.imageAreaL)
+                self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR) # image index is already updated, so no +1 needed
 
     def on_previous_image(self, imageArea=None):
         """ Loads the previous image and draws animals accordingly. """
         if self.stackedWidget_imagearea.currentIndex() == 0:
             self.switchImage(self.cur_image_index-1, self.imageArea)
-        elif self.stackedWidget_imagearea.currentIndex() == 1:
-            self.switchImage(self.cur_image_index-1, self.imageAreaLR.imageAreaL)
-            self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR)
-            
-    def switchImage(self, newIndex, imageArea=None):
-        if not imageArea:
-            imageArea = self.imageArea
-            
+        elif self.stackedWidget_imagearea.currentIndex() == 1:            
+            if self.is_cur_animal_complete(self.imageAreaLR.imageAreaL) and \
+            self.is_cur_animal_complete(self.imageAreaLR.imageAreaR):
+                self.switchImage(self.cur_image_index-1, self.imageAreaLR.imageAreaL)
+                self.switchImage(self.cur_image_index, self.imageAreaLR.imageAreaR)   
+                
+    def is_cur_animal_complete(self, imageArea):
+        " Checks if the current animal on the given animal is completely drawn. "
         if not self.models.model_animals.isEmpty(): 
             # only go to another image if cur animal is none or complete
             cur_animal = imageArea.animal_painter.cur_animal
-
+            
             if cur_animal is not None and \
             ((cur_animal.is_head_drawn and not cur_animal.is_tail_drawn) or \
              (not cur_animal.is_head_drawn and cur_animal.is_tail_drawn)):
                 displayErrorMsg("Error", 
                                 "Please draw head and tail before switching the image.", 
-                                "Error")  
-            # only go to new image if the given index is valid
-            elif newIndex in range(len(self.image_list[0])):
-                # next file_id
-                cur_file_id = os.path.basename(
-                    self.image_list[0][newIndex]).strip(".jpg"). \
-                    strip(".png").strip("_L").strip("_R")
+                                "Error") 
+                return False
+        return True
+    
+    def switchImage(self, newIndex, imageArea=None):
+        if not imageArea:
+            imageArea = self.imageArea
+            
+        if not self.is_cur_animal_complete(imageArea):
+            return False
+        
+        # only go to new image if the given index is valid
+        elif newIndex in range(len(self.image_list[0])):
+            # next file_id
+            cur_file_id = os.path.basename(
+                self.image_list[0][newIndex]).strip(".jpg"). \
+                strip(".png").strip("_L").strip("_R")
 
-                # previous file_id
-                prev_file_id = os.path.basename(
-                    self.image_list[0][self.cur_image_index]).strip(".jpg"). \
-                    strip(".png").strip("_L").strip("_R")
-                    
-                # set new image to status "checked"
-                cur_file_indices = self.models.model_animals.data[
-                    self.models.model_animals.data['file_id'] ==  cur_file_id].index
+            # previous file_id
+            prev_file_id = os.path.basename(
+                self.image_list[0][self.cur_image_index]).strip(".jpg"). \
+                strip(".png").strip("_L").strip("_R")
                 
-                for idx in cur_file_indices:
-                    self.models.model_animals.data.loc[idx, "status"] = "checked"
-                                
-                # update the previous image in the csv file
-                self.exportToCsv(prev_file_id)        
-                
-                # get the new image and load it
-                self.cur_image_index = newIndex
-                self.cur_animal = None
-                self.loadImageFromIndex(newIndex) 
+            # set new image to status "checked"
+            cur_file_indices = self.models.model_animals.data[
+                self.models.model_animals.data['file_id'] ==  cur_file_id].index
+            
+            for idx in cur_file_indices:
+                self.models.model_animals.data.loc[idx, "status"] = "checked"
+                            
+            # update the previous image in the csv file
+            self.exportToCsv(prev_file_id)        
+            
+            # get the new image and load it
+            self.cur_image_index = newIndex
+            self.cur_animal = None
+            self.loadImageFromIndex(newIndex) 
+            return True
 
     def updateImageCountVisual(self):
         """ Updates the display of the total number of images and the current 
