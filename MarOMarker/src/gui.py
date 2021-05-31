@@ -67,7 +67,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
                 
         # variable to save settings outside program
         self.settings = QtCore.QSettings("MarOMarker", "MarOMarker")        
-        
+
         # init data models
         self.models = Models()
 
@@ -77,7 +77,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         # translate UI and set starting tabs
         self.retranslateUi()
-        self.stackedWidget.setCurrentIndex(1) #@todo 1
+        self.stackedWidget.setCurrentIndex(1) 
         self.window_table.tabWidget.setCurrentIndex(0)
         self.page_settings.tabWidget.setCurrentIndex(0)
         
@@ -729,6 +729,7 @@ import ressources_rc
 
 if __name__ == "__main__":
     import sys
+    print("MarOMarker initialization starts...")
     app = QtWidgets.QApplication(sys.argv)
     mainWindow= MarOMarker_MainWindow()
     mainWindow.show()
