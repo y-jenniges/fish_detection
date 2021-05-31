@@ -149,7 +149,12 @@ class AnimalPainter(QtCore.QObject):
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
             
-            # redraw ID and 'remove match' button if match mode is active
+            # redraw ID and 'remove match' button if match mode is active and the animal has a match
+            # if isinstance(self.imageArea.parent().parent(), ImageAreas.ImageAreaLR):
+            #     matchL = self.imageArea.parent().parent().findAnimalMatch(self.cur_animal, "L")
+            #     matchR = self.imageArea.parent().parent().findAnimalMatch(self.cur_animal, "R")
+            #     if matchL is None and matchR is None: return
+                
             if hasattr(self.imageArea.parent().parent().parent().parent().parent(), "is_match_animal_active"):
                 if self.imageArea.parent().parent().parent().parent().parent().is_match_animal_active:
                     self.imageArea._scene.removeItem(self.cur_animal.id_visual)
@@ -408,6 +413,9 @@ class AnimalPainter(QtCore.QObject):
 
             # remove ID
             self.removeIdVisual(animal)
+            
+            # remove remove-match-btn visual
+            self.removeRemoveBtnVisual(animal)
                            
             # only drawbounding boxes of animals that are annotated on both images
             if self.models.model_animals.data.loc[animal.row_index, "RX1"] != -1 \
@@ -593,6 +601,14 @@ class AnimalPainter(QtCore.QObject):
         self.imageArea._scene.removeItem(animal.id_visual)
         animal.id_visual = None
         
+    def removeRemoveBtnVisual(self, animal):
+        """ Removes the remove-match-button of a given animal. """
+        # if button is already drawn, remove it before drawing a new button
+        for btn, ani in self.btns_remove_match:
+            if animal == ani:
+                self.imageArea._scene.removeItem(btn)
+                self.btns_remove_match.remove([btn, ani])        
+                
     def on_next_animal(self):
         """ Makes the next animal in the animal_list active. """
         # if no animal ist selected, then select first one
