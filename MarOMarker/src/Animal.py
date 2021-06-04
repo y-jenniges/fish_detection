@@ -587,7 +587,6 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
     def updateVisuals(self):
         """ Sets the visuals of the specifications widget to the currently
         set animal. """
-        
         if self.animal is None:
             group = AnimalGroup.UNIDENTIFIED.name.title()
             species = AnimalSpecies.UNIDENTIFIED.name.title()
@@ -764,7 +763,7 @@ class AnimalSpecificationsWidget(QtWidgets.QWidget):
             
         
          # align buttons in a horizontal layout
-        button_layout = QtWidgets.QHBoxLayout(self)
+        button_layout = QtWidgets.QHBoxLayout()
         button_layout.setObjectName("button_layout")
         button_layout.setContentsMargins(0, 0, 0, 0)
  
