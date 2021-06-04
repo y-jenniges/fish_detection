@@ -511,12 +511,12 @@ class AnimalPainter(QtCore.QObject):
         top_right = animal.boundingBox_visual.rect().topRight()   
         btn.move((top_right - QtCore.QPoint(20-2.5, 20+2.5)).toPoint())
         
-        # init action
-        btn.clicked.connect(partial(self.remove_match, animal))
-
         # add btn to scene and to list
         proxy = self.imageArea._scene.addWidget(btn)
         self.btns_remove_match.append([proxy, animal])
+        
+        # init action
+        btn.clicked.connect(partial(self.remove_match, proxy))
      
     def removeAllRemoveMatchBtns(self):
         # remove old buttons from scene
@@ -527,9 +527,17 @@ class AnimalPainter(QtCore.QObject):
         # clear list
         self.btns_remove_match = []
         
-    def remove_match(self, animal):
+    def remove_match(self, button_proxy):
         """ Called when a remove match button is clicked. """
-        self.removeMatchBtnClicked.emit(animal)
+        #self.removeMatchBtnClicked.emit(animal)
+        #print(f"remove match for btn {button_proxy}")
+        animal = None
+        for btn_proxy, ani in self.btns_remove_match:
+            if button_proxy == btn_proxy:
+                animal = ani
+        if animal:
+            img_spec = self.image_ending.lstrip("*_").rstrip(".jpg")        
+            self.imageArea.parent().parent().on_remove_match_btn(img_spec, animal) 
 
     def drawAnimalId(self, animal):
         """ Draws the ID of a given animal. """

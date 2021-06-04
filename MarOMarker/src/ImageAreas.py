@@ -230,36 +230,42 @@ class ImageAreaLR(QtWidgets.QWidget):
 
     def on_remove_match(self, animal_L, animal_R):
         """ Creates a separate data row for the right animal and removes the 
-        right coordinates from the left animal. """        
+        right coordinates from the left animal. """   
         # reset current animals
         self.imageAreaL.animal_painter.cur_animal = None
-        self.imageAreaR.animal_painter.cur_animal = None
+        self.imageAreaR.animal_painter.cur_animal = None    
         
         # create data row for the right animal and update index
         self.createSeparateDataRow(animal_R, "R")   
         
         # remove right coordinates from left animal 
         self.match(animal_L, None)
-                
-        # redraw animals
-        self.imageAreaL.animal_painter.updateBoundingBoxes()
-        self.imageAreaR.animal_painter.updateBoundingBoxes()
-                
-        # set length to zero (without a match, it cannot be calculated)
-        animal_L.setLength(0.0)
-        animal_R.setLength(0.0)
         
-        # remove cancel button, redraw cancel button when group changes
+
+        
+        # remove cancel button, redraw cancel button when group changes 
+        # here only on left image since createSeparateDataRow already does this for right image
         for btn, ani in self.imageAreaL.animal_painter.btns_remove_match:
             if animal_L == ani and btn is not None:
-                self.imageAreaL._scene.removeItem(btn)
                 self.imageAreaL.animal_painter.btns_remove_match.remove([btn, ani])
+                self.imageAreaL._scene.removeItem(btn)
+                print("btn removed")
                 
         # for btn, ani in self.imageAreaR.animal_painter.btns_remove_match:
         #     if animal_R == ani and btn is not None:
         #         self.imageAreaR._scene.removeItem(btn)
         #         self.imageAreaR.animal_painter.btns_remove_match.remove([btn, ani])
+        
+        # set length to zero (without a match, it cannot be calculated)
+        animal_L.setLength(0.0)
+        animal_R.setLength(0.0)
+        
+        # redraw animals
+        self.imageAreaL.animal_painter.updateBoundingBoxes()
+        self.imageAreaR.animal_painter.updateBoundingBoxes()
                 
+
+              
         print("ImageAreaLR: Removing animal match complete")
         
     def on_next_animal(self):
@@ -635,15 +641,15 @@ class ImageAreaLR(QtWidgets.QWidget):
     def matchAnimals(self, animal_L, animal_R):
         # if group, species, remark, length, other props are different, then what?
         if str(animal_L.group).lower() != str(animal_R.group).lower():
-            print(f"animals do not have the same group {animal_L.group, animal_R.group}")
+            print(f"ImageAreaLR: Animals do not have the same group {animal_L.group, animal_R.group}")
             if not self.handleDifferentGroup(animal_L, animal_R): return False
                    
         if str(animal_L.species).lower() != str(animal_R.species).lower():
-            print(f"animals do not have the same species {animal_L.species, animal_R.species}")
+            print(f"ImageAreaLR: Animals do not have the same species {animal_L.species, animal_R.species}")
             if not self.handleDifferentSpecies(animal_L, animal_R): return False
             
         if str(animal_L.remark).lower() != str(animal_R.remark).lower():
-            print(f"animals do not have the same remark {animal_L.remark, animal_R.remark}")
+            print(f"ImageAreaLR: Animals do not have the same remark {animal_L.remark, animal_R.remark}")
             if not self.handleDifferentRemark(animal_L, animal_R): return False
         
         # remove old matches - there are 4 cases (for this we need to adapt the data model and the animal instances)
@@ -814,8 +820,8 @@ class ImageAreaLR(QtWidgets.QWidget):
         self.imageAreaL.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "L"))
         self.imageAreaR.rightMouseButtonClicked.connect(partial(self.on_right_mouse_click, "R"))
         
-        self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
-        self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
+        #self.imageAreaL.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "L"))
+        #self.imageAreaR.animal_painter.removeMatchBtnClicked.connect(partial(self.on_remove_match_btn, "R"))
            
     def _initUi(self):
         """ Defines and draws the UI elements. """
@@ -852,9 +858,10 @@ class ImageAreaLR(QtWidgets.QWidget):
             
         # specification widget
         self.widget_animal_specs = AnimalSpecificationsWidget(self._models, self.imageAreaL)
+        self.widget_animal_specs.setObjectName("animal_specs_widget_LR")
         self.widget_animal_specs.setStyleSheet("QLabel{font:12pt 'Century Gothic'; color:black;} QComboBox QAbstractItemView {background-color:white;border:None;selection-background-color: rgb(0, 203, 221);}")
         self.widget_animal_specs.show()
-        
+
         # add specs widget to specs layout
         layout_specs.addWidget(self.widget_animal_specs) 
         
