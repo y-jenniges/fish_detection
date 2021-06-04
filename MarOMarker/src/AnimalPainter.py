@@ -141,10 +141,14 @@ class AnimalPainter(QtCore.QObject):
             self.cur_animal.tail_item_visual.setPixmap(self.cur_animal._pixmap_tail)
             
             # redraw line and boundingbox visuals
-            self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
+            # if self.cur_animal.line_item_visual is not None:
+            #     self.imageArea._scene.removeItem(self.cur_animal.line_item_visual)
+            self.removeLineVisual(self.cur_animal)
             self.drawAnimalLine(self.cur_animal)
             
-            self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
+            # if self.cur_animal.boundingBox_visual is not None:
+            #     self.imageArea._scene.removeItem(self.cur_animal.boundingBox_visual)
+            self.removeBoundingBoxVisual(self.cur_animal)
             self.cur_animal.boundingBox_visual = self.imageArea._scene.addRect(
                 self.cur_animal.boundingBox, 
                 QtGui.QPen(self.cur_animal.color, 2, QtCore.Qt.SolidLine))
@@ -157,7 +161,8 @@ class AnimalPainter(QtCore.QObject):
                 
             if hasattr(self.imageArea.parent().parent().parent().parent().parent(), "is_match_animal_active"):
                 if self.imageArea.parent().parent().parent().parent().parent().is_match_animal_active:
-                    self.imageArea._scene.removeItem(self.cur_animal.id_visual)
+                    if self.cur_animal.id_visual is not None:
+                        self.imageArea._scene.removeItem(self.cur_animal.id_visual)
                     self.drawAnimalIdRemoveBtn(self.cur_animal)
             
             self.propertyChanged.emit(self.cur_animal)   
@@ -464,10 +469,12 @@ class AnimalPainter(QtCore.QObject):
             return
         
         # if button is already drawn, remove it before drawing a new button
-        for btn, ani in self.btns_remove_match:
-            if animal == ani:
-                self.imageArea._scene.removeItem(btn)
-                self.btns_remove_match.remove([btn, ani])
+        self.removeRemoveBtnVisual(animal)
+        # for btn, ani in self.btns_remove_match:
+        #     if animal == ani:
+        #         if btn is not None:
+        #             self.imageArea._scene.removeItem(btn)
+        #             self.btns_remove_match.remove([btn, ani])
         
         # get animal color as string
         c = animal.color
@@ -514,7 +521,8 @@ class AnimalPainter(QtCore.QObject):
     def removeAllRemoveMatchBtns(self):
         # remove old buttons from scene
         for btn, ani in self.btns_remove_match:
-            self.imageArea._scene.removeItem(btn)
+            if btn is not None:
+                self.imageArea._scene.removeItem(btn)
             
         # clear list
         self.btns_remove_match = []
@@ -578,27 +586,32 @@ class AnimalPainter(QtCore.QObject):
                 
     def removeHeadVisual(self, animal):
         """ Removes the head visual on the image of a given animal. """
-        self.imageArea._scene.removeItem(animal.head_item_visual)
+        if animal.head_item_visual is not None:
+            self.imageArea._scene.removeItem(animal.head_item_visual)
         animal.head_item_visual = None  
 
     def removeTailVisual(self, animal):
         """ Removes the tail visual on the image of a given animal. """
-        self.imageArea._scene.removeItem(animal.tail_item_visual)
+        if animal.tail_item_visual is not None:
+            self.imageArea._scene.removeItem(animal.tail_item_visual)
         animal.tail_item_visual = None  
     
     def removeLineVisual(self, animal):
         """ Removes the line visual on the image of a given animal. """
-        self.imageArea._scene.removeItem(animal.line_item_visual)
+        if animal.line_item_visual is not None:
+            self.imageArea._scene.removeItem(animal.line_item_visual)
         animal.line_item_visual = None  
 
     def removeBoundingBoxVisual(self, animal):
         """ Removes the bounding box visual on the image of a given animal. """
-        self.imageArea._scene.removeItem(animal.boundingBox_visual)
+        if animal.boundingBox_visual is not None:
+            self.imageArea._scene.removeItem(animal.boundingBox_visual)
         animal.boundingBox_visual = None  
       
     def removeIdVisual(self, animal):
         """ Removes the ID visual on the image of a given animal. """
-        self.imageArea._scene.removeItem(animal.id_visual)
+        if animal.id_visual is not None:
+            self.imageArea._scene.removeItem(animal.id_visual)
         animal.id_visual = None
         
     def removeRemoveBtnVisual(self, animal):
@@ -606,8 +619,9 @@ class AnimalPainter(QtCore.QObject):
         # if button is already drawn, remove it before drawing a new button
         for btn, ani in self.btns_remove_match:
             if animal == ani:
-                self.imageArea._scene.removeItem(btn)
-                self.btns_remove_match.remove([btn, ani])        
+                if btn is not None:
+                    self.imageArea._scene.removeItem(btn)
+                    self.btns_remove_match.remove([btn, ani])        
                 
     def on_next_animal(self):
         """ Makes the next animal in the animal_list active. """
