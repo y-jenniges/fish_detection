@@ -67,12 +67,12 @@ class PageData(QtWidgets.QWidget):
      
     def onCameraConfigChanged(self, config_path):
         """ Loads a new camera configuration from a json file path. """
-        print("loadi loadi loadi cami config")
+        print("PageData: Loadi loadi loadi cami config")
         # read camera config
         self.camera_config = {}
         with open(config_path, 'r') as f:
             self.camera_config = json.load(f)
-        
+
         # instantiate a matcher to find matching animals on left and right image
         self.matcher = pp.StereoCorrespondence(self.camera_config['mtx_L'], 
                                               self.camera_config['dist_L'],
@@ -80,7 +80,7 @@ class PageData(QtWidgets.QWidget):
                                               self.camera_config['dist_R'],
                                               self.camera_config['R'], 
                                               self.camera_config['T'], IMAGE_SIZE)
-        
+
         # instantiate a distance-measurer to determine length of animals
         self.distance_measurer = DistanceMeasurer(self.camera_config['mtx_L'], 
                                                  self.camera_config['dist_L'],
@@ -1103,7 +1103,7 @@ class PageData(QtWidgets.QWidget):
         length of animals whose coordinates are valid. """
         
         # @todo check if the coordinate rectification is correct
-        print("calc length")
+        print("PageData: Calculate length")
         
         # reset label
         self.label_length_measurement_number.setText(str(0))
