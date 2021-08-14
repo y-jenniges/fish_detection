@@ -451,9 +451,6 @@ class PhotoViewer(QtWidgets.QWidget):
         image_remark = main_window.page_home.comboBox_imgRemark.currentText()
         experiment_id = main_window.page_data.lineEdit_exp_id.text()
         user_id = main_window.page_data.frame_topBar.label_user_id.text()
-        print(image_remark)
-        print(experiment_id)
-        print(user_id)
         self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id, 
                                               image_remark, experiment_id, user_id)
         

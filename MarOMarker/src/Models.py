@@ -504,6 +504,15 @@ class TableModel(QtCore.QAbstractTableModel):
             Name of the output file.
         file_id : string, optional
             ID of the current image. The default is None.
+        image_remark: string
+            Remark of the current image. Provide when no animal is on the image 
+            and you want an empty line for the image in the CSV. The default is None.
+        experiment_id: string
+            Current experiment ID. Provide when no animal is on the image 
+            and you want an empty line for the image in the CSV. The default is None.
+        user_id: string
+            Current user ID. Provide when no animal is on the image 
+            and you want an empty line for the image in the CSV. The default is None.
         """
         # create the output file path
         path = os.path.join(output_dir, filename)
