@@ -489,7 +489,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_previous.setIconSize(QtCore.QSize(30, 30))
         self.btn_previous.setObjectName("btn_previous")
         
-        # playeholder button to keep symmetry 
+        # placeholder button to keep symmetry 
         self.btn_placeholder = QtWidgets.QPushButton(frame_controlBar)
         self.btn_placeholder.setEnabled(False)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
