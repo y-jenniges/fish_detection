@@ -283,7 +283,6 @@ head/tail visuals, as well as removing/adding animals on click.</p>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>is_remove_activatable</strong> (<em>bool</em>) – Whether it is possible to activate the remove mode.</p></li>
 <li><p><strong>is_add_active</strong> (<em>bool</em>) – Wheter the add mode needs to be active or not.</p></li>
-<li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the match mode needs to be active or not.</p></li>
 <li><p><strong>is_match_active</strong> (<em>bool</em>) – Whether the remove mode is active or not.</p></li>
 </ul>
 </p>
@@ -366,6 +365,12 @@ desired.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.removeRemoveBtnVisual">
+<code class="sig-name descname">removeRemoveBtnVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeRemoveBtnVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the remove-match-button of a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="src.AnimalPainter.AnimalPainter.removeTailVisual">
 <code class="sig-name descname">removeTailVisual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.removeTailVisual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes the tail visual on the image of a given animal.</p>
@@ -373,7 +378,7 @@ desired.</p>
 
 <dl class="py method">
 <dt id="src.AnimalPainter.AnimalPainter.remove_match">
-<code class="sig-name descname">remove_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.remove_match" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">remove_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">button_proxy</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.remove_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when a remove match button is clicked.</p>
 </dd></dl>
 

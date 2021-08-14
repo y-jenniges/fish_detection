@@ -234,7 +234,7 @@ It returns the number of columns.</p>
 
 <dl class="py method">
 <dt id="Models.TableModel.exportToCsv">
-<code class="sig-name descname">exportToCsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output_dir</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">file_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Models.TableModel.exportToCsv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">exportToCsv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output_dir</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">file_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">image_remark</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">experiment_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">user_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#Models.TableModel.exportToCsv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exports the data table to a CSV file in the specified output directory.
 If the outfile already exists, only the current image is
 updated in the file. If the result file does not exists and/or the
@@ -245,6 +245,12 @@ model data is None, create new file/empty dataframe.</p>
 <li><p><strong>output_dir</strong> (<em>string</em>) – Path to the output directory</p></li>
 <li><p><strong>filename</strong> (<em>string</em>) – Name of the output file.</p></li>
 <li><p><strong>file_id</strong> (<em>string</em><em>, </em><em>optional</em>) – ID of the current image. The default is None.</p></li>
+<li><p><strong>image_remark</strong> (<em>string</em>) – Remark of the current image. Provide when no animal is on the image
+and you want an empty line for the image in the CSV. The default is None.</p></li>
+<li><p><strong>experiment_id</strong> (<em>string</em>) – Current experiment ID. Provide when no animal is on the image
+and you want an empty line for the image in the CSV. The default is None.</p></li>
+<li><p><strong>user_id</strong> (<em>string</em>) – Current user ID. Provide when no animal is on the image
+and you want an empty line for the image in the CSV. The default is None.</p></li>
 </ul>
 </dd>
 </dl>
