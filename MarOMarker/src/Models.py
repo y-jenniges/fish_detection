@@ -488,7 +488,8 @@ class TableModel(QtCore.QAbstractTableModel):
         asc = True if order==QtCore.Qt.AscendingOrder else False
         self.data = self.data.sort_values(by=[column], ascending=asc)
         
-    def exportToCsv(self, output_dir, filename, file_id=None):
+    def exportToCsv(self, output_dir, filename, file_id=None, image_remark=None, 
+                    experiment_id=None, user_id=None):
         """
         Exports the data table to a CSV file in the specified output directory. 
         If the outfile already exists, only the current image is 
@@ -513,17 +514,53 @@ class TableModel(QtCore.QAbstractTableModel):
             current_output = pd.read_csv(path, sep=",")
             
             if self.data is not None:
-                # drop old rows of current image
+                # drop empty rows from data
+                same_id = self.data[self.data["file_id"] == file_id]
+                empty_group0 = same_id[same_id["group"] == ""]
+                empty_group1 = same_id[same_id["group"].astype(str).str.lower()=="nan"]
+                empty_group2 = same_id[same_id["group"] == None]
+                empty_group = pd.concat([empty_group0, empty_group1, empty_group2])
+                #self.data.drop(empty_group.index, inplace=True)
+                if len(empty_group.index) > 0:
+                    for idx in empty_group.index:
+                        self.removeRows(idx, 1)
+                
+                # drop old rows of current image (in CSV)
                 current_output.drop(current_output[
                 current_output["file_id"] == file_id].index, inplace=True)
             
-                # insert new rows of current image
+                # insert new rows of current image (in CSV)
                 current_output = current_output.append(
                     self.data[self.data["file_id"] == file_id])
             
                 # sort according to file_id
                 current_output.sort_values(
                     by="file_id", ignore_index=True, inplace=True)
+            
+                # if no animal is detected on current image, add an empty line to output
+                if current_output[current_output["file_id"]==file_id].empty:
+                    print("Models: Current image is empty, i.e. no animals are annotated.")
+                    row = self.data.shape[0]
+                    count = 1
+                    animal = None
+                    image_path = file_id # the image path is transformed to an ID anyway
+                    image_spec = "L" # not important in this case
+                    
+                    # make sure, all necessary input is given
+                    if image_remark == None or experiment_id == None or user_id == None:
+                        print("Models: Error! If you want to write an empty line, make sure the following parameters are not None: ")
+                        print(f"    Image remark: {image_remark}")
+                        print(f"    Experiment ID: {experiment_id}")
+                        print(f"    User ID: {user_id}")
+                        return
+                    
+                    # add row to data
+                    df = self._create_row(animal, image_path, image_remark, experiment_id, 
+                    user_id, image_spec)
+                    self.insertDfRows(row, count, df, parent=QtCore.QModelIndex())   
+                    
+                    # add row to current output
+                    current_output = current_output.append(df)
             
                 # save the new CSV file
                 try:
@@ -578,12 +615,13 @@ class TableModel(QtCore.QAbstractTableModel):
                     user_id, image_spec="L"): 
         """
         Creates a new row for the dataframe given the arguments of this 
-        function.
+        function. If the animal is None, an empty row will be inserted. 
 
         Parameters
         ----------
         animal : Animal
-            Animal described in the new dataframe row
+            Animal described in the new dataframe row. If None, an empty row
+            will be inserted at the end
         image_path : string
             Path to the image on which the animal is found
         image_remark : string
@@ -604,29 +642,51 @@ class TableModel(QtCore.QAbstractTableModel):
         # get file ID
         file_id = os.path.basename(image_path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
         
-        # get animal group
-        if isinstance(animal.group, AnimalGroup):
-            group = animal.group.name.title()
-        else:
-            group = animal.group.title()
+        if animal is None:
+            group = ""
+            species = ""
+            remark = ""
+            head_x = -1
+            head_y = -1
+            tail_x = -1
+            tail_y = -1
+            row = self.data.shape[0]
+        else: 
+            # get animal group
+            if isinstance(animal.group, AnimalGroup):
+                group = animal.group.name.title()
+            else:
+                group = animal.group.title()
+                
+            # get animal species
+            if isinstance(animal.species, AnimalSpecies):
+                species = animal.species.name.title()
+            else:
+                species = animal.species.title()
+                
+            # get animal remark
+            remark = str(animal.remark)
+    
+            # get animal position
+            head_x = animal.original_pos_head.x()
+            head_y = animal.original_pos_head.y()
+            tail_x = animal.original_pos_tail.x()
+            tail_y = animal.original_pos_tail.y()
             
-        # get animal species
-        if isinstance(animal.species, AnimalSpecies):
-            species = animal.species.name.title()
-        else:
-            species = animal.species.title()
-
+            # get row index
+            row = animal.row_index
+        
         # create a new row (depending on whether the animal is on the left or 
         # right image)
         if image_spec == "L":
             new_row = pd.DataFrame({"file_id": file_id, 
-                                    "object_remarks": str(animal.remark), 
+                                    "object_remarks": remark, 
                                     "group": group, 
                                     "species": species,
-                                    "LX1": animal.original_pos_head.x(),
-                                    "LY1": animal.original_pos_head.y(),
-                                    "LX2": animal.original_pos_tail.x(),
-                                    "LY2": animal.original_pos_tail.y(),
+                                    "LX1": head_x,
+                                    "LY1": head_y,
+                                    "LX2": tail_x,
+                                    "LY2": tail_y,
                                     "LX3": -1, 
                                     "LY3": -1,
                                     "LX4": -1,
@@ -646,10 +706,10 @@ class TableModel(QtCore.QAbstractTableModel):
                                     "manually_corrected": "True",
                                     "experiment_id": experiment_id,
                                     "user_id": user_id
-                                    }, index=[animal.row_index])
+                                    }, index=[row])
         elif image_spec=="R":
             new_row = pd.DataFrame({"file_id": file_id, 
-                                    "object_remarks": str(animal.remark), 
+                                    "object_remarks": remark, 
                                     "group": group, 
                                     "species": species,
                                     "LX1": -1,
@@ -660,10 +720,10 @@ class TableModel(QtCore.QAbstractTableModel):
                                     "LY3": -1,
                                     "LX4": -1,
                                     "LY4": -1,
-                                    "RX1": animal.original_pos_head.x(),
-                                    "RY1": animal.original_pos_head.y(),
-                                    "RX2": animal.original_pos_tail.x(),
-                                    "RY2": animal.original_pos_tail.y(),
+                                    "RX1": head_x,
+                                    "RY1": head_y,
+                                    "RX2": tail_x,
+                                    "RY2": tail_y,
                                     "RX3": -1, 
                                     "RY3": -1,
                                     "RX4": -1,
@@ -675,7 +735,7 @@ class TableModel(QtCore.QAbstractTableModel):
                                     "manually_corrected": "True",
                                     "experiment_id": experiment_id,
                                     "user_id": user_id
-                                    }, index=[animal.row_index])        
+                                    }, index=[row])        
         else: 
             print("TableModel: Could not insert current animal due to invalid \
                   image specification. Either use 'L' or 'R'.")

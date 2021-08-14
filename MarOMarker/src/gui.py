@@ -160,9 +160,13 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
                     self.page_home.photo_viewer.image_list[0][index])[:-6]
                 output_dir = self.page_data.lineEdit_output_dir.text()
                 res_file_name = self.getResultFileName()
-                self.models.model_animals.exportToCsv(output_dir=output_dir,
-                                                      filename=res_file_name,
-                                                      file_id=cur_file_id)
+                image_remark = self.page_home.comboBox_imgRemark.currentText()
+                experiment_id = self.page_data.lineEdit_exp_id.text()
+                user_id = self.page_data.frame_topBar.label_user_id.text()
+
+                self.models.model_animals.exportToCsv(output_dir, res_file_name, 
+                                                      cur_file_id, image_remark, 
+                                                      experiment_id, user_id)
 
         # close table window
         if self.window_table is not None:

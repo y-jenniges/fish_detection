@@ -448,7 +448,14 @@ class PhotoViewer(QtWidgets.QWidget):
         main_window = self.parent().parent().parent()
         output_dir = main_window.page_data.lineEdit_output_dir.text()
         res_file_name = main_window.getResultFileName()
-        self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id)
+        image_remark = main_window.page_home.comboBox_imgRemark.currentText()
+        experiment_id = main_window.page_data.lineEdit_exp_id.text()
+        user_id = main_window.page_data.frame_topBar.label_user_id.text()
+        print(image_remark)
+        print(experiment_id)
+        print(user_id)
+        self.models.model_animals.exportToCsv(output_dir, res_file_name, file_id, 
+                                              image_remark, experiment_id, user_id)
         
     def on_next_image(self, imageArea=None):
         """ Loads the next image and draws animals accordingly. """
@@ -503,7 +510,7 @@ class PhotoViewer(QtWidgets.QWidget):
             prev_file_id = os.path.basename(
                 self.image_list[0][self.cur_image_index]).strip(".jpg"). \
                 strip(".png").strip("_L").strip("_R")
-                
+            
             # set new image to status "checked"
             cur_file_indices = self.models.model_animals.data[
                 self.models.model_animals.data['file_id'] ==  cur_file_id].index
