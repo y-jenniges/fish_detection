@@ -527,12 +527,12 @@ class TableModel(QtCore.QAbstractTableModel):
                 same_id = self.data[self.data["file_id"] == file_id]
                 empty_group0 = same_id[same_id["group"] == ""]
                 empty_group1 = same_id[same_id["group"].astype(str).str.lower()=="nan"]
-                empty_group2 = same_id[same_id["group"] == None]
-                empty_group = pd.concat([empty_group0, empty_group1, empty_group2])
-                #self.data.drop(empty_group.index, inplace=True)
+                #empty_group2 = same_id[same_id["group"] == None]
+                empty_group = pd.concat([empty_group0, empty_group1])#, empty_group2])
+
                 if len(empty_group.index) > 0:
                     for idx in empty_group.index:
-                        self.removeRows(idx, 1)
+                        self.removeRows(idx, 1) 
                 
                 # drop old rows of current image (in CSV)
                 current_output.drop(current_output[
@@ -567,10 +567,13 @@ class TableModel(QtCore.QAbstractTableModel):
                     df = self._create_row(animal, image_path, image_remark, experiment_id, 
                     user_id, image_spec)
                     self.insertDfRows(row, count, df, parent=QtCore.QModelIndex())   
-                    
+     
                     # add row to current output
                     current_output = current_output.append(df)
-            
+                
+                # reset data index
+                self.data = self.data.reset_index(drop=True) 
+                
                 # save the new CSV file
                 try:
                     current_output.to_csv(path, sep=",", index=False)
