@@ -190,10 +190,25 @@ class PageHome(QtWidgets.QWidget):
 
     def showEvent(self, event):
         """" Reload the image when opening the home page. """
-        if len(self.photo_viewer.image_list) < 2: return
+        # load empty screen if there is no image available
+        if len(self.photo_viewer.image_list) < 2: 
+            self.photo_viewer.loadSingleImage(None)
+            return
+        
         if self.photo_viewer.cur_image_index < len(self.photo_viewer.image_list[0]):
             self.photo_viewer.loadImageFromIndex(self.photo_viewer.cur_image_index)
-
+        
+    def hideEvent(self, event):
+        """ When page home looses focus, write the CSV file. This ensures that
+        animals from the last image are saved as well. """
+        print("hide")
+        # only write to CSV if there were photos shown in the viewer
+        if len(self.photo_viewer.image_list[0]) > 0:
+            
+            cur_file_id = os.path.basename(
+                self.photo_viewer.image_list[0][self.photo_viewer.cur_image_index]).strip(".jpg").strip(".png").strip("_L").strip("_R")
+            self.photo_viewer.exportToCsv(cur_file_id)
+        
     def setComboboxImageRemark(self, text):
         """ Add a text to the image remark combobx and data model. """
         # if the remark is not in the combobox, add it. Else choose its index
