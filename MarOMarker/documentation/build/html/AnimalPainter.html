@@ -55,6 +55,7 @@ the mouse events to the AnimalPainter.</p>
 <li><p><strong>drag_position_head</strong> (<em>QPoint</em>) – </p></li>
 <li><p><strong>drag_position_tail</strong> (<em>QPoint</em>) – </p></li>
 <li><p><strong>cur_animal</strong> (<a class="reference internal" href="Animal.html#Animal.Animal" title="Animal.Animal"><em>Animal</em></a>) – Currently active animal.</p></li>
+<li><p><strong>are_markings_visible</strong> (<em>bool</em>) – If animal markings are visible.</p></li>
 <li><p><strong>imageArea</strong> (<a class="reference internal" href="ImageAreas.html#ImageAreas.ImageArea" title="ImageAreas.ImageArea"><em>ImageArea</em></a>) – A canvas to paint the object on and that provides mouse events to
 the AnimalPainter.</p></li>
 <li><p><strong>image_ending</strong> (<em>string</em>) – It is either ‘*_L.jpg’ or ‘*_R.jpg’. Indicates if the left or right
@@ -187,6 +188,12 @@ group, species, object_remarks</p>
 <dt id="src.AnimalPainter.AnimalPainter.drawRemoveMatchBtn">
 <code class="sig-name descname">drawRemoveMatchBtn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">animal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.drawRemoveMatchBtn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draws the button to remove a match on a given animal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.AnimalPainter.AnimalPainter.makeAllMarkingsVisible">
+<code class="sig-name descname">makeAllMarkingsVisible</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">make_visible</span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.AnimalPainter.AnimalPainter.makeAllMarkingsVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes markings of all animals (in-)visible. This includes head, tail, line, bounding box and ID markings.</p>
 </dd></dl>
 
 <dl class="py method">
