@@ -28,7 +28,9 @@ class AnimalPainter(QtCore.QObject):
     drag_position_tail : QPoint
     
     cur_animal : Animal
-        Currently active animal.    
+        Currently active animal.
+    are_markings_visible: bool
+        If animal markings are visible.
     imageArea : ImageArea
         A canvas to paint the object on and that provides mouse events to 
         the AnimalPainter.
