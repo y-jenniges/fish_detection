@@ -3226,8 +3226,8 @@ QPushButton{
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1642</width>
-                   <height>1139</height>
+                   <width>1638</width>
+                   <height>1167</height>
                   </rect>
                  </property>
                  <property name="styleSheet">

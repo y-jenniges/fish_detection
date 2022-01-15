@@ -5,6 +5,7 @@ settings	https://pixabay.com/de/vectors/getriebe-mechanik-einstellungen-1119298/
 camera	https://pixabay.com/de/vectors/foto-kamera-kamera-bilder-foto-2027073/
 fish	https://pixabay.com/de/vectors/fisch-icon-ikone-1294822/
 book 	https://pixabay.com/de/vectors/buch-offen-seiten-lesung-leser-158814/
+eye	https://pixabay.com/de/vectors/auge-symbol-suchen-vision-siehe-1915455/		(15.01.2022)
 
 NN brain https://pixabay.com/vectors/anatomy-biology-brain-thought-mind-1751201/
 
