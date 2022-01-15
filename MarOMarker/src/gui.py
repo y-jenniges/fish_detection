@@ -200,6 +200,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         self.page_home.comboBox_imgRemark.setToolTip(_translate("MainWindow", "Remark to the current image"))
         
         self.page_home.frame_topBar.btn_user.setToolTip(_translate("MainWindow", "User profile"))
+        self.page_home.btn_visibility.setToolTip(_translate("MainWindow", "Make markings (in-)visible, shortcut: v"))
         self.page_home.btn_filter.setToolTip(_translate("MainWindow", "Image filters"))
         self.page_home.btn_imgSwitch.setToolTip(_translate("MainWindow", "Switch to left, right or left-right image(s) (shortcuts: 1, 2, 3)"))
         self.page_home.btn_zoom.setToolTip(_translate("MainWindow", "Image zoom"))

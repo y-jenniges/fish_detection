@@ -30,7 +30,7 @@ class PageHome(QtWidgets.QWidget):
         self.is_add_animal_active = False
         self.is_remove_animal_active = False
         self.is_match_animal_active = False
-        
+            
         # init UI and actions
         self._initUi()
         self._initActions()
@@ -121,8 +121,13 @@ class PageHome(QtWidgets.QWidget):
 
         self.updateAddRemoveMatchIcons()
         
+    def on_visibility_clicked(self):
+        """ Make organism markings, i.e. bounding boxes, crosses and circles, (in-)visible. """
+        are_markings_visible = self.photo_viewer.on_visibility_btn()  
+        self.updateVisibilityIcon(are_markings_visible)
+        
     def updateAddRemoveMatchIcons(self):
-        """ Update the icond of add and remove mode according to their state.  """
+        """ Update the icons of add and remove mode according to their state.  """
         # adapt icon of the add button
         if self.is_add_animal_active:
             self.btn_add.setIcon(getIcon(":/icons/icons/plus_darkBlue.png"))
@@ -143,6 +148,13 @@ class PageHome(QtWidgets.QWidget):
                 self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_darkblue.png")) 
             else:
                 self.btn_match.setIcon(getIcon(":/icons/icons/puzzle_black.png")) 
+                
+    def updateVisibilityIcon(self, are_markings_visible):
+        """ Update the icon indicating the visibility of the organism markings. """
+        if are_markings_visible:
+            self.btn_visibility.setIcon(getIcon(":/icons/icons/eye_black.png")) 
+        else:
+            self.btn_visibility.setIcon(getIcon(":/icons/icons/eye_dark_blue_crossed.png")) 
  
     def on_filter_clicked(self):
         """ !!! NOT IMPLEMENTED YET !!! 
@@ -287,6 +299,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_filter.clicked.connect(self.on_filter_clicked)
         self.btn_match.clicked.connect(self.on_match_clicked)
         self.btn_undo.clicked.connect(self.on_undo_clicked)
+        self.btn_visibility.clicked.connect(self.on_visibility_clicked)
         
         # --- define shortcuts ------------------------------------------------------------------------------------------- #  
         self.shortcut_previous_animal = QtWidgets.QShortcut(QtGui.QKeySequence("a"), self.btn_previous, self.photo_viewer.on_previous_animal)
@@ -297,6 +310,7 @@ class PageHome(QtWidgets.QWidget):
         self.shortcut_img_left = QtWidgets.QShortcut(QtGui.QKeySequence("1"), self.btn_imgSwitch, self.displayLeftImage)
         self.shortcut_img_right = QtWidgets.QShortcut(QtGui.QKeySequence("2"), self.btn_imgSwitch, self.displayRightImage)
         self.shortcut_img_both = QtWidgets.QShortcut(QtGui.QKeySequence("3"), self.btn_imgSwitch, self.displayBothImages)
+        self.shortcut_visibility = QtWidgets.QShortcut(QtGui.QKeySequence("v"), self.btn_visibility, self.on_visibility_clicked)
       
             
     def _initModels(self):
@@ -420,6 +434,20 @@ class PageHome(QtWidgets.QWidget):
         self.btn_imgSwitch.setFont(font)
         self.btn_imgSwitch.setObjectName("btn_imgSwitch")
         
+        # button for making markings invisible/visible
+        self.btn_visibility = QtWidgets.QPushButton(frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_visibility.sizePolicy().hasHeightForWidth())
+        self.btn_visibility.setSizePolicy(sizePolicy)
+        self.btn_visibility.setMinimumSize(QtCore.QSize(60, 40))
+        self.btn_visibility.setMaximumSize(QtCore.QSize(60, 40))
+        self.btn_visibility.setIcon(getIcon(":/icons/icons/eye_black.png"))
+        self.btn_visibility.setIconSize(QtCore.QSize(30, 30))
+        self.btn_visibility.setObjectName("btn_visibility")
+        
         # button for opening a widget displaying filters
         self.btn_filter = QtWidgets.QPushButton(frame_controlBar)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
@@ -434,7 +462,7 @@ class PageHome(QtWidgets.QWidget):
         self.btn_filter.setIconSize(QtCore.QSize(30, 30))
         self.btn_filter.setObjectName("btn_filter")
         
-        # combo box for image remarks
+        # combobox for image remarks
         self.comboBox_imgRemark = QtWidgets.QComboBox(frame_controlBar)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
                                            QtWidgets.QSizePolicy.Preferred)
@@ -614,6 +642,20 @@ class PageHome(QtWidgets.QWidget):
         self.btn_imgSwitch_dummy.setObjectName("btn_imgSwitch_dummy")
         self.btn_imgSwitch_dummy.setEnabled(False)
         
+        # dummy button for making markings invisible/visible
+        self.btn_visibility_dummy = QtWidgets.QPushButton(frame_controlBar)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, 
+                                           QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btn_visibility_dummy.sizePolicy().hasHeightForWidth())
+        self.btn_visibility_dummy.setSizePolicy(sizePolicy)
+        self.btn_visibility_dummy.setMinimumSize(QtCore.QSize(60, 40))
+        self.btn_visibility_dummy.setMaximumSize(QtCore.QSize(60, 40))
+        self.btn_visibility_dummy.setIconSize(QtCore.QSize(30, 30))
+        self.btn_visibility_dummy.setObjectName("btn_visibility_dummy")
+        self.btn_visibility_dummy.setEnabled(False)
+        
         # dummy button for opening a widget displaying filters
         self.btn_filter_dummy = QtWidgets.QPushButton(frame_controlBar)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
@@ -642,6 +684,7 @@ class PageHome(QtWidgets.QWidget):
         self.layout_frame_controlBar.addWidget(self.btn_menu2)
         self.layout_frame_controlBar.addItem(spacerItem2)
         self.layout_frame_controlBar.addWidget(self.btn_imgSwitch)
+        self.layout_frame_controlBar.addWidget(self.btn_visibility)
         self.layout_frame_controlBar.addWidget(self.btn_filter)
         self.layout_frame_controlBar.addWidget(self.comboBox_imgRemark)
         self.layout_frame_controlBar.addItem(spacerItem11) 
@@ -665,6 +708,7 @@ class PageHome(QtWidgets.QWidget):
         self.layout_frame_controlBar.addItem(spacerItem11)
         self.layout_frame_controlBar.addWidget(self.comboBox_imgRemark_dummy)
         self.layout_frame_controlBar.addWidget(self.btn_filter_dummy)
+        self.layout_frame_controlBar.addWidget(self.btn_visibility_dummy)
         self.layout_frame_controlBar.addWidget(self.btn_imgSwitch_dummy)
         self.layout_frame_controlBar.addItem(spacerItem2)
         self.layout_frame_controlBar.addWidget(self.btn_menu)             

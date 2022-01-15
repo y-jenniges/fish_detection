@@ -108,9 +108,23 @@ class AnimalPainter(QtCore.QObject):
         self._previous_group = "Unidentified"
         self._previous_species = AnimalSpecies.UNIDENTIFIED
         
+        # variable to indicate if organism markings are visible
+        self.are_markings_visible = True
+        
         # setup shortcuts
         self.shortcut_deselect_animal = QtWidgets.QShortcut(
             QtGui.QKeySequence("Escape"), self.imageArea, self.deselectAnimal) 
+        
+    def makeAllMarkingsVisible(self, make_visible):
+        """ Makes markings of all animals (in-)visible. This includes head, tail, line, bounding box and ID markings. """
+        for animal in self.animal_list:
+            if animal.boundingBox_visual: animal.boundingBox_visual.setVisible(make_visible)
+            if animal.head_item_visual: animal.head_item_visual.setVisible(make_visible)
+            if animal.tail_item_visual: animal.tail_item_visual.setVisible(make_visible)
+            if animal.line_item_visual: animal.line_item_visual.setVisible(make_visible)
+            if animal.id_visual: animal.id_visual.setVisible(make_visible)
+            
+        self.are_markings_visible = make_visible
     
     def setAnimalRemark(self, remark):
         """ Sets the remark of the currently active animal. """

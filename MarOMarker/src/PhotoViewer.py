@@ -282,6 +282,12 @@ class PhotoViewer(QtWidgets.QWidget):
             self.imageArea.animal_painter.on_previous_animal()
         elif self.stackedWidget_imagearea.currentIndex() == 1:
             self.imageAreaLR.on_previous_animal()  
+            
+    def on_visibility_btn(self):
+        """ """ #@todo
+        cur_visibility = self.imageArea.animal_painter.are_markings_visible
+        self.imageArea.animal_painter.makeAllMarkingsVisible(not cur_visibility)
+        return not cur_visibility
     
     def activateImageMode(self, mode):
         """
@@ -442,6 +448,10 @@ class PhotoViewer(QtWidgets.QWidget):
         
         if hasattr(self, "imageAreaLR"):
             self.imageAreaLR.widget_animal_specs.setAnimal(None)
+            
+        # update visibility of animal markings 
+        visible = self.imageArea.animal_painter.are_markings_visible
+        self.imageArea.animal_painter.makeAllMarkingsVisible(visible)
     
     def exportToCsv(self, file_id):
         """ Updates the current CSV table. """
