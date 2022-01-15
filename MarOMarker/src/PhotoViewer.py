@@ -284,7 +284,7 @@ class PhotoViewer(QtWidgets.QWidget):
             self.imageAreaLR.on_previous_animal()  
             
     def on_visibility_btn(self):
-        """ """ #@todo
+        """ Changes the visiblity of the animal markings. """
         cur_visibility = self.imageArea.animal_painter.are_markings_visible
         self.imageArea.animal_painter.makeAllMarkingsVisible(not cur_visibility)
         return not cur_visibility
