@@ -201,7 +201,6 @@ class PageHome(QtWidgets.QWidget):
     def hideEvent(self, event):
         """ When page home looses focus, write the CSV file. This ensures that
         animals from the last image are saved as well. """
-        print("hide")
         # only write to CSV if there were photos shown in the viewer
         if len(self.photo_viewer.image_list[0]) > 0:
             
