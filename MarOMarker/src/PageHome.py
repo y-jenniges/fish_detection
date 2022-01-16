@@ -191,7 +191,7 @@ class PageHome(QtWidgets.QWidget):
     def showEvent(self, event):
         """" Reload the image when opening the home page. """
         # load empty screen if there is no image available
-        if len(self.photo_viewer.image_list) < 2: 
+        if len(self.photo_viewer.image_list[0]) < 2: 
             self.photo_viewer.loadSingleImage(None)
             return
         
@@ -202,8 +202,7 @@ class PageHome(QtWidgets.QWidget):
         """ When page home looses focus, write the CSV file. This ensures that
         animals from the last image are saved as well. """
         # only write to CSV if there were photos shown in the viewer
-        if len(self.photo_viewer.image_list[0]) > 0:
-            
+        if len(self.photo_viewer.image_list[0]) > 0:        
             cur_file_id = os.path.basename(
                 self.photo_viewer.image_list[0][self.photo_viewer.cur_image_index]).strip(".jpg").strip(".png").strip("_L").strip("_R")
             self.photo_viewer.exportToCsv(cur_file_id)
