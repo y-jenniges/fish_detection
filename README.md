@@ -7,4 +7,4 @@ a neural network is realized to detect and classify animals.
 Using User-Centered Design methods, a user interface (MarOMarker) is developed enabling users 
 to manually correct the output of the network. 
 
-In case of questions or remarks, please send me an email: yvonne.jenniges@gmx.de
+In case of questions or remarks, please send me an email: yvonne.jenniges(at)gmx.de
