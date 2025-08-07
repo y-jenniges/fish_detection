@@ -9,5 +9,6 @@ to manually correct the output of the network.
 It was developed within the scope of Yvonne Jenniges' Master Thesis
 [Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN (2021)](https://www.informatik.uni-bremen.de/agebv2/downloads/published/jenniges_thesis_21.pdf).
 
+Cite this project: [![DOI](https://zenodo.org/badge/263565599.svg)](https://doi.org/10.5281/zenodo.16758578)
 
 In case of questions or remarks, please send me an email: yvonne.jenniges(at)gmx.de
