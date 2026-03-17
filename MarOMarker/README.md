@@ -28,7 +28,7 @@ https://support.microsoft.com/de-de/help/2977003/the-latest-supported-visual-c-d
 
 *For developers:*
 The GitHub repository for both, software and neural network, has the following
-link: https://github.com/Onnyy/fish_detection.git
+link: https://github.com/y-jenniges/fish_detection
 For setting up the anaconda python environment, a **requirements.txt** can be found in 
 the **NeuralNetwork** and **MarOMarker** folder for the network and the software respectively. 
 Run the program by running the file gui.py.
