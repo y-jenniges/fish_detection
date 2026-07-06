@@ -2,8 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import glob
 import pandas as pd
 import os
-from Helpers import getIcon, displayErrorMsg
-from ImageAreas import ImageArea, ImageAreaLR
+from maromarker.ui.helpers import getIcon, displayErrorMsg
+from maromarker.ui.image_areas import ImageArea, ImageAreaLR
 
 
 class PhotoViewer(QtWidgets.QWidget):

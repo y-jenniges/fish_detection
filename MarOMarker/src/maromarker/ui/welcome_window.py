@@ -1,7 +1,7 @@
 import os
 import json
 from PyQt5 import QtCore, QtGui, QtWidgets
-import Helpers
+from maromarker.ui import helpers as Helpers
 """ Module for displaying content to first-time users. """
 
 class WelcomeWindow(QtWidgets.QMainWindow):

@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Helpers import TopFrame, MenuFrame
+from maromarker.ui.helpers import TopFrame, MenuFrame
 
 
 class PageAbout(QtWidgets.QWidget):

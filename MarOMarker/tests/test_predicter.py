@@ -10,7 +10,7 @@ pytestmark = pytest.mark.slow
 
 @pytest.fixture(scope="module")
 def predicter(qapp, example_paths):
-    import Predicter
+    from maromarker.processing import predicter as Predicter
     p = Predicter.Predicter()
     assert p.loadNeuralNet(example_paths["model"])
     return p

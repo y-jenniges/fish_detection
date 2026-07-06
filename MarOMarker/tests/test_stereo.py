@@ -6,8 +6,8 @@ stereo image pair.
 import numpy as np
 import pytest
 
-import PostProcessing as pp
-from DistanceMeasurer import DistanceMeasurer
+from maromarker.processing import post_processing as pp
+from maromarker.processing.distance_measurer import DistanceMeasurer
 from conftest import IMAGE_SIZE
 
 

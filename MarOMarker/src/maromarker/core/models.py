@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
-import Helpers
+from maromarker.ui import helpers as Helpers
 
 # constants for initalizing data models
 IMAGE_REMARKS= ["", "Low turbidity", "Medium turbidity", "High turbidity", 

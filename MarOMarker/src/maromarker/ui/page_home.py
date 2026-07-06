@@ -1,7 +1,7 @@
 import os
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Helpers import TopFrame, getIcon
-from PhotoViewer import PhotoViewer
+from maromarker.ui.helpers import TopFrame, getIcon
+from maromarker.ui.photo_viewer import PhotoViewer
 
 
 class PageHome(QtWidgets.QWidget):

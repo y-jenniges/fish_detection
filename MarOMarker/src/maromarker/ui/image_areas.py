@@ -2,9 +2,9 @@
 # https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview
 from PyQt5 import QtCore, QtGui, QtWidgets
 from functools import partial
-from Animal import AnimalSpecificationsWidget
-from AnimalPainter import AnimalPainter
-from Helpers import MismatchDialog
+from maromarker.ui.animal import AnimalSpecificationsWidget
+from maromarker.ui.animal_painter import AnimalPainter
+from maromarker.ui.helpers import MismatchDialog
 
 
 class ImageArea(QtWidgets.QGraphicsView):

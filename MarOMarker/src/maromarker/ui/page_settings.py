@@ -2,8 +2,8 @@ import json
 import os
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
-from TabWidget import TabWidget
-import Helpers
+from maromarker.ui.tab_widget import TabWidget
+from maromarker.ui import helpers as Helpers
 
 class PageSettings(QtWidgets.QWidget):
     """ 

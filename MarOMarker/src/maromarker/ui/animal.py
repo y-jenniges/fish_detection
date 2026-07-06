@@ -1,7 +1,7 @@
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Models import AnimalGroup, AnimalSpecies
-import Helpers
+from maromarker.core.models import AnimalGroup, AnimalSpecies
+from maromarker.ui import helpers as Helpers
 
 class Animal():
     """ 

@@ -6,7 +6,7 @@ loading for the neural network.
 import numpy as np
 import pytest
 
-import PostProcessing as pp
+from maromarker.processing import post_processing as pp
 from conftest import IMG_L
 
 

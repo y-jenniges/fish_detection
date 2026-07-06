@@ -1,9 +1,9 @@
 """
 Shared pytest fixtures for the MarOMarker test suite.
 
-The application modules live as flat modules in src/, so src is put on
-sys.path here. A single QApplication is created for the whole session,
-since the Qt-based models and widgets require one.
+The maromarker package lives under src/, so src is put on sys.path
+here. A single QApplication is created for the whole session, since the
+Qt-based models and widgets require one.
 """
 import os
 import sys
@@ -20,7 +20,7 @@ IMG_L = os.path.join(EXAMPLE_DIR, "input_images", "2016_04",
 IMG_R = os.path.join(EXAMPLE_DIR, "input_images", "2016_04",
                      "TN_Exif_Remos1_2016.04.28_01.30.54_R.jpg")
 MODEL_PATH = os.path.join(EXAMPLE_DIR, "neural_network_model")
-CONFIG_PATH = os.path.join(SRC, "config.json")
+CONFIG_PATH = os.path.join(SRC, "maromarker", "config.json")
 
 # original image resolution of the example stereo camera setup
 IMAGE_SIZE = (4272, 2848)

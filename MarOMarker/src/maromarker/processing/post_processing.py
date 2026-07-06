@@ -1,6 +1,6 @@
 #from sklearn.cluster import DBSCAN
 #from statistics import median
-import WinDllCompat
+from maromarker import win_dll_compat as WinDllCompat
 import numpy as np
 import cv2
 import pandas as pd

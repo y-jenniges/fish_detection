@@ -3,11 +3,11 @@ import json
 import glob
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-from Animal import Animal
-from Helpers import TopFrame, MenuFrame, displayErrorMsg, ProgressBar
-import PostProcessing as pp
-from Predicter import Predicter, PredictionWorker
-from DistanceMeasurer import DistanceMeasurer
+from maromarker.ui.animal import Animal
+from maromarker.ui.helpers import TopFrame, MenuFrame, displayErrorMsg, ProgressBar
+from maromarker.processing import post_processing as pp
+from maromarker.processing.predicter import Predicter, PredictionWorker
+from maromarker.processing.distance_measurer import DistanceMeasurer
 
 
 IMAGE_SIZE = (4272, 2848)
@@ -60,7 +60,10 @@ class PageData(QtWidgets.QWidget):
         self.predicter = Predicter()
         
         # camera configuration @todo needs to be set to file used in settings and adaptable by the parameters that are set there
-        config_path = "config.json" # default camera config
+        # default camera config, resolved relative to the package so it
+        # works regardless of the current working directory
+        config_path = os.path.join(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__))), "config.json")
         self.onCameraConfigChanged(config_path)
         
         self.onCalenderSelectionChanged()

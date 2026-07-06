@@ -2,12 +2,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import math
 import numpy as np
 from functools import partial
-from Animal import Animal, AnimalSpecificationsWidget
-from Models import AnimalGroup, AnimalSpecies
-from Helpers import getIcon, displayErrorMsg
-import PhotoViewer
-import ImageAreas 
-    
+from maromarker.ui.animal import Animal, AnimalSpecificationsWidget
+from maromarker.core.models import AnimalGroup, AnimalSpecies
+from maromarker.ui.helpers import getIcon, displayErrorMsg
+
 
 class AnimalPainter(QtCore.QObject):
     """
@@ -814,6 +812,10 @@ class AnimalPainter(QtCore.QObject):
     def mousePressEvent(self, event):
         """ Handles the painting options on the image: Enables dragging of
         head/tail visuals, as well as removing/adding animals on click. """
+        # imported lazily to avoid a circular import at module load time
+        from maromarker.ui import photo_viewer as PhotoViewer
+        from maromarker.ui import image_areas as ImageAreas
+
         # convert event position to scene corrdinates
         pos = self.imageArea.mapToScene(event.pos()).toPoint()
         

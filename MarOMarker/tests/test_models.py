@@ -21,7 +21,7 @@ EXPECTED_COLUMNS = [
 
 @pytest.fixture()
 def models(qapp):
-    from Models import Models
+    from maromarker.core.models import Models
     m = Models()
     m.model_animals.update(
         pd.DataFrame(columns=m.model_animals.getColumns()))
@@ -94,7 +94,7 @@ class TestTableModel:
 class TestAnimal:
     def test_remark_nan_normalized(self, models):
         from PyQt5 import QtCore
-        from Animal import Animal
+        from maromarker.ui.animal import Animal
         a = Animal(models, 0, QtCore.QPointF(10, 10),
                    QtCore.QPointF(50, 50), "Fish", "Unidentified",
                    remark=float("nan"))
@@ -102,7 +102,7 @@ class TestAnimal:
 
     def test_creation_and_marker_moves(self, models):
         from PyQt5 import QtCore
-        from Animal import Animal
+        from maromarker.ui.animal import Animal
         a = Animal(models, 0, QtCore.QPointF(100, 150),
                    QtCore.QPointF(300, 350), "Fish", "Unidentified")
         a.createHeadVisual()

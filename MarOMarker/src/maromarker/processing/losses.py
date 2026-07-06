@@ -1,4 +1,4 @@
-import WinDllCompat
+from maromarker import win_dll_compat as WinDllCompat
 from tensorflow.keras import backend as K
 """
 Module containing custom losses.

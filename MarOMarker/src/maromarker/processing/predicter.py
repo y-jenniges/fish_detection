@@ -1,14 +1,14 @@
 import os
-import WinDllCompat
+from maromarker import win_dll_compat as WinDllCompat
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore
 import tensorflow as tf
 #import matplotlib.pyplot as plt
 #import matplotlib.cm as cm
-import Helpers
-import PostProcessing as pp
-import Losses
+from maromarker.ui import helpers as Helpers
+from maromarker.processing import post_processing as pp
+from maromarker.processing import losses as Losses
 
 GROUP_DICT = {0: "Nothing", 1: "Fish", 2: "Crustacea", 
               3: "Chaetognatha", 4: "Unidentified", 5: "Jellyfish"}
