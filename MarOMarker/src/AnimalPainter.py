@@ -237,13 +237,13 @@ class AnimalPainter(QtCore.QObject):
                 
                 # specs widget in viewport coords
                 specs_vp = self.imageArea.mapFromScene(QtCore.QRectF(self.widget_animal_specs.rect()))
-                specs_width = (specs_vp.value(1) - specs_vp.value(0)).x() #self.widget_animal_specs.width()
-                specs_height = (specs_vp.value(2) - specs_vp.value(1)).y() #self.widget_animal_specs.height()
-                    
+                specs_width = round((specs_vp.value(1) - specs_vp.value(0)).x())
+                specs_height = round((specs_vp.value(2) - specs_vp.value(1)).y())
+
                 # bounding box in viewport coordinates
                 bb_vp = self.imageArea.mapFromScene(self.cur_animal.boundingBox_visual.rect())
-                bb_width = (bb_vp.value(1) - bb_vp.value(0)).x() #self.cur_animal.boundingBox_visual.rect().width()
-                bb_height = (bb_vp.value(2) - bb_vp.value(1)).y() #self.cur_animal.boundingBox_visual.rect().height()
+                bb_width = round((bb_vp.value(1) - bb_vp.value(0)).x())
+                bb_height = round((bb_vp.value(2) - bb_vp.value(1)).y())
                 
                 # 8 possible placements of specs that are checked one after the other
                 # 1. specs below animal
@@ -525,7 +525,7 @@ class AnimalPainter(QtCore.QObject):
 
         # get top left corner of bounding box and move button there
         top_right = animal.boundingBox_visual.rect().topRight()   
-        btn.move((top_right - QtCore.QPoint(20-2.5, 20+2.5)).toPoint())
+        btn.move((top_right - QtCore.QPointF(20-2.5, 20+2.5)).toPoint())
         
         # add btn to scene and to list
         proxy = self.imageArea._scene.addWidget(btn)

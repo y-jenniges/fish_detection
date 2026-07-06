@@ -383,7 +383,7 @@ class Animal():
             + self.boundingBoxOffset[1]
         
         # update the bounding box with the new parameters
-        self.boundingBox.setTopLeft(QtCore.QPoint(pos_x, pos_y))
+        self.boundingBox.setTopLeft(QtCore.QPointF(pos_x, pos_y))
         self.boundingBox.setWidth(size_x)
         self.boundingBox.setHeight(size_y)
         

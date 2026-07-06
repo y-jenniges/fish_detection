@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import WinDllCompat
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import Models
@@ -734,9 +735,30 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
 import ressources_rc
 
+
+def _excepthook(exc_type, exc_value, exc_traceback):
+    """
+    Reports unhandled exceptions instead of aborting the program. PyQt5
+    terminates the application when a Python exception escapes a Qt slot,
+    which loses all unsaved annotations. This hook prints the traceback
+    and shows it in an error dialog, so the user can save and restart.
+    """
+    import traceback
+    msg = "".join(traceback.format_exception(exc_type, exc_value,
+                                             exc_traceback))
+    print(msg, file=sys.stderr)
+    try:
+        QtWidgets.QMessageBox.critical(
+            None, "Unexpected Error",
+            "An unexpected error occurred. Please save your work and "
+            "restart the program if it behaves strangely.\n\n" + msg)
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
-    import sys
     print("MarOMarker initialization starts...")
+    sys.excepthook = _excepthook
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = MarOMarker_MainWindow()
     mainWindow.show()
