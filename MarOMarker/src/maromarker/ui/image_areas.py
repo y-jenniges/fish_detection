@@ -569,12 +569,8 @@ class ImageAreaLR(QtWidgets.QWidget):
                     self.imageAreaR.animal_painter.updateBoundingBoxes()
                     return
                 
-                # match the active and the lastly selected animal. The match
-                # may open a modal dialog (group/species/remark mismatch).
-                # Opening a nested modal event loop from within the graphics
-                # view mouse press event that triggered this handler causes a
-                # native crash (access violation), so defer the match until the
-                # mouse event has fully unwound.
+                # match the active and the lastly selected animal, deferred
+                # so the mouse press event unwinds before any dialog opens
                 if animal is not None:
                     waiting_animal = self.animal_to_match[0]
                     self.animal_to_match[0] = None
@@ -607,14 +603,13 @@ class ImageAreaLR(QtWidgets.QWidget):
     def matchAnimals(self, animal_L, animal_R):
         """
         Matches the given left and right animal. Group, species and remark
-        mismatches are resolved one after another with non-modal dialogs;
-        the actual match is completed in _completeMatch once all mismatches
+        mismatches are resolved one after another with non-modal dialogs.
+        The actual match is completed in _completeMatch once all mismatches
         are resolved (or aborted if the user cancels).
 
-        Non-modal dialogs (open + finished) are used instead of exec_ on
-        purpose. exec_ runs a nested event loop, which processes pending
-        graphics scene deletions and proxy widgets accumulated from earlier
-        matches and crashes with a native access violation.
+        Non-modal dialogs (open) are used instead of exec_ because exec_ runs
+        a nested event loop, which crashes when it processes pending graphics
+        scene deletions from earlier matches.
         """
         # collect the mismatches that need a user decision
         mismatches = []
@@ -666,8 +661,7 @@ class ImageAreaLR(QtWidgets.QWidget):
             self._applyMismatchChoice(kind, animal_L, animal_R, answer)
             self._resolveMismatches(animal_L, animal_R, mismatches, index + 1)
 
-        # run the continuation first, then delete the dialog so dialogs do not
-        # accumulate as hidden children of this widget over many matches
+        # continue the match, then delete the dialog so dialogs do not pile up
         dlg.finished.connect(on_finished)
         dlg.finished.connect(dlg.deleteLater)
         dlg.setWindowModality(QtCore.Qt.ApplicationModal)

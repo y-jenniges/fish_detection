@@ -50,10 +50,8 @@ def displayErrorMsg(text, information, windowTitle):
     msg.setWindowTitle(windowTitle)
     msg.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))
 
-    # Show non-modally (open, not exec_). exec_ runs a nested event loop,
-    # which can crash with a native access violation when it processes
-    # pending graphics scene deletions while the message box is up. Keep a
-    # reference until it closes so it is not garbage collected while shown.
+    # show non-modally (open, not exec_) to avoid a nested event loop that can
+    # crash; keep a reference until it closes so it is not garbage collected
     _open_message_boxes.add(msg)
     msg.finished.connect(lambda _result, m=msg: _open_message_boxes.discard(m))
     msg.open()

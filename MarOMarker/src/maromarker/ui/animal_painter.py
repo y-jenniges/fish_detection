@@ -494,9 +494,8 @@ class AnimalPainter(QtCore.QObject):
         c = animal.color
         color = "(" + str(c.red()) + "," + str(c.green()) + "," + str(c.blue()) + ", 70)"
        
-        # define button. It must be created without a parent: scene.addWidget
-        # takes ownership of it, and giving it another parent as well leads to
-        # dangling/double-freed widgets when many matches are made (crash).
+        # define button, without a parent: scene.addWidget takes ownership,
+        # so a second parent would leave a dangling widget when it is removed
         btn = QtWidgets.QPushButton()
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
                                            QtWidgets.QSizePolicy.Fixed)
@@ -535,9 +534,8 @@ class AnimalPainter(QtCore.QObject):
         btn.clicked.connect(partial(self.remove_match, proxy))
      
     def _deleteRemoveMatchProxy(self, proxy):
-        """ Removes a remove-match button proxy from the scene and deletes it
-        together with its embedded widget, so dead QPushButton objects do not
-        accumulate (a native crash source when many matches are made). """
+        """ Removes a remove-match button proxy from the scene and deletes it,
+        so dead button widgets do not accumulate over many matches. """
         if proxy is None:
             return
         try:
@@ -651,9 +649,7 @@ class AnimalPainter(QtCore.QObject):
         
     def removeRemoveBtnVisual(self, animal):
         """ Removes the remove-match-button of a given animal. """
-        # delete every button belonging to this animal and keep the rest.
-        # Rebuilding the list avoids mutating it while iterating (which used
-        # to skip entries and leak buttons).
+        # rebuild the list instead of removing from it while iterating
         remaining = []
         for proxy, ani in self.btns_remove_match:
             if ani == animal:
@@ -1193,9 +1189,10 @@ class AnimalPainter(QtCore.QObject):
                 self.drawAnimalTailLineBoundingBox(animal)
                 
                 # append animal to list
-                self.animal_list.append(animal)  
-                
-                # update bounding boxes
-                self.updateBoundingBoxes()      
+                self.animal_list.append(animal)
+
+        # update the bounding boxes once, after all animals are added
+        # (doing it per animal is quadratic and made image switching slow)
+        self.updateBoundingBoxes()
      
  

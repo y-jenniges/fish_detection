@@ -61,8 +61,7 @@ class PageData(QtWidgets.QWidget):
         self.predicter = Predicter()
         
         # camera configuration @todo needs to be set to file used in settings and adaptable by the parameters that are set there
-        # default camera config, resolved relative to the package so it
-        # works regardless of the current working directory
+        # default camera config, resolved relative to the package
         config_path = os.path.join(os.path.dirname(os.path.dirname(
             os.path.abspath(__file__))), "config.json")
         self.onCameraConfigChanged(config_path)

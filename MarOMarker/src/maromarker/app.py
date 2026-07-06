@@ -194,8 +194,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         crash cannot lose all placed points. It never raises: autosave
         failures must not interrupt the user's work.
         """
-        # periodically flush the log so it survives a force-kill of a hang
-        # (the per-write flush was removed for performance)
+        # flush the log periodically so it survives a force-kill
         try:
             sys.stdout.flush()
             sys.stderr.flush()
@@ -787,10 +786,8 @@ class _TeeStream:
             except Exception:
                 pass
         try:
-            # do not flush on every write: flushing to disk per print is
-            # slow in the hot annotation paths. faulthandler writes and
-            # flushes its own traceback on a crash, so tracebacks are not
-            # lost; the buffered prints flush on newline / clean exit.
+            # do not flush per write: it is slow in the hot paths. faulthandler
+            # flushes its own traceback on a crash, and autosave flushes the log
             self._logfile.write(text)
         except Exception:
             pass
