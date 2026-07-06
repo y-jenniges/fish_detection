@@ -58,6 +58,23 @@ class TestCsvFormat:
         assert out.loc[0, "file_id"] == "TN_Exif_Remos1_2016.04.28_01.30.54"
         assert list(out.columns) == EXPECTED_COLUMNS
 
+    def test_snapshot_writes_all_rows(self, models, tmp_path):
+        # the autosave safety net calls exportToCsv without a file_id,
+        # which must write the complete in-memory table as a snapshot
+        df = pd.DataFrame([_make_row(models, file_id="img_a"),
+                           _make_row(models, file_id="img_b", group="Jellyfish"),
+                           _make_row(models, file_id="img_c")])
+        models.model_animals.insertDfRows(0, 3, df)
+
+        # a pre-existing snapshot file must be fully overwritten, not merged
+        (tmp_path / "results_2016_04_inProgress.csv").write_text("stale")
+        models.model_animals.exportToCsv(
+            str(tmp_path), "results_2016_04_inProgress.csv")
+
+        out = pd.read_csv(tmp_path / "results_2016_04_inProgress.csv")
+        assert len(out) == 3
+        assert set(out["file_id"]) == {"img_a", "img_b", "img_c"}
+
 
 class TestTableModel:
     def test_insert_df_rows(self, models):

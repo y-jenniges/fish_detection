@@ -91,6 +91,14 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 
         print(self.settings.fileName())
 
+        # periodically snapshot annotations to the in-progress CSV, so a
+        # crash cannot lose all placed points (safety net independent of
+        # the per-image save on closeEvent and page navigation)
+        self.autosave_timer = QtCore.QTimer(self)
+        self.autosave_timer.setInterval(30000)  # every 30 seconds
+        self.autosave_timer.timeout.connect(self.autosave)
+        self.autosave_timer.start()
+
     def showWelcome(self):
         """ Creates and shows the welcome screen. A user ID and camera config
         path have to be entered here before continuing. """
@@ -178,7 +186,28 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         # close welcome window
         if self.window_welcome is not None:
             self.window_welcome.close()
-        
+
+    def autosave(self):
+        """
+        Writes a full snapshot of the current annotations to the
+        in-progress result CSV. Runs on a timer as a safety net so a
+        crash cannot lose all placed points. It never raises: autosave
+        failures must not interrupt the user's work.
+        """
+        try:
+            output_dir = self.page_data.lineEdit_output_dir.text()
+            if not output_dir or not os.path.isdir(output_dir):
+                return
+            if self.models.model_animals.data is None \
+                    or self.models.model_animals.data.empty:
+                return
+            res_file_name = self.getResultFileName(isInProgress=True)
+            if res_file_name is None:
+                return
+            self.models.model_animals.exportToCsv(output_dir, res_file_name)
+        except Exception as e:
+            print(f"Autosave failed: {e}")
+
     def retranslateUi(self):
         """
         Function to retranslate the UI and set the inital texts.
