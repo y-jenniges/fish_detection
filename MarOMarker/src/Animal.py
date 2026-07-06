@@ -364,12 +364,16 @@ class Animal():
         remark : string
             New animal remark.
         """
-        self.remark = str(remark)
-        
+        # treat missing values (NaN/None) as an empty remark
+        remark = str(remark)
+        if remark.lower() in ("nan", "none"):
+            remark = ""
+        self.remark = remark
+
         # adapt remark in data model if there is an entry for this animal
         if self.row_index in self._models.model_animals.data.index:
             self._models.model_animals.data.loc[
-                self.row_index, 'object_remarks'] = str(remark)
+                self.row_index, 'object_remarks'] = remark
     
     def calculateBoundingBox(self):
         """ Calculates the bounding box of the animal. """

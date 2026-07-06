@@ -285,8 +285,19 @@ class PhotoViewer(QtWidgets.QWidget):
             
     def on_visibility_btn(self):
         """ Changes the visiblity of the animal markings. """
-        cur_visibility = self.imageArea.animal_painter.are_markings_visible
+        # read the current state from the image area that is displayed
+        if self.stackedWidget_imagearea.currentIndex() == 1:
+            cur_visibility = \
+                self.imageAreaLR.imageAreaL.animal_painter.are_markings_visible
+        else:
+            cur_visibility = self.imageArea.animal_painter.are_markings_visible
+
+        # apply the new state to all image areas to keep them in sync
         self.imageArea.animal_painter.makeAllMarkingsVisible(not cur_visibility)
+        self.imageAreaLR.imageAreaL.animal_painter.makeAllMarkingsVisible(
+            not cur_visibility)
+        self.imageAreaLR.imageAreaR.animal_painter.makeAllMarkingsVisible(
+            not cur_visibility)
         return not cur_visibility
     
     def activateImageMode(self, mode):

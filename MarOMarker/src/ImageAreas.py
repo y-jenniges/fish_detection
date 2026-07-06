@@ -633,8 +633,11 @@ class ImageAreaLR(QtWidgets.QWidget):
         elif answer == 1:
             animal_L.setRemark(animal_R.remark)
         elif answer == 2:
-            animal_R.setRemark(animal_L.remark + ", " + animal_R.remark)
-            animal_L.setRemark(animal_L.remark + ", " + animal_R.remark)
+            # merge, skipping empty remarks
+            merged = ", ".join(
+                r for r in (animal_L.remark, animal_R.remark) if r)
+            animal_R.setRemark(merged)
+            animal_L.setRemark(merged)
             
         return True
         

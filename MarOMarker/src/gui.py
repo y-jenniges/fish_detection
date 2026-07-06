@@ -736,6 +736,60 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
 import ressources_rc
 
 
+class _TeeStream:
+    """ Writes to the original stream (if any) and to a log file. """
+
+    def __init__(self, stream, logfile):
+        self._stream = stream
+        self._logfile = logfile
+
+    def write(self, text):
+        if self._stream is not None:
+            try:
+                self._stream.write(text)
+            except Exception:
+                pass
+        try:
+            self._logfile.write(text)
+            self._logfile.flush()
+        except Exception:
+            pass
+
+    def flush(self):
+        if self._stream is not None:
+            try:
+                self._stream.flush()
+            except Exception:
+                pass
+
+
+def _setupLogFile():
+    """
+    Mirrors all console output into a daily log file in
+    ~/.maromarker/logs, so problems can be diagnosed after the program
+    was closed or crashed. Also enables faulthandler on that file to
+    capture tracebacks of hard crashes. Returns the log file path, or
+    None if the file could not be created.
+    """
+    import datetime
+    import faulthandler
+    log_dir = os.path.join(os.path.expanduser("~"), ".maromarker", "logs")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+        path = os.path.join(
+            log_dir,
+            datetime.datetime.now().strftime("maromarker_%Y-%m-%d.log"))
+        logfile = open(path, "a", encoding="utf-8")
+        logfile.write("\n--- MarOMarker session started {} ---\n".format(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        sys.stdout = _TeeStream(sys.stdout, logfile)
+        sys.stderr = _TeeStream(sys.stderr, logfile)
+        faulthandler.enable(file=logfile)
+        return path
+    except OSError:
+        return None
+
+
 def _excepthook(exc_type, exc_value, exc_traceback):
     """
     Reports unhandled exceptions instead of aborting the program. PyQt5
@@ -757,7 +811,10 @@ def _excepthook(exc_type, exc_value, exc_traceback):
 
 
 if __name__ == "__main__":
+    log_path = _setupLogFile()
     print("MarOMarker initialization starts...")
+    if log_path is not None:
+        print(f"Logging to {log_path}")
     sys.excepthook = _excepthook
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = MarOMarker_MainWindow()
