@@ -179,7 +179,7 @@ class ListViewDelegate(QtWidgets.QStyledItemDelegate):
                 rect = option.rect
                 painter.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0, 0)))
                 #painter.setRenderHint(QtGui.QPainter.Antialiasing)
-                middle = (rect.bottom() - rect.top()) / 2
+                middle = (rect.bottom() - rect.top()) // 2
                 
                 # icon position is slightly offset from borders of rect
                 pos_icon = QtCore.QPoint(rect.left()+10, rect.top())
@@ -200,7 +200,7 @@ class ListViewDelegate(QtWidgets.QStyledItemDelegate):
                 pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # keep resolution large
                 pixmap = pixmap.scaled(QtCore.QSize(icon_height, icon_height), 
                                        QtCore.Qt.KeepAspectRatioByExpanding)
-                offset = (self.item_height - pixmap.height())/2
+                offset = (self.item_height - pixmap.height())//2
                 painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
                 
                 painter.restore()
@@ -263,7 +263,7 @@ class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
             
             # rect for icon and text
             rect = option.rect
-            middle = (rect.bottom() - rect.top()) / 2
+            middle = (rect.bottom() - rect.top()) // 2
             
             # icon position is slightly offset from borders of rect
             pos_icon = QtCore.QPoint(rect.left()+5, rect.top())
@@ -283,7 +283,7 @@ class ComboboxDelegate(QtWidgets.QStyledItemDelegate):
             
             pixmap = icon.pixmap(QtCore.QSize(icon_height*50, icon_height*50)) # to keep resolution large
             pixmap = pixmap.scaled(QtCore.QSize(140, 140), QtCore.Qt.KeepAspectRatio)
-            offset = (self.item_height - pixmap.height())/2
+            offset = (self.item_height - pixmap.height())//2
             painter.drawPixmap(QtCore.QPoint(pos_icon.x(), pos_icon.y()+offset), pixmap)
             
             painter.restore()

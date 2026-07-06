@@ -900,7 +900,7 @@ class PageData(QtWidgets.QWidget):
         # update progress bar
         img_list = self.parent().parent().page_home.photo_viewer.image_list
         num_images = len(img_list[0])
-        self.progressBar_nn.setValue(i/num_images*100)
+        self.progressBar_nn.setValue(round(i/num_images*100))
     
     def areInputOutputDirsValid(self): 
         """ Checks if there is a valid image input directory and output directory. """
@@ -1031,7 +1031,7 @@ class PageData(QtWidgets.QWidget):
         # update progress bar
         img_list = self.parent().parent().page_home.photo_viewer.image_list
         num_images = len(img_list[0])
-        self.progressBar_rectify_match.setValue(i/num_images*100)
+        self.progressBar_rectify_match.setValue(round(i/num_images*100))
             
     def onRectifyMatchFinished(self): 
         """ Called when the rectification and matching calculations are done.

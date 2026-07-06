@@ -989,8 +989,8 @@ class LineOverlay(QtWidgets.QWidget):
         painter.begin(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         painter.fillRect(event.rect(), QtGui.QBrush(QtGui.QColor(255, 255, 255, 127)))
-        painter.drawLine(self.width() / 8, self.height() / 8, 7 * self.width() / 8, 7 * self.height() / 8)
-        painter.drawLine(self.width() / 8, 7 * self.height() / 8, 7 * self.width() / 8, self.height() / 8)
+        painter.drawLine(self.width() // 8, self.height() // 8, 7 * self.width() // 8, 7 * self.height() // 8)
+        painter.drawLine(self.width() // 8, 7 * self.height() // 8, 7 * self.width() // 8, self.height() // 8)
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         
         # painter = QtGui.QPainter(self)
