@@ -1103,12 +1103,10 @@ class PageData(QtWidgets.QWidget):
         self.parent().parent().page_home.displayBothImages()
     
     def onCalcLength(self):
-        """ Gets current image list from photo viewer and calculates the 
+        """ Gets current image list from photo viewer and calculates the
         length of animals whose coordinates are valid. """
-        
+
         # @todo check if the coordinate rectification is correct
-        print("PageData: Calculate length")
-        
         # reset label
         self.label_length_measurement_number.setText(str(0))
         
@@ -1152,21 +1150,17 @@ class PageData(QtWidgets.QWidget):
                     idx = cur_entries.index[i]
                     self.models.model_animals.data.loc[idx, "length"] = distances[0]
                     
-                    # update animal length
-                    for animal in self.parent().parent().page_home.photo_viewer.imageArea.animal_painter.animal_list:
-                        if animal.row_index == idx:
-                            print(f"length {distances[0]} set on animal")
-                            animal.setLength(distances[0])
-
-                    for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaL.animal_painter.animal_list:
-                        if animal.row_index == idx:
-                            print(f"length {distances[0]} set on animal")
-                            animal.setLength(distances[0])
-                    
-                    for animal in self.parent().parent().page_home.photo_viewer.imageAreaLR.imageAreaR.animal_painter.animal_list:
-                        if animal.row_index == idx:
-                            print(f"length {distances[0]} set on animal")
-                            animal.setLength(distances[0])
+                    # update animal length on every image area that shows it
+                    photo_viewer = self.parent().parent().page_home.photo_viewer
+                    animal_lists = (
+                        photo_viewer.imageArea.animal_painter.animal_list,
+                        photo_viewer.imageAreaLR.imageAreaL.animal_painter.animal_list,
+                        photo_viewer.imageAreaLR.imageAreaR.animal_painter.animal_list,
+                    )
+                    for animal_list in animal_lists:
+                        for animal in animal_list:
+                            if animal.row_index == idx:
+                                animal.setLength(distances[0])
                             
             # update label displaying number of rectified and matched images
             num_imgs = int(self.label_length_measurement_number.text()) + 1
