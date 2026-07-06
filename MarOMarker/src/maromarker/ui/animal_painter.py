@@ -494,8 +494,10 @@ class AnimalPainter(QtCore.QObject):
         c = animal.color
         color = "(" + str(c.red()) + "," + str(c.green()) + "," + str(c.blue()) + ", 70)"
        
-        # define button
-        btn = QtWidgets.QPushButton(self.parent())
+        # define button. It must be created without a parent: scene.addWidget
+        # takes ownership of it, and giving it another parent as well leads to
+        # dangling/double-freed widgets when many matches are made (crash).
+        btn = QtWidgets.QPushButton()
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, 
                                            QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -532,12 +534,23 @@ class AnimalPainter(QtCore.QObject):
         # init action
         btn.clicked.connect(partial(self.remove_match, proxy))
      
+    def _deleteRemoveMatchProxy(self, proxy):
+        """ Removes a remove-match button proxy from the scene and deletes it
+        together with its embedded widget, so dead QPushButton objects do not
+        accumulate (a native crash source when many matches are made). """
+        if proxy is None:
+            return
+        try:
+            self.imageArea._scene.removeItem(proxy)
+        except Exception:
+            pass
+        proxy.deleteLater()
+
     def removeAllRemoveMatchBtns(self):
-        # remove old buttons from scene
-        for btn, ani in self.btns_remove_match:
-            if btn is not None:
-                self.imageArea._scene.removeItem(btn)
-            
+        # remove old buttons from scene and delete them
+        for proxy, ani in self.btns_remove_match:
+            self._deleteRemoveMatchProxy(proxy)
+
         # clear list
         self.btns_remove_match = []
         
@@ -638,12 +651,16 @@ class AnimalPainter(QtCore.QObject):
         
     def removeRemoveBtnVisual(self, animal):
         """ Removes the remove-match-button of a given animal. """
-        # if button is already drawn, remove it before drawing a new button
-        for btn, ani in self.btns_remove_match:
-            if animal == ani:
-                if btn is not None:
-                    self.imageArea._scene.removeItem(btn)
-                    self.btns_remove_match.remove([btn, ani])        
+        # delete every button belonging to this animal and keep the rest.
+        # Rebuilding the list avoids mutating it while iterating (which used
+        # to skip entries and leak buttons).
+        remaining = []
+        for proxy, ani in self.btns_remove_match:
+            if ani == animal:
+                self._deleteRemoveMatchProxy(proxy)
+            else:
+                remaining.append([proxy, ani])
+        self.btns_remove_match = remaining
                 
     def on_next_animal(self):
         """ Makes the next animal in the animal_list active. """

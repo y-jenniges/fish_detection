@@ -243,13 +243,9 @@ class ImageAreaLR(QtWidgets.QWidget):
         
 
         
-        # remove cancel button, redraw cancel button when group changes 
+        # remove cancel button, redraw cancel button when group changes
         # here only on left image since createSeparateDataRow already does this for right image
-        for btn, ani in self.imageAreaL.animal_painter.btns_remove_match:
-            if animal_L == ani and btn is not None:
-                self.imageAreaL.animal_painter.btns_remove_match.remove([btn, ani])
-                self.imageAreaL._scene.removeItem(btn)
-                print("btn removed")
+        self.imageAreaL.animal_painter.removeRemoveBtnVisual(animal_L)
                 
         # for btn, ani in self.imageAreaR.animal_painter.btns_remove_match:
         #     if animal_R == ani and btn is not None:
@@ -670,7 +666,10 @@ class ImageAreaLR(QtWidgets.QWidget):
             self._applyMismatchChoice(kind, animal_L, animal_R, answer)
             self._resolveMismatches(animal_L, animal_R, mismatches, index + 1)
 
+        # run the continuation first, then delete the dialog so dialogs do not
+        # accumulate as hidden children of this widget over many matches
         dlg.finished.connect(on_finished)
+        dlg.finished.connect(dlg.deleteLater)
         dlg.setWindowModality(QtCore.Qt.ApplicationModal)
         dlg.open()
 
@@ -789,12 +788,9 @@ class ImageAreaLR(QtWidgets.QWidget):
                                               experiment_id, user_id, image)
         
         imageArea = self.imageAreaL if image=="L" else self.imageAreaR
-        
-        # remove the button to remove a match 
-        for btn, ani in imageArea.animal_painter.btns_remove_match:
-            if animal == ani and btn is not None:
-                imageArea._scene.removeItem(btn)
-                imageArea.animal_painter.btns_remove_match.remove([btn, ani])
+
+        # remove the button to remove a match
+        imageArea.animal_painter.removeRemoveBtnVisual(animal)
             
     def match(self, animal_L, animal_R):
         """
