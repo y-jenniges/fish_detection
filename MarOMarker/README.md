@@ -2,6 +2,8 @@
 This is the code for the software MarOMarker (Marine Organism Marker).
 It provides options to annotate marine organisms on photos with the optional help of a 
 neural network.
+It was developed within the scope of Yvonne Jenniges' Master Thesis
+[Semiautomatic Detection and Measurement of Marine Life on Underwater Stereoscopic Photographs Using a CNN (2021)](https://www.informatik.uni-bremen.de/agebv2/downloads/published/jenniges_thesis_21.pdf).
 
 
 ## Documentation
@@ -27,11 +29,18 @@ Due to DLL dependencies of tensorflow, a redistributable of Visual Studio
 https://support.microsoft.com/de-de/help/2977003/the-latest-supported-visual-c-downloads
 
 *For developers:*
-The GitHub repository for both, software and neural network, has the following
-link: https://github.com/y-jenniges/fish_detection
-For setting up the anaconda python environment, a **requirements.txt** can be found in 
-the **NeuralNetwork** and **MarOMarker** folder for the network and the software respectively. 
-Run the program by running the file gui.py.
+The software runs on Python 3.11+ (tested with 3.13). Set up an environment
+and start the program like this:
+
+```
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+cd src
+..\.venv\Scripts\python gui.py
+```
+
+The neural network training code lives in a separate repository:
+https://github.com/y-jenniges/fish_detection
 
 
 ## General Remarks For MarOMarker Software Usage 
