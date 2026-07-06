@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maromarker"
+version = "2.0.0.dev0"
+description = "Semi-automatic annotation and measurement of marine organisms on stereoscopic underwater photographs"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "gpl-3.0.txt" }
+authors = [{ name = "Yvonne Jenniges" }]
+keywords = ["marine biology", "stereo vision", "annotation", "CNN"]
+
+dependencies = [
+    "PyQt5",
+    "tensorflow",
+    "opencv-python",
+    "scikit-image",
+    "scipy",
+    "pandas",
+    "numpy",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["pytest", "pyinstaller"]
+
+[project.scripts]
+maromarker = "maromarker.app:main"
+
+[project.urls]
+Repository = "https://github.com/y-jenniges/MarOMarker"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["maromarker*"]
+
+[tool.setuptools.package-data]
+maromarker = ["config.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: tests that load TensorFlow or run real inference"]

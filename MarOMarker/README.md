@@ -29,14 +29,27 @@ Due to DLL dependencies of tensorflow, a redistributable of Visual Studio
 https://support.microsoft.com/de-de/help/2977003/the-latest-supported-visual-c-downloads
 
 *For developers:*
-The software runs on Python 3.11+ (tested with 3.13). Set up an environment
-and start the program like this:
+The software runs on Python 3.11+ (tested with 3.13). Set up an
+environment and install the package (editable, so code changes take
+effect immediately):
 
 ```
 python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-cd src
-..\.venv\Scripts\python gui.py
+.venv\Scripts\pip install -e .
+```
+
+Then start the program in any of these equivalent ways:
+
+```
+maromarker
+python -m maromarker
+```
+
+Run the tests with:
+
+```
+.venv\Scripts\pip install -e .[test]
+.venv\Scripts\pytest
 ```
 
 The neural network training code lives in a separate repository:
