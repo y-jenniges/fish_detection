@@ -268,9 +268,12 @@ class TableModel(QtCore.QAbstractTableModel):
         self.data = new_data
         
         if self.data is not None:
-            # make sure that the remarks columns are string
-            self.data["object_remarks"] = self.data["object_remarks"].astype(str)
-            self.data["image_remarks"] = self.data["image_remarks"].astype(str)
+            # make sure that the remarks columns are string; missing values
+            # become empty strings (pandas 3 astype(str) keeps NaN as NaN)
+            self.data["object_remarks"] = \
+                self.data["object_remarks"].fillna("").astype(str)
+            self.data["image_remarks"] = \
+                self.data["image_remarks"].fillna("").astype(str)
             
             # make sure, the remarks columns have empty strings instead of nan
             self.data["object_remarks"] = self.data["object_remarks"].str.lower().replace("nan", "")
@@ -610,7 +613,7 @@ class TableModel(QtCore.QAbstractTableModel):
         """ Reads data from a file and updates the data model with it. """
         if os.path.isfile(path):
             data = pd.read_csv(path, sep=",")
-            if (data.columns == self.getColumns()).all():
+            if list(data.columns) == list(self.getColumns()):
                 self.update(data)
             else:
                 print("TableModel: Cannot load file due to incorrect columns.")

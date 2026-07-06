@@ -200,9 +200,10 @@ class StereoCorrespondence():
         """check if 2 vectors have less than dynamic_thresh*norm(vec0) difference
         param min_thresh is minimum absolute distance threshold for difference of vec0, vec1,
         param dynamic_thresh defines the part of the longer vector thats used as thresh"""
-        #print("sameVEC DEBUG: ",vec0, vec1)
+        vec0 = np.array(vec0, dtype=float)
+        vec1 = np.array(vec1, dtype=float)
         diff_thresh = dynamic_thresh * cv2.norm(vec0, normType=cv2.NORM_L2)
-        diff = cv2.norm(np.array(vec0, dtype=float), np.array(vec1, dtype=float), normType=cv2.NORM_L2)
+        diff = cv2.norm(vec0, vec1, normType=cv2.NORM_L2)
         return diff < max(min_thresh, diff_thresh)
     
         
