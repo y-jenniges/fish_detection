@@ -7,4 +7,4 @@ measurement of marine organisms on stereoscopic underwater photographs.
 # TensorFlow (see win_dll_compat); doing it here makes it order-independent
 from maromarker import win_dll_compat as _win_dll_compat  # noqa: F401
 
-__version__ = "2.0.0.dev0"
+__version__ = "3.0.0"
