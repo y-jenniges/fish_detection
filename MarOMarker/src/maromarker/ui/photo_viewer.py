@@ -130,7 +130,7 @@ class PhotoViewer(QtWidgets.QWidget):
         
     def setImageEnding(self, text, imageArea=None):
         """ Adapt image ending in animal_painter and in self. Must be either
-        '\*_L.jpg' or '\*_R.jpg'. """
+        ``*_L.jpg`` or ``*_R.jpg``. """
         assert(text == "*_L.jpg" or text == "*_R.jpg")
 
         if imageArea:

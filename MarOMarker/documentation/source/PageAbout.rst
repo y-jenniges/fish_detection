@@ -1,7 +1,7 @@
 About Page
 ================
 
-.. automodule:: PageAbout
+.. automodule:: maromarker.ui.page_about
     :members:
     :undoc-members:
     :show-inheritance:

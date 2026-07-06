@@ -1,7 +1,7 @@
 Data Page
 ================
 
-.. automodule:: PageData
+.. automodule:: maromarker.ui.page_data
     :members:
     :undoc-members:
     :show-inheritance:

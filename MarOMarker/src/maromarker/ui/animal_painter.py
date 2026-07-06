@@ -33,7 +33,7 @@ class AnimalPainter(QtCore.QObject):
         A canvas to paint the object on and that provides mouse events to 
         the AnimalPainter.
     image_ending : string
-        It is either '\*_L.jpg' or '\*_R.jpg'. Indicates if the left or right 
+        It is either ``*_L.jpg`` or ``*_R.jpg``. Indicates if the left or right
         image is currently being edited.
     original_img_width : int
         Width of the original image. Necessary for rescaling calculations.

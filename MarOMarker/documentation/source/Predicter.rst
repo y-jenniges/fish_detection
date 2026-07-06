@@ -4,14 +4,14 @@ Handles the process of animal group and position prediction.
 
 ``Predicter`` class
 *****************************
-.. autoclass:: Predicter.Predicter
+.. autoclass:: maromarker.processing.predicter.Predicter
     :members:
     :undoc-members:
     :show-inheritance:
 
 ``PredictionWorker`` class
 *****************************	
-.. autoclass:: Predicter.PredictionWorker
+.. autoclass:: maromarker.processing.predicter.PredictionWorker
     :members:
     :undoc-members:
     :show-inheritance:

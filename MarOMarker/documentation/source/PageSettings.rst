@@ -1,7 +1,7 @@
 Settings Page
 ======================
 
-.. automodule:: PageSettings
+.. automodule:: maromarker.ui.page_settings
     :members:
     :undoc-members:
     :show-inheritance:
