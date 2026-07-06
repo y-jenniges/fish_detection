@@ -1,5 +1,6 @@
 import time
 import os
+import WinDllCompat
 from PyQt5 import QtCore, QtGui, QtWidgets
 from Models import Models
 import PageHome
@@ -130,6 +131,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
                 self.showWelcome()                
         
     # save some values and options when closing the program
+
     def closeEvent(self, event):
         """
         Saving some values when closing the program, like window size and 
@@ -736,7 +738,7 @@ if __name__ == "__main__":
     import sys
     print("MarOMarker initialization starts...")
     app = QtWidgets.QApplication(sys.argv)
-    mainWindow= MarOMarker_MainWindow()
+    mainWindow = MarOMarker_MainWindow()
     mainWindow.show()
     sys.exit(app.exec_())
 

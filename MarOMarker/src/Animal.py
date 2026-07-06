@@ -126,9 +126,9 @@ class Animal():
       
         # set the visual for the head, tail and line between them 
         self.pos_visual_head = QtCore.QPoint(int(position_head.x()), int(position_head.y())) - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2)
+            self.pixmap_width//2, self.pixmap_width//2)
         self.pos_visual_tail = QtCore.QPoint(int(position_tail.x()), int(position_tail.y())) - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2)
+            self.pixmap_width//2, self.pixmap_width//2)
 
         self.rect_head = QtCore.QRect(self.pos_visual_head, QtCore.QSize(
             self.pixmap_width, self.pixmap_width))
@@ -267,9 +267,9 @@ class Animal():
      
         # scale pixmaps
         self._pixmap_head = self._pixmap_head.scaled(QtCore.QSize(
-            self.pixmap_width/2, self.pixmap_width/2))     
+            self.pixmap_width//2, self.pixmap_width//2))     
         self._pixmap_tail = self._pixmap_tail.scaled(QtCore.QSize(
-            self.pixmap_width/2, self.pixmap_width/2))     
+            self.pixmap_width//2, self.pixmap_width//2))     
     
     def setPositionHead(self, pos):
         """
@@ -283,9 +283,9 @@ class Animal():
         """
         self.position_head = pos
         self.rect_head.moveTopLeft(QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2))
+            self.pixmap_width//2, self.pixmap_width//2))
         self.pos_visual_head = QtCore.QPoint(int(pos.x()), int(pos.y()))  - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2)
+            self.pixmap_width//2, self.pixmap_width//2)
         
         self.line.setP1(pos)
         self.calculateBoundingBox() 
@@ -302,9 +302,9 @@ class Animal():
         """
         self.position_tail = pos
         self.rect_tail.moveTopLeft(QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2))
+            self.pixmap_width//2, self.pixmap_width//2))
         self.pos_visual_tail = QtCore.QPoint(int(pos.x()), int(pos.y())) - QtCore.QPoint(
-            self.pixmap_width/2, self.pixmap_width/2)
+            self.pixmap_width//2, self.pixmap_width//2)
         
         self.line.setP2(pos)
         self.calculateBoundingBox()

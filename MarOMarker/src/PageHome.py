@@ -294,7 +294,7 @@ class PageHome(QtWidgets.QWidget):
         p = self.widget_zoom.mapFromGlobal(pos)
         
         # move the zoom widget a bit below the button position and center it below the button
-        self.widget_zoom.move(p + QtCore.QPoint(-self.widget_zoom.width()/2 + 20, 50))        
+        self.widget_zoom.move(p + QtCore.QPoint(-self.widget_zoom.width()//2 + 20, 50))
 
 # --- initialization -------------------------------------------------------- # 
     def _initActions(self):

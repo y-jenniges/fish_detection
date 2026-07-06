@@ -1,12 +1,13 @@
 #from sklearn.cluster import DBSCAN
 #from statistics import median
+import WinDllCompat
 import numpy as np
 import cv2
 import pandas as pd
 import os
 #import matplotlib.pyplot as plt
 from PyQt5 import QtCore
-from tensorflow.keras.preprocessing.image import load_img, img_to_array # check if t works, otherwise only keras
+from tensorflow.keras.utils import load_img, img_to_array
 from skimage.feature import peak_local_max
 #from skimage.transform import resize
 #from skimage.transform import rescale
@@ -161,7 +162,7 @@ class StereoCorrespondence():
     def undistortPoint(self, point, lr="L"):
         """Undistort a point. """
         # make sure that the point is a numpy array of float
-        point = np.array(point).astype(np.float)
+        point = np.array(point).astype(float)
         
         rectified = [0,0]
         if lr == "L":

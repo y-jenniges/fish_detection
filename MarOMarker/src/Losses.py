@@ -1,6 +1,7 @@
+import WinDllCompat
 from tensorflow.keras import backend as K
 """
-Module containing custom losses. 
+Module containing custom losses.
 """
 
 def weighted_categorical_crossentropy(weights):

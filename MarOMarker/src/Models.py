@@ -31,13 +31,13 @@ class AnimalGroup(enum.Enum):
 
 class AnimalSpecies(enum.Enum):
     """
-    Enum for initally possible animal species.
+    Enum for initially possible animal species.
     """
     
     UNIDENTIFIED = 0
     
     
-class Models():
+class Models:
     """
     This class wraps up all data models necessary for the application.
     
@@ -56,7 +56,7 @@ class Models():
         about animals on images
     """
     
-    def __init__ (self):  
+    def __init__(self):
         # data model for the animal groups
         self.model_group = QtGui.QStandardItemModel()
         index = 0
@@ -415,7 +415,7 @@ class TableModel(QtCore.QAbstractTableModel):
         for i in range(count):
             new_row = self._create_row(animals[i], image_path, image_remark, 
                                        experiment_id, user_id, image_spec[i])
-            self.data = self.data.append(new_row)    
+            self.data = pd.concat([self.data, new_row])
         self.endInsertRows()
 
         # sort data        
@@ -448,7 +448,8 @@ class TableModel(QtCore.QAbstractTableModel):
         for i in range(count):
             # check if columns are a subset of desired columns
             if df.columns.isin(self.data.columns).all():
-                self.data = self.data.append(df.iloc[i], ignore_index=True)    
+                self.data = pd.concat([self.data, df.iloc[[i]]],
+                                      ignore_index=True)
         self.endInsertRows()
 
         # sort data        
@@ -539,8 +540,9 @@ class TableModel(QtCore.QAbstractTableModel):
                 current_output["file_id"] == file_id].index, inplace=True)
             
                 # insert new rows of current image (in CSV)
-                current_output = current_output.append(
-                    self.data[self.data["file_id"] == file_id])
+                current_output = pd.concat([
+                    current_output,
+                    self.data[self.data["file_id"] == file_id]])
             
                 # sort according to file_id
                 current_output.sort_values(
@@ -569,7 +571,7 @@ class TableModel(QtCore.QAbstractTableModel):
                     self.insertDfRows(row, count, df, parent=QtCore.QModelIndex())   
      
                     # add row to current output
-                    current_output = current_output.append(df)
+                    current_output = pd.concat([current_output, df])
                 
                 # reset data index
                 self.data = self.data.reset_index(drop=True) 

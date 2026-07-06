@@ -1,4 +1,5 @@
 import os
+import WinDllCompat
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore
@@ -89,25 +90,54 @@ class Predicter(QtCore.QObject):
         """
         if os.path.isfile(path):
             try:
-            # if specified, use given weights
-                w = self.weights if weights is None else weights
-                
-                # load model
-                self.neural_network = tf.keras.models.load_model(path, custom_objects={
-                        "loss": Losses.weighted_categorical_crossentropy(w)})
+                # load model for inference only (compile=False), so the custom
+                # training loss does not need to be reconstructed
+                self.neural_network = self._loadKerasModel(path)
                 return True
-            except:               
+            except Exception as e:
+                print(f"Predicter: could not load model from {path}: {e}")
                 Helpers.displayErrorMsg(
-                    "Loading Error", 
+                    "Loading Error",
                     f"The neural network from {path} is not a valid model.",
-                    "Error") 
-                return False    
+                    "Error")
+                return False
         else:
-            Helpers.displayErrorMsg("Path Error", 
+            Helpers.displayErrorMsg("Path Error",
                                     f"The neural network path {path} is invalid.",
-                                    "Error") 
+                                    "Error")
             return False
-        
+
+    @staticmethod
+    def _loadKerasModel(path):
+        """
+        Loads a Keras model for inference. Keras 3 dispatches on the file
+        extension, so legacy HDF5 model files without an .h5 extension are
+        loaded through a temporary copy with the proper suffix.
+
+        Parameters
+        ----------
+        path : string
+            Path to neural network file (.keras, .h5 or extensionless HDF5).
+
+        Returns
+        -------
+        keras model
+            The loaded model.
+        """
+        if path.endswith((".keras", ".h5", ".hdf5")):
+            return tf.keras.models.load_model(path, compile=False)
+
+        # extensionless file: assume legacy HDF5 and retry with .h5 suffix
+        import shutil
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(suffix=".h5", delete=False)
+        tmp.close()
+        try:
+            shutil.copyfile(path, tmp.name)
+            return tf.keras.models.load_model(tmp.name, compile=False)
+        finally:
+            os.remove(tmp.name)
+
     def predictImage(self, img_path, file_id, experiment_id="", user_id=""):
         """
         Handles the prediction of an image. From the neural network prediction
@@ -222,7 +252,8 @@ class Predicter(QtCore.QObject):
                               "manually_corrected": "False",
                               "experiment_id": experiment_id,
                               "user_id": user_id}
-                    df = df.append(animal, ignore_index=True)          
+                    df = pd.concat([df, pd.DataFrame([animal])],
+                                   ignore_index=True)
         else:
             Helpers.displayErrorMsg(
                 "Missing Neural Network", 
@@ -284,7 +315,7 @@ class Predicter(QtCore.QObject):
             path = local_img_pathes[i]
             file_id = local_file_ids[i]
             prediction = self.predictImage(path, file_id, experiment_id, user_id)
-            df = df.append(prediction, file_id, experiment_id, user_id)
+            df = pd.concat([df, prediction], ignore_index=True)
             self.progress.emit(i+1)
         
         self.df = df
