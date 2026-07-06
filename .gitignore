@@ -39,6 +39,10 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# maromarker.spec is hand written and versioned on purpose
+!maromarker.spec
+# PyInstaller build log
+build_maromarker.log
 
 # Installer logs
 pip-log.txt

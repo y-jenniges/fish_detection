@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import glob
 import numpy as np
@@ -61,9 +62,14 @@ class PageData(QtWidgets.QWidget):
         self.predicter = Predicter()
         
         # camera configuration @todo needs to be set to file used in settings and adaptable by the parameters that are set there
-        # default camera config, resolved relative to the package
-        config_path = os.path.join(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))), "config.json")
+        # default camera config, resolved relative to the package (also works
+        # inside a PyInstaller bundle, where files live under sys._MEIPASS)
+        if getattr(sys, "frozen", False):
+            package_dir = os.path.join(sys._MEIPASS, "maromarker")
+        else:
+            package_dir = os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)))
+        config_path = os.path.join(package_dir, "config.json")
         self.onCameraConfigChanged(config_path)
         
         self.onCalenderSelectionChanged()
