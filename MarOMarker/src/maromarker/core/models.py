@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtGui
+from maromarker.naming import file_id_from_path
 from maromarker.ui import helpers as Helpers
 
 # constants for initalizing data models
@@ -657,7 +658,7 @@ class TableModel(QtCore.QAbstractTableModel):
             New row for the data
         """
         # get file ID
-        file_id = os.path.basename(image_path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+        file_id = file_id_from_path(image_path)
         
         if animal is None:
             group = ""

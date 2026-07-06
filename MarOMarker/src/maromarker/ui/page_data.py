@@ -8,6 +8,7 @@ from maromarker.ui.helpers import TopFrame, MenuFrame, displayErrorMsg, Progress
 from maromarker.processing import post_processing as pp
 from maromarker.processing.predicter import Predicter, PredictionWorker
 from maromarker.processing.distance_measurer import DistanceMeasurer
+from maromarker.naming import file_id_from_path
 
 
 IMAGE_SIZE = (4272, 2848)
@@ -954,7 +955,7 @@ class PageData(QtWidgets.QWidget):
             # determine file IDs
             file_ids = []
             for path in img_list[0]:
-                file_ids.append(os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L"))
+                file_ids.append(file_id_from_path(path))
                 
             # get experiment and user ID
             exp_id = self.lineEdit_exp_id.text()
@@ -1119,7 +1120,7 @@ class PageData(QtWidgets.QWidget):
         if len(img_list) == 0: return
         for path in img_list[0]:                
             # get animals on current image
-            file_id = os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+            file_id = file_id_from_path(path)
             cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
             
             # iterate over animals

@@ -12,6 +12,7 @@ from skimage.feature import peak_local_max
 #from skimage.transform import resize
 #from skimage.transform import rescale
 from scipy.optimize import linear_sum_assignment
+from maromarker.naming import file_id_from_path
 
 
 """ Functions and classes necessary for post processing. """
@@ -53,7 +54,7 @@ class RectifyMatchWorker(QtCore.QObject):
             
             # only continue if both images exists
             if os.path.isfile(right_image) and os.path.isfile(left_image):
-                file_id = os.path.basename(left_image).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")
+                file_id = file_id_from_path(left_image)
                 
                 # get animals on current image into necessary format
                 cur_entries = self.models.model_animals.data[self.models.model_animals.data["file_id"] == file_id]
@@ -241,8 +242,6 @@ class StereoCorrespondence():
         #stereo rectify points for Left Head and Back
         pts_L_H = np.array([[x[1],x[2]] for x in obj_L], dtype=np.float32)
         pts_L_B = np.array([[x[3],x[4]] for x in obj_L], dtype=np.float32)
-        pts_R_H = np.array([[x[1],x[2]] for x in obj_R], dtype=np.float32)
-        pts_R_H = np.array([[x[3],x[4]] for x in obj_R], dtype=np.float32)
         pts_rectified_L_H = cv2.undistortPoints(np.expand_dims(pts_L_H, 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
         pts_rectified_L_B = cv2.undistortPoints(np.expand_dims(pts_L_B, 1), self.c_L, self.d_L, R=self.R1, P=self.P1)
         

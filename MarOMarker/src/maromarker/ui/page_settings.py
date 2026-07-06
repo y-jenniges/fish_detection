@@ -45,9 +45,10 @@ class PageSettings(QtWidgets.QWidget):
         # init UI and actions on it
         self._initUi()
         self._initActions()
-        
-        # default image root directory
-        self.lineEdit_root_dir.setText("T:/'Center for Scientific Diving'/cosyna_data_all/SVL/Remos-1")
+
+        # the image root directory starts empty and is filled by the user
+        # (or restored from the previous session); it is deliberately not
+        # hardcoded to a specific machine's drive
                  
 # --- actions in camera tab ------------------------------------------------- #        
     def camera_spinBox_changed(self):

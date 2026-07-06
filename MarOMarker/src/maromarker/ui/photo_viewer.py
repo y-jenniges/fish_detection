@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from maromarker.ui.helpers import getIcon, displayErrorMsg
 from maromarker.ui.image_areas import ImageArea, ImageAreaLR
+from maromarker.naming import file_id_from_path
 
 
 class PhotoViewer(QtWidgets.QWidget):
@@ -440,7 +441,7 @@ class PhotoViewer(QtWidgets.QWidget):
             # find animals on current image
             cur_file_entries = self.models.model_animals.data[
                 self.models.model_animals.data['file_id'] == \
-                    os.path.basename(path).rstrip(".jpg").rstrip(".png").rstrip("_L").rstrip("_R")]
+                    file_id_from_path(path)]
             
             # draw animals
             imageArea.animal_painter.drawAnimalsFromList(cur_file_entries)
