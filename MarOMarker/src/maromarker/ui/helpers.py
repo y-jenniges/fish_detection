@@ -2,7 +2,10 @@ import os
 from PyQt5 import QtCore, QtWidgets, QtGui
 """
 GUI Helper functions and classes.
-"""   
+"""
+
+# keeps non-modal message boxes alive until the user closes them
+_open_message_boxes = set()
     
 def getIcon(ressource_path):
     """
@@ -40,12 +43,20 @@ def displayErrorMsg(text, information, windowTitle):
         Title of error window.
     """
     msg = QtWidgets.QMessageBox()
+    msg.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
     msg.setIcon(QtWidgets.QMessageBox.Critical)
     msg.setText(text)
     msg.setInformativeText(information)
     msg.setWindowTitle(windowTitle)
-    msg.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png')) 
-    msg.exec_()
+    msg.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))
+
+    # Show non-modally (open, not exec_). exec_ runs a nested event loop,
+    # which can crash with a native access violation when it processes
+    # pending graphics scene deletions while the message box is up. Keep a
+    # reference until it closes so it is not garbage collected while shown.
+    _open_message_boxes.add(msg)
+    msg.finished.connect(lambda _result, m=msg: _open_message_boxes.discard(m))
+    msg.open()
 
 class MismatchDialog(QtWidgets.QDialog):
     def __init__(self, title, text, btn_a_text, btn_b_text, btn_c_text=None, parent=None):
@@ -114,24 +125,26 @@ class MismatchDialog(QtWidgets.QDialog):
     def _initActions(self):
         self.btn_a.clicked.connect(self.on_btn_a)
         self.btn_b.clicked.connect(self.on_btn_b)
-        self.btn_cancel.clicked.connect(self.close)
-        
+        self.btn_cancel.clicked.connect(self.on_cancel)
+
         if self.btn_c is not None:
             self.btn_c.clicked.connect(self.on_btn_c)
-        
+
     def on_btn_a(self):
         self.done(0)
-        
+
     def on_btn_b(self):
         self.done(1)
-    
+
     def on_btn_c(self):
         self.done(2)
-    
-    def closeEvent(self, event):
-        print("close event")
-        if self.result not in range(3):
-            self.setResult(-1)
+
+    def on_cancel(self):
+        self.done(-1)
+
+    def reject(self):
+        # closing via the window frame or the Escape key counts as cancel
+        self.done(-1)
         
         
 class ListViewDelegate(QtWidgets.QStyledItemDelegate):

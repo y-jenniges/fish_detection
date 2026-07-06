@@ -79,15 +79,12 @@ class PageSettings(QtWidgets.QWidget):
                 self.parent().parent().page_data.onCameraConfigChanged(path)
             
             else:
-                msg = QtWidgets.QMessageBox()
-                msg.setIcon(QtWidgets.QMessageBox.Critical)
-                msg.setText("File Format Error")
-                msg.setInformativeText(
-                    "The given CSV file is not in the required format. Please "+\
+                Helpers.displayErrorMsg(
+                    "File Format Error",
+                    "The given CSV file is not in the required format. Please "
                     "make sure that it has the following keys: \n"
-                    "   'mtx_L' (left camera matrix) \n   'dist_L' (distance matrix of left camera) \n   'mtx_R' (right camera matrix) \n   'dist_R' (distance matrix of right camera) \n   'R' (rotation matrix) \n   'T' (translation matrix)")
-                msg.setWindowTitle("Error")
-                msg.exec_()  
+                    "   'mtx_L' (left camera matrix) \n   'dist_L' (distance matrix of left camera) \n   'mtx_R' (right camera matrix) \n   'dist_R' (distance matrix of right camera) \n   'R' (rotation matrix) \n   'T' (translation matrix)",
+                    "Error")
             
         
     def check_config_format(self, config_data):

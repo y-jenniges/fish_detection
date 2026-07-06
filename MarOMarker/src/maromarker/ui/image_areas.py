@@ -573,141 +573,193 @@ class ImageAreaLR(QtWidgets.QWidget):
                     self.imageAreaR.animal_painter.updateBoundingBoxes()
                     return
                 
-                # match the active and the lastly selected animal
+                # match the active and the lastly selected animal. The match
+                # may open a modal dialog (group/species/remark mismatch).
+                # Opening a nested modal event loop from within the graphics
+                # view mouse press event that triggered this handler causes a
+                # native crash (access violation), so defer the match until the
+                # mouse event has fully unwound.
                 if animal is not None:
-                    if image == "L":
-                        match_successfull = self.matchAnimals(animal, self.animal_to_match[0])
-                    elif image == "R":
-                        match_successfull = self.matchAnimals(self.animal_to_match[0], animal) 
-                    
-                    # set the animal waiting to be matched to None 
+                    waiting_animal = self.animal_to_match[0]
                     self.animal_to_match[0] = None
-                    
-                    if not match_successfull:
-                        self.imageAreaL.animal_painter.cur_animal = None
-                        self.imageAreaR.animal_painter.cur_animal = None
-                
-                # update the visuals, i.e. IDs, bounding boxes on both images
-                self.redrawSelection()
-     
-    def handleDifferentGroup(self, animal_L, animal_R):
-        text = "You are about to match two animals that have a different group. \nWhich group do you want to keep?"
-        dlg = MismatchDialog("Groups do not match", text, animal_L.group, animal_R.group, None, self)
-        answer = dlg.exec_()
-        
-        if answer == -1:
-            print("handling differnt group: return false")
-            return False
-        elif answer == 0:
-            animal_R.setGroup(animal_L.group)
-            self.imageAreaR.animal_painter.redrawAnimal(animal_R)
-        elif answer == 1:
-            animal_L.setGroup(animal_R.group)
-            self.imageAreaL.animal_painter.redrawAnimal(animal_L)
-            
-        return True
-        
-    def handleDifferentSpecies(self, animal_L, animal_R):
-        text = "You are about to match two animals that have a different species. \nWhich species do you want to keep?"
-        dlg = MismatchDialog("Species do not match", text, animal_L.species, animal_R.species, None, self)
-        answer = dlg.exec_()
-        
-        if answer == -1:
-            return False
-        elif answer == 0:
-            animal_R.setSpecies(animal_L.species)
-        elif answer == 1:
-            animal_L.setSpecies(animal_R.species)
-    
-        return True
-    
-    def handleDifferentRemark(self, animal_L, animal_R):
-        text = "You are about to match two animals that have different remarks. \nWhich remark do you want to keep?"
-        dlg = MismatchDialog("Remarks do not match", text, animal_L.remark, animal_R.remark, "Merge remarks", self)
-        answer = dlg.exec_()
-        
-        if answer == -1:
-            return False
-        elif answer == 0:
-            animal_R.setRemark(animal_L.remark)
-        elif answer == 1:
-            animal_L.setRemark(animal_R.remark)
-        elif answer == 2:
-            # merge, skipping empty remarks
-            merged = ", ".join(
-                r for r in (animal_L.remark, animal_R.remark) if r)
-            animal_R.setRemark(merged)
-            animal_L.setRemark(merged)
-            
-        return True
-        
+                    QtCore.QTimer.singleShot(
+                        0, partial(self._performMatch, animal, image,
+                                   waiting_animal))
+                else:
+                    # update the visuals, i.e. IDs, bounding boxes on both images
+                    self.redrawSelection()
+
+    def _performMatch(self, animal, image, waiting_animal):
+        """
+        Performs the deferred match between the currently selected animal
+        and the animal that was waiting for a match.
+
+        Parameters
+        ----------
+        animal : Animal
+            The animal that was just selected.
+        image : string
+            The image the selected animal is on, either "L" or "R".
+        waiting_animal : Animal
+            The animal that was already waiting to be matched.
+        """
+        if image == "L":
+            self.matchAnimals(animal, waiting_animal)
+        elif image == "R":
+            self.matchAnimals(waiting_animal, animal)
+
     def matchAnimals(self, animal_L, animal_R):
-        # if group, species, remark, length, other props are different, then what?
+        """
+        Matches the given left and right animal. Group, species and remark
+        mismatches are resolved one after another with non-modal dialogs;
+        the actual match is completed in _completeMatch once all mismatches
+        are resolved (or aborted if the user cancels).
+
+        Non-modal dialogs (open + finished) are used instead of exec_ on
+        purpose. exec_ runs a nested event loop, which processes pending
+        graphics scene deletions and proxy widgets accumulated from earlier
+        matches and crashes with a native access violation.
+        """
+        # collect the mismatches that need a user decision
+        mismatches = []
         if str(animal_L.group).lower() != str(animal_R.group).lower():
             print(f"ImageAreaLR: Animals do not have the same group {animal_L.group, animal_R.group}")
-            if not self.handleDifferentGroup(animal_L, animal_R): return False
-                   
+            mismatches.append("group")
         if str(animal_L.species).lower() != str(animal_R.species).lower():
             print(f"ImageAreaLR: Animals do not have the same species {animal_L.species, animal_R.species}")
-            if not self.handleDifferentSpecies(animal_L, animal_R): return False
-            
+            mismatches.append("species")
         if str(animal_L.remark).lower() != str(animal_R.remark).lower():
             print(f"ImageAreaLR: Animals do not have the same remark {animal_L.remark, animal_R.remark}")
-            if not self.handleDifferentRemark(animal_L, animal_R): return False
-        
+            mismatches.append("remark")
+
+        self._resolveMismatches(animal_L, animal_R, mismatches, 0)
+
+    def _resolveMismatches(self, animal_L, animal_R, mismatches, index):
+        """
+        Resolves the mismatch at the given index with a non-modal dialog and
+        continues with the next one from its finished handler. Completes the
+        match once all mismatches are resolved.
+        """
+        if index >= len(mismatches):
+            self._completeMatch(animal_L, animal_R)
+            return
+
+        kind = mismatches[index]
+        if kind == "group":
+            title = "Groups do not match"
+            text = "You are about to match two animals that have a different group. \nWhich group do you want to keep?"
+            option_a, option_b, option_c = animal_L.group, animal_R.group, None
+        elif kind == "species":
+            title = "Species do not match"
+            text = "You are about to match two animals that have a different species. \nWhich species do you want to keep?"
+            option_a, option_b, option_c = animal_L.species, animal_R.species, None
+        else:
+            title = "Remarks do not match"
+            text = "You are about to match two animals that have different remarks. \nWhich remark do you want to keep?"
+            option_a, option_b, option_c = animal_L.remark, animal_R.remark, "Merge remarks"
+
+        dlg = MismatchDialog(title, text, option_a, option_b, option_c, self)
+
+        def on_finished(answer):
+            # cancelling aborts the whole match
+            if answer == -1:
+                self.imageAreaL.animal_painter.cur_animal = None
+                self.imageAreaR.animal_painter.cur_animal = None
+                self.redrawSelection()
+                return
+            self._applyMismatchChoice(kind, animal_L, animal_R, answer)
+            self._resolveMismatches(animal_L, animal_R, mismatches, index + 1)
+
+        dlg.finished.connect(on_finished)
+        dlg.setWindowModality(QtCore.Qt.ApplicationModal)
+        dlg.open()
+
+    def _applyMismatchChoice(self, kind, animal_L, animal_R, answer):
+        """ Applies the user's choice for a single resolved mismatch. """
+        if kind == "group":
+            if answer == 0:
+                animal_R.setGroup(animal_L.group)
+                self.imageAreaR.animal_painter.redrawAnimal(animal_R)
+            elif answer == 1:
+                animal_L.setGroup(animal_R.group)
+                self.imageAreaL.animal_painter.redrawAnimal(animal_L)
+        elif kind == "species":
+            if answer == 0:
+                animal_R.setSpecies(animal_L.species)
+            elif answer == 1:
+                animal_L.setSpecies(animal_R.species)
+        elif kind == "remark":
+            if answer == 0:
+                animal_R.setRemark(animal_L.remark)
+            elif answer == 1:
+                animal_L.setRemark(animal_R.remark)
+            elif answer == 2:
+                # merge, skipping empty remarks
+                merged = ", ".join(
+                    r for r in (animal_L.remark, animal_R.remark) if r)
+                animal_R.setRemark(merged)
+                animal_L.setRemark(merged)
+
+    def _completeMatch(self, animal_L, animal_R):
+        """
+        Performs the actual match once all group/species/remark mismatches
+        have been resolved, then recalculates lengths and redraws.
+        """
+        data = self._models.model_animals.data
+
         # remove old matches - there are 4 cases (for this we need to adapt the data model and the animal instances)
         # left animal has no right coordinates, right animal has no left coordinates
-        if self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
-        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
+        if data.loc[animal_L.row_index, "RX1"] == -1 \
+        and data.loc[animal_R.row_index, "LX1"] == -1:
             self.match(animal_L, animal_R)
-        
+
         # left animal has right coordinates, right animal doesnt have left coordinates
-        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
-        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] == -1:
-            # find old animal that represents curent right coordinates  
+        elif data.loc[animal_L.row_index, "RX1"] != -1 \
+        and data.loc[animal_R.row_index, "LX1"] == -1:
+            # find old animal that represents curent right coordinates
             cur_right_animal = self.findAnimalMatch(animal_L, "L")
-            
+
             # create separate data row for olf right animal
             self.createSeparateDataRow(cur_right_animal, image="R")
-            
+
             # replace right animal
             self.match(animal_L, animal_R)
-            
+
         # left animal has no right coordinates, right animal has left coordinates
-        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] == -1 \
-        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:           
-            # find old animal that represents curent left coordinates  
+        elif data.loc[animal_L.row_index, "RX1"] == -1 \
+        and data.loc[animal_R.row_index, "LX1"] != -1:
+            # find old animal that represents curent left coordinates
             cur_left_animal = self.findAnimalMatch(animal_R, "R")
-            
+
             # create separate data row for old right animal
             self.createSeparateDataRow(cur_left_animal, image="L")
-            
+
             # replace right animal
             self.match(animal_L, animal_R)
-        
+
         # left animal has right coordinates, right animal has left coordinates
-        elif self._models.model_animals.data.loc[animal_L.row_index, "RX1"] != -1 \
-        and self._models.model_animals.data.loc[animal_R.row_index, "LX1"] != -1:
-            
+        elif data.loc[animal_L.row_index, "RX1"] != -1 \
+        and data.loc[animal_R.row_index, "LX1"] != -1:
+
             # do nothing when the animal has already been matched
-            if animal_L.row_index == animal_R.row_index: return True
-            
-            # find old animal that represents curent right coordinates  
-            cur_right_animal = self.findAnimalMatch(animal_L, "L")
-            cur_left_animal = self.findAnimalMatch(animal_R, "R")
-            
-             # create separate data rows for old left and right animal
-            self.createSeparateDataRow(cur_right_animal, image="R")
-            self.createSeparateDataRow(cur_left_animal, image="L")
-            
-            # replace animals
-            self.match(animal_L, animal_R)
-        
+            if animal_L.row_index != animal_R.row_index:
+                # find old animals that represent the current coordinates
+                cur_right_animal = self.findAnimalMatch(animal_L, "L")
+                cur_left_animal = self.findAnimalMatch(animal_R, "R")
+
+                # create separate data rows for old left and right animal
+                self.createSeparateDataRow(cur_right_animal, image="R")
+                self.createSeparateDataRow(cur_left_animal, image="L")
+
+                # replace animals
+                self.match(animal_L, animal_R)
+
         # recalculate length of animals (this changes when different animals are matched)
         self.parent().parent().parent().parent().parent().page_data.onCalcLength()
-        
-        return True
-    
+
+        # update the visuals, i.e. IDs, bounding boxes on both images
+        self.redrawSelection()
+
     def createSeparateDataRow(self, animal, image="L"):  
         """
         Adds a row at the end of the data table for the given animal.
