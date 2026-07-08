@@ -858,6 +858,16 @@ def main():
     if log_path is not None:
         print(f"Logging to {log_path}")
     sys.excepthook = _excepthook
+
+    if sys.platform == "win32":
+        # let Windows use the window icon for the taskbar button
+        import ctypes
+        try:
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                "MarOMarker.MarOMarker")
+        except Exception:
+            pass
+
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = MarOMarker_MainWindow()
     mainWindow.show()
