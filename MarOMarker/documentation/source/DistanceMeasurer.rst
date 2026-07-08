@@ -5,7 +5,7 @@ von Meereslebewesen auf Stereo-Kamerabildern mit einem neuronalen Netz' (2019)
 
 ``DistanceMeasurer`` class
 *****************************
-.. autoclass:: DistanceMeasurer.DistanceMeasurer
+.. autoclass:: maromarker.processing.distance_measurer.DistanceMeasurer
     :members:
     :undoc-members:
     :show-inheritance:

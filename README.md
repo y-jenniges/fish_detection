@@ -11,4 +11,4 @@ It was developed within the scope of Yvonne Jenniges' Master Thesis
 
 Cite this project: [![DOI](https://zenodo.org/badge/263565599.svg)](https://doi.org/10.5281/zenodo.16758578)
 
-In case of questions or remarks, please send me an email: yvonne.jenniges(at)gmx.de
+In case of questions or remarks, please send me an email: yvonne.jenniges(at)gmail.com

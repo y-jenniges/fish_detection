@@ -4,14 +4,14 @@ Classes to display photos.
 
 ``ImageArea`` class
 *****************************
-.. autoclass:: ImageAreas.ImageArea
+.. autoclass:: maromarker.ui.image_areas.ImageArea
     :members:
     :undoc-members:
     :show-inheritance:
 	
 ``ImageAreaLR`` class
 *****************************
-.. autoclass:: ImageAreas.ImageAreaLR
+.. autoclass:: maromarker.ui.image_areas.ImageAreaLR
     :members:
     :undoc-members:
     :show-inheritance:

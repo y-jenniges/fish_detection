@@ -1,0 +1,39 @@
+name: build
+
+# Builds standalone MarOMarker apps for Windows, macOS and Linux.
+# PyInstaller cannot cross compile, so each app is built on its own runner.
+# Runs on version tags (v*) and can be triggered manually.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: MarOMarker
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install project and build tools
+        run: pip install -e .[dev]
+
+      - name: Build with PyInstaller
+        run: pyinstaller maromarker.spec
+
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: MarOMarker-${{ matrix.os }}
+          path: MarOMarker/dist/MarOMarker

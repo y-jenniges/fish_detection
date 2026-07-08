@@ -1,7 +1,7 @@
 GUI 
 ================
 
-.. automodule:: gui
+.. automodule:: maromarker.app
     :members:
     :undoc-members:
     :show-inheritance:

@@ -4,7 +4,7 @@ Classes relevant to data models.
 
 ``AnimalGroup`` class
 *****************************
-.. autoclass:: Models.AnimalGroup
+.. autoclass:: maromarker.core.models.AnimalGroup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,21 +12,21 @@ Classes relevant to data models.
 	
 ``AnimalSpecies`` class
 *****************************
-.. autoclass:: Models.AnimalSpecies
+.. autoclass:: maromarker.core.models.AnimalSpecies
     :members:
     :undoc-members:
     :show-inheritance:
 	
 ``Models`` class
 *****************************
-.. autoclass:: Models.Models
+.. autoclass:: maromarker.core.models.Models
     :members:
     :undoc-members:
     :show-inheritance:
 	
 ``TableModel`` class
 *****************************
-.. autoclass:: Models.TableModel
+.. autoclass:: maromarker.core.models.TableModel
     :members:
     :undoc-members:
     :show-inheritance:

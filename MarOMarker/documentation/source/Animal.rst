@@ -4,7 +4,7 @@ Classes to store information about single animals.
 
 ``Animal`` class
 *****************************
-.. autoclass:: Animal.Animal
+.. autoclass:: maromarker.ui.animal.Animal
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ Classes to store information about single animals.
 
 ``AnimalSpecificationsWidget`` class
 **********************************************
-.. autoclass:: Animal.AnimalSpecificationsWidget
+.. autoclass:: maromarker.ui.animal.AnimalSpecificationsWidget
     :members:
     :undoc-members:
     :show-inheritance:
