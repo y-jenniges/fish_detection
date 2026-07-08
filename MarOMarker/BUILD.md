@@ -1,13 +1,11 @@
 # Building MarOMarker executables
 
 MarOMarker is bundled into a standalone application with
-[PyInstaller](https://pyinstaller.org) using the versioned
-`maromarker.spec` file.
+[PyInstaller](https://pyinstaller.org) using the `maromarker.spec` file.
 
 ## Important: no cross compilation
 
-PyInstaller cannot build for a different operating system than the one it
-runs on. To ship for all three platforms you have to run the build once on
+To ship for all three operating system, you have to run the build once on
 each:
 
 - a Windows machine produces `MarOMarker.exe`
@@ -28,7 +26,7 @@ pip install -e .[dev]
 pyinstaller maromarker.spec
 ```
 
-The result is a self contained folder in `MarOMarker/dist/MarOMarker/`. Start
+The result is a self-contained folder in `MarOMarker/dist/MarOMarker/`. Start
 the program with `dist/MarOMarker/MarOMarker` (`MarOMarker.exe` on Windows).
 The folder can be zipped and shared; the target machine does not need Python
 or any of the dependencies installed.
@@ -72,9 +70,3 @@ machines.
 You can also start a build without tagging: on the **Actions** tab pick the
 **build** workflow and use **Run workflow** (this is the `workflow_dispatch`
 trigger).
-
-### First-time setup
-
-GitHub Actions is enabled by default for a repository. The only requirement
-is that the code, the `maromarker.spec` file and the workflow are pushed to
-GitHub.
