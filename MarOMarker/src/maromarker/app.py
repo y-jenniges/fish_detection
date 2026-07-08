@@ -382,7 +382,7 @@ class MarOMarker_MainWindow(QtWidgets.QMainWindow):
         """
         # set up main window properties
         self.setObjectName("MainWindow")
-        self.setWindowIcon(QtGui.QIcon(':/icons/icons/fish.png'))    
+        self.setWindowIcon(_app_icon())
         
         # some general properties
         self.setTabShape(QtWidgets.QTabWidget.Rounded)
@@ -851,6 +851,15 @@ def _excepthook(exc_type, exc_value, exc_traceback):
         pass
 
 
+def _app_icon():
+    """ Returns the square multi-size app icon used for the taskbar. """
+    if getattr(sys, "frozen", False):
+        base = os.path.join(sys._MEIPASS, "maromarker")
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return QtGui.QIcon(os.path.join(base, "logos", "fish.ico"))
+
+
 def main():
     """ Starts the MarOMarker application. """
     log_path = _setupLogFile()
@@ -869,6 +878,7 @@ def main():
             pass
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(_app_icon())
     mainWindow = MarOMarker_MainWindow()
     mainWindow.show()
     sys.exit(app.exec_())

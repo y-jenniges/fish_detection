@@ -18,7 +18,8 @@ block_cipher = None
 
 # collect data files, binaries and hidden imports of the heavy dependencies
 # that PyInstaller does not fully pick up on its own
-datas = [("src/maromarker/config.json", "maromarker")]
+datas = [("src/maromarker/config.json", "maromarker"),
+         ("src/maromarker/logos/fish.ico", "maromarker/logos")]
 binaries = []
 hiddenimports = []
 for package in ("tensorflow", "cv2", "skimage", "scipy", "sklearn"):
