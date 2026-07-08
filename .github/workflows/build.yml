@@ -2,7 +2,8 @@ name: build
 
 # Builds standalone MarOMarker apps for Windows, macOS and Linux.
 # PyInstaller cannot cross compile, so each app is built on its own runner.
-# Runs on version tags (v*) and can be triggered manually.
+# On a version tag (v*) the builds are attached to the GitHub Release for
+# that tag. Manual runs (workflow_dispatch) keep them as artifacts.
 on:
   push:
     tags: ["v*"]
@@ -14,6 +15,8 @@ defaults:
 
 jobs:
   build:
+    permissions:
+      contents: write   # needed to publish the release assets
     strategy:
       fail-fast: false
       matrix:
@@ -32,8 +35,28 @@ jobs:
       - name: Build with PyInstaller
         run: pyinstaller maromarker.spec
 
-      - name: Upload application
+      - name: Upload application as artifact
         uses: actions/upload-artifact@v4
         with:
           name: MarOMarker-${{ matrix.os }}
           path: MarOMarker/dist/MarOMarker
+
+      # -- release packaging, only on a version tag ------------------------- #
+      - name: Zip the app (Windows)
+        if: startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/MarOMarker -DestinationPath MarOMarker-${{ matrix.os }}.zip
+
+      - name: Zip the app (macOS/Linux)
+        if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
+        shell: bash
+        run: cd dist && zip -r ../MarOMarker-${{ matrix.os }}.zip MarOMarker
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes || true
+          gh release upload "$GITHUB_REF_NAME" "MarOMarker-${{ matrix.os }}.zip" --clobber
