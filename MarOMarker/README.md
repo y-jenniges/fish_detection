@@ -23,9 +23,8 @@ To run the software, run the file
 **MarOMarker/src/build/dist/MarOMarker.exe**. 
 
 *Remark:* 
-Due to DLL dependencies of tensorflow, a redistributable of Visual Studio 
-2015, 2017 and 2019 needs to be installed. Simply download and install a redistributable from
-https://support.microsoft.com/de-de/help/2977003/the-latest-supported-visual-c-downloads
+Due to DLL dependencies of tensorflow, a redistributable of Visual Studio needs to be installed. Simply download and install a v14 redistributable from
+https://learn.microsoft.com/de-de/cpp/windows/latest-supported-vc-redist?view=msvc-170
 
 *For developers:*
 The software runs on Python 3.11+ (tested with 3.13). Set up an
