@@ -868,15 +868,6 @@ def main():
         print(f"Logging to {log_path}")
     sys.excepthook = _excepthook
 
-    if sys.platform == "win32":
-        # let Windows use the window icon for the taskbar button
-        import ctypes
-        try:
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                "MarOMarker.MarOMarker")
-        except Exception:
-            pass
-
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(_app_icon())
     mainWindow = MarOMarker_MainWindow()
