@@ -35,6 +35,10 @@ jobs:
       - name: Build with PyInstaller
         run: pyinstaller maromarker.spec
 
+      - name: Add example_usage to the app folder
+        shell: bash
+        run: cp -r example_usage dist/MarOMarker/
+
       - name: Upload application as artifact
         uses: actions/upload-artifact@v5
         with:

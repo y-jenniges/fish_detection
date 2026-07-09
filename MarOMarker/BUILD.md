@@ -24,12 +24,15 @@ From the `MarOMarker` directory, in the project virtual environment:
 cd MarOMarker
 pip install -e .[dev]
 pyinstaller maromarker.spec
+cp -r example_usage dist/MarOMarker/
 ```
 
 The result is a self-contained folder in `MarOMarker/dist/MarOMarker/`. Start
 the program with `dist/MarOMarker/MarOMarker` (`MarOMarker.exe` on Windows).
-The folder can be zipped and shared; the target machine does not need Python
-or any of the dependencies installed.
+The last step copies the sample data (images, camera config, neural network)
+into the folder so users can try the app right away. The folder can be zipped
+and shared; the target machine does not need Python or any of the dependencies
+installed.
 
 The build is large (TensorFlow alone is well over a gigabyte) and takes a
 few minutes.
