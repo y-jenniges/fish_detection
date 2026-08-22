@@ -4,7 +4,7 @@ import pandas as pd
 import os
 from maromarker.ui.helpers import getIcon, displayErrorMsg
 from maromarker.ui.image_areas import ImageArea, ImageAreaLR
-from maromarker.naming import file_id_from_path
+from maromarker.naming import file_id_from_path, match_stereo_pairs
 
 
 class PhotoViewer(QtWidgets.QWidget):
@@ -67,12 +67,21 @@ class PhotoViewer(QtWidgets.QWidget):
         
         self.image_list = []
         if hasattr(self.parent().parent().parent(), 'page_data'):
+            # get date
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
-            
-            self.image_list.append([x for x in l_images_with_prefix if date in x])
-            self.image_list.append([x for x in r_images_with_prefix if date in x])
-            
+
+            # filter for date
+            l_images_with_date = [x for x in l_images_with_prefix if date in x]
+            r_images_with_date = [x for x in r_images_with_prefix if date in x]
+
+            # get left and right image pairs
+            matched_l, matched_r, unmatched_l, unmatched_r = match_stereo_pairs(l_images_with_date, r_images_with_date)
+            self._warnAboutUnmatchedImages(unmatched_l, unmatched_r)
+
+            self.image_list.append(matched_l)
+            self.image_list.append(matched_r)
+
         # load result file if one already exists
         self.loadResFile()
 
@@ -323,22 +332,55 @@ class PhotoViewer(QtWidgets.QWidget):
         else:
             print("PhotoViewer: Unknown image mode.")
 
+    def _warnAboutUnmatchedImages(self, unmatched_l, unmatched_r):
+        """ Shows a status bar warning for left or right images that have
+        no matching counterpart. """
+        if not unmatched_l and not unmatched_r:
+            return
+
+        # build warning message
+        parts = []
+        if unmatched_l:
+            unmatched_l_names = [str(os.path.basename(p)) for p in unmatched_l]
+            parts.append("no matching right image for: " + ", ".join(unmatched_l_names))
+        if unmatched_r:
+            unmatched_r_names = [str(os.path.basename(p)) for p in unmatched_r]
+            parts.append("no matching left image for: " + ", ".join(unmatched_r_names))
+        message = "; ".join(parts)
+
+        # print, so it is also written to the log file
+        print(f"PhotoViewer: {message}")
+
+        # show in status bar, if it exists
+        main_window = self.parent().parent().parent()
+        if hasattr(main_window, "statusbar"):
+            main_window.statusbar.showMessage(message, 10000)
+
     def updateImageList(self):
         """ Recalculate image list, i.e. filter the image directory for images
         with the correct prefix and date. """
-        l_images_with_prefix = glob.glob(self.image_directory 
+        l_images_with_prefix = glob.glob(self.image_directory
                              + self.image_prefix + "*_L.jpg")
-        r_images_with_prefix = glob.glob(self.image_directory 
+        r_images_with_prefix = glob.glob(self.image_directory
                              + self.image_prefix + "*_R.jpg")
-        
+
         if hasattr(self.parent().parent().parent(), 'page_data'):
+            # get data
             date = self.parent().parent().parent().page_data.\
                 calendarWidget.selectedDate().toString("yyyy.MM.dd")
-            # clear and refill image list
-            self.image_list = [] 
-            self.image_list.append([x for x in l_images_with_prefix if date in x])
-            self.image_list.append([x for x in r_images_with_prefix if date in x])
-        
+
+            # filter for date
+            l_images_with_date = [x for x in l_images_with_prefix if date in x]
+            r_images_with_date = [x for x in r_images_with_prefix if date in x]
+
+            # match L and R images by id, i.e. name without _L / _R suffixes
+            matched_l, matched_r, unmatched_l, unmatched_r = match_stereo_pairs(l_images_with_date, r_images_with_date)
+            self._warnAboutUnmatchedImages(unmatched_l, unmatched_r)
+
+            self.image_list = []
+            self.image_list.append(matched_l)
+            self.image_list.append(matched_r)
+
         if not self.image_list:
             self.loadImageFromPath(path=None)
         else:
